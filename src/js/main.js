@@ -40,16 +40,28 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
   // Terminal typing effect
-  const lines = document.querySelectorAll('.terminal-line');
-  lines.forEach((line, i) => {
-    line.style.opacity = '0';
-    line.style.transform = 'translateX(-10px)';
-    setTimeout(() => {
-      line.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-      line.style.opacity = '1';
-      line.style.transform = 'translateX(0)';
-    }, 800 + i * 200);
-  });
+  const terminalObserver = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) {
+      const lines = document.querySelectorAll('.terminal-line');
+      lines.forEach((line, i) => {
+        setTimeout(() => {
+          line.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+          line.style.opacity = '1';
+          line.style.transform = 'translateX(0)';
+        }, 300 + i * 200);
+      });
+      terminalObserver.disconnect(); // Run only once
+    }
+  }, { threshold: 0.3 });
+
+  const terminal = document.querySelector('.hero-terminal');
+  if (terminal) {
+    document.querySelectorAll('.terminal-line').forEach(line => {
+      line.style.opacity = '0';
+      line.style.transform = 'translateX(-10px)';
+    });
+    terminalObserver.observe(terminal);
+  }
 
   // Contact form
   // Contact form animation removed so Web3Forms can handle the native submit
