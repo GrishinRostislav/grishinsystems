@@ -5,6 +5,7 @@
   .hero-ctas { justify-content: center; }
   .hero-stats { justify-content: center; }
   .hero-visual { margin-top: 40px; }
+  .header .logo-text { display: none; }
   .nav { display: none; }
   .hamburger { display: flex; }
   .about-grid { grid-template-columns: 1fr; text-align: center; }
