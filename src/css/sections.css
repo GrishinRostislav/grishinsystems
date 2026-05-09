@@ -54,6 +54,7 @@
   background: rgba(10,22,40,0.8); border: 1px solid var(--glass-border);
   border-radius: var(--radius); padding: 24px; width: 100%; max-width: 400px;
   font-family: 'Courier New', monospace; font-size: 13px; box-shadow: var(--shadow-glow);
+  text-align: left;
 }
 .terminal-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--glass-border); }
 .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
