@@ -62,16 +62,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (charIndex < text.length) {
               cmdSpan.textContent += text.charAt(charIndex);
               charIndex++;
-              setTimeout(typeChar, Math.random() * 60 + 40); // 40-100ms per character
+              setTimeout(typeChar, Math.random() * 20 + 20); // 20-40ms per character (smoother & faster)
             } else {
               // Finished typing command, simulate hitting Enter
-              setTimeout(() => typeNextLine(index + 1), 300);
+              setTimeout(() => typeNextLine(index + 1), 200);
             }
           };
           typeChar();
         } else {
           // This is an output line or the final prompt: show instantly
-          setTimeout(() => typeNextLine(index + 1), 150);
+          setTimeout(() => typeNextLine(index + 1), 100);
         }
       };
 
