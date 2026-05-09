@@ -42,14 +42,40 @@ document.addEventListener('DOMContentLoaded', () => {
   // Terminal typing effect
   const terminalObserver = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting) {
-      const lines = document.querySelectorAll('.terminal-line');
-      lines.forEach((line, i) => {
-        setTimeout(() => {
-          line.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-          line.style.opacity = '1';
-          line.style.transform = 'translateX(0)';
-        }, 300 + i * 200);
-      });
+      const lines = Array.from(document.querySelectorAll('.terminal-line'));
+      
+      const typeNextLine = (index) => {
+        if (index >= lines.length) return;
+        
+        const line = lines[index];
+        line.style.display = 'block'; // Show the line
+        
+        const cmdSpan = line.querySelector('.cmd');
+        if (cmdSpan) {
+          // This is a command line: simulate typing
+          const text = cmdSpan.getAttribute('data-text') || cmdSpan.textContent;
+          if (!cmdSpan.getAttribute('data-text')) cmdSpan.setAttribute('data-text', text);
+          cmdSpan.textContent = '';
+          
+          let charIndex = 0;
+          const typeChar = () => {
+            if (charIndex < text.length) {
+              cmdSpan.textContent += text.charAt(charIndex);
+              charIndex++;
+              setTimeout(typeChar, Math.random() * 60 + 40); // 40-100ms per character
+            } else {
+              // Finished typing command, simulate hitting Enter
+              setTimeout(() => typeNextLine(index + 1), 300);
+            }
+          };
+          typeChar();
+        } else {
+          // This is an output line or the final prompt: show instantly
+          setTimeout(() => typeNextLine(index + 1), 150);
+        }
+      };
+
+      typeNextLine(0); // Start the sequence
       terminalObserver.disconnect(); // Run only once
     }
   }, { threshold: 0.3 });
@@ -57,8 +83,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const terminal = document.querySelector('.hero-terminal');
   if (terminal) {
     document.querySelectorAll('.terminal-line').forEach(line => {
-      line.style.opacity = '0';
-      line.style.transform = 'translateX(-10px)';
+      line.style.display = 'none'; // Hide all lines initially
+      line.style.opacity = '1';
+      line.style.transform = 'none';
+      line.style.transition = 'none';
     });
     terminalObserver.observe(terminal);
   }
