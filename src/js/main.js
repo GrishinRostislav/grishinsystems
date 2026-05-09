@@ -52,13 +52,5 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Contact form
-  const form = document.getElementById('contact-form');
-  form?.addEventListener('submit', e => {
-    e.preventDefault();
-    const btn = form.querySelector('.btn');
-    const orig = btn.innerHTML;
-    btn.innerHTML = '✓ Message Sent!';
-    btn.style.background = 'linear-gradient(135deg, #10B981, #059669)';
-    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; form.reset(); }, 3000);
-  });
+  // Contact form animation removed so Web3Forms can handle the native submit
 });
