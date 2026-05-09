@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title | default("Rostislav Grishin — Network & Infrastructure Specialist") }}</title>
+  <meta name="description" content="{{ description | default('13+ years of experience in enterprise networking, Cisco Meraki, VPN security, and VLAN segmentation. Based in Edmonton, AB. Available for remote network engineering roles.') }}">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/sections.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header" id="top">
+  <div class="container">
+    <a href="/" class="logo">
+      <div class="logo-icon">RG</div>
+      <div class="logo-text">GrishinSystems<span>.com</span></div>
+    </a>
+    <nav class="nav">
+      <a href="/#about">About</a>
+      <a href="/#expertise">Expertise</a>
+      <a href="/#projects">Projects</a>
+      <a href="/#blog">Blog</a>
+      <a href="/#contact">Contact</a>
+    </nav>
+    <a href="/#contact" class="btn btn-primary btn-sm">Let's Connect</a>
+    <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<div class="mobile-nav">
+  <button class="mobile-nav-close" aria-label="Close">✕</button>
+  <a href="/#about">About</a><a href="/#expertise">Expertise</a><a href="/#projects">Projects</a><a href="/#blog">Blog</a><a href="/#contact">Contact</a>
+</div>
+
+<!-- MAIN CONTENT -->
+{{ content | safe }}
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <a href="/" class="logo"><div class="logo-icon">RG</div><div class="logo-text">GrishinSystems<span>.com</span></div></a>
+      <div class="footer-links">
+        <a href="/#about">About</a><a href="/#expertise">Expertise</a><a href="/#projects">Projects</a><a href="/#blog">Blog</a><a href="/#contact">Contact</a>
+        <a href="https://linkedin.com/in/rostislav-grishin" target="_blank">LinkedIn</a>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2026 Rostislav Grishin. Network & Infrastructure Specialist. Edmonton, AB, Canada.</div>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+</body>
+</html>
