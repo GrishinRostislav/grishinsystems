@@ -1,0 +1,30 @@
+---
+layout: base.njk
+title: Blog - GrishinSystems
+description: Read the latest articles on networking, IT infrastructure, and my CCNA journey.
+---
+
+<section class="section-grid" style="padding-top: 140px; min-height: 100vh;">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-label">All Articles</div>
+      <h1 class="section-title">Knowledge Sharing</h1>
+      <p class="section-subtitle">A collection of my thoughts, tutorials, and experiences in IT.</p>
+    </div>
+    
+    <div class="blog-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+      {%- for post in collections.post | reverse -%}
+        <a href="{{ post.url }}" class="glass-card blog-card fade-in" style="display: block; text-decoration: none; color: inherit;">
+          <div class="blog-date" style="font-size: 13px; color: var(--accent); margin-bottom: 12px; font-weight: 500;">📅 {{ post.date | readableDate }}</div>
+          <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 12px;">{{ post.data.title }}</h3>
+          <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 15px;">{{ post.data.description }}</p>
+          <span class="read-more" style="color: var(--accent); font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px;">Read Article →</span>
+        </a>
+      {%- else -%}
+        <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">
+          No articles published yet. Check back soon!
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>

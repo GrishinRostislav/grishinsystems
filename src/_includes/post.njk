@@ -5,7 +5,10 @@ layout: base.njk
 <section class="blog-post" style="padding-top: 140px; padding-bottom: 80px;">
   <div class="container" style="max-width: 800px;">
     <div style="margin-bottom: 40px;">
-      <a href="/#blog" style="color: var(--text-muted); font-size: 14px; text-decoration: none;">← Back to Home</a>
+      <div style="display: flex; gap: 16px; margin-bottom: 16px;">
+        <a href="/" style="color: var(--text-muted); font-size: 14px; text-decoration: none;">← Back to Home</a>
+        <a href="/blog/" style="color: var(--accent); font-size: 14px; text-decoration: none; font-weight: 500;">📋 All Articles</a>
+      </div>
       <h1 style="font-size: clamp(32px, 4vw, 48px); margin: 20px 0 10px; line-height: 1.2;">{{ title }}</h1>
       <div style="color: var(--text-secondary); font-size: 14px; display: flex; gap: 16px;">
         <span>📅 {{ date | readableDate }}</span>
@@ -21,6 +24,10 @@ layout: base.njk
     
     <div class="post-content" style="font-size: 17px; line-height: 1.8; color: var(--text-secondary);">
       {{ content | safe }}
+    </div>
+
+    <div style="margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--glass-border); text-align: center;">
+      <a href="/blog/" class="btn btn-secondary">← Back to All Articles</a>
     </div>
   </div>
 </section>
