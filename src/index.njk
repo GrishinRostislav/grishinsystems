@@ -201,7 +201,7 @@ layout: base.njk
     <div class="section-header fade-in">
       <div class="section-label">Knowledge Sharing</div>
       <h2 class="section-title">Latest Articles</h2>
-      <p class="section-subtitle">Writing about networking, infrastructure, and my CCNA journey.</p>
+      <p class="section-subtitle">Writing about networking, infrastructure, and home labs.</p>
     </div>
     <div class="blog-grid">
       {%- for post in collections.post | reverse -%}
@@ -213,25 +213,6 @@ layout: base.njk
           <span class="read-more">Read Article →</span>
         </a>
         {%- endif -%}
-      {%- else -%}
-        <div class="glass-card blog-card fade-in">
-          <div class="blog-date">📅 Coming Soon</div>
-          <h3>Managing 120+ Locations with Cisco Meraki: Lessons Learned</h3>
-          <p>Real-world insights from deploying and maintaining a cloud-managed network across hundreds of distributed sites.</p>
-          <span class="read-more">Read Article →</span>
-        </div>
-        <div class="glass-card blog-card fade-in">
-          <div class="blog-date">📅 Coming Soon</div>
-          <h3>VLAN Segmentation for OT/IT Networks: A Practical Guide</h3>
-          <p>How to properly isolate operational technology systems from your corporate network using VLANs and zero-trust principles.</p>
-          <span class="read-more">Read Article →</span>
-        </div>
-        <div class="glass-card blog-card fade-in">
-          <div class="blog-date">📅 Coming Soon</div>
-          <h3>My CCNA Journey: Study Plan & Progress</h3>
-          <p>Documenting my path to CCNA certification — study resources, lab setups, and the concepts that matter most.</p>
-          <span class="read-more">Read Article →</span>
-        </div>
       {%- endfor -%}
     </div>
     <div style="text-align: center; margin-top: 48px;">
