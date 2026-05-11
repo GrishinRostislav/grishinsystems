@@ -5,9 +5,13 @@ layout: base.njk
 <section class="blog-post" style="padding-top: 140px; padding-bottom: 80px;">
   <div class="container" style="max-width: 800px;">
     <div style="margin-bottom: 40px;">
-      <div style="display: flex; gap: 16px; margin-bottom: 16px;">
-        <a href="/" style="color: var(--text-muted); font-size: 14px; text-decoration: none;">← Back to Home</a>
-        <a href="/blog/" style="color: var(--accent); font-size: 14px; text-decoration: none; font-weight: 500;">📋 All Articles</a>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--glass-border);">
+        <a href="/" style="color: var(--text-muted); font-size: 14px; text-decoration: none; display: flex; align-items: center; gap: 6px; transition: var(--transition);" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'">
+          <span style="font-size: 18px;">←</span> Back to Home
+        </a>
+        <a href="/blog/" class="btn btn-secondary btn-sm" style="background: rgba(10,22,40,0.4); font-weight: 500;">
+          📋 All Articles
+        </a>
       </div>
       <h1 style="font-size: clamp(32px, 4vw, 48px); margin: 20px 0 10px; line-height: 1.2;">{{ title }}</h1>
       <div style="color: var(--text-secondary); font-size: 14px; display: flex; gap: 16px;">
