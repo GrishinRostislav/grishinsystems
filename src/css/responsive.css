@@ -10,13 +10,15 @@
   .hamburger { display: flex; }
   .about-grid { grid-template-columns: 1fr; text-align: center; }
   .contact-grid { grid-template-columns: 1fr; }
+  .skills-grid { grid-template-columns: 1fr; }
+  .timeline-header { flex-direction: column; }
+  .timeline-meta { align-items: flex-start; }
 }
 @media (max-width: 640px) {
   section { padding: 60px 0; }
   .hero { padding: 100px 0 60px; }
   .hero-terminal { font-size: 11px; min-height: 290px; padding: 16px; }
-  .expertise-grid { grid-template-columns: 1fr; }
-  .projects-grid { grid-template-columns: 1fr; }
+  .skills-grid { grid-template-columns: 1fr; }
   .blog-grid { grid-template-columns: 1fr; }
   .certs-grid { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr; }
@@ -24,4 +26,8 @@
   .footer-links { flex-wrap: wrap; justify-content: center; }
   .hero-stats { flex-direction: column; gap: 16px; }
   .about-highlights { justify-content: center; }
+  .timeline { padding-left: 30px; }
+  .timeline::before { left: 10px; }
+  .timeline-dot { left: -28px; }
+  .timeline-content { padding: 20px; }
 }

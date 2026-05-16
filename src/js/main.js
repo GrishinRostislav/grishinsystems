@@ -25,7 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('scroll', () => {
     let current = '';
     sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) current = s.id; });
-    navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === `#${current}`));
+    navLinks.forEach(l => {
+      const href = l.getAttribute('href');
+      l.classList.toggle('active', href === `#${current}` || href === `/#${current}`);
+    });
   });
 
   // Scroll animations
@@ -38,6 +41,41 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }, { threshold: 0.1 });
   document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Counter animation for hero stats
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const counters = entry.target.querySelectorAll('.num[data-count]');
+        counters.forEach(counter => {
+          const target = parseInt(counter.getAttribute('data-count'));
+          const duration = 2000;
+          const start = performance.now();
+          
+          const animate = (currentTime) => {
+            const elapsed = currentTime - start;
+            const progress = Math.min(elapsed / duration, 1);
+            // Ease out cubic
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = Math.floor(eased * target);
+            counter.textContent = current + (target >= 16 ? '+' : '');
+            
+            if (progress < 1) {
+              requestAnimationFrame(animate);
+            } else {
+              counter.textContent = target + '+';
+            }
+          };
+          
+          requestAnimationFrame(animate);
+        });
+        counterObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  const heroStats = document.querySelector('.hero-stats');
+  if (heroStats) counterObserver.observe(heroStats);
 
   // Terminal typing effect
   const terminalObserver = new IntersectionObserver((entries) => {
@@ -91,6 +129,5 @@ document.addEventListener('DOMContentLoaded', () => {
     terminalObserver.observe(terminal);
   }
 
-  // Contact form
   // Contact form animation removed so Web3Forms can handle the native submit
 });
