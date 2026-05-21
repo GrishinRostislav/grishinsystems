@@ -70,6 +70,21 @@
 }
 .tag-green { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.2); color: var(--success); }
 .tag-amber { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.2); color: var(--warning); }
+.tag-contract { background: rgba(148, 163, 184, 0.1); border-color: rgba(148, 163, 184, 0.2); color: var(--text-secondary); }
+.badge-contract {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: 8px;
+  vertical-align: middle;
+  background: rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: var(--text-secondary);
+}
 
 /* ===== FOOTER ===== */
 .footer { padding: 48px 0 24px; border-top: 1px solid var(--glass-border); }
