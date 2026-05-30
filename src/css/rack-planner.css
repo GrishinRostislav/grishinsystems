@@ -2,7 +2,7 @@
 
 .planner-layout {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: 340px 1fr;
   gap: 32px;
   align-items: start;
   margin-top: 24px;
@@ -714,24 +714,30 @@
 
 /* Cabinet side-by-side layout with labels */
 .cabinet-layout-container {
-  display: grid;
-  grid-template-columns: 1fr 220px;
-  gap: 20px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 40px; /* Fixed 40px gap between rack and side labels */
   width: 100%;
-  max-width: 680px;
+  max-width: 720px;
   position: relative;
 }
 
 @media (max-width: 768px) {
   .cabinet-layout-container {
-    grid-template-columns: 1fr;
+    flex-direction: column;
     gap: 24px;
   }
 }
 
+.cabinet-rack {
+  flex: 0 0 400px;
+  max-width: 400px;
+}
+
 .cabinet-side-labels {
+  flex: 0 0 240px;
   position: relative;
-  height: 100%;
 }
 
 @media (max-width: 768px) {
@@ -739,6 +745,7 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    width: 100%;
   }
 }
 
@@ -762,7 +769,7 @@
 
 .device-label-card:hover {
   border-color: var(--accent-cyan);
-  background: rgba(30, 41, 59, 0.8);
+  background: rgba(30, 41, 59, 0.85);
   box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
 }
 
@@ -811,12 +818,18 @@
 .device-label-card::before {
   content: '';
   position: absolute;
-  left: -20px;
+  left: -52px; /* Bridges the 40px gap + rack right padding/border */
   top: 50%;
-  width: 20px;
-  height: 1px;
-  border-top: 1px dashed rgba(148, 163, 184, 0.3);
+  width: 52px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-cyan), rgba(148, 163, 184, 0.15));
   pointer-events: none;
+  transition: var(--transition);
+}
+
+.device-label-card:hover::before {
+  background: var(--accent-cyan);
+  box-shadow: 0 0 8px var(--accent-cyan);
 }
 
 @media (max-width: 768px) {

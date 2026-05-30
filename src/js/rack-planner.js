@@ -297,6 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderCabinet() {
     cabinetRackEl.innerHTML = "";
     cabinetSideLabelsEl.innerHTML = "";
+    cabinetSideLabelsEl.style.height = `${state.rackSize * 42}px`;
     
     // Create rack container
     const container = document.createElement("div");
