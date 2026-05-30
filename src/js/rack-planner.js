@@ -100,30 +100,37 @@ document.addEventListener("DOMContentLoaded", () => {
       const newSize = parseInt(e.target.value) || 18;
       const adjustedDevices = [];
       
-      // Sort devices top-down to ensure consistent sliding adjustment
-      const sorted = [...state.placedDevices].sort((a, b) => b.slot - a.slot);
+      // Sort devices bottom-up (ascending by slot) to preserve relative order when sliding
+      const sorted = [...state.placedDevices].sort((a, b) => a.slot - b.slot);
       
       sorted.forEach(dev => {
+        // Calculate preferred slot relative to the top of the cabinet
+        const offsetFromTop = state.rackSize - dev.slot;
+        const preferredSlot = newSize - offsetFromTop;
+        
         let targetSlot = null;
         
-        // 1. Try to keep original slot if it fits inside the new rack bounds
-        if (dev.slot <= newSize) {
+        // 1. Search upwards starting from preferredSlot (capped at newSize)
+        const startSearchUp = Math.max(dev.u, preferredSlot);
+        for (let u = startSearchUp; u <= newSize; u++) {
           let fits = true;
           for (let i = 0; i < dev.u; i++) {
-            const u = dev.slot - i;
-            if (u <= 0 || u > newSize || isSlotOccupiedInList(u, adjustedDevices)) {
+            const checkU = u - i;
+            if (checkU <= 0 || isSlotOccupiedInList(checkU, adjustedDevices)) {
               fits = false;
               break;
             }
           }
           if (fits) {
-            targetSlot = dev.slot;
+            targetSlot = u;
+            break;
           }
         }
         
-        // 2. If it does not fit, find the highest available slot in the new cabinet bounds
+        // 2. If no fit searching up, search downwards from preferredSlot to dev.u
         if (targetSlot === null) {
-          for (let u = newSize; u >= dev.u; u--) {
+          const startSearchDown = Math.min(newSize, Math.max(dev.u, preferredSlot));
+          for (let u = startSearchDown; u >= dev.u; u--) {
             let fits = true;
             for (let i = 0; i < dev.u; i++) {
               const checkU = u - i;
@@ -149,7 +156,8 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       
       state.rackSize = newSize;
-      state.placedDevices = adjustedDevices;
+      // Store devices sorted top-down in state
+      state.placedDevices = adjustedDevices.sort((a, b) => b.slot - a.slot);
       saveState();
       update();
     });
