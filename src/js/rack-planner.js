@@ -18,7 +18,11 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "tplink-sg3428xmp", name: "TP-Link JetStream SG3428XMP", brand: "tplink", u: 1, ports: 24, poe_ports: 24, poe_budget: 384, outlets: 0, requires_power: true, type: "switch", cost: 399 },
       { id: "araknis-210-8p", name: "Araknis AN-210-SW-F-8-PoE", brand: "araknis", u: 1, ports: 8, poe_ports: 8, poe_budget: 130, outlets: 0, requires_power: true, type: "switch", cost: 350 },
       { id: "araknis-310-24p", name: "Araknis AN-310-SW-F-24-PoE", brand: "araknis", u: 1, ports: 24, poe_ports: 24, poe_budget: 375, outlets: 0, requires_power: true, type: "switch", cost: 850 },
-      { id: "araknis-810-48p", name: "Araknis AN-810-SW-F-48-PoE", brand: "araknis", u: 1, ports: 48, poe_ports: 48, poe_budget: 740, outlets: 0, requires_power: true, type: "switch", cost: 1650 }
+      { id: "araknis-810-48p", name: "Araknis AN-810-SW-F-48-PoE", brand: "araknis", u: 1, ports: 48, poe_ports: 48, poe_budget: 740, outlets: 0, requires_power: true, type: "switch", cost: 1650 },
+      { id: "araknis-620-8p", name: "Araknis AN-620-SW-R-8-PoE (2.5G)", brand: "araknis", u: 1, ports: 8, poe_ports: 8, poe_budget: 240, outlets: 0, requires_power: true, type: "switch", cost: 750 },
+      { id: "araknis-620-24p", name: "Araknis AN-620-SW-R-24-PoE (2.5G)", brand: "araknis", u: 1, ports: 24, poe_ports: 24, poe_budget: 720, outlets: 0, requires_power: true, type: "switch", cost: 1450 },
+      { id: "araknis-920-12p", name: "Araknis AN-920-SW-F-12-PoE (10G)", brand: "araknis", u: 1, ports: 12, poe_ports: 12, poe_budget: 480, outlets: 0, requires_power: true, type: "switch", cost: 2200 },
+      { id: "araknis-920-24p", name: "Araknis AN-920-SW-F-24-PoE (10G)", brand: "araknis", u: 1, ports: 24, poe_ports: 24, poe_budget: 740, outlets: 0, requires_power: true, type: "switch", cost: 3500 }
     ],
     panels: [
       { id: "patch-24", name: "24-Port Blank Keystone Panel", brand: "generic", u: 1, ports: 24, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: false, type: "patch-panel", cost: 35 }
@@ -26,6 +30,8 @@ document.addEventListener("DOMContentLoaded", () => {
     routers: [
       { id: "udm-pro", name: "UniFi Dream Machine Pro", brand: "ubiquiti", u: 1, ports: 8, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 379 },
       { id: "cisco-firepower", name: "Cisco Firepower 1010", brand: "cisco", u: 1, ports: 8, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 890 },
+      { id: "araknis-110-rt", name: "Araknis AN-110-RT-2L1W Router", brand: "araknis", u: 1, ports: 3, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 249 },
+      { id: "araknis-220-rt", name: "Araknis AN-220-RT-2WAN Router (2.5G)", brand: "araknis", u: 1, ports: 5, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 450 },
       { id: "araknis-310-rt", name: "Araknis AN-310-RT-4L2W Router", brand: "araknis", u: 1, ports: 6, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 399 },
       { id: "araknis-520-rt", name: "Araknis AN-520-RT-2WAN Router", brand: "araknis", u: 1, ports: 5, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 650 }
     ],
@@ -50,9 +56,13 @@ document.addEventListener("DOMContentLoaded", () => {
     { id: "unifi-nanostation-loco", name: "NanoStation 5AC Loco Bridge", brand: "ubiquiti", category: "wireless", wattage: 8.5, poeClass: "af", cost: 49 },
     { id: "tplink-eap670", name: "TP-Link EAP670 AX5400 AP", brand: "tplink", category: "wireless", wattage: 25.0, poeClass: "at", cost: 119 },
     { id: "mikrotik-wap-ac", name: "MikroTik wAP ac AP", brand: "mikrotik", category: "wireless", wattage: 10.0, poeClass: "af", cost: 99 },
+    { id: "araknis-320-ap", name: "Araknis AN-320-AP-I Wi-Fi 6 AP", brand: "araknis", category: "wireless", wattage: 12.0, poeClass: "af", cost: 350 },
     { id: "araknis-820-ap", name: "Araknis AN-820-AP-I-AC AP", brand: "araknis", category: "wireless", wattage: 12.0, poeClass: "af", cost: 450 },
     { id: "araknis-520-ap", name: "Araknis AN-520-AP-I-AX AP", brand: "araknis", category: "wireless", wattage: 18.0, poeClass: "at", cost: 499 },
+    { id: "araknis-520-ap-o", name: "Araknis AN-520-AP-O-AX Outdoor AP", brand: "araknis", category: "wireless", wattage: 18.0, poeClass: "at", cost: 520 },
     { id: "araknis-720-ap", name: "Araknis AN-720-AP-O-AC AP", brand: "araknis", category: "wireless", wattage: 15.6, poeClass: "at", cost: 550 },
+    { id: "araknis-820-ap-ax", name: "Araknis AN-820-AP-I-AX AP", brand: "araknis", category: "wireless", wattage: 22.0, poeClass: "at", cost: 599 },
+    { id: "araknis-530-ap", name: "Araknis AN-530-AP-I Wi-Fi 7 AP", brand: "araknis", category: "wireless", wattage: 25.0, poeClass: "at", cost: 699 },
 
     // IP Cameras
     { id: "unifi-g5-bullet", name: "UniFi G5 Bullet", brand: "ubiquiti", category: "cctv", wattage: 4.0, poeClass: "af", cost: 129 },
@@ -157,6 +167,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Open Endpoint Modal
     if (btnOpenEndpointModalEl) {
       btnOpenEndpointModalEl.addEventListener("click", () => {
+        if (endpointFormEl) {
+          endpointFormEl.reset(); // Reset form which triggers the 'reset' listener below
+        }
         endpointModalEl.classList.add("open");
       });
     }
@@ -165,6 +178,50 @@ document.addEventListener("DOMContentLoaded", () => {
     if (selectEndpointCatEl) {
       selectEndpointCatEl.addEventListener("change", () => {
         populateEndpointDropdown();
+      });
+    }
+
+    // Filter Endpoint Models by Search Input
+    const endpointSearchInput = document.getElementById("endpoint-search");
+    if (endpointSearchInput) {
+      endpointSearchInput.addEventListener("input", () => {
+        populateEndpointDropdown();
+      });
+    }
+
+    // Handle form reset event to sync dropdowns properly
+    if (endpointFormEl) {
+      endpointFormEl.addEventListener("reset", () => {
+        // Wait for browser to restore default values, then refresh models
+        setTimeout(() => {
+          populateEndpointDropdown();
+        }, 0);
+      });
+    }
+
+    // Equipment Library Catalog Search Input
+    const catalogSearchInput = document.getElementById("catalog-search");
+    const catalogSearchClear = document.getElementById("catalog-search-clear");
+    
+    if (catalogSearchInput) {
+      catalogSearchInput.addEventListener("input", () => {
+        const activeTabEl = catalogTabsEl.querySelector(".catalog-tab.active");
+        const activeTab = activeTabEl ? activeTabEl.dataset.tab : "switches";
+        renderCatalog(activeTab);
+        if (catalogSearchClear) {
+          catalogSearchClear.style.display = catalogSearchInput.value ? "block" : "none";
+        }
+      });
+    }
+
+    if (catalogSearchClear) {
+      catalogSearchClear.addEventListener("click", () => {
+        catalogSearchInput.value = "";
+        catalogSearchClear.style.display = "none";
+        const activeTabEl = catalogTabsEl.querySelector(".catalog-tab.active");
+        const activeTab = activeTabEl ? activeTabEl.dataset.tab : "switches";
+        renderCatalog(activeTab);
+        catalogSearchInput.focus();
       });
     }
 
@@ -378,7 +435,24 @@ document.addEventListener("DOMContentLoaded", () => {
     selectEndpointModelEl.innerHTML = "";
     
     const selectedCat = selectEndpointCatEl.value;
-    const filtered = poeEndpointDatabase.filter(ep => ep.category === selectedCat);
+    const searchInput = document.getElementById("endpoint-search");
+    const query = searchInput ? searchInput.value.toLowerCase().trim() : "";
+    
+    const filtered = poeEndpointDatabase.filter(ep => {
+      if (ep.category !== selectedCat) return false;
+      if (query) {
+        return ep.name.toLowerCase().includes(query) || ep.brand.toLowerCase().includes(query);
+      }
+      return true;
+    });
+    
+    if (filtered.length === 0) {
+      const opt = document.createElement("option");
+      opt.disabled = true;
+      opt.textContent = "No matching models found";
+      selectEndpointModelEl.appendChild(opt);
+      return;
+    }
     
     filtered.forEach(ep => {
       const opt = document.createElement("option");
@@ -479,9 +553,23 @@ document.addEventListener("DOMContentLoaded", () => {
   // Render Catalog items
   function renderCatalog(category) {
     catalogListEl.innerHTML = "";
+    
+    const searchInput = document.getElementById("catalog-search");
+    const query = searchInput ? searchInput.value.toLowerCase().trim() : "";
+    
     const items = presets[category] || [];
     
-    items.forEach(item => {
+    const filteredItems = items.filter(item => {
+      if (!query) return true;
+      return item.name.toLowerCase().includes(query) || item.brand.toLowerCase().includes(query);
+    });
+    
+    if (filteredItems.length === 0) {
+      catalogListEl.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 14px; grid-column: 1 / -1;">No matching items found</div>`;
+      return;
+    }
+    
+    filteredItems.forEach(item => {
       const itemEl = document.createElement("div");
       itemEl.className = "catalog-item";
       itemEl.draggable = true;

@@ -919,6 +919,31 @@
   cursor: grabbing;
 }
 
+/* Catalog & Endpoint Search Styling */
+.catalog-search-wrapper {
+  position: relative;
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.catalog-search-wrapper input {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 8px 36px 8px 12px;
+  font-size: 14px;
+  outline: none;
+  transition: var(--transition);
+}
+
+.catalog-search-wrapper input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+  background: rgba(15, 23, 42, 0.6);
+}
+
 /* Print Styles */
 @media print {
   body {
