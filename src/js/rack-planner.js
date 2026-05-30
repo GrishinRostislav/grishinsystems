@@ -100,7 +100,8 @@ document.addEventListener("DOMContentLoaded", () => {
     endpoints: [], // Added PoE endpoints: { id, name, brand, category, qty, wattage, poeClass, cost }
     placedDevices: [],
     draggedPresetId: null,
-    draggedInstanceId: null
+    draggedInstanceId: null,
+    lastAddedInstanceId: null // Keep track of the last added device to flash animate it
   };
 
   // Selectors
@@ -603,10 +604,23 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       // Quick Click action - Find first empty slot that fits
-      itemEl.querySelector(".catalog-item-action").addEventListener("click", () => {
+      itemEl.querySelector(".catalog-item-action").addEventListener("click", (e) => {
         const slot = findFirstAvailableSlot(item.u);
         if (slot) {
           addDevice(item.id, slot);
+          
+          // Provide instant visual success feedback on the button
+          const btn = e.currentTarget;
+          const originalText = btn.textContent;
+          btn.textContent = "Added! ✓";
+          btn.classList.add("added-success");
+          btn.disabled = true;
+          
+          setTimeout(() => {
+            btn.textContent = originalText;
+            btn.classList.remove("added-success");
+            btn.disabled = false;
+          }, 800);
         } else {
           alert(`Not enough space to add ${item.name} (${item.u}U required).`);
         }
@@ -680,6 +694,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     state.placedDevices.push(newDevice);
+    state.lastAddedInstanceId = newDevice.instanceId; // Set last added ID to trigger pulse animation
     saveState();
     update();
   }
@@ -766,6 +781,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const devEl = document.createElement("div");
       devEl.className = `placed-device device-brand-${dev.brand}`;
+      
+      // Visual pulse highlight for newly added hardware
+      if (state.lastAddedInstanceId && dev.instanceId === state.lastAddedInstanceId) {
+        devEl.classList.add("newly-added-pulse");
+        state.lastAddedInstanceId = null; // Consume the animation state
+      }
+
       devEl.draggable = true;
       devEl.style.height = `${dev.u * 42 - 3}px`; // 1U = 42px. Subtract a little padding
       
@@ -1136,6 +1158,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const customPreset = {
+      instanceId: "inst_" + Math.random().toString(36).substr(2, 9), // Fix deletion/reordering bug
       id: "custom_" + Date.now(),
       name,
       brand,
@@ -1151,6 +1174,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     state.placedDevices.push(customPreset);
+    state.lastAddedInstanceId = customPreset.instanceId; // Set last added ID to trigger pulse animation
     saveState();
     update();
     closeModal();

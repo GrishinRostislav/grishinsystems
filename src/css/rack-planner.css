@@ -944,6 +944,32 @@
   background: rgba(15, 23, 42, 0.6);
 }
 
+.catalog-item-action.added-success {
+  background: var(--success) !important;
+  color: #fff !important;
+  border-color: var(--success) !important;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+@keyframes flash-green {
+  0% {
+    box-shadow: 0 0 0 0px rgba(16, 185, 129, 0.7);
+    filter: brightness(1.2);
+  }
+  50% {
+    box-shadow: 0 0 20px 10px rgba(16, 185, 129, 0.4);
+    filter: brightness(1.4);
+  }
+  100% {
+    box-shadow: none;
+    filter: none;
+  }
+}
+
+.placed-device.newly-added-pulse {
+  animation: flash-green 1.2s ease-out;
+}
+
 /* Print Styles */
 @media print {
   body {
