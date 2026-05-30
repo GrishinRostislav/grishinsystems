@@ -439,6 +439,11 @@
   border-left: 4px solid #00a4e4;
 }
 
+.device-brand-araknis {
+  background: linear-gradient(135deg, #111e25, #1f2d37);
+  border-left: 4px solid #005691;
+}
+
 .device-brand-cyberpower {
   background: linear-gradient(135deg, #111827, #1f2937);
   border-left: 4px solid #facc15;
