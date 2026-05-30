@@ -7,35 +7,27 @@ document.addEventListener("DOMContentLoaded", () => {
   // 1. Device catalog presets
   const presets = {
     switches: [
-      { id: "usw-24-poe", name: "UniFi USW-24-PoE", brand: "ubiquiti", u: 1, ports: 24, poe_ports: 16, poe_budget: 95, outlets: 0, requires_power: true, consumes_port: false, poe_consumer_wattage: 0, type: "switch", cost: 379 },
-      { id: "usw-pro-48-poe", name: "UniFi USW-Pro-48-PoE", brand: "ubiquiti", u: 1, ports: 48, poe_ports: 48, poe_budget: 600, outlets: 0, requires_power: true, consumes_port: false, poe_consumer_wattage: 0, type: "switch", cost: 1099 },
-      { id: "cisco-9200l-48p", name: "Cisco Catalyst 9200L 48P", brand: "cisco", u: 1, ports: 48, poe_ports: 48, poe_budget: 740, outlets: 0, requires_power: true, consumes_port: false, poe_consumer_wattage: 0, type: "switch", cost: 1850 },
-      { id: "mikrotik-crs326", name: "MikroTik CRS326-24G", brand: "mikrotik", u: 1, ports: 24, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, consumes_port: false, poe_consumer_wattage: 0, type: "switch", cost: 199 }
+      { id: "usw-24-poe", name: "UniFi USW-24-PoE", brand: "ubiquiti", u: 1, ports: 24, poe_ports: 16, poe_budget: 95, outlets: 0, requires_power: true, type: "switch", cost: 379 },
+      { id: "usw-pro-48-poe", name: "UniFi USW-Pro-48-PoE", brand: "ubiquiti", u: 1, ports: 48, poe_ports: 48, poe_budget: 600, outlets: 0, requires_power: true, type: "switch", cost: 1099 },
+      { id: "cisco-9200l-48p", name: "Cisco Catalyst 9200L 48P", brand: "cisco", u: 1, ports: 48, poe_ports: 48, poe_budget: 740, outlets: 0, requires_power: true, type: "switch", cost: 1850 },
+      { id: "mikrotik-crs326", name: "MikroTik CRS326-24G", brand: "mikrotik", u: 1, ports: 24, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "switch", cost: 199 }
     ],
     panels: [
-      { id: "patch-24", name: "24-Port Blank Keystone Panel", brand: "generic", u: 1, ports: 24, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: false, consumes_port: false, poe_consumer_wattage: 0, type: "patch-panel", cost: 35 }
+      { id: "patch-24", name: "24-Port Blank Keystone Panel", brand: "generic", u: 1, ports: 24, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: false, type: "patch-panel", cost: 35 }
     ],
     routers: [
-      { id: "udm-pro", name: "UniFi Dream Machine Pro", brand: "ubiquiti", u: 1, ports: 8, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, consumes_port: true, poe_consumer_wattage: 0, type: "router", cost: 379 },
-      { id: "cisco-firepower", name: "Cisco Firepower 1010", brand: "cisco", u: 1, ports: 8, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, consumes_port: true, poe_consumer_wattage: 0, type: "router", cost: 890 }
+      { id: "udm-pro", name: "UniFi Dream Machine Pro", brand: "ubiquiti", u: 1, ports: 8, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 379 },
+      { id: "cisco-firepower", name: "Cisco Firepower 1010", brand: "cisco", u: 1, ports: 8, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 890 }
     ],
     power: [
-      { id: "ups-cyberpower-2u", name: "CyberPower 1500VA UPS", brand: "cyberpower", u: 2, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 8, requires_power: true, consumes_port: true, poe_consumer_wattage: 0, type: "power", cost: 249 },
-      { id: "pdu-apc-1u", name: "APC 1U PDU Rackmount", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 10, requires_power: true, consumes_port: true, poe_consumer_wattage: 0, type: "power", cost: 99 }
+      { id: "ups-cyberpower-2u", name: "CyberPower 1500VA UPS", brand: "cyberpower", u: 2, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 8, requires_power: true, type: "power", cost: 249 },
+      { id: "pdu-apc-1u", name: "APC 1U PDU Rackmount", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 10, requires_power: true, type: "power", cost: 99 }
     ],
     misc: [
-      { id: "organizer-1u", name: "1U Brush Cable Organizer", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: false, consumes_port: false, poe_consumer_wattage: 0, type: "misc", cost: 20 },
-      { id: "shelf-1u", name: "1U Cantilever Rack Shelf", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: false, consumes_port: false, poe_consumer_wattage: 0, type: "misc", cost: 35 },
-      { id: "generic-1u", name: "Custom Generic 1U Device", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, consumes_port: true, poe_consumer_wattage: 0, type: "misc", cost: 100 },
-      { id: "generic-2u", name: "Custom Generic 2U Device", brand: "generic", u: 2, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, consumes_port: true, poe_consumer_wattage: 0, type: "misc", cost: 150 }
-    ],
-    clients: [
-      { id: "client-ap-poe", name: "UniFi U6 Pro AP", brand: "ubiquiti", u: 0, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: false, consumes_port: true, poe_consumer_wattage: 15.4, type: "client", cost: 150 },
-      { id: "client-camera-poe", name: "UniFi G5 Bullet Camera", brand: "ubiquiti", u: 0, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: false, consumes_port: true, poe_consumer_wattage: 8.0, type: "client", cost: 129 },
-      { id: "client-smart-hub", name: "Smart Home Hub (PoE)", brand: "generic", u: 0, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: false, consumes_port: true, poe_consumer_wattage: 5.0, type: "client", cost: 99 },
-      { id: "client-pi-controller", name: "Raspberry Pi Controller (PoE)", brand: "generic", u: 0, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: false, consumes_port: true, poe_consumer_wattage: 7.0, type: "client", cost: 75 },
-      { id: "client-micro-server", name: "Proxmox Mini PC Server", brand: "generic", u: 0, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 1, requires_power: true, consumes_port: true, poe_consumer_wattage: 0, type: "client", cost: 350 },
-      { id: "client-nas-2u", name: "Synology 4-Bay Rack NAS", brand: "generic", u: 2, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 1, requires_power: true, consumes_port: true, poe_consumer_wattage: 0, type: "client", cost: 499 }
+      { id: "organizer-1u", name: "1U Brush Cable Organizer", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: false, type: "misc", cost: 20 },
+      { id: "shelf-1u", name: "1U Cantilever Rack Shelf", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: false, type: "misc", cost: 35 },
+      { id: "generic-1u", name: "Custom Generic 1U Device", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 100 },
+      { id: "generic-2u", name: "Custom Generic 2U Device", brand: "generic", u: 2, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 150 }
     ]
   };
 
@@ -259,17 +251,7 @@ document.addEventListener("DOMContentLoaded", () => {
         state.poeAtDevices = parsed.poeAtDevices || 0;
         state.poeBt3Devices = parsed.poeBt3Devices || 0;
         state.poeBt4Devices = parsed.poeBt4Devices || 0;
-        
-        // Migrate placed devices to support consumes_port and poe_consumer_wattage
-        state.placedDevices = (parsed.placedDevices || []).map(dev => {
-          if (dev.consumes_port === undefined) {
-            dev.consumes_port = (dev.type === "router" || dev.type === "power" || dev.id.startsWith("generic") || dev.id.startsWith("custom"));
-          }
-          if (dev.poe_consumer_wattage === undefined) {
-            dev.poe_consumer_wattage = 0;
-          }
-          return dev;
-        });
+        state.placedDevices = parsed.placedDevices || [];
       } catch (e) {
         console.error("Error parsing saved state", e);
       }
@@ -330,14 +312,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Check if U slots are occupied
   function isSlotOccupied(slot, height, excludeInstanceId = null) {
-    if (height === 0 || slot === 0) return false;
     for (let i = 0; i < height; i++) {
       const targetU = slot - i;
       if (targetU <= 0 || targetU > state.rackSize) return true; // Out of bounds
       
       const collision = state.placedDevices.find(dev => {
         if (excludeInstanceId && dev.instanceId === excludeInstanceId) return false;
-        if (dev.u === 0 || dev.slot === 0) return false; // 0U devices don't collide
         // Device occupies slots from dev.slot down to dev.slot - dev.u + 1
         const devStart = dev.slot;
         const devEnd = dev.slot - dev.u + 1;
@@ -352,7 +332,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Check if slot U is occupied in a custom list of devices
   function isSlotOccupiedInList(u, list) {
     return list.some(dev => {
-      if (dev.u === 0 || dev.slot === 0) return false;
       const start = dev.slot;
       const end = dev.slot - dev.u + 1;
       return u <= start && u >= end;
@@ -361,7 +340,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Find first slot starting from top that can accommodate item
   function findFirstAvailableSlot(height) {
-    if (height === 0) return 0;
     for (let u = state.rackSize; u >= height; u--) {
       if (!isSlotOccupied(u, height)) {
         return u;
@@ -384,9 +362,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!foundPreset) return;
 
-    if (foundPreset.u === 0) {
-      slot = 0;
-    } else if (isSlotOccupied(slot, foundPreset.u)) {
+    if (isSlotOccupied(slot, foundPreset.u)) {
       alert("This slot or slots below it are already occupied!");
       return;
     }
@@ -474,18 +450,10 @@ document.addEventListener("DOMContentLoaded", () => {
     cabinetRackEl.appendChild(container);
 
     // Initialize active port allocations
-    const placedPoeCount = state.placedDevices.filter(d => d.consumes_port && d.poe_consumer_wattage > 0).length;
-    const placedPortCount = state.placedDevices.filter(d => d.consumes_port).length;
-
-    const totalPoeDevices = state.poeAfDevices + state.poeAtDevices + state.poeBt3Devices + state.poeBt4Devices + placedPoeCount;
-    const switchPortsNeeded = state.dropPoints + state.localLines + placedPortCount;
-
+    const totalPoeDevices = state.poeAfDevices + state.poeAtDevices + state.poeBt3Devices + state.poeBt4Devices;
     let remainingPoeForSwitches = totalPoeDevices;
-    let remainingNonPoeForSwitches = Math.max(0, switchPortsNeeded - totalPoeDevices);
-    
-    // For panels, they only carry drop points (external)
-    const externalPoeCount = state.poeAfDevices + state.poeAtDevices + state.poeBt3Devices + state.poeBt4Devices;
-    let remainingPoeForPanels = Math.min(state.dropPoints, externalPoeCount);
+    let remainingNonPoeForSwitches = Math.max(0, (state.dropPoints + state.localLines) - totalPoeDevices);
+    let remainingPoeForPanels = Math.min(state.dropPoints, totalPoeDevices);
     let remainingNonPoeForPanels = Math.max(0, state.dropPoints - remainingPoeForPanels);
 
     // Sort devices by slot descending to ensure consistent top-down port allocation
@@ -607,62 +575,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       cabinetRackEl.appendChild(devEl);
     });
-
-    // Render 0U / Shelf / Loose Devices at the bottom
-    const zeroUDevices = sortedDevices.filter(dev => dev.u === 0 || dev.slot === 0);
-    
-    const floorEl = document.createElement("div");
-    floorEl.className = "cabinet-floor";
-    floorEl.innerHTML = `<div class="cabinet-floor-title">Cabinet Floor (0U Loose Devices)</div>`;
-    
-    const floorListEl = document.createElement("div");
-    floorListEl.className = "cabinet-floor-devices";
-    
-    if (zeroUDevices.length === 0) {
-      floorListEl.innerHTML = `<div class="cabinet-floor-empty">No loose or 0U devices added</div>`;
-    } else {
-      zeroUDevices.forEach(dev => {
-        const devEl = document.createElement("div");
-        devEl.className = `floor-device floor-brand-${dev.brand}`;
-        
-        let specsStr = "0U";
-        if (dev.consumes_port) {
-          specsStr += " · Network";
-          if (dev.poe_consumer_wattage > 0) {
-            specsStr += ` (${dev.poe_consumer_wattage}W PoE)`;
-          }
-        }
-        if (dev.requires_power) {
-          specsStr += " · AC Power";
-        }
-        
-        let statusLedHtml = "";
-        if (dev.consumes_port) {
-          statusLedHtml = `<span class="floor-device-dot ${dev.poe_consumer_wattage > 0 ? 'poe' : 'active'}" title="Network Connected"></span>`;
-        }
-        
-        devEl.innerHTML = `
-          <div class="floor-device-info">
-            ${statusLedHtml}
-            <span class="floor-device-name">${dev.name}</span>
-            <span class="floor-device-specs">${specsStr}</span>
-          </div>
-          <div class="floor-device-actions">
-            <button class="device-delete-btn" title="Remove Device">✕</button>
-          </div>
-        `;
-        
-        devEl.querySelector(".device-delete-btn").addEventListener("click", (e) => {
-          e.stopPropagation();
-          removeDevice(dev.instanceId);
-        });
-        
-        floorListEl.appendChild(devEl);
-      });
-    }
-    
-    floorEl.appendChild(floorListEl);
-    cabinetRackEl.appendChild(floorEl);
   }
 
   // Move device to new slot
@@ -694,8 +606,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 2. Switch Port capacity check
     const totalSwitchPorts = state.placedDevices.reduce((sum, d) => sum + (d.type === "switch" ? d.ports : 0), 0);
-    const placedPortCount = state.placedDevices.filter(d => d.consumes_port).length;
-    const switchPortsNeeded = state.dropPoints + state.localLines + placedPortCount;
+    const switchPortsNeeded = state.dropPoints + state.localLines;
     let switchStatus = "valid";
     let switchMsg = `${totalSwitchPorts} Ports mounted`;
     if (switchPortsNeeded > totalSwitchPorts) {
@@ -720,11 +631,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 3. PoE budget calculations
     const combinedPoeBudget = state.placedDevices.reduce((sum, d) => sum + (d.type === "switch" ? d.poe_budget : 0), 0);
-    const placedPoeCount = state.placedDevices.filter(d => d.consumes_port && d.poe_consumer_wattage > 0).length;
-    const totalPoeDevices = state.poeAfDevices + state.poeAtDevices + state.poeBt3Devices + state.poeBt4Devices + placedPoeCount;
-    
-    const placedPoeDemand = state.placedDevices.reduce((sum, d) => sum + (d.consumes_port ? d.poe_consumer_wattage : 0), 0);
-    const calculatedPoeDemand = (state.poeAfDevices * 15.4) + (state.poeAtDevices * 30) + (state.poeBt3Devices * 60) + (state.poeBt4Devices * 90) + placedPoeDemand;
+    const totalPoeDevices = state.poeAfDevices + state.poeAtDevices + state.poeBt3Devices + state.poeBt4Devices;
+    const calculatedPoeDemand = (state.poeAfDevices * 15.4) + (state.poeAtDevices * 30) + (state.poeBt3Devices * 60) + (state.poeBt4Devices * 90);
     
     let poeStatus = "valid";
     let poeMsg = `${Math.round(calculatedPoeDemand)}W load / ${combinedPoeBudget}W budget`;
@@ -798,9 +706,8 @@ document.addEventListener("DOMContentLoaded", () => {
       totalU += dev.u;
 
       const tr = document.createElement("tr");
-      const slotText = dev.slot === 0 ? "Shelf" : `U${dev.slot}`;
       tr.innerHTML = `
-        <td style="font-weight: 700; color: var(--accent-cyan); font-family: monospace;">${slotText}</td>
+        <td style="font-weight: 700; color: var(--accent-cyan); font-family: monospace;">U${dev.slot}</td>
         <td><strong>${dev.name}</strong></td>
         <td>${dev.u}U</td>
         <td>$${dev.cost}</td>
@@ -833,18 +740,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const name = document.getElementById("custom-name").value || "Custom Device";
     const brand = document.getElementById("custom-brand").value || "generic";
-    const u = parseInt(document.getElementById("custom-u").value) === 0 ? 0 : (parseInt(document.getElementById("custom-u").value) || 1);
+    const u = parseInt(document.getElementById("custom-u").value) || 1;
     const ports = parseInt(document.getElementById("custom-ports").value) || 0;
     const poe_ports = parseInt(document.getElementById("custom-poe-ports").value) || 0;
     const poe_budget = parseInt(document.getElementById("custom-poe-budget").value) || 0;
     const outlets = parseInt(document.getElementById("custom-outlets").value) || 0;
     const requires_power = document.getElementById("custom-power").checked;
-    const consumes_port = document.getElementById("custom-net").checked;
-    const poe_consumer_wattage = parseFloat(document.getElementById("custom-poe-consumer").value) || 0;
     const cost = parseInt(document.getElementById("custom-cost").value) || 100;
     const type = document.getElementById("custom-type").value || "misc";
 
-    if (u > 0 && isSlotOccupied(customTargetSlot, u)) {
+    if (isSlotOccupied(customTargetSlot, u)) {
       alert(`There is not enough room. Installing a ${u}U device requires slots U${customTargetSlot} down to U${customTargetSlot - u + 1}.`);
       return;
     }
@@ -859,11 +764,9 @@ document.addEventListener("DOMContentLoaded", () => {
       poe_budget,
       outlets,
       requires_power,
-      consumes_port,
-      poe_consumer_wattage,
       type,
       cost,
-      slot: u === 0 ? 0 : customTargetSlot
+      slot: customTargetSlot
     };
 
     state.placedDevices.push(customPreset);

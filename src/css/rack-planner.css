@@ -709,6 +709,8 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--transition);
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .modal-overlay.open {
@@ -722,10 +724,24 @@
   border-radius: var(--radius);
   width: 100%;
   max-width: 480px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
   padding: 24px;
   box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
   transform: translateY(20px);
   transition: transform var(--transition);
+  box-sizing: border-box;
+}
+
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-content::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.2);
+}
+.modal-content::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 3px;
 }
 
 .modal-overlay.open .modal-content {
@@ -765,123 +781,13 @@
   white-space: nowrap;
 }
 
-/* Cabinet Floor (0U Loose Devices) */
-.cabinet-floor {
-  margin-top: 16px;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-sm);
-  padding: 12px;
-  width: calc(100% - 8px);
-  margin-left: 4px;
-  margin-right: 4px;
-  margin-bottom: 8px;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-  box-sizing: border-box;
-}
-
-.cabinet-floor-title {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
-  letter-spacing: 0.5px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  padding-bottom: 4px;
-}
-
-.cabinet-floor-devices {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.cabinet-floor-empty {
-  font-size: 11px;
-  color: var(--text-muted);
-  font-style: italic;
-  text-align: center;
-  padding: 6px 0;
-}
-
-.floor-device {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(30, 41, 59, 0.5);
-  border: 1px solid var(--glass-border);
-  border-radius: 4px;
-  padding: 8px 10px;
-  transition: var(--transition);
-}
-
-.floor-device:hover {
-  background: rgba(30, 41, 59, 0.8);
-  border-color: var(--accent-cyan);
-}
-
-.floor-device-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.floor-device-name {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.floor-device-specs {
-  font-size: 10px;
-  color: var(--text-secondary);
-  font-family: monospace;
-}
-
-.floor-device-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #1e293b;
-  display: inline-block;
-}
-
-.floor-device-dot.active {
-  background: var(--success);
-  box-shadow: 0 0 6px var(--success);
-}
-
-.floor-device-dot.poe {
-  background: var(--warning);
-  box-shadow: 0 0 6px var(--warning);
-}
-
-/* Floor Branding Colors */
-.floor-brand-ubiquiti {
-  border-left: 3px solid var(--accent);
-}
-.floor-brand-cisco {
-  border-left: 3px solid var(--success);
-}
-.floor-brand-mikrotik {
-  border-left: 3px solid var(--warning);
-}
-.floor-brand-cyberpower {
-  border-left: 3px solid #facc15;
-}
-.floor-brand-generic {
-  border-left: 3px solid var(--text-secondary);
-}
-
 /* Print Styles */
 @media print {
   body {
     background: white;
     color: black;
   }
-  .header, .footer, .control-panel, .manifest-ctas, .device-actions, .cabinet-header, .catalog-tabs, .catalog-list, .cabinet-side-labels, .device-delete-btn {
+  .header, .footer, .control-panel, .manifest-ctas, .device-actions, .cabinet-header, .catalog-tabs, .catalog-list, .cabinet-side-labels {
     display: none !important;
   }
   section {
@@ -906,17 +812,6 @@
     border: 1px solid #000 !important;
     color: black !important;
     box-shadow: none !important;
-  }
-  .cabinet-floor {
-    background: transparent !important;
-    border: 1px solid #000 !important;
-    color: black !important;
-    box-shadow: none !important;
-  }
-  .floor-device {
-    background: transparent !important;
-    border: 1px solid #ccc !important;
-    color: black !important;
   }
   .manifest-card {
     background: transparent !important;

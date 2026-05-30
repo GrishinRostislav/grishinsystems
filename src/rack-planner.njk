@@ -45,7 +45,7 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
               </select>
             </div>
           </div>
-          <h3 style="font-size: 11px; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; color: var(--text-secondary); border-top: 1px solid var(--glass-border); padding-top: 15px; letter-spacing: 0.5px;">⚡ External Drops PoE Inventory</h3>
+          <h3 style="font-size: 11px; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; color: var(--text-secondary); border-top: 1px solid var(--glass-border); padding-top: 15px; letter-spacing: 0.5px;">⚡ PoE Device Inventory</h3>
           <div class="form-grid">
             <div class="form-group">
               <label for="input-poe-af">PoE (802.3af - 15.4W)</label>
@@ -119,7 +119,6 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
             <button class="catalog-tab" data-tab="routers">Routers / Firewalls</button>
             <button class="catalog-tab" data-tab="power">UPS & PDUs</button>
             <button class="catalog-tab" data-tab="misc">Shelves & Organizers</button>
-            <button class="catalog-tab" data-tab="clients">Clients</button>
           </div>
 
           <div class="catalog-list" id="catalog-list">
@@ -247,7 +246,6 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
         <div class="form-group">
           <label for="custom-u">Height (U)</label>
           <select id="custom-u">
-            <option value="0">0U (Shelf / Loose Device)</option>
             <option value="1" selected>1U Slot</option>
             <option value="2">2U Slots</option>
             <option value="3">3U Slots</option>
@@ -282,26 +280,9 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
         </div>
       </div>
 
-      <div class="form-grid" style="margin-bottom: 16px;">
-        <div class="form-group" style="flex-direction: row; gap: 8px; align-items: center; margin-bottom: 0;">
-          <input type="checkbox" id="custom-power" checked style="width: auto; margin: 0;">
-          <label for="custom-power" style="cursor: pointer; text-transform: none; font-size: 13px; color: var(--text);">Requires AC Power</label>
-        </div>
-        <div class="form-group" style="flex-direction: row; gap: 8px; align-items: center; margin-bottom: 0;">
-          <input type="checkbox" id="custom-net" checked style="width: auto; margin: 0;">
-          <label for="custom-net" style="cursor: pointer; text-transform: none; font-size: 13px; color: var(--text);">Connects to Switch</label>
-        </div>
-      </div>
-
-      <div class="form-group" style="margin-bottom: 20px;">
-        <label for="custom-poe-consumer">PoE Power Client Requirement</label>
-        <select id="custom-poe-consumer">
-          <option value="0" selected>None (AC or Passive Powered)</option>
-          <option value="15.4">PoE (802.3af) - 15.4W</option>
-          <option value="30">PoE+ (802.3at) - 30W</option>
-          <option value="60">PoE++ Type 3 (60W)</option>
-          <option value="90">PoE++ Type 4 (90W)</option>
-        </select>
+      <div class="form-group" style="flex-direction: row; gap: 8px; align-items: center; margin-bottom: 20px;">
+        <input type="checkbox" id="custom-power" checked style="width: auto;">
+        <label for="custom-power" style="cursor: pointer; text-transform: none; font-size: 14px; color: var(--text);">Requires AC Power Connection</label>
       </div>
 
       <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;">Add Device to Cabinet</button>
