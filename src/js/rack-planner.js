@@ -31,17 +31,34 @@ document.addEventListener("DOMContentLoaded", () => {
     ]
   };
 
-  // 2. Application State
-  // 2. Application State
+  // 2. Camera Database
+  const cameraDatabase = [
+    { id: "unifi-g5-bullet", name: "UniFi G5 Bullet", brand: "ubiquiti", wattage: 4.0, poeClass: "af", cost: 129 },
+    { id: "unifi-g5-dome", name: "UniFi G5 Dome", brand: "ubiquiti", wattage: 5.0, poeClass: "af", cost: 179 },
+    { id: "unifi-g5-pro", name: "UniFi G5 Pro 4K", brand: "ubiquiti", wattage: 10.0, poeClass: "af", cost: 379 },
+    { id: "unifi-g4-ptz", name: "UniFi G4 PTZ Speed Dome", brand: "ubiquiti", wattage: 42.9, poeClass: "bt", cost: 1799 },
+    
+    { id: "hik-colorvu-bullet", name: "Hikvision DS-2CD2087G2-L (8MP ColorVu)", brand: "hikvision", wattage: 8.5, poeClass: "af", cost: 220 },
+    { id: "hik-dome-4mp", name: "Hikvision DS-2CD2143G2-I (4MP Dome)", brand: "hikvision", wattage: 7.0, poeClass: "af", cost: 130 },
+    { id: "hik-bullet-varifocal", name: "Hikvision DS-2CD2686G2-IZS (8MP Varifocal)", brand: "hikvision", wattage: 12.0, poeClass: "at", cost: 380 },
+    { id: "hik-ptz-dome", name: "Hikvision DS-2DE4A425IW-DE (4MP PTZ)", brand: "hikvision", wattage: 18.0, poeClass: "at", cost: 550 },
+    
+    { id: "dahua-tioc-bullet", name: "Dahua TiOC IPC-HFW3849T1 (8MP Bullet)", brand: "dahua", wattage: 8.5, poeClass: "af", cost: 210 },
+    { id: "dahua-dome-varifocal", name: "Dahua IPC-HDBW2431R-ZS (4MP VF Dome)", brand: "dahua", wattage: 6.5, poeClass: "af", cost: 150 },
+    { id: "dahua-ptz-5mp", name: "Dahua SD49525DB-HNY (5MP 25x PTZ)", brand: "dahua", wattage: 22.0, poeClass: "at", cost: 480 },
+    
+    { id: "axis-m3065", name: "Axis M3065-V (Mini Dome)", brand: "axis", wattage: 4.8, poeClass: "af", cost: 215 },
+    { id: "axis-p1455", name: "Axis P1455-LE (Bullet)", brand: "axis", wattage: 12.9, poeClass: "af", cost: 525 },
+    { id: "axis-q6075", name: "Axis Q6075-E (Outdoor PTZ)", brand: "axis", wattage: 51.0, poeClass: "bt", cost: 2450 }
+  ];
+
+  // 3. Application State
   let state = {
     rackSize: 18,
-    dropPoints: 24,
+    dropPoints: 12,
     localLines: 2,
-    poeAfDevices: 10,
-    poeAtDevices: 0,
-    poeBt3Devices: 0,
-    poeBt4Devices: 0,
-    placedDevices: [], // Array of placed devices: { instanceId, presetId, name, brand, u, ports, poe_ports, poe_budget, outlets, requires_power, type, cost, slot }
+    cameras: [], // Added cameras: { id, name, brand, qty, wattage, poeClass, cost }
+    placedDevices: [],
     draggedPresetId: null,
     draggedInstanceId: null
   };
@@ -50,10 +67,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const cabinetRackEl = document.getElementById("cabinet-rack");
   const dropsInputEl = document.getElementById("input-drops");
   const localLinksInputEl = document.getElementById("input-local-links");
-  const poeAfInputEl = document.getElementById("input-poe-af");
-  const poeAtInputEl = document.getElementById("input-poe-at");
-  const poeBt3InputEl = document.getElementById("input-poe-bt3");
-  const poeBt4InputEl = document.getElementById("input-poe-bt4");
+  const selectCameraEl = document.getElementById("select-camera");
+  const inputCameraQtyEl = document.getElementById("input-camera-qty");
+  const btnAddCameraEl = document.getElementById("btn-add-camera");
+  const cameraListBodyEl = document.getElementById("camera-list-body");
   const rackSizeSelectEl = document.getElementById("input-rack-size");
   const catalogListEl = document.getElementById("catalog-list");
   const catalogTabsEl = document.getElementById("catalog-tabs");
@@ -85,11 +102,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Set inputs to match state
     dropsInputEl.value = state.dropPoints;
     localLinksInputEl.value = state.localLines;
-    poeAfInputEl.value = state.poeAfDevices;
-    poeAtInputEl.value = state.poeAtDevices;
-    poeBt3InputEl.value = state.poeBt3Devices;
-    poeBt4InputEl.value = state.poeBt4Devices;
     rackSizeSelectEl.value = state.rackSize;
+    
+    populateCameraDropdown();
+    renderCameraList();
 
     // Attach Event Listeners
     dropsInputEl.addEventListener("input", (e) => {
@@ -102,23 +118,29 @@ document.addEventListener("DOMContentLoaded", () => {
       saveState();
       update();
     });
-    poeAfInputEl.addEventListener("input", (e) => {
-      state.poeAfDevices = parseInt(e.target.value) || 0;
-      saveState();
-      update();
-    });
-    poeAtInputEl.addEventListener("input", (e) => {
-      state.poeAtDevices = parseInt(e.target.value) || 0;
-      saveState();
-      update();
-    });
-    poeBt3InputEl.addEventListener("input", (e) => {
-      state.poeBt3Devices = parseInt(e.target.value) || 0;
-      saveState();
-      update();
-    });
-    poeBt4InputEl.addEventListener("input", (e) => {
-      state.poeBt4Devices = parseInt(e.target.value) || 0;
+    
+    btnAddCameraEl.addEventListener("click", () => {
+      const cameraId = selectCameraEl.value;
+      const qty = parseInt(inputCameraQtyEl.value) || 1;
+      
+      const cameraPreset = cameraDatabase.find(c => c.id === cameraId);
+      if (!cameraPreset) return;
+      
+      const existing = state.cameras.find(c => c.id === cameraId);
+      if (existing) {
+        existing.qty += qty;
+      } else {
+        state.cameras.push({
+          id: cameraPreset.id,
+          name: cameraPreset.name,
+          brand: cameraPreset.brand,
+          qty: qty,
+          wattage: cameraPreset.wattage,
+          poeClass: cameraPreset.poeClass,
+          cost: cameraPreset.cost
+        });
+      }
+      
       saveState();
       update();
     });
@@ -230,10 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
       rackSize: state.rackSize,
       dropPoints: state.dropPoints,
       localLines: state.localLines,
-      poeAfDevices: state.poeAfDevices,
-      poeAtDevices: state.poeAtDevices,
-      poeBt3Devices: state.poeBt3Devices,
-      poeBt4Devices: state.poeBt4Devices,
+      cameras: state.cameras,
       placedDevices: state.placedDevices
     }));
   }
@@ -244,19 +263,84 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const parsed = JSON.parse(saved);
         state.rackSize = parsed.rackSize || 18;
-        state.dropPoints = parsed.dropPoints || 24;
+        state.dropPoints = parsed.dropPoints !== undefined ? parsed.dropPoints : 12;
         state.localLines = parsed.localLines !== undefined ? parsed.localLines : 2;
-        
-        // Support migrating legacy single poeDevices count to poeAfDevices
-        state.poeAfDevices = parsed.poeAfDevices !== undefined ? parsed.poeAfDevices : (parsed.poeDevices || 10);
-        state.poeAtDevices = parsed.poeAtDevices || 0;
-        state.poeBt3Devices = parsed.poeBt3Devices || 0;
-        state.poeBt4Devices = parsed.poeBt4Devices || 0;
         state.placedDevices = parsed.placedDevices || [];
+        
+        if (parsed.cameras) {
+          state.cameras = parsed.cameras;
+        } else {
+          state.cameras = [];
+          // Legacy migration
+          const legacyAf = parsed.poeAfDevices !== undefined ? parsed.poeAfDevices : (parsed.poeDevices || 0);
+          const legacyAt = parsed.poeAtDevices || 0;
+          const legacyBt3 = parsed.poeBt3Devices || 0;
+          const legacyBt4 = parsed.poeBt4Devices || 0;
+          
+          if (legacyAf > 0) {
+            state.cameras.push({ id: "legacy-af", name: "Generic PoE Camera (af)", brand: "generic", qty: legacyAf, wattage: 15.4, poeClass: "af", cost: 100 });
+          }
+          if (legacyAt > 0) {
+            state.cameras.push({ id: "legacy-at", name: "Generic PoE+ Camera (at)", brand: "generic", qty: legacyAt, wattage: 30.0, poeClass: "at", cost: 150 });
+          }
+          if (legacyBt3 > 0) {
+            state.cameras.push({ id: "legacy-bt3", name: "Generic PoE++ PTZ (bt3)", brand: "generic", qty: legacyBt3, wattage: 60.0, poeClass: "bt", cost: 350 });
+          }
+          if (legacyBt4 > 0) {
+            state.cameras.push({ id: "legacy-bt4", name: "Generic PoE++ Speed (bt4)", brand: "generic", qty: legacyBt4, wattage: 90.0, poeClass: "bt", cost: 500 });
+          }
+        }
       } catch (e) {
         console.error("Error parsing saved state", e);
       }
     }
+  }
+
+  // CCTV Camera Helpers
+  function populateCameraDropdown() {
+    selectCameraEl.innerHTML = "";
+    cameraDatabase.forEach(cam => {
+      const opt = document.createElement("option");
+      opt.value = cam.id;
+      const brandStr = cam.brand.charAt(0).toUpperCase() + cam.brand.slice(1);
+      opt.textContent = `[${brandStr}] ${cam.name} (${cam.wattage}W)`;
+      selectCameraEl.appendChild(opt);
+    });
+  }
+
+  function renderCameraList() {
+    cameraListBodyEl.innerHTML = "";
+    
+    if (state.cameras.length === 0) {
+      cameraListBodyEl.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 8px 0;">No cameras added</td></tr>`;
+      return;
+    }
+    
+    state.cameras.forEach(cam => {
+      const tr = document.createElement("tr");
+      const totalWattage = (cam.qty * cam.wattage).toFixed(1);
+      
+      tr.innerHTML = `
+        <td style="padding: 6px 8px;"><strong>${cam.name}</strong></td>
+        <td style="padding: 6px 8px; text-align: center; font-family: monospace;">${cam.qty}</td>
+        <td style="padding: 6px 8px; text-align: right; font-family: monospace; color: var(--accent-cyan);">${totalWattage}W</td>
+        <td style="padding: 6px 8px; text-align: right;">
+          <button type="button" class="camera-delete-btn" title="Remove Device">✕</button>
+        </td>
+      `;
+      
+      tr.querySelector(".camera-delete-btn").addEventListener("click", () => {
+        removeCamera(cam.id);
+      });
+      
+      cameraListBodyEl.appendChild(tr);
+    });
+  }
+
+  function removeCamera(id) {
+    state.cameras = state.cameras.filter(c => c.id !== id);
+    saveState();
+    update();
   }
 
   // Render Catalog items
@@ -440,11 +524,14 @@ document.addEventListener("DOMContentLoaded", () => {
     cabinetRackEl.appendChild(container);
 
     // Initialize active port allocations
-    const totalPoeDevices = state.poeAfDevices + state.poeAtDevices + state.poeBt3Devices + state.poeBt4Devices;
+    const cameraQtyCount = state.cameras.reduce((sum, c) => sum + c.qty, 0);
+    const totalPoeDevices = cameraQtyCount;
+    const totalDropPoints = state.dropPoints + cameraQtyCount;
+    
     let remainingPoeForSwitches = totalPoeDevices;
-    let remainingNonPoeForSwitches = Math.max(0, (state.dropPoints + state.localLines) - totalPoeDevices);
-    let remainingPoeForPanels = Math.min(state.dropPoints, totalPoeDevices);
-    let remainingNonPoeForPanels = Math.max(0, state.dropPoints - remainingPoeForPanels);
+    let remainingNonPoeForSwitches = Math.max(0, (totalDropPoints + state.localLines) - totalPoeDevices);
+    let remainingPoeForPanels = Math.min(totalDropPoints, totalPoeDevices);
+    let remainingNonPoeForPanels = Math.max(0, totalDropPoints - remainingPoeForPanels);
 
     // Sort devices by slot descending to ensure consistent top-down port allocation
     const sortedDevices = [...state.placedDevices].sort((a, b) => b.slot - a.slot);
@@ -595,8 +682,11 @@ document.addEventListener("DOMContentLoaded", () => {
     updateValCard(valSpaceEl, spaceStatus, "📦", "Rack Space", `${totalUUsed}U / ${state.rackSize}U Used`);
 
     // 2. Switch Port capacity check
+    const cameraQtyCount = state.cameras.reduce((sum, c) => sum + c.qty, 0);
+    const totalDropPoints = state.dropPoints + cameraQtyCount;
+    const switchPortsNeeded = totalDropPoints + state.localLines;
+
     const totalSwitchPorts = state.placedDevices.reduce((sum, d) => sum + (d.type === "switch" ? d.ports : 0), 0);
-    const switchPortsNeeded = state.dropPoints + state.localLines;
     let switchStatus = "valid";
     let switchMsg = `${totalSwitchPorts} Ports mounted`;
     if (switchPortsNeeded > totalSwitchPorts) {
@@ -611,18 +701,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalPatchPanelPorts = state.placedDevices.reduce((sum, d) => sum + (d.type === "patch-panel" ? d.ports : 0), 0);
     let patchStatus = "valid";
     let patchMsg = `${totalPatchPanelPorts} Ports mounted`;
-    if (state.dropPoints > totalPatchPanelPorts) {
+    if (totalDropPoints > totalPatchPanelPorts) {
       patchStatus = "danger";
-      patchMsg = `Need ${state.dropPoints - totalPatchPanelPorts} more ports`;
+      patchMsg = `Need ${totalDropPoints - totalPatchPanelPorts} more ports`;
     } else {
-      patchMsg = `Covered (${state.dropPoints} / ${totalPatchPanelPorts})`;
+      patchMsg = `Covered (${totalDropPoints} / ${totalPatchPanelPorts})`;
     }
     updateValCard(valPatchPortsEl, patchStatus, "🎛️", "Patch Panels", patchMsg);
 
     // 3. PoE budget calculations
     const combinedPoeBudget = state.placedDevices.reduce((sum, d) => sum + (d.type === "switch" ? d.poe_budget : 0), 0);
-    const totalPoeDevices = state.poeAfDevices + state.poeAtDevices + state.poeBt3Devices + state.poeBt4Devices;
-    const calculatedPoeDemand = (state.poeAfDevices * 15.4) + (state.poeAtDevices * 30) + (state.poeBt3Devices * 60) + (state.poeBt4Devices * 90);
+    const totalPoeDevices = cameraQtyCount;
+    const calculatedPoeDemand = state.cameras.reduce((sum, c) => sum + (c.qty * c.wattage), 0);
     
     let poeStatus = "valid";
     let poeMsg = `${Math.round(calculatedPoeDemand)}W load / ${combinedPoeBudget}W budget`;
@@ -669,8 +759,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderManifest() {
     manifestBodyEl.innerHTML = "";
     
-    if (state.placedDevices.length === 0) {
-      manifestBodyEl.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No devices mounted in rack. Drag or add items from catalog!</td></tr>`;
+    if (state.placedDevices.length === 0 && state.cameras.length === 0) {
+      manifestBodyEl.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No equipment in project. Drag cabinet gear or add cameras!</td></tr>`;
       manifestUCountEl.textContent = "0";
       manifestPortCountEl.textContent = "0";
       manifestPoeBudgetEl.textContent = "0W";
@@ -701,6 +791,21 @@ document.addEventListener("DOMContentLoaded", () => {
         <td><strong>${dev.name}</strong></td>
         <td>${dev.u}U</td>
         <td>$${dev.cost}</td>
+      `;
+      manifestBodyEl.appendChild(tr);
+    });
+
+    // Render CCTV cameras
+    state.cameras.forEach(cam => {
+      const camCost = cam.cost * cam.qty;
+      totalCost += camCost;
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td style="font-weight: 700; color: var(--accent); font-family: monospace;">External</td>
+        <td><strong>${cam.name} (Qty: ${cam.qty})</strong></td>
+        <td>—</td>
+        <td>$${camCost}</td>
       `;
       manifestBodyEl.appendChild(tr);
     });
