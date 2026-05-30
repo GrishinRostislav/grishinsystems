@@ -781,6 +781,11 @@
   white-space: nowrap;
 }
 
+#btn-add-custom:hover {
+  background: var(--accent) !important;
+  color: #fff !important;
+}
+
 /* Print Styles */
 @media print {
   body {

@@ -111,7 +111,10 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
 
         <!-- 3. Hardware Catalog -->
         <div class="glass-card panel-section fade-in visible">
-          <h2 class="panel-title">🛠️ Equipment Library</h2>
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; margin-bottom: 16px;">
+            <h2 class="panel-title" style="border: none; margin: 0; padding: 0;">🛠️ Equipment Library</h2>
+            <button id="btn-add-custom" style="font-size: 12px; font-weight: 700; border: 1px solid var(--accent); color: var(--accent); padding: 4px 10px; border-radius: 4px; background: transparent; cursor: pointer; transition: var(--transition);">+ Custom Device</button>
+          </div>
           
           <div class="catalog-tabs" id="catalog-tabs">
             <button class="catalog-tab active" data-tab="switches">Switches</button>
@@ -240,6 +243,13 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
             <option value="misc" selected>Shelf / Cable Organizer</option>
           </select>
         </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label for="custom-target-slot">Mount Position (U Slot)</label>
+        <select id="custom-target-slot" required>
+          <!-- Dynamically populated with free slots -->
+        </select>
       </div>
 
       <div class="form-grid" style="margin-bottom: 12px;">

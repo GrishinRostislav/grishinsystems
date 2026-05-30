@@ -211,6 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Setup Custom Device Modal Close
+    document.getElementById("btn-add-custom").addEventListener("click", openCustomDeviceModal);
     document.getElementById("modal-close").addEventListener("click", closeModal);
     addCustomModalEl.addEventListener("click", (e) => {
       if (e.target === addCustomModalEl) closeModal();
@@ -411,16 +412,6 @@ document.addEventListener("DOMContentLoaded", () => {
       numEl.textContent = `${u}U`;
       slotEl.appendChild(numEl);
 
-      const zoneEl = document.createElement("div");
-      zoneEl.className = "slot-dropzone";
-      zoneEl.dataset.u = u;
-      zoneEl.innerHTML = `<span>Click to mount gear here</span>`;
-      
-      // Slot Click action (opens custom popup or Catalog focus)
-      zoneEl.addEventListener("click", () => {
-        openCustomDeviceModal(u);
-      });
-
       // Drag over event to allow dropping
       slotEl.addEventListener("dragover", (e) => {
         e.preventDefault();
@@ -443,7 +434,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      slotEl.appendChild(zoneEl);
       container.appendChild(slotEl);
     }
 
@@ -723,20 +713,45 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Modal Controllers for Custom/Generic Add
-  function openCustomDeviceModal(slot) {
-    customTargetSlot = slot;
+  function openCustomDeviceModal() {
+    const selectEl = document.getElementById("custom-target-slot");
+    if (!selectEl) return;
+    
+    selectEl.innerHTML = "";
+    let hasAvailableSlots = false;
+    
+    for (let u = state.rackSize; u >= 1; u--) {
+      if (!isSlotOccupied(u, 1)) {
+        const opt = document.createElement("option");
+        opt.value = u;
+        opt.textContent = `Slot U${u}`;
+        selectEl.appendChild(opt);
+        hasAvailableSlots = true;
+      }
+    }
+    
+    if (!hasAvailableSlots) {
+      alert("No available slots in the rack cabinet!");
+      return;
+    }
+    
     addCustomModalEl.classList.add("open");
   }
 
   function closeModal() {
     addCustomModalEl.classList.remove("open");
     customFormEl.reset();
-    customTargetSlot = null;
   }
 
   function handleCustomDeviceSubmit(e) {
     e.preventDefault();
-    if (!customTargetSlot) return;
+    
+    const targetSlotEl = document.getElementById("custom-target-slot");
+    const targetSlot = targetSlotEl ? parseInt(targetSlotEl.value) : null;
+    if (!targetSlot) {
+      alert("Please select a target mount slot.");
+      return;
+    }
 
     const name = document.getElementById("custom-name").value || "Custom Device";
     const brand = document.getElementById("custom-brand").value || "generic";
@@ -749,8 +764,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const cost = parseInt(document.getElementById("custom-cost").value) || 100;
     const type = document.getElementById("custom-type").value || "misc";
 
-    if (isSlotOccupied(customTargetSlot, u)) {
-      alert(`There is not enough room. Installing a ${u}U device requires slots U${customTargetSlot} down to U${customTargetSlot - u + 1}.`);
+    if (isSlotOccupied(targetSlot, u)) {
+      alert(`There is not enough room. Installing a ${u}U device requires slots U${targetSlot} down to U${targetSlot - u + 1}.`);
       return;
     }
 
@@ -766,7 +781,7 @@ document.addEventListener("DOMContentLoaded", () => {
       requires_power,
       type,
       cost,
-      slot: customTargetSlot
+      slot: targetSlot
     };
 
     state.placedDevices.push(customPreset);
