@@ -434,6 +434,11 @@
   border-left: 4px solid var(--warning);
 }
 
+.device-brand-tplink {
+  background: linear-gradient(135deg, #0f2b3e, #183e58);
+  border-left: 4px solid #00a4e4;
+}
+
 .device-brand-cyberpower {
   background: linear-gradient(135deg, #111827, #1f2937);
   border-left: 4px solid #facc15;
