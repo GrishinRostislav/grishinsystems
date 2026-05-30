@@ -685,8 +685,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!foundPreset) return;
 
-    if (isSlotOccupied(slot, foundPreset.u)) {
-      alert("This slot or slots below it are already occupied!");
+    const totalUUsed = state.placedDevices.reduce((sum, d) => sum + d.u, 0);
+    if (totalUUsed + foundPreset.u > state.rackSize) {
+      alert(`Not enough space in the rack cabinet to add ${foundPreset.name} (${foundPreset.u}U).`);
       return;
     }
 
@@ -698,6 +699,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     state.placedDevices.push(newDevice);
     state.lastAddedInstanceId = newDevice.instanceId; // Set last added ID to trigger pulse animation
+    
+    // Resolve collisions so other gear slides out of the way
+    resolveCollisions(newDevice.instanceId, slot);
+
     saveState();
     update();
   }
@@ -907,17 +912,130 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Move device to new slot
+  // Resolve collisions by sliding other devices out of the way non-destructively
+  function resolveCollisions(insertedInstanceId, targetSlot) {
+    const targetDev = state.placedDevices.find(d => d.instanceId === insertedInstanceId);
+    if (!targetDev) return;
+
+    // Cap targetSlot so the device fits inside the rack
+    targetSlot = Math.min(state.rackSize, Math.max(targetDev.u, targetSlot));
+    targetDev.slot = targetSlot;
+
+    // Collect all other devices
+    const otherDevices = state.placedDevices.filter(d => d.instanceId !== insertedInstanceId);
+
+    // Partition relative to targetDev's original position if moving, or targetSlot if newly added
+    const pivotSlot = targetDev._originalSlot !== undefined ? targetDev._originalSlot : targetSlot;
+
+    const above = otherDevices.filter(d => d.slot > pivotSlot);
+    const below = otherDevices.filter(d => d.slot <= pivotSlot);
+
+    // Sort: below descending (highest first) to push down, above ascending (lowest first) to push up
+    below.sort((a, b) => b.slot - a.slot);
+    above.sort((a, b) => a.slot - b.slot);
+
+    // Initialize occupied slots set with targetDev
+    const occupied = new Set();
+    for (let i = 0; i < targetDev.u; i++) {
+      occupied.add(targetSlot - i);
+    }
+
+    // Process below group (push down)
+    below.forEach(dev => {
+      let slotFound = null;
+      for (let u = dev.slot; u >= dev.u; u--) {
+        let fits = true;
+        for (let i = 0; i < dev.u; i++) {
+          if (occupied.has(u - i)) {
+            fits = false;
+            break;
+          }
+        }
+        if (fits) {
+          slotFound = u;
+          break;
+        }
+      }
+      // If couldn't push down, search upwards
+      if (slotFound === null) {
+        for (let u = dev.u; u <= state.rackSize; u++) {
+          let fits = true;
+          for (let i = 0; i < dev.u; i++) {
+            if (occupied.has(u - i)) {
+              fits = false;
+              break;
+            }
+          }
+          if (fits) {
+            slotFound = u;
+            break;
+          }
+        }
+      }
+
+      if (slotFound !== null) {
+        dev.slot = slotFound;
+        for (let i = 0; i < dev.u; i++) {
+          occupied.add(slotFound - i);
+        }
+      }
+    });
+
+    // Process above group (push up)
+    above.forEach(dev => {
+      let slotFound = null;
+      for (let u = dev.slot; u <= state.rackSize; u++) {
+        let fits = true;
+        for (let i = 0; i < dev.u; i++) {
+          const checkU = u - i;
+          if (checkU <= 0 || occupied.has(checkU)) {
+            fits = false;
+            break;
+          }
+        }
+        if (fits) {
+          slotFound = u;
+          break;
+        }
+      }
+      // If couldn't push up, search downwards
+      if (slotFound === null) {
+        for (let u = state.rackSize; u >= dev.u; u--) {
+          let fits = true;
+          for (let i = 0; i < dev.u; i++) {
+            const checkU = u - i;
+            if (checkU <= 0 || occupied.has(checkU)) {
+              fits = false;
+              break;
+            }
+          }
+          if (fits) {
+            slotFound = u;
+            break;
+          }
+        }
+      }
+
+      if (slotFound !== null) {
+        dev.slot = slotFound;
+        for (let i = 0; i < dev.u; i++) {
+          occupied.add(slotFound - i);
+        }
+      }
+    });
+
+    delete targetDev._originalSlot;
+  }
+
+  // Move device to new slot with cascading shift
   function moveDevice(instanceId, newSlot) {
     const dev = state.placedDevices.find(x => x.instanceId === instanceId);
     if (!dev) return;
 
-    if (isSlotOccupied(newSlot, dev.u, instanceId)) {
-      alert("Cannot move device: Target slots are occupied.");
-      return;
-    }
+    dev._originalSlot = dev.slot;
 
-    dev.slot = newSlot;
+    resolveCollisions(instanceId, newSlot);
+
     saveState();
     update();
   }
@@ -1280,8 +1398,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const cost = parseInt(document.getElementById("custom-cost").value) || 100;
     const type = document.getElementById("custom-type").value || "misc";
 
-    if (isSlotOccupied(targetSlot, u)) {
-      alert(`There is not enough room. Installing a ${u}U device requires slots U${targetSlot} down to U${targetSlot - u + 1}.`);
+    const totalUUsed = state.placedDevices.reduce((sum, d) => sum + d.u, 0);
+    if (totalUUsed + u > state.rackSize) {
+      alert(`Not enough space in the rack cabinet to add this custom device (${u}U).`);
       return;
     }
 
@@ -1303,6 +1422,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     state.placedDevices.push(customPreset);
     state.lastAddedInstanceId = customPreset.instanceId; // Set last added ID to trigger pulse animation
+    
+    // Resolve collisions and slide other gear
+    resolveCollisions(customPreset.instanceId, targetSlot);
+
     saveState();
     update();
     closeModal();
