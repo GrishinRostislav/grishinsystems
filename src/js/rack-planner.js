@@ -818,8 +818,12 @@ document.addEventListener("DOMContentLoaded", () => {
           let classStr = "port-dot";
           
           if (dev.type === "switch") {
+            const isUplinkPort = (i === 0); // Port 1 is designated as the uplink port
             const isPoeCapable = dev.poe_ports > 0 && i < dev.poe_ports;
-            if (isPoeCapable && remainingPoeForSwitches > 0) {
+            
+            if (isUplinkPort) {
+              classStr += " uplink";
+            } else if (isPoeCapable && remainingPoeForSwitches > 0) {
               classStr += " poe";
               remainingPoeForSwitches--;
             } else if (remainingNonPoeForSwitches > 0) {
@@ -927,19 +931,29 @@ document.addEventListener("DOMContentLoaded", () => {
     
     updateValCard(valSpaceEl, spaceStatus, "📦", "Rack Space", `${totalUUsed}U / ${state.rackSize}U Used`);
 
-    // 2. Switch Port capacity check
+    // 2. Switch Port capacity check (including 1 uplink port per switch)
     const endpointQtyCount = state.endpoints.reduce((sum, e) => sum + e.qty, 0);
     const totalDropPoints = state.dropPoints + endpointQtyCount;
-    const switchPortsNeeded = totalDropPoints + state.localLines;
-
+    
+    const activeSwitches = state.placedDevices.filter(d => d.type === "switch");
+    const numSwitches = activeSwitches.length;
+    const uplinkPorts = numSwitches; // 1 uplink port per switch
+    
+    const switchPortsNeeded = totalDropPoints + state.localLines + uplinkPorts;
     const totalSwitchPorts = state.placedDevices.reduce((sum, d) => sum + (d.type === "switch" ? d.ports : 0), 0);
+    
     let switchStatus = "valid";
-    let switchMsg = `${totalSwitchPorts} Ports mounted`;
-    if (switchPortsNeeded > totalSwitchPorts) {
+    let switchMsg = "";
+    
+    if (numSwitches === 0) {
       switchStatus = "danger";
-      switchMsg = `Need ${switchPortsNeeded - totalSwitchPorts} more ports`;
+      switchMsg = "No switches mounted";
+    } else if (switchPortsNeeded > totalSwitchPorts) {
+      switchStatus = "danger";
+      const diff = switchPortsNeeded - totalSwitchPorts;
+      switchMsg = `Need ${diff} more port${diff > 1 ? 's' : ''} (inc. ${uplinkPorts} uplink${uplinkPorts > 1 ? 's' : ''})`;
     } else {
-      switchMsg = `Covered (${switchPortsNeeded} / ${totalSwitchPorts})`;
+      switchMsg = `Covered (${switchPortsNeeded} / ${totalSwitchPorts} ports, inc. ${uplinkPorts} uplink${uplinkPorts > 1 ? 's' : ''})`;
     }
     updateValCard(valSwitchPortsEl, switchStatus, "🔌", "Switch Ports", switchMsg);
 

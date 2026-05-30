@@ -551,6 +551,13 @@
   box-shadow: 0 0 6px var(--warning), inset 0 1px 1px rgba(255,255,255,0.4);
 }
 
+/* Cyan/Blue for active Uplink connection ports */
+.port-dot.uplink {
+  background: var(--accent);
+  border-color: rgba(255,255,255,0.2);
+  box-shadow: 0 0 6px var(--accent), inset 0 1px 1px rgba(255,255,255,0.4);
+}
+
 /* Brush organizer slot style */
 .device-brush-strip {
   width: 160px;
