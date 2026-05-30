@@ -1,0 +1,704 @@
+/* SERVER RACK PLANNER SPECIFIC STYLES */
+
+.planner-layout {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 32px;
+  align-items: start;
+  margin-top: 24px;
+}
+
+@media (max-width: 992px) {
+  .planner-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Control Panel */
+.control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.panel-section {
+  padding: 24px;
+  border-radius: var(--radius);
+}
+
+.panel-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 10px;
+}
+
+/* Form Styles */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+}
+
+.form-group input, .form-group select {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 10px 14px;
+  font-size: 15px;
+  font-family: inherit;
+  transition: var(--transition);
+}
+
+.form-group input:focus, .form-group select:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+}
+
+/* Validation System */
+.validation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.validation-card {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  transition: var(--transition);
+}
+
+.validation-card.valid {
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.validation-card.warning {
+  border-color: rgba(245, 158, 11, 0.4);
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.05);
+}
+
+.validation-card.danger {
+  border-color: rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.1);
+}
+
+.validation-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.validation-name {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.validation-value {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.validation-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.valid .validation-status-dot { background: var(--success); box-shadow: 0 0 8px var(--success); }
+.warning .validation-status-dot { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
+.danger .validation-status-dot { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+
+/* Catalog Section */
+.catalog-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 8px;
+  overflow-x: auto;
+}
+
+.catalog-tab {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  transition: var(--transition);
+}
+
+.catalog-tab.active {
+  background: var(--primary-light);
+  color: var(--text);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.catalog-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Custom Scrollbar for Catalog */
+.catalog-list::-webkit-scrollbar {
+  width: 6px;
+}
+.catalog-list::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.2);
+}
+.catalog-list::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 3px;
+}
+
+.catalog-item {
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px dashed var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  cursor: grab;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: var(--transition);
+  user-select: none;
+}
+
+.catalog-item:hover {
+  border-style: solid;
+  border-color: var(--accent);
+  background: rgba(30, 41, 59, 0.7);
+  transform: translateY(-1px);
+}
+
+.catalog-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.catalog-item-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.catalog-item-specs {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.catalog-item-action {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+.catalog-item:hover .catalog-item-action {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Server Rack Cabinet View */
+.cabinet-wrapper {
+  background: rgba(15, 23, 42, 0.8);
+  border: 2px solid #334155;
+  border-radius: 20px;
+  padding: 24px 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.cabinet-header {
+  text-align: center;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.cabinet-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.cabinet-rack {
+  position: relative;
+  background: #0f172a;
+  border: 8px solid #1e293b;
+  border-top: 16px solid #1e293b;
+  border-bottom: 20px solid #1e293b;
+  width: 100%;
+  max-width: 440px;
+  min-height: 400px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.9);
+  padding: 0 4px;
+}
+
+/* Rack Rails (left & right mounting holes) */
+.cabinet-rack::before, .cabinet-rack::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 12px;
+  background: repeating-linear-gradient(
+    to bottom,
+    #334155,
+    #334155 10px,
+    transparent 10px,
+    transparent 20px
+  );
+  opacity: 0.5;
+  z-index: 2;
+}
+
+.cabinet-rack::before { left: 4px; }
+.cabinet-rack::after { right: 4px; }
+
+/* Visual U Slots */
+.rack-slots-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.rack-slot {
+  display: grid;
+  grid-template-columns: 35px 1fr;
+  align-items: stretch;
+  height: 42px; /* 1U Height representation */
+  border-bottom: 1px solid rgba(51, 65, 85, 0.25);
+  position: relative;
+}
+
+.rack-slot.drop-hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.slot-number {
+  background: #1e293b;
+  color: var(--text-muted);
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 2px solid #334155;
+  user-select: none;
+}
+
+.slot-dropzone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-style: italic;
+  cursor: pointer;
+  transition: var(--transition);
+  z-index: 3;
+}
+
+.slot-dropzone:hover {
+  background: rgba(59, 130, 246, 0.05);
+  color: var(--accent-cyan);
+}
+
+/* Placed Device Style */
+.placed-device {
+  position: absolute;
+  left: 37px;
+  right: 6px;
+  z-index: 5;
+  background: #1e293b;
+  border: 1.5px solid #475569;
+  border-radius: 3px;
+  padding: 4px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: var(--transition);
+  cursor: grab;
+  /* Multi-U positioning dynamically configured in JS */
+}
+
+.placed-device:hover {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 6px 15px rgba(6, 182, 212, 0.15);
+}
+
+/* Device Branding Styles */
+.device-brand-ubiquiti {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  border-left: 4px solid var(--accent);
+}
+
+.device-brand-cisco {
+  background: linear-gradient(135deg, #062016, #112a1f);
+  border-left: 4px solid var(--success);
+}
+
+.device-brand-mikrotik {
+  background: linear-gradient(135deg, #2d1b10, #382415);
+  border-left: 4px solid var(--warning);
+}
+
+.device-brand-cyberpower {
+  background: linear-gradient(135deg, #111827, #1f2937);
+  border-left: 4px solid #facc15;
+}
+
+.device-brand-generic {
+  background: linear-gradient(135deg, #1f2937, #374151);
+  border-left: 4px solid var(--text-secondary);
+}
+
+/* Faceplate details */
+.device-faceplate {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: calc(100% - 40px);
+  overflow: hidden;
+}
+
+.device-leds {
+  display: flex;
+  gap: 3px;
+}
+
+.led {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.led.glowing {
+  background: var(--success);
+  box-shadow: 0 0 6px var(--success);
+  animation: pulse-led 1.5s infinite;
+}
+
+.led.orange {
+  background: var(--warning);
+  box-shadow: 0 0 6px var(--warning);
+}
+
+@keyframes pulse-led {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.device-faceplate-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.device-model {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.device-desc {
+  font-size: 9px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* Port simulation grids on devices */
+.device-ports {
+  display: grid;
+  grid-template-rows: repeat(2, 4px);
+  grid-auto-flow: column;
+  gap: 2px;
+  background: rgba(0,0,0,0.4);
+  padding: 2px;
+  border-radius: 1px;
+  margin-left: auto;
+  margin-right: 12px;
+}
+
+.port-dot {
+  width: 4px;
+  height: 4px;
+  background: #334155;
+  border-radius: 0.5px;
+}
+
+.port-dot.patched {
+  background: var(--accent-cyan);
+  box-shadow: 0 0 3px var(--accent-cyan);
+}
+
+.port-dot.poe {
+  background: var(--warning);
+}
+
+/* Delete / Action buttons */
+.device-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.device-delete-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  padding: 4px;
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+.device-delete-btn:hover {
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Detailed Manifest / Bill of Materials */
+.manifest-section {
+  margin-top: 40px;
+}
+
+.manifest-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius);
+  padding: 32px;
+}
+
+.manifest-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 32px;
+}
+
+@media (max-width: 768px) {
+  .manifest-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.manifest-table-wrapper {
+  overflow-x: auto;
+}
+
+.manifest-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.manifest-table th, .manifest-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.manifest-table th {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.manifest-table td {
+  font-size: 14px;
+}
+
+.manifest-summary-card {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.summary-row.total {
+  font-size: 18px;
+  font-weight: 800;
+  border-top: 1px solid var(--glass-border);
+  padding-top: 12px;
+}
+
+.manifest-ctas {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* Modals */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 22, 40, 0.85);
+  backdrop-filter: blur(5px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition);
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-content {
+  background: #1e293b;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 480px;
+  padding: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+  transform: translateY(20px);
+  transition: transform var(--transition);
+}
+
+.modal-overlay.open .modal-content {
+  transform: translateY(0);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+  .header, .footer, .control-panel, .manifest-ctas, .device-actions, .cabinet-header, .catalog-tabs, .catalog-list {
+    display: none !important;
+  }
+  section {
+    padding: 0 !important;
+  }
+  .planner-layout {
+    grid-template-columns: 1fr !important;
+    gap: 0;
+  }
+  .cabinet-wrapper {
+    background: transparent !important;
+    border: 1px solid #000 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+  .cabinet-rack {
+    border-color: #000 !important;
+    background: white !important;
+  }
+  .placed-device {
+    background: #f1f5f9 !important;
+    border: 1px solid #000 !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+  .device-model {
+    color: black !important;
+  }
+  .device-desc {
+    color: #475569 !important;
+  }
+  .manifest-card {
+    background: transparent !important;
+    border: none !important;
+    color: black !important;
+    page-break-before: always;
+  }
+  .manifest-summary-card {
+    background: transparent !important;
+    border: 1px solid #000 !important;
+  }
+}

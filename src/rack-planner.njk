@@ -1,0 +1,271 @@
+---
+layout: base.njk
+title: Server Rack Planner - GrishinSystems
+description: Interactive 2D server rack planner. Lay out switches, patch panels, power supplies, and routers, and validate ports, power, and space.
+---
+
+<link rel="stylesheet" href="/css/rack-planner.css">
+
+<section class="section-grid" style="padding-top: 140px; min-height: 100vh;">
+  <div class="container">
+    
+    <!-- Header -->
+    <div class="section-header fade-in visible" style="margin-bottom: 40px;">
+      <div class="section-label">Interactive Tools</div>
+      <h1 class="section-title">2D Server Rack Planner</h1>
+      <p class="section-subtitle">Design your cabinet layout, stack real equipment, and automatically validate space, port capacity, PoE power budget, and outlets.</p>
+    </div>
+
+    <!-- Main Layout Grid -->
+    <div class="planner-layout">
+      
+      <!-- Left Column: Controls & Catalog -->
+      <div class="control-panel">
+        
+        <!-- 1. Project Specifications -->
+        <div class="glass-card panel-section fade-in visible">
+          <h2 class="panel-title">📋 Project Specifications</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="input-drops">Drop Points (RJ45)</label>
+              <input type="number" id="input-drops" min="0" max="240" value="24">
+            </div>
+            <div class="form-group">
+              <label for="input-poe">PoE Endpoints</label>
+              <input type="number" id="input-poe" min="0" max="96" value="10">
+            </div>
+            <div class="form-group">
+              <label for="input-poe-wattage">Avg PoE Load (W)</label>
+              <input type="number" id="input-poe-wattage" min="1" max="90" value="15">
+            </div>
+            <div class="form-group">
+              <label for="input-rack-size">Cabinet Size</label>
+              <select id="input-rack-size">
+                <option value="9">9U Cabinet</option>
+                <option value="12">12U Cabinet</option>
+                <option value="18" selected>18U Cabinet</option>
+                <option value="24">24U Cabinet</option>
+                <option value="42">42U Cabinet</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Real-Time Validation Checks -->
+        <div class="glass-card panel-section fade-in visible">
+          <h2 class="panel-title">🛡️ Cabinet Validation Checks</h2>
+          <div class="validation-grid">
+            
+            <div class="validation-card valid" id="val-space">
+              <span class="validation-status-dot"></span>
+              <span class="validation-icon">📦</span>
+              <span class="validation-name">Rack Space</span>
+              <span class="validation-value">0U / 18U Used</span>
+            </div>
+
+            <div class="validation-card valid" id="val-ports">
+              <span class="validation-status-dot"></span>
+              <span class="validation-icon">🔌</span>
+              <span class="validation-name">Ports Capacity</span>
+              <span class="validation-value">0 / 24 Ports</span>
+            </div>
+
+            <div class="validation-card valid" id="val-poe">
+              <span class="validation-status-dot"></span>
+              <span class="validation-icon">⚡</span>
+              <span class="validation-name">PoE Load</span>
+              <span class="validation-value">0W / 0W</span>
+            </div>
+
+            <div class="validation-card valid" id="val-outlets">
+              <span class="validation-status-dot"></span>
+              <span class="validation-icon">🔌</span>
+              <span class="validation-name">Power Outlets</span>
+              <span class="validation-value">0 / 0 plugs</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 3. Hardware Catalog -->
+        <div class="glass-card panel-section fade-in visible">
+          <h2 class="panel-title">🛠️ Equipment Library</h2>
+          
+          <div class="catalog-tabs" id="catalog-tabs">
+            <button class="catalog-tab active" data-tab="switches">Switches</button>
+            <button class="catalog-tab" data-tab="panels">Patch Panels</button>
+            <button class="catalog-tab" data-tab="routers">Routers / Firewalls</button>
+            <button class="catalog-tab" data-tab="power">UPS & PDUs</button>
+            <button class="catalog-tab" data-tab="misc">Shelves & Organizers</button>
+          </div>
+
+          <div class="catalog-list" id="catalog-list">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Visual Cabinet -->
+      <div class="cabinet-wrapper fade-in visible">
+        <div class="cabinet-header">
+          <span class="cabinet-tag">2D Visual Elevation</span>
+        </div>
+        
+        <!-- The visual metal rack framework -->
+        <div class="cabinet-rack" id="cabinet-rack">
+          <!-- Rendered dynamically by JS -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Detailed Manifest / Bill of Materials -->
+    <div class="manifest-section fade-in visible">
+      <div class="manifest-card">
+        <h2 class="panel-title" style="font-size: 22px; margin-bottom: 24px;">📝 Bill of Materials & Manifest</h2>
+        
+        <div class="manifest-grid">
+          
+          <!-- Manifest table -->
+          <div class="manifest-table-wrapper">
+            <table class="manifest-table">
+              <thead>
+                <tr>
+                  <th>Slot</th>
+                  <th>Device / Description</th>
+                  <th>Height</th>
+                  <th>Est. Cost</th>
+                </tr>
+              </thead>
+              <tbody id="manifest-body">
+                <!-- Dynamically populated via JS -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Total specs box -->
+          <div class="manifest-summary-card">
+            <h3>Layout Specifications</h3>
+            
+            <div class="summary-row">
+              <span>Total U Space:</span>
+              <span id="manifest-u-count" style="font-weight: 700;">0U / 18U</span>
+            </div>
+            <div class="summary-row">
+              <span>Switch Ports Placed:</span>
+              <span id="manifest-port-count" style="font-weight: 700;">0</span>
+            </div>
+            <div class="summary-row">
+              <span>PoE Power Pool:</span>
+              <span id="manifest-poe-budget" style="font-weight: 700;">0W</span>
+            </div>
+            <div class="summary-row">
+              <span>PDU/UPS Plugs:</span>
+              <span id="manifest-outlet-count" style="font-weight: 700;">0</span>
+            </div>
+
+            <div class="summary-row total">
+              <span>Est. Cost:</span>
+              <span id="manifest-total-cost" style="color: var(--accent-cyan);">$0</span>
+            </div>
+
+            <div class="manifest-ctas">
+              <button class="btn btn-primary" id="btn-print" style="flex: 1; justify-content: center; padding: 10px 16px; font-size: 14px;">🖨️ Print Manifest</button>
+              <button class="btn btn-secondary" id="btn-clear" style="flex: 1; justify-content: center; padding: 10px 16px; font-size: 14px; border-color: var(--danger); color: var(--danger);">✕ Clear Rack</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Add Custom/Generic Device Overlay Modal -->
+<div class="modal-overlay" id="custom-device-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Add Custom Hardware</h3>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    
+    <form id="custom-device-form">
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label for="custom-name">Device Model Name</label>
+        <input type="text" id="custom-name" placeholder="e.g. Ubiquiti USW-Lite-16-PoE" required>
+      </div>
+
+      <div class="form-grid" style="margin-bottom: 12px;">
+        <div class="form-group">
+          <label for="custom-brand">Brand Style</label>
+          <select id="custom-brand">
+            <option value="generic">Generic Slate</option>
+            <option value="ubiquiti">Ubiquiti Blue</option>
+            <option value="cisco">Cisco Green</option>
+            <option value="mikrotik">MikroTik Amber</option>
+            <option value="cyberpower">CyberPower Yellow</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="custom-type">Equipment Type</label>
+          <select id="custom-type">
+            <option value="switch">Ethernet Switch</option>
+            <option value="patch-panel">Patch Panel</option>
+            <option value="router">Router / Firewall</option>
+            <option value="power">UPS / PDU Power</option>
+            <option value="misc" selected>Shelf / Cable Organizer</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-bottom: 12px;">
+        <div class="form-group">
+          <label for="custom-u">Height (U)</label>
+          <select id="custom-u">
+            <option value="1" selected>1U Slot</option>
+            <option value="2">2U Slots</option>
+            <option value="3">3U Slots</option>
+            <option value="4">4U Slots</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="custom-cost">Est. Price ($)</label>
+          <input type="number" id="custom-cost" min="0" value="100">
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-bottom: 16px;">
+        <div class="form-group">
+          <label for="custom-ports">Ports (RJ45)</label>
+          <input type="number" id="custom-ports" min="0" value="0">
+        </div>
+        <div class="form-group">
+          <label for="custom-poe-ports">PoE Ports</label>
+          <input type="number" id="custom-poe-ports" min="0" value="0">
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-bottom: 16px;">
+        <div class="form-group">
+          <label for="custom-poe-budget">PoE Budget (W)</label>
+          <input type="number" id="custom-poe-budget" min="0" value="0">
+        </div>
+        <div class="form-group">
+          <label for="custom-outlets">Power Outlets</label>
+          <input type="number" id="custom-outlets" min="0" value="0">
+        </div>
+      </div>
+
+      <div class="form-group" style="flex-direction: row; gap: 8px; align-items: center; margin-bottom: 20px;">
+        <input type="checkbox" id="custom-power" checked style="width: auto;">
+        <label for="custom-power" style="cursor: pointer; text-transform: none; font-size: 14px; color: var(--text);">Requires AC Power Connection</label>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;">Add Device to Cabinet</button>
+    </form>
+  </div>
+</div>
+
+<script src="/js/rack-planner.js"></script>
