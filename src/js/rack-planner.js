@@ -349,8 +349,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     cabinetRackEl.appendChild(container);
 
+    // Initialize active port allocations
+    let remainingPoeForSwitches = state.poeDevices;
+    let remainingNonPoeForSwitches = Math.max(0, state.dropPoints - state.poeDevices);
+    let remainingPoeForPanels = state.poeDevices;
+    let remainingNonPoeForPanels = Math.max(0, state.dropPoints - state.poeDevices);
+
+    // Sort devices by slot descending to ensure consistent top-down port allocation
+    const sortedDevices = [...state.placedDevices].sort((a, b) => b.slot - a.slot);
+
     // Place devices absolutely in their correct slot positions
-    state.placedDevices.forEach(dev => {
+    sortedDevices.forEach(dev => {
       // Find the slot element corresponding to the dev.slot
       const slotEl = container.querySelector(`.rack-slot[data-u="${dev.slot}"]`);
       if (!slotEl) return;
@@ -365,17 +374,39 @@ document.addEventListener("DOMContentLoaded", () => {
       const slotsFromTop = state.rackSize - dev.slot;
       devEl.style.top = `${slotsFromTop * 42 + 1}px`;
 
-      // Build RJ45 port dots visual simulation
+      // Build RJ45 port dots visual simulation or custom accessories
       let portsHtml = "";
-      if (dev.ports > 0) {
-        portsHtml += `<div class="device-ports">`;
-        // Draw port dots. Render a grid simulating ports. Max 24 dots for display.
-        const displayPorts = Math.min(dev.ports, 24);
-        for (let i = 0; i < displayPorts; i++) {
+      if (dev.id === "organizer-1u" || dev.name.toLowerCase().includes("brush") || dev.name.toLowerCase().includes("organizer")) {
+        portsHtml = `<div class="device-brush-strip" title="Brush Cable Pass-Through"></div>`;
+      } else if (dev.id === "shelf-1u" || dev.name.toLowerCase().includes("shelf")) {
+        portsHtml = `<div class="device-shelf-plate" title="Equipment Shelf Tray"></div>`;
+      } else if (dev.ports > 0) {
+        // Set columns for 2-row layout
+        const cols = Math.ceil(dev.ports / 2);
+        portsHtml += `<div class="device-ports" style="grid-template-columns: repeat(${cols}, auto);">`;
+        
+        for (let i = 0; i < dev.ports; i++) {
           let classStr = "port-dot";
-          if (dev.poe_ports > 0 && i < dev.poe_ports) classStr += " poe";
-          // Simulate some random patched ports to make it look "alive"
-          if (i % 3 === 0 && i < state.dropPoints) classStr += " patched";
+          
+          if (dev.type === "switch") {
+            const isPoeCapable = dev.poe_ports > 0 && i < dev.poe_ports;
+            if (isPoeCapable && remainingPoeForSwitches > 0) {
+              classStr += " poe";
+              remainingPoeForSwitches--;
+            } else if (remainingNonPoeForSwitches > 0) {
+              classStr += " active";
+              remainingNonPoeForSwitches--;
+            }
+          } else if (dev.type === "patch-panel") {
+            if (remainingPoeForPanels > 0) {
+              classStr += " poe";
+              remainingPoeForPanels--;
+            } else if (remainingNonPoeForPanels > 0) {
+              classStr += " active";
+              remainingNonPoeForPanels--;
+            }
+          }
+          
           portsHtml += `<span class="${classStr}"></span>`;
         }
         portsHtml += `</div>`;
