@@ -97,9 +97,59 @@ document.addEventListener("DOMContentLoaded", () => {
       update();
     });
     rackSizeSelectEl.addEventListener("change", (e) => {
-      state.rackSize = parseInt(e.target.value) || 18;
-      // Filter out any devices placed above new size
-      state.placedDevices = state.placedDevices.filter(dev => dev.slot <= state.rackSize);
+      const newSize = parseInt(e.target.value) || 18;
+      const adjustedDevices = [];
+      
+      // Sort devices top-down to ensure consistent sliding adjustment
+      const sorted = [...state.placedDevices].sort((a, b) => b.slot - a.slot);
+      
+      sorted.forEach(dev => {
+        let targetSlot = null;
+        
+        // 1. Try to keep original slot if it fits inside the new rack bounds
+        if (dev.slot <= newSize) {
+          let fits = true;
+          for (let i = 0; i < dev.u; i++) {
+            const u = dev.slot - i;
+            if (u <= 0 || u > newSize || isSlotOccupiedInList(u, adjustedDevices)) {
+              fits = false;
+              break;
+            }
+          }
+          if (fits) {
+            targetSlot = dev.slot;
+          }
+        }
+        
+        // 2. If it does not fit, find the highest available slot in the new cabinet bounds
+        if (targetSlot === null) {
+          for (let u = newSize; u >= dev.u; u--) {
+            let fits = true;
+            for (let i = 0; i < dev.u; i++) {
+              const checkU = u - i;
+              if (checkU <= 0 || isSlotOccupiedInList(checkU, adjustedDevices)) {
+                fits = false;
+                break;
+              }
+            }
+            if (fits) {
+              targetSlot = u;
+              break;
+            }
+          }
+        }
+        
+        // Keep device and update slot if slot is found, else warn/drop (only if rack is totally full)
+        if (targetSlot !== null) {
+          dev.slot = targetSlot;
+          adjustedDevices.push(dev);
+        } else {
+          console.warn(`Device ${dev.name} could not fit in the resized rack and was removed.`);
+        }
+      });
+      
+      state.rackSize = newSize;
+      state.placedDevices = adjustedDevices;
       saveState();
       update();
     });
@@ -235,6 +285,15 @@ document.addEventListener("DOMContentLoaded", () => {
       if (collision) return true;
     }
     return false;
+  }
+
+  // Check if slot U is occupied in a custom list of devices
+  function isSlotOccupiedInList(u, list) {
+    return list.some(dev => {
+      const start = dev.slot;
+      const end = dev.slot - dev.u + 1;
+      return u <= start && u >= end;
+    });
   }
 
   // Find first slot starting from bottom that can accommodate item
