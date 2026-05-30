@@ -977,13 +977,32 @@
   animation: flash-green 1.2s ease-out;
 }
 
+/* General BOM order buttons */
+.bom-order-btn {
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 10px;
+  cursor: pointer;
+  transition: var(--transition);
+  margin: 0 1px;
+}
+
+.bom-order-btn:hover:not([disabled]) {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(56, 189, 248, 0.1);
+}
+
 /* Print Styles */
 @media print {
   body {
     background: white;
     color: black;
   }
-  .header, .footer, .control-panel, .manifest-ctas, .device-actions, .cabinet-header, .catalog-tabs, .catalog-list, .cabinet-side-labels {
+  .header, .footer, .control-panel, .manifest-ctas, .device-actions, .cabinet-header, .catalog-tabs, .catalog-list, .cabinet-side-labels, .no-print {
     display: none !important;
   }
   section {

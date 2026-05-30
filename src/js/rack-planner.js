@@ -101,7 +101,8 @@ document.addEventListener("DOMContentLoaded", () => {
     placedDevices: [],
     draggedPresetId: null,
     draggedInstanceId: null,
-    lastAddedInstanceId: null // Keep track of the last added device to flash animate it
+    lastAddedInstanceId: null, // Keep track of the last added device to flash animate it
+    bomCustomOrder: [] // Custom order list for the Bill of Materials layout
   };
 
   // Selectors
@@ -381,7 +382,8 @@ document.addEventListener("DOMContentLoaded", () => {
       dropPoints: state.dropPoints,
       localLines: state.localLines,
       endpoints: state.endpoints,
-      placedDevices: state.placedDevices
+      placedDevices: state.placedDevices,
+      bomCustomOrder: state.bomCustomOrder
     }));
   }
 
@@ -394,6 +396,7 @@ document.addEventListener("DOMContentLoaded", () => {
         state.dropPoints = parsed.dropPoints !== undefined ? parsed.dropPoints : 12;
         state.localLines = parsed.localLines !== undefined ? parsed.localLines : 2;
         state.placedDevices = parsed.placedDevices || [];
+        state.bomCustomOrder = parsed.bomCustomOrder || [];
         
         if (parsed.endpoints) {
           state.endpoints = parsed.endpoints;
@@ -1023,7 +1026,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalPoEEndPoints = state.endpoints.reduce((sum, e) => sum + e.qty, 0);
 
     if (state.placedDevices.length === 0 && state.endpoints.length === 0 && totalWallPorts === 0) {
-      manifestBodyEl.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No equipment in project. Drag cabinet gear, add endpoints, or set wall ports!</td></tr>`;
+      manifestBodyEl.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No equipment in project. Drag cabinet gear, add endpoints, or set wall ports!</td></tr>`;
       manifestUCountEl.textContent = "0";
       manifestPortCountEl.textContent = "0";
       manifestPoeBudgetEl.textContent = "0W";
@@ -1032,94 +1035,197 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Sort devices by slot (top down)
-    const sorted = [...state.placedDevices].sort((a, b) => b.slot - a.slot);
-    
+    // 1. Calculate aggregated summary totals (cost, ports, poe, outlets, u)
     let totalCost = 0;
     let totalPorts = 0;
     let totalPoe = 0;
     let totalOutlets = 0;
     let totalU = 0;
 
-    sorted.forEach(dev => {
+    state.placedDevices.forEach(dev => {
       totalCost += dev.cost;
       totalPorts += dev.ports || 0;
       totalPoe += dev.poe_budget || 0;
       totalOutlets += dev.outlets || 0;
       totalU += dev.u;
-
-      // Determine clean equipment type label
-      let typeLabel = "Rack Unit";
-      if (dev.type === "switch") typeLabel = "Switch";
-      else if (dev.type === "patch-panel") typeLabel = "Patch Panel";
-      else if (dev.type === "router") typeLabel = "Router";
-      else if (dev.type === "power") typeLabel = "Power/UPS";
-      else if (dev.type === "misc") {
-        if (dev.name.toLowerCase().includes("shelf")) typeLabel = "Shelf";
-        else if (dev.name.toLowerCase().includes("organizer")) typeLabel = "Organizer";
-        else typeLabel = "Accessory";
-      }
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td style="font-weight: 700; color: var(--accent-cyan); font-family: monospace;">${typeLabel}</td>
-        <td><strong>${dev.name}</strong></td>
-        <td>$${dev.cost}</td>
-      `;
-      manifestBodyEl.appendChild(tr);
     });
 
-    // Render PoE Endpoints
     state.endpoints.forEach(ep => {
-      const epCost = ep.cost * ep.qty;
-      totalCost += epCost;
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td style="font-weight: 700; color: var(--accent); font-family: monospace;">Endpoint</td>
-        <td><strong>${ep.name} (Qty: ${ep.qty})</strong></td>
-        <td>$${epCost}</td>
-      `;
-      manifestBodyEl.appendChild(tr);
+      totalCost += ep.cost * ep.qty;
     });
 
-    // Render Cabling Accessories (Keystones and RJ45 connectors)
     const keystoneQty = (2 * totalWallPorts) + totalPoEEndPoints;
     const rj45Qty = totalPoEEndPoints;
-
     const keystoneUnitCost = 5.00;
     const rj45UnitCost = 1.50;
-
     const keystoneTotalCost = keystoneQty * keystoneUnitCost;
     const rj45TotalCost = rj45Qty * rj45UnitCost;
 
+    totalCost += keystoneTotalCost + rj45TotalCost;
+
+    // 2. Gather all individual manifest items
+    let bomItems = [];
+
+    // Placed rack devices
+    state.placedDevices.forEach(dev => {
+      let typeLabel = "Rack Unit";
+      let typeGroup = "misc";
+      if (dev.type === "switch") { typeLabel = "Switch"; typeGroup = "switch"; }
+      else if (dev.type === "patch-panel") { typeLabel = "Patch Panel"; typeGroup = "patch-panel"; }
+      else if (dev.type === "router") { typeLabel = "Router"; typeGroup = "router"; }
+      else if (dev.type === "power") { typeLabel = "Power/UPS"; typeGroup = "power"; }
+      else if (dev.type === "misc") {
+        if (dev.name.toLowerCase().includes("shelf")) { typeLabel = "Shelf"; typeGroup = "misc"; }
+        else if (dev.name.toLowerCase().includes("organizer")) { typeLabel = "Organizer"; typeGroup = "misc"; }
+        else { typeLabel = "Accessory"; typeGroup = "misc"; }
+      }
+
+      bomItems.push({
+        id: dev.instanceId,
+        type: typeLabel,
+        typeGroup: typeGroup,
+        name: dev.name,
+        cost: dev.cost
+      });
+    });
+
+    // PoE Endpoints
+    state.endpoints.forEach(ep => {
+      bomItems.push({
+        id: "ep_" + ep.id,
+        type: "Endpoint",
+        typeGroup: "endpoint",
+        name: `${ep.name} (Qty: ${ep.qty})`,
+        cost: ep.cost * ep.qty
+      });
+    });
+
+    // Cabling Accessories
     if (keystoneQty > 0) {
-      totalCost += keystoneTotalCost;
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td style="font-weight: 700; color: var(--text-muted); font-family: monospace;">Accessory</td>
-        <td><strong>RJ45 Keystone Jack (Cat6) (Qty: ${keystoneQty})</strong><div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">(2 per Wall Port, 1 per PoE Endpoint)</div></td>
-        <td>$${keystoneTotalCost.toFixed(2).replace(".00", "")}</td>
-      `;
-      manifestBodyEl.appendChild(tr);
+      bomItems.push({
+        id: "acc_keystones",
+        type: "Accessory",
+        typeGroup: "accessory",
+        name: `RJ45 Keystone Jack (Cat6) (Qty: ${keystoneQty})`,
+        subText: "(2 per Wall Port, 1 per PoE Endpoint)",
+        cost: keystoneTotalCost
+      });
     }
 
     if (rj45Qty > 0) {
-      totalCost += rj45TotalCost;
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td style="font-weight: 700; color: var(--text-muted); font-family: monospace;">Accessory</td>
-        <td><strong>RJ45 Pass-Through Connector (Cat6) (Qty: ${rj45Qty})</strong><div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">(1 per PoE Endpoint)</div></td>
-        <td>$${rj45TotalCost.toFixed(2).replace(".00", "")}</td>
-      `;
-      manifestBodyEl.appendChild(tr);
+      bomItems.push({
+        id: "acc_rj45",
+        type: "Accessory",
+        typeGroup: "accessory",
+        name: `RJ45 Pass-Through Connector (Cat6) (Qty: ${rj45Qty})`,
+        subText: "(1 per PoE Endpoint)",
+        cost: rj45TotalCost
+      });
     }
 
+    // 3. Sort items according to type group default order OR user custom order
+    const defaultGroupOrder = {
+      "router": 1,
+      "switch": 2,
+      "patch-panel": 3,
+      "power": 4,
+      "misc": 5,
+      "endpoint": 6,
+      "accessory": 7
+    };
+
+    const validIds = bomItems.map(item => item.id);
+    state.bomCustomOrder = (state.bomCustomOrder || []).filter(id => validIds.includes(id));
+
+    bomItems.forEach(item => {
+      if (!state.bomCustomOrder.includes(item.id)) {
+        const itemGroupVal = defaultGroupOrder[item.typeGroup] || 99;
+        let insertIdx = state.bomCustomOrder.length;
+        
+        for (let i = 0; i < state.bomCustomOrder.length; i++) {
+          const existingId = state.bomCustomOrder[i];
+          const existingItem = bomItems.find(x => x.id === existingId);
+          if (existingItem) {
+            const existingGroupVal = defaultGroupOrder[existingItem.typeGroup] || 99;
+            if (existingGroupVal > itemGroupVal) {
+              insertIdx = i;
+              break;
+            }
+          }
+        }
+        state.bomCustomOrder.splice(insertIdx, 0, item.id);
+      }
+    });
+
+    bomItems.sort((a, b) => {
+      return state.bomCustomOrder.indexOf(a.id) - state.bomCustomOrder.indexOf(b.id);
+    });
+
+    // 4. Render rows to the table
+    bomItems.forEach((item, idx) => {
+      const isFirst = idx === 0;
+      const isLast = idx === bomItems.length - 1;
+
+      const orderBtnsHtml = `
+        <td class="no-print" style="text-align: center; white-space: nowrap; padding: 6px 4px;">
+          <button type="button" class="bom-order-btn bom-order-up" data-id="${item.id}" ${isFirst ? 'disabled style="opacity: 0.3; cursor: not-allowed;"' : ''} title="Move Up">▲</button>
+          <button type="button" class="bom-order-btn bom-order-down" data-id="${item.id}" ${isLast ? 'disabled style="opacity: 0.3; cursor: not-allowed;"' : ''} title="Move Down">▼</button>
+        </td>
+      `;
+
+      let colorVar = "var(--accent-cyan)";
+      if (item.typeGroup === "endpoint") colorVar = "var(--accent)";
+      else if (item.typeGroup === "accessory") colorVar = "var(--text-muted)";
+
+      const subTextHtml = item.subText ? `<div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">${item.subText}</div>` : "";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        ${orderBtnsHtml}
+        <td style="font-weight: 700; color: ${colorVar}; font-family: monospace;">${item.type}</td>
+        <td><strong>${item.name}</strong>${subTextHtml}</td>
+        <td>$${item.cost.toFixed(2).replace(".00", "")}</td>
+      `;
+      manifestBodyEl.appendChild(tr);
+    });
+
+    // Add event listeners for ordering buttons
+    manifestBodyEl.querySelectorAll(".bom-order-up").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.id;
+        moveBomItem(id, -1);
+      });
+    });
+
+    manifestBodyEl.querySelectorAll(".bom-order-down").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.id;
+        moveBomItem(id, 1);
+      });
+    });
+
+    // Update aggregated totals card values
     manifestUCountEl.textContent = `${totalU}U / ${state.rackSize}U`;
     manifestPortCountEl.textContent = totalPorts.toString();
     manifestPoeBudgetEl.textContent = `${totalPoe}W`;
     manifestOutletCountEl.textContent = totalOutlets.toString();
     manifestTotalCostEl.textContent = `$${Math.round(totalCost)}`;
+  }
+
+  function moveBomItem(id, direction) {
+    const idx = state.bomCustomOrder.indexOf(id);
+    if (idx === -1) return;
+    
+    const targetIdx = idx + direction;
+    if (targetIdx < 0 || targetIdx >= state.bomCustomOrder.length) return;
+    
+    // Swap the elements in state.bomCustomOrder
+    const temp = state.bomCustomOrder[idx];
+    state.bomCustomOrder[idx] = state.bomCustomOrder[targetIdx];
+    state.bomCustomOrder[targetIdx] = temp;
+    
+    saveState();
+    update();
   }
 
   // Modal Controllers for Custom/Generic Add
