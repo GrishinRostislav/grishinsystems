@@ -57,7 +57,8 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // Validation elements
   const valSpaceEl = document.getElementById("val-space");
-  const valPortsEl = document.getElementById("val-ports");
+  const valSwitchPortsEl = document.getElementById("val-switch-ports");
+  const valPatchPortsEl = document.getElementById("val-patch-ports");
   const valPoeEl = document.getElementById("val-poe");
   const valOutletsEl = document.getElementById("val-outlets");
   
@@ -592,24 +593,29 @@ document.addEventListener("DOMContentLoaded", () => {
     
     updateValCard(valSpaceEl, spaceStatus, "📦", "Rack Space", `${totalUUsed}U / ${state.rackSize}U Used`);
 
-    // 2. Port capacity check
+    // 2. Switch Port capacity check
     const totalSwitchPorts = state.placedDevices.reduce((sum, d) => sum + (d.type === "switch" ? d.ports : 0), 0);
-    const totalPatchPanelPorts = state.placedDevices.reduce((sum, d) => sum + (d.type === "patch-panel" ? d.ports : 0), 0);
-    
-    let portStatus = "valid";
-    let portMsg = `${totalSwitchPorts} Switch Ports`;
-    
+    let switchStatus = "valid";
+    let switchMsg = `${totalSwitchPorts} Ports mounted`;
     if (state.dropPoints > totalSwitchPorts) {
-      portStatus = "danger";
-      portMsg = `Need ${state.dropPoints - totalSwitchPorts} more Switch Ports`;
-    } else if (state.dropPoints > totalPatchPanelPorts) {
-      portStatus = "warning";
-      portMsg = `Need ${state.dropPoints - totalPatchPanelPorts} more Patch Ports`;
+      switchStatus = "danger";
+      switchMsg = `Need ${state.dropPoints - totalSwitchPorts} more ports`;
     } else {
-      portMsg = `Fully Patched (${state.dropPoints} / ${totalSwitchPorts} Ports)`;
+      switchMsg = `Covered (${state.dropPoints} / ${totalSwitchPorts})`;
     }
-    
-    updateValCard(valPortsEl, portStatus, "🔌", "Ports Capacity", portMsg);
+    updateValCard(valSwitchPortsEl, switchStatus, "🔌", "Switch Ports", switchMsg);
+
+    // 2b. Patch Panel capacity check
+    const totalPatchPanelPorts = state.placedDevices.reduce((sum, d) => sum + (d.type === "patch-panel" ? d.ports : 0), 0);
+    let patchStatus = "valid";
+    let patchMsg = `${totalPatchPanelPorts} Ports mounted`;
+    if (state.dropPoints > totalPatchPanelPorts) {
+      patchStatus = "danger";
+      patchMsg = `Need ${state.dropPoints - totalPatchPanelPorts} more ports`;
+    } else {
+      patchMsg = `Covered (${state.dropPoints} / ${totalPatchPanelPorts})`;
+    }
+    updateValCard(valPatchPortsEl, patchStatus, "🎛️", "Patch Panels", patchMsg);
 
     // 3. PoE budget calculations
     const combinedPoeBudget = state.placedDevices.reduce((sum, d) => sum + (d.type === "switch" ? d.poe_budget : 0), 0);
