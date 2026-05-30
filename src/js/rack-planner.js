@@ -392,12 +392,17 @@ document.addEventListener("DOMContentLoaded", () => {
       voip: "VoIP/IoT"
     };
 
-    state.endpoints.forEach(ep => {
+    state.endpoints.forEach((ep, index) => {
       const tr = document.createElement("tr");
+      tr.draggable = true;
+      tr.dataset.index = index;
+      tr.className = "draggable-endpoint-row";
+
       const totalWattage = (ep.qty * ep.wattage).toFixed(1);
       const catLabel = categoryLabels[ep.category] || ep.category;
       
       tr.innerHTML = `
+        <td style="padding: 6px 4px; text-align: center; cursor: grab; color: var(--text-muted);" class="endpoint-drag-handle" draggable="false">☰</td>
         <td style="padding: 6px 8px;"><strong>${ep.name}</strong></td>
         <td style="padding: 6px 8px; text-align: center;"><span class="endpoint-badge badge-${ep.category}">${catLabel}</span></td>
         <td style="padding: 6px 8px; text-align: center; font-family: monospace;">${ep.qty}</td>
@@ -406,6 +411,43 @@ document.addEventListener("DOMContentLoaded", () => {
           <button type="button" class="endpoint-delete-btn" title="Remove Device">✕</button>
         </td>
       `;
+      
+      // Drag events
+      tr.addEventListener("dragstart", (e) => {
+        state.draggedEndpointIndex = index;
+        e.dataTransfer.effectAllowed = "move";
+        tr.classList.add("dragging-row");
+      });
+
+      tr.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        tr.classList.add("drag-over-row");
+      });
+
+      tr.addEventListener("dragleave", () => {
+        tr.classList.remove("drag-over-row");
+      });
+
+      tr.addEventListener("drop", (e) => {
+        e.preventDefault();
+        tr.classList.remove("drag-over-row");
+        const fromIndex = state.draggedEndpointIndex;
+        const toIndex = index;
+        
+        if (fromIndex !== undefined && fromIndex !== toIndex) {
+          const reordered = [...state.endpoints];
+          const [movedItem] = reordered.splice(fromIndex, 1);
+          reordered.splice(toIndex, 0, movedItem);
+          state.endpoints = reordered;
+          saveState();
+          update();
+        }
+      });
+
+      tr.addEventListener("dragend", () => {
+        tr.classList.remove("dragging-row");
+        state.draggedEndpointIndex = undefined;
+      });
       
       tr.querySelector(".endpoint-delete-btn").addEventListener("click", () => {
         removeEndpoint(ep.id);

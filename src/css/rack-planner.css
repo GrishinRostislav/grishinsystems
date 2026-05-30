@@ -885,6 +885,30 @@
   border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
+/* PoE Endpoint table row dragging styles */
+.draggable-endpoint-row {
+  transition: background-color var(--transition), border-color var(--transition);
+}
+
+.draggable-endpoint-row.dragging-row {
+  opacity: 0.4;
+  border: 1px dashed var(--accent-cyan);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.draggable-endpoint-row.drag-over-row {
+  background: rgba(59, 130, 246, 0.1);
+  box-shadow: inset 0 2px 0 0 var(--accent-cyan), inset 0 -2px 0 0 var(--accent-cyan);
+}
+
+.endpoint-drag-handle:hover {
+  color: var(--accent-cyan) !important;
+}
+
+.endpoint-drag-handle:active {
+  cursor: grabbing;
+}
+
 /* Print Styles */
 @media print {
   body {
