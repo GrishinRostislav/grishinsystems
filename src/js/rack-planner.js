@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
     rackSize: 18,
     dropPoints: 24,
     poeDevices: 10,
-    poeDeviceWattage: 15,
+    poeDeviceWattage: 15.4,
     placedDevices: [], // Array of placed devices: { instanceId, presetId, name, brand, u, ports, poe_ports, poe_budget, outlets, requires_power, type, cost, slot }
     draggedPresetId: null,
     draggedInstanceId: null
@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const cabinetRackEl = document.getElementById("cabinet-rack");
   const dropsInputEl = document.getElementById("input-drops");
   const poeDevicesInputEl = document.getElementById("input-poe");
-  const poeWattageInputEl = document.getElementById("input-poe-wattage");
+  const poeWattageInputEl = document.getElementById("input-poe-type");
   const rackSizeSelectEl = document.getElementById("input-rack-size");
   const catalogListEl = document.getElementById("catalog-list");
   const catalogTabsEl = document.getElementById("catalog-tabs");
@@ -91,8 +91,8 @@ document.addEventListener("DOMContentLoaded", () => {
       saveState();
       update();
     });
-    poeWattageInputEl.addEventListener("input", (e) => {
-      state.poeDeviceWattage = parseInt(e.target.value) || 0;
+    poeWattageInputEl.addEventListener("change", (e) => {
+      state.poeDeviceWattage = parseFloat(e.target.value) || 15.4;
       saveState();
       update();
     });
@@ -216,7 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
         state.rackSize = parsed.rackSize || 18;
         state.dropPoints = parsed.dropPoints || 24;
         state.poeDevices = parsed.poeDevices || 10;
-        state.poeDeviceWattage = parsed.poeDeviceWattage || 15;
+        state.poeDeviceWattage = parsed.poeDeviceWattage || 15.4;
         state.placedDevices = parsed.placedDevices || [];
       } catch (e) {
         console.error("Error parsing saved state", e);
