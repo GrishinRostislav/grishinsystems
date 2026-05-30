@@ -31,6 +31,10 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
               <input type="number" id="input-drops" min="0" max="240" value="24">
             </div>
             <div class="form-group">
+              <label for="input-local-links" title="Uplinks, controllers, servers, and local gear plugged directly to switch without patch panel">Local Cabinet Lines</label>
+              <input type="number" id="input-local-links" min="0" max="48" value="2">
+            </div>
+            <div class="form-group">
               <label for="input-rack-size">Cabinet Size</label>
               <select id="input-rack-size">
                 <option value="9">9U Cabinet</option>

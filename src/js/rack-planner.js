@@ -32,9 +32,11 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // 2. Application State
+  // 2. Application State
   let state = {
     rackSize: 18,
     dropPoints: 24,
+    localLines: 2,
     poeAfDevices: 10,
     poeAtDevices: 0,
     poeBt3Devices: 0,
@@ -47,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Selectors
   const cabinetRackEl = document.getElementById("cabinet-rack");
   const dropsInputEl = document.getElementById("input-drops");
+  const localLinksInputEl = document.getElementById("input-local-links");
   const poeAfInputEl = document.getElementById("input-poe-af");
   const poeAtInputEl = document.getElementById("input-poe-at");
   const poeBt3InputEl = document.getElementById("input-poe-bt3");
@@ -81,6 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Set inputs to match state
     dropsInputEl.value = state.dropPoints;
+    localLinksInputEl.value = state.localLines;
     poeAfInputEl.value = state.poeAfDevices;
     poeAtInputEl.value = state.poeAtDevices;
     poeBt3InputEl.value = state.poeBt3Devices;
@@ -90,6 +94,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // Attach Event Listeners
     dropsInputEl.addEventListener("input", (e) => {
       state.dropPoints = parseInt(e.target.value) || 0;
+      saveState();
+      update();
+    });
+    localLinksInputEl.addEventListener("input", (e) => {
+      state.localLines = parseInt(e.target.value) || 0;
       saveState();
       update();
     });
@@ -219,6 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("grishinsystems_rack_state", JSON.stringify({
       rackSize: state.rackSize,
       dropPoints: state.dropPoints,
+      localLines: state.localLines,
       poeAfDevices: state.poeAfDevices,
       poeAtDevices: state.poeAtDevices,
       poeBt3Devices: state.poeBt3Devices,
@@ -234,6 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const parsed = JSON.parse(saved);
         state.rackSize = parsed.rackSize || 18;
         state.dropPoints = parsed.dropPoints || 24;
+        state.localLines = parsed.localLines !== undefined ? parsed.localLines : 2;
         
         // Support migrating legacy single poeDevices count to poeAfDevices
         state.poeAfDevices = parsed.poeAfDevices !== undefined ? parsed.poeAfDevices : (parsed.poeDevices || 10);
@@ -441,9 +452,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initialize active port allocations
     const totalPoeDevices = state.poeAfDevices + state.poeAtDevices + state.poeBt3Devices + state.poeBt4Devices;
     let remainingPoeForSwitches = totalPoeDevices;
-    let remainingNonPoeForSwitches = Math.max(0, state.dropPoints - totalPoeDevices);
-    let remainingPoeForPanels = totalPoeDevices;
-    let remainingNonPoeForPanels = Math.max(0, state.dropPoints - totalPoeDevices);
+    let remainingNonPoeForSwitches = Math.max(0, (state.dropPoints + state.localLines) - totalPoeDevices);
+    let remainingPoeForPanels = Math.min(state.dropPoints, totalPoeDevices);
+    let remainingNonPoeForPanels = Math.max(0, state.dropPoints - remainingPoeForPanels);
 
     // Sort devices by slot descending to ensure consistent top-down port allocation
     const sortedDevices = [...state.placedDevices].sort((a, b) => b.slot - a.slot);
@@ -595,13 +606,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 2. Switch Port capacity check
     const totalSwitchPorts = state.placedDevices.reduce((sum, d) => sum + (d.type === "switch" ? d.ports : 0), 0);
+    const switchPortsNeeded = state.dropPoints + state.localLines;
     let switchStatus = "valid";
     let switchMsg = `${totalSwitchPorts} Ports mounted`;
-    if (state.dropPoints > totalSwitchPorts) {
+    if (switchPortsNeeded > totalSwitchPorts) {
       switchStatus = "danger";
-      switchMsg = `Need ${state.dropPoints - totalSwitchPorts} more ports`;
+      switchMsg = `Need ${switchPortsNeeded - totalSwitchPorts} more ports`;
     } else {
-      switchMsg = `Covered (${state.dropPoints} / ${totalSwitchPorts})`;
+      switchMsg = `Covered (${switchPortsNeeded} / ${totalSwitchPorts})`;
     }
     updateValCard(valSwitchPortsEl, switchStatus, "🔌", "Switch Ports", switchMsg);
 
