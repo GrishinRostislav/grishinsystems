@@ -304,10 +304,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Find first slot starting from bottom that can accommodate item
+  // Find first slot starting from top that can accommodate item
   function findFirstAvailableSlot(height) {
-    for (let u = 1; u <= state.rackSize; u++) {
-      if (u - height + 1 >= 1 && !isSlotOccupied(u, height)) {
+    for (let u = state.rackSize; u >= height; u--) {
+      if (!isSlotOccupied(u, height)) {
         return u;
       }
     }
