@@ -1023,7 +1023,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalPoEEndPoints = state.endpoints.reduce((sum, e) => sum + e.qty, 0);
 
     if (state.placedDevices.length === 0 && state.endpoints.length === 0 && totalWallPorts === 0) {
-      manifestBodyEl.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No equipment in project. Drag cabinet gear, add endpoints, or set wall ports!</td></tr>`;
+      manifestBodyEl.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No equipment in project. Drag cabinet gear, add endpoints, or set wall ports!</td></tr>`;
       manifestUCountEl.textContent = "0";
       manifestPortCountEl.textContent = "0";
       manifestPoeBudgetEl.textContent = "0W";
@@ -1048,11 +1048,22 @@ document.addEventListener("DOMContentLoaded", () => {
       totalOutlets += dev.outlets || 0;
       totalU += dev.u;
 
+      // Determine clean equipment type label
+      let typeLabel = "Rack Unit";
+      if (dev.type === "switch") typeLabel = "Switch";
+      else if (dev.type === "patch-panel") typeLabel = "Patch Panel";
+      else if (dev.type === "router") typeLabel = "Router";
+      else if (dev.type === "power") typeLabel = "Power/UPS";
+      else if (dev.type === "misc") {
+        if (dev.name.toLowerCase().includes("shelf")) typeLabel = "Shelf";
+        else if (dev.name.toLowerCase().includes("organizer")) typeLabel = "Organizer";
+        else typeLabel = "Accessory";
+      }
+
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td style="font-weight: 700; color: var(--accent-cyan); font-family: monospace;">U${dev.slot}</td>
+        <td style="font-weight: 700; color: var(--accent-cyan); font-family: monospace;">${typeLabel}</td>
         <td><strong>${dev.name}</strong></td>
-        <td>${dev.u}U</td>
         <td>$${dev.cost}</td>
       `;
       manifestBodyEl.appendChild(tr);
@@ -1065,9 +1076,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td style="font-weight: 700; color: var(--accent); font-family: monospace;">External</td>
+        <td style="font-weight: 700; color: var(--accent); font-family: monospace;">Endpoint</td>
         <td><strong>${ep.name} (Qty: ${ep.qty})</strong></td>
-        <td>—</td>
         <td>$${epCost}</td>
       `;
       manifestBodyEl.appendChild(tr);
@@ -1089,7 +1099,6 @@ document.addEventListener("DOMContentLoaded", () => {
       tr.innerHTML = `
         <td style="font-weight: 700; color: var(--text-muted); font-family: monospace;">Accessory</td>
         <td><strong>RJ45 Keystone Jack (Cat6) (Qty: ${keystoneQty})</strong><div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">(2 per Wall Port, 1 per PoE Endpoint)</div></td>
-        <td>—</td>
         <td>$${keystoneTotalCost.toFixed(2).replace(".00", "")}</td>
       `;
       manifestBodyEl.appendChild(tr);
@@ -1101,7 +1110,6 @@ document.addEventListener("DOMContentLoaded", () => {
       tr.innerHTML = `
         <td style="font-weight: 700; color: var(--text-muted); font-family: monospace;">Accessory</td>
         <td><strong>RJ45 Pass-Through Connector (Cat6) (Qty: ${rj45Qty})</strong><div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">(1 per PoE Endpoint)</div></td>
-        <td>—</td>
         <td>$${rj45TotalCost.toFixed(2).replace(".00", "")}</td>
       `;
       manifestBodyEl.appendChild(tr);
