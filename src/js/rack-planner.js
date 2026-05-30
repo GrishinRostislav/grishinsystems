@@ -880,8 +880,11 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderManifest() {
     manifestBodyEl.innerHTML = "";
     
-    if (state.placedDevices.length === 0 && state.endpoints.length === 0) {
-      manifestBodyEl.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No equipment in project. Drag cabinet gear or add endpoints!</td></tr>`;
+    const totalWallPorts = state.dropPoints || 0;
+    const totalPoEEndPoints = state.endpoints.reduce((sum, e) => sum + e.qty, 0);
+
+    if (state.placedDevices.length === 0 && state.endpoints.length === 0 && totalWallPorts === 0) {
+      manifestBodyEl.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No equipment in project. Drag cabinet gear, add endpoints, or set wall ports!</td></tr>`;
       manifestUCountEl.textContent = "0";
       manifestPortCountEl.textContent = "0";
       manifestPoeBudgetEl.textContent = "0W";
@@ -931,11 +934,45 @@ document.addEventListener("DOMContentLoaded", () => {
       manifestBodyEl.appendChild(tr);
     });
 
+    // Render Cabling Accessories (Keystones and RJ45 connectors)
+    const keystoneQty = (2 * totalWallPorts) + totalPoEEndPoints;
+    const rj45Qty = totalPoEEndPoints;
+
+    const keystoneUnitCost = 5.00;
+    const rj45UnitCost = 1.50;
+
+    const keystoneTotalCost = keystoneQty * keystoneUnitCost;
+    const rj45TotalCost = rj45Qty * rj45UnitCost;
+
+    if (keystoneQty > 0) {
+      totalCost += keystoneTotalCost;
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td style="font-weight: 700; color: var(--text-muted); font-family: monospace;">Accessory</td>
+        <td><strong>RJ45 Keystone Jack (Cat6) (Qty: ${keystoneQty})</strong><div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">(2 per Wall Port, 1 per PoE Endpoint)</div></td>
+        <td>—</td>
+        <td>$${keystoneTotalCost.toFixed(2).replace(".00", "")}</td>
+      `;
+      manifestBodyEl.appendChild(tr);
+    }
+
+    if (rj45Qty > 0) {
+      totalCost += rj45TotalCost;
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td style="font-weight: 700; color: var(--text-muted); font-family: monospace;">Accessory</td>
+        <td><strong>RJ45 Pass-Through Connector (Cat6) (Qty: ${rj45Qty})</strong><div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">(1 per PoE Endpoint)</div></td>
+        <td>—</td>
+        <td>$${rj45TotalCost.toFixed(2).replace(".00", "")}</td>
+      `;
+      manifestBodyEl.appendChild(tr);
+    }
+
     manifestUCountEl.textContent = `${totalU}U / ${state.rackSize}U`;
     manifestPortCountEl.textContent = totalPorts.toString();
     manifestPoeBudgetEl.textContent = `${totalPoe}W`;
     manifestOutletCountEl.textContent = totalOutlets.toString();
-    manifestTotalCostEl.textContent = `$${totalCost}`;
+    manifestTotalCostEl.textContent = `$${Math.round(totalCost)}`;
   }
 
   // Modal Controllers for Custom/Generic Add
