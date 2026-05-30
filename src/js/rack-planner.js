@@ -45,6 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Selectors
   const cabinetRackEl = document.getElementById("cabinet-rack");
+  const cabinetSideLabelsEl = document.getElementById("cabinet-side-labels");
   const dropsInputEl = document.getElementById("input-drops");
   const poeDevicesInputEl = document.getElementById("input-poe");
   const poeWattageInputEl = document.getElementById("input-poe-wattage");
@@ -295,6 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Render visual cabinet rack
   function renderCabinet() {
     cabinetRackEl.innerHTML = "";
+    cabinetSideLabelsEl.innerHTML = "";
     
     // Create rack container
     const container = document.createElement("div");
@@ -372,7 +374,8 @@ document.addEventListener("DOMContentLoaded", () => {
       // Calculate top position of the absolute element
       // Standard slot height is 42px
       const slotsFromTop = state.rackSize - dev.slot;
-      devEl.style.top = `${slotsFromTop * 42 + 1}px`;
+      const topPosPx = slotsFromTop * 42 + 1;
+      devEl.style.top = `${topPosPx}px`;
 
       // Build RJ45 port dots visual simulation or custom accessories
       let portsHtml = "";
@@ -421,25 +424,21 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
+      // Brand logo text
+      let logoText = "";
+      if (dev.brand === "ubiquiti") logoText = "U";
+      else if (dev.brand === "cisco") logoText = "Cisco";
+      else if (dev.brand === "mikrotik") logoText = "MikroTik";
+      else if (dev.brand === "cyberpower") logoText = "CP";
+
+      // Render actual hardware faceplate - ONLY contains LEDs, tiny logo, and ports (or slot/shelf)
       devEl.innerHTML = `
         <div class="device-faceplate">
           ${ledsHtml}
-          <div class="device-faceplate-info">
-            <span class="device-model">${dev.name}</span>
-            <span class="device-desc">${dev.u}U · ${dev.ports ? dev.ports + ' Ports' : 'Accessory'}</span>
-          </div>
+          ${logoText ? `<span class="device-logo">${logoText}</span>` : ""}
           ${portsHtml}
         </div>
-        <div class="device-actions">
-          <button class="device-delete-btn" title="Delete Device">✕</button>
-        </div>
       `;
-
-      // Delete listener
-      devEl.querySelector(".device-delete-btn").addEventListener("click", (e) => {
-        e.stopPropagation();
-        removeDevice(dev.instanceId);
-      });
 
       // Drag listener for reordering
       devEl.addEventListener("dragstart", (e) => {
@@ -454,6 +453,37 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       cabinetRackEl.appendChild(devEl);
+
+      // Create Aligned Side Label Card on the right of the cabinet
+      const labelEl = document.createElement("div");
+      labelEl.className = "device-label-card";
+      labelEl.style.top = `${topPosPx}px`;
+      labelEl.style.height = `${dev.u * 42 - 3}px`;
+
+      const startSlot = dev.slot;
+      const endSlot = dev.slot - dev.u + 1;
+      const slotRangeStr = startSlot === endSlot ? `U${startSlot}` : `U${startSlot}-U${endSlot}`;
+
+      labelEl.innerHTML = `
+        <div class="label-card-info">
+          <span class="label-card-title" title="${dev.name}">${dev.name}</span>
+          <span class="label-card-specs">
+            <span class="label-card-u-badge">${slotRangeStr}</span>
+            <span>${dev.u}U · ${dev.ports ? `${dev.ports} Ports` : 'Accessory'}</span>
+          </span>
+        </div>
+        <div class="label-card-actions">
+          <button class="device-delete-btn" title="Remove Device">✕</button>
+        </div>
+      `;
+
+      // Delete listener on the label card
+      labelEl.querySelector(".device-delete-btn").addEventListener("click", (e) => {
+        e.stopPropagation();
+        removeDevice(dev.instanceId);
+      });
+
+      cabinetSideLabelsEl.appendChild(labelEl);
     });
   }
 

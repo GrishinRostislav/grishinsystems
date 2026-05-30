@@ -712,13 +712,145 @@
   cursor: pointer;
 }
 
+/* Cabinet side-by-side layout with labels */
+.cabinet-layout-container {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 20px;
+  width: 100%;
+  max-width: 680px;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .cabinet-layout-container {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+.cabinet-side-labels {
+  position: relative;
+  height: 100%;
+}
+
+@media (max-width: 768px) {
+  .cabinet-side-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+/* Device side label card */
+.device-label-card {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  transition: var(--transition);
+  z-index: 5;
+}
+
+.device-label-card:hover {
+  border-color: var(--accent-cyan);
+  background: rgba(30, 41, 59, 0.8);
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
+}
+
+.label-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+  text-align: left;
+}
+
+.label-card-title {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.label-card-specs {
+  font-size: 10px;
+  color: var(--text-secondary);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.label-card-u-badge {
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.label-card-actions {
+  display: flex;
+  align-items: center;
+}
+
+/* Connector line pointer */
+.device-label-card::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  width: 20px;
+  height: 1px;
+  border-top: 1px dashed rgba(148, 163, 184, 0.3);
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .device-label-card {
+    position: relative !important;
+    top: auto !important;
+    height: auto !important;
+  }
+  .device-label-card::before {
+    display: none;
+  }
+}
+
+/* Device Logo Branding Label */
+.device-logo {
+  font-family: monospace;
+  font-size: 8px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.25);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  user-select: none;
+  margin-left: 8px;
+  display: inline-block;
+  white-space: nowrap;
+}
+
 /* Print Styles */
 @media print {
   body {
     background: white;
     color: black;
   }
-  .header, .footer, .control-panel, .manifest-ctas, .device-actions, .cabinet-header, .catalog-tabs, .catalog-list {
+  .header, .footer, .control-panel, .manifest-ctas, .device-actions, .cabinet-header, .catalog-tabs, .catalog-list, .cabinet-side-labels {
     display: none !important;
   }
   section {
@@ -743,12 +875,6 @@
     border: 1px solid #000 !important;
     color: black !important;
     box-shadow: none !important;
-  }
-  .device-model {
-    color: black !important;
-  }
-  .device-desc {
-    color: #475569 !important;
   }
   .manifest-card {
     background: transparent !important;
