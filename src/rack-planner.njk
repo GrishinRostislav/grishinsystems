@@ -46,32 +46,23 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
             </div>
           </div>
           
-          <h3 style="font-size: 11px; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; color: var(--text-secondary); border-top: 1px solid var(--glass-border); padding-top: 15px; letter-spacing: 0.5px;">🎥 CCTV & PoE Endpoint Inventory</h3>
-          <div style="display: flex; gap: 10px; align-items: flex-end; margin-bottom: 12px;">
-            <div class="form-group" style="flex: 2;">
-              <label for="select-camera">Camera Model Preset</label>
-              <select id="select-camera" style="width: 100%;">
-                <!-- Dynamically populated via JS -->
-              </select>
-            </div>
-            <div class="form-group" style="width: 70px; flex-shrink: 0;">
-              <label for="input-camera-qty">Qty</label>
-              <input type="number" id="input-camera-qty" min="1" max="96" value="4" style="width: 100%;">
-            </div>
-            <button type="button" class="btn btn-primary" id="btn-add-camera" style="padding: 10px 16px; font-size: 13px; font-weight: 700; height: 44px; border-radius: var(--radius-sm); border: none; cursor: pointer; transition: var(--transition);">Add</button>
+          <h3 style="font-size: 11px; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; color: var(--text-secondary); border-top: 1px solid var(--glass-border); padding-top: 15px; letter-spacing: 0.5px;">📡 PoE Endpoints (External)</h3>
+          <div style="margin-bottom: 12px;">
+            <button type="button" class="btn btn-primary" id="btn-open-endpoint-modal" style="width: 100%; justify-content: center; padding: 10px; font-size: 13px; font-weight: 700; height: 40px; border-radius: var(--radius-sm); border: none; cursor: pointer; transition: var(--transition);">+ Add PoE Endpoint</button>
           </div>
           
-          <div class="camera-list-wrapper">
-            <table class="camera-table" id="camera-table">
+          <div class="endpoint-list-wrapper">
+            <table class="endpoint-table" id="endpoint-table">
               <thead>
                 <tr>
                   <th>Model</th>
+                  <th style="text-align: center; width: 65px;">Type</th>
                   <th style="text-align: center; width: 40px;">Qty</th>
                   <th style="text-align: right; width: 70px;">Power</th>
                   <th style="text-align: right; width: 40px;">Del</th>
                 </tr>
               </thead>
-              <tbody id="camera-list-body">
+              <tbody id="endpoint-list-body">
                 <!-- Dynamically populated via JS -->
               </tbody>
             </table>
@@ -308,6 +299,41 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
       </div>
 
       <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;">Add Device to Cabinet</button>
+    </form>
+</div>
+
+<!-- Add PoE Endpoint Overlay Modal -->
+<div class="modal-overlay" id="endpoint-device-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Add PoE Endpoint Device</h3>
+      <button class="modal-close" id="modal-endpoint-close">✕</button>
+    </div>
+    
+    <form id="endpoint-device-form">
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label for="endpoint-category">Device Category</label>
+        <select id="endpoint-category" style="width: 100%;">
+          <option value="wireless">Wi-Fi & Bridges (Wireless APs/Antennas)</option>
+          <option value="cctv" selected>IP CCTV Cameras</option>
+          <option value="access">Access Control & Doorbells</option>
+          <option value="voip">VoIP Phones & Displays</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label for="endpoint-model">Select Model Preset</label>
+        <select id="endpoint-model" style="width: 100%;">
+          <!-- Dynamically populated and filtered via JS -->
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label for="endpoint-qty">Quantity</label>
+        <input type="number" id="endpoint-qty" min="1" max="96" value="4" style="width: 100%;" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="btn-add-endpoint" style="width: 100%; justify-content: center; padding: 12px; font-weight: 700;">Add to Project Inventory</button>
     </form>
   </div>
 </div>

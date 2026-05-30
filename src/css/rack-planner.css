@@ -787,40 +787,41 @@
 }
 
 /* CCTV camera inventory styling */
-.camera-list-wrapper {
+/* PoE Endpoint list and table styling */
+.endpoint-list-wrapper {
   background: rgba(15, 23, 42, 0.4);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
   padding: 10px;
-  max-height: 180px;
+  max-height: 220px;
   overflow-y: auto;
   margin-top: 12px;
 }
 
-.camera-list-wrapper::-webkit-scrollbar {
+.endpoint-list-wrapper::-webkit-scrollbar {
   width: 6px;
 }
-.camera-list-wrapper::-webkit-scrollbar-track {
+.endpoint-list-wrapper::-webkit-scrollbar-track {
   background: rgba(15, 23, 42, 0.2);
 }
-.camera-list-wrapper::-webkit-scrollbar-thumb {
+.endpoint-list-wrapper::-webkit-scrollbar-thumb {
   background: var(--glass-border);
   border-radius: 3px;
 }
 
-.camera-table {
+.endpoint-table {
   width: 100%;
   font-size: 12px;
   border-collapse: collapse;
   text-align: left;
 }
 
-.camera-table th, .camera-table td {
+.endpoint-table th, .endpoint-table td {
   padding: 6px 8px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.camera-table th {
+.endpoint-table th {
   color: var(--text-secondary);
   font-weight: 700;
   text-transform: uppercase;
@@ -828,11 +829,12 @@
   letter-spacing: 0.5px;
 }
 
-.camera-table td {
+.endpoint-table td {
   color: var(--text);
+  vertical-align: middle;
 }
 
-.camera-delete-btn {
+.endpoint-delete-btn {
   background: transparent;
   border: none;
   color: var(--text-muted);
@@ -843,9 +845,44 @@
   transition: var(--transition);
 }
 
-.camera-delete-btn:hover {
+.endpoint-delete-btn:hover {
   color: var(--danger);
   background: rgba(239, 68, 68, 0.1);
+}
+
+/* Category Badges for PoE Endpoints */
+.endpoint-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-wireless {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-cctv {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.badge-access {
+  background: rgba(139, 92, 246, 0.15);
+  color: #8b5cf6;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.badge-voip {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 /* Print Styles */
