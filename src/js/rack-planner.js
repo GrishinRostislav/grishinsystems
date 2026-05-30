@@ -473,6 +473,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Visual Update Loop
   function update() {
     renderCabinet();
+    renderCameraList();
     runValidations();
     renderManifest();
   }
