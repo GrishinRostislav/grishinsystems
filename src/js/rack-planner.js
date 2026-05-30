@@ -35,8 +35,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let state = {
     rackSize: 18,
     dropPoints: 24,
-    poeDevices: 10,
-    poeDeviceWattage: 15.4,
+    poeAfDevices: 10,
+    poeAtDevices: 0,
+    poeBt3Devices: 0,
+    poeBt4Devices: 0,
     placedDevices: [], // Array of placed devices: { instanceId, presetId, name, brand, u, ports, poe_ports, poe_budget, outlets, requires_power, type, cost, slot }
     draggedPresetId: null,
     draggedInstanceId: null
@@ -45,8 +47,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Selectors
   const cabinetRackEl = document.getElementById("cabinet-rack");
   const dropsInputEl = document.getElementById("input-drops");
-  const poeDevicesInputEl = document.getElementById("input-poe");
-  const poeWattageInputEl = document.getElementById("input-poe-type");
+  const poeAfInputEl = document.getElementById("input-poe-af");
+  const poeAtInputEl = document.getElementById("input-poe-at");
+  const poeBt3InputEl = document.getElementById("input-poe-bt3");
+  const poeBt4InputEl = document.getElementById("input-poe-bt4");
   const rackSizeSelectEl = document.getElementById("input-rack-size");
   const catalogListEl = document.getElementById("catalog-list");
   const catalogTabsEl = document.getElementById("catalog-tabs");
@@ -76,8 +80,10 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Set inputs to match state
     dropsInputEl.value = state.dropPoints;
-    poeDevicesInputEl.value = state.poeDevices;
-    poeWattageInputEl.value = state.poeDeviceWattage;
+    poeAfInputEl.value = state.poeAfDevices;
+    poeAtInputEl.value = state.poeAtDevices;
+    poeBt3InputEl.value = state.poeBt3Devices;
+    poeBt4InputEl.value = state.poeBt4Devices;
     rackSizeSelectEl.value = state.rackSize;
 
     // Attach Event Listeners
@@ -86,13 +92,23 @@ document.addEventListener("DOMContentLoaded", () => {
       saveState();
       update();
     });
-    poeDevicesInputEl.addEventListener("input", (e) => {
-      state.poeDevices = parseInt(e.target.value) || 0;
+    poeAfInputEl.addEventListener("input", (e) => {
+      state.poeAfDevices = parseInt(e.target.value) || 0;
       saveState();
       update();
     });
-    poeWattageInputEl.addEventListener("change", (e) => {
-      state.poeDeviceWattage = parseFloat(e.target.value) || 15.4;
+    poeAtInputEl.addEventListener("input", (e) => {
+      state.poeAtDevices = parseInt(e.target.value) || 0;
+      saveState();
+      update();
+    });
+    poeBt3InputEl.addEventListener("input", (e) => {
+      state.poeBt3Devices = parseInt(e.target.value) || 0;
+      saveState();
+      update();
+    });
+    poeBt4InputEl.addEventListener("input", (e) => {
+      state.poeBt4Devices = parseInt(e.target.value) || 0;
       saveState();
       update();
     });
@@ -202,8 +218,10 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("grishinsystems_rack_state", JSON.stringify({
       rackSize: state.rackSize,
       dropPoints: state.dropPoints,
-      poeDevices: state.poeDevices,
-      poeDeviceWattage: state.poeDeviceWattage,
+      poeAfDevices: state.poeAfDevices,
+      poeAtDevices: state.poeAtDevices,
+      poeBt3Devices: state.poeBt3Devices,
+      poeBt4Devices: state.poeBt4Devices,
       placedDevices: state.placedDevices
     }));
   }
@@ -215,8 +233,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const parsed = JSON.parse(saved);
         state.rackSize = parsed.rackSize || 18;
         state.dropPoints = parsed.dropPoints || 24;
-        state.poeDevices = parsed.poeDevices || 10;
-        state.poeDeviceWattage = parsed.poeDeviceWattage || 15.4;
+        
+        // Support migrating legacy single poeDevices count to poeAfDevices
+        state.poeAfDevices = parsed.poeAfDevices !== undefined ? parsed.poeAfDevices : (parsed.poeDevices || 10);
+        state.poeAtDevices = parsed.poeAtDevices || 0;
+        state.poeBt3Devices = parsed.poeBt3Devices || 0;
+        state.poeBt4Devices = parsed.poeBt4Devices || 0;
         state.placedDevices = parsed.placedDevices || [];
       } catch (e) {
         console.error("Error parsing saved state", e);
@@ -416,10 +438,11 @@ document.addEventListener("DOMContentLoaded", () => {
     cabinetRackEl.appendChild(container);
 
     // Initialize active port allocations
-    let remainingPoeForSwitches = state.poeDevices;
-    let remainingNonPoeForSwitches = Math.max(0, state.dropPoints - state.poeDevices);
-    let remainingPoeForPanels = state.poeDevices;
-    let remainingNonPoeForPanels = Math.max(0, state.dropPoints - state.poeDevices);
+    const totalPoeDevices = state.poeAfDevices + state.poeAtDevices + state.poeBt3Devices + state.poeBt4Devices;
+    let remainingPoeForSwitches = totalPoeDevices;
+    let remainingNonPoeForSwitches = Math.max(0, state.dropPoints - totalPoeDevices);
+    let remainingPoeForPanels = totalPoeDevices;
+    let remainingNonPoeForPanels = Math.max(0, state.dropPoints - totalPoeDevices);
 
     // Sort devices by slot descending to ensure consistent top-down port allocation
     const sortedDevices = [...state.placedDevices].sort((a, b) => b.slot - a.slot);
@@ -590,18 +613,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 3. PoE budget calculations
     const combinedPoeBudget = state.placedDevices.reduce((sum, d) => sum + (d.type === "switch" ? d.poe_budget : 0), 0);
-    const calculatedPoeDemand = state.poeDevices * state.poeDeviceWattage;
+    const totalPoeDevices = state.poeAfDevices + state.poeAtDevices + state.poeBt3Devices + state.poeBt4Devices;
+    const calculatedPoeDemand = (state.poeAfDevices * 15.4) + (state.poeAtDevices * 30) + (state.poeBt3Devices * 60) + (state.poeBt4Devices * 90);
     
     let poeStatus = "valid";
-    let poeMsg = `${calculatedPoeDemand}W load / ${combinedPoeBudget}W budget`;
+    let poeMsg = `${Math.round(calculatedPoeDemand)}W load / ${combinedPoeBudget}W budget`;
     
     if (calculatedPoeDemand > combinedPoeBudget) {
       poeStatus = "danger";
-      poeMsg = `Over Budget by ${calculatedPoeDemand - combinedPoeBudget}W`;
+      poeMsg = `Over Budget by ${Math.round(calculatedPoeDemand - combinedPoeBudget)}W`;
     } else if (calculatedPoeDemand > combinedPoeBudget * 0.8) {
       poeStatus = "warning";
       poeMsg = `Nearing budget (80%+)`;
-    } else if (combinedPoeBudget === 0 && state.poeDevices > 0) {
+    } else if (combinedPoeBudget === 0 && totalPoeDevices > 0) {
       poeStatus = "danger";
       poeMsg = `No PoE Switch Found`;
     }

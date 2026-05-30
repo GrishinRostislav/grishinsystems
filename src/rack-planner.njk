@@ -25,23 +25,10 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
         <!-- 1. Project Specifications -->
         <div class="glass-card panel-section fade-in visible">
           <h2 class="panel-title">📋 Project Specifications</h2>
-          <div class="form-grid">
+          <div class="form-grid" style="margin-bottom: 20px;">
             <div class="form-group">
               <label for="input-drops">Drop Points (RJ45)</label>
               <input type="number" id="input-drops" min="0" max="240" value="24">
-            </div>
-            <div class="form-group">
-              <label for="input-poe">PoE Endpoints</label>
-              <input type="number" id="input-poe" min="0" max="96" value="10">
-            </div>
-            <div class="form-group">
-              <label for="input-poe-type">PoE Standard / Type</label>
-              <select id="input-poe-type">
-                <option value="15.4" selected>PoE (802.3af) - 15.4W</option>
-                <option value="30">PoE+ (802.3at) - 30W</option>
-                <option value="60">PoE++ Type 3 (802.3bt) - 60W</option>
-                <option value="90">PoE++ Type 4 (802.3bt) - 90W</option>
-              </select>
             </div>
             <div class="form-group">
               <label for="input-rack-size">Cabinet Size</label>
@@ -52,6 +39,25 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
                 <option value="24">24U Cabinet</option>
                 <option value="42">42U Cabinet</option>
               </select>
+            </div>
+          </div>
+          <h3 style="font-size: 11px; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; color: var(--text-secondary); border-top: 1px solid var(--glass-border); padding-top: 15px; letter-spacing: 0.5px;">⚡ PoE Device Inventory</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="input-poe-af">PoE (802.3af - 15.4W)</label>
+              <input type="number" id="input-poe-af" min="0" max="96" value="10">
+            </div>
+            <div class="form-group">
+              <label for="input-poe-at">PoE+ (802.3at - 30W)</label>
+              <input type="number" id="input-poe-at" min="0" max="96" value="0">
+            </div>
+            <div class="form-group">
+              <label for="input-poe-bt3">PoE++ (60W)</label>
+              <input type="number" id="input-poe-bt3" min="0" max="96" value="0">
+            </div>
+            <div class="form-group">
+              <label for="input-poe-bt4">PoE++ (90W)</label>
+              <input type="number" id="input-poe-bt4" min="0" max="96" value="0">
             </div>
           </div>
         </div>
