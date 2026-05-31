@@ -1537,6 +1537,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       if (dev.type === "switch") {
         switchCount++;
+      } else if (dev.type === "router") {
+        const numWan = dev.name.includes("2WAN") || dev.name.includes("4L2W") ? 2 : 1;
+        patchcordQty += numWan + 1; // WAN ports + 1 LAN uplink
       } else if (dev.type !== "patch-panel" && dev.type !== "power" && dev.ports) {
         patchcordQty += dev.ports;
       }
