@@ -681,7 +681,6 @@ body.dragging-active .placed-device * {
   background: #050810;
   border: 1px solid #94a3b8; /* silver metallic shield */
   border-bottom: 2px solid #94a3b8; /* thicker bottom */
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.9), 0 1px 1px rgba(255, 255, 255, 0.05);
   position: relative;
   transition: var(--transition);
 }
@@ -704,7 +703,6 @@ body.dragging-active .placed-device * {
 .port-dot.active {
   background: rgba(16, 185, 129, 0.15);
   border-color: var(--success);
-  box-shadow: 0 0 6px var(--success), inset 0 2px 4px rgba(0, 0, 0, 0.9);
 }
 .port-dot.active::after {
   background: rgba(16, 185, 129, 0.15);
@@ -729,7 +727,6 @@ body.dragging-active .placed-device * {
 .port-dot.poe {
   background: rgba(245, 158, 11, 0.15);
   border-color: var(--warning);
-  box-shadow: 0 0 6px var(--warning), inset 0 2px 4px rgba(0, 0, 0, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -742,7 +739,6 @@ body.dragging-active .placed-device * {
   color: #fff;
   z-index: 2;
   margin-top: 1px;
-  text-shadow: 0 0 3px var(--warning);
 }
 .port-dot.poe::after {
   background: rgba(245, 158, 11, 0.15);
@@ -752,7 +748,6 @@ body.dragging-active .placed-device * {
 .port-dot.uplink {
   background: rgba(59, 130, 246, 0.15);
   border-color: var(--accent);
-  box-shadow: 0 0 6px var(--accent), inset 0 2px 4px rgba(0, 0, 0, 0.9);
 }
 .port-dot.uplink::after {
   background: rgba(59, 130, 246, 0.15);
@@ -762,7 +757,6 @@ body.dragging-active .placed-device * {
 .port-dot.wan-port {
   background: rgba(239, 68, 68, 0.15);
   border-color: #ef4444;
-  box-shadow: 0 0 6px rgba(239, 68, 68, 0.8), inset 0 2px 4px rgba(0, 0, 0, 0.9);
   position: relative;
 }
 .port-dot.wan-port::after {
