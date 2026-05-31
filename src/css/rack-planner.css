@@ -615,32 +615,86 @@ body.dragging-active .placed-device * {
 /* Port grids */
 .device-ports {
   display: grid;
-  grid-template-rows: repeat(2, 1fr);
+  grid-template-rows: repeat(2, auto);
   grid-auto-flow: column;
   gap: 2px;
+  align-items: center;
 }
 
+.patch-panel-ports {
+  grid-template-rows: 1fr !important;
+  width: 100%;
+  padding: 0 12px;
+  box-sizing: border-box;
+  justify-items: center;
+  gap: 0;
+}
+
+/* Realistic RJ45 Ports */
 .port-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 1px;
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.5);
+  width: 12px;
+  height: 10px;
+  border-radius: 1.5px;
+  background: #050810;
+  border: 1px solid #94a3b8; /* silver metallic shield */
+  border-bottom: 2px solid #94a3b8; /* thicker bottom */
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.9), 0 1px 1px rgba(255, 255, 255, 0.05);
+  position: relative;
+  transition: var(--transition);
 }
 
+/* Simulate the little clip notch at the top */
+.port-dot::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 3px;
+  width: 4px;
+  height: 2px;
+  background: #050810;
+  border-left: 1px solid #94a3b8;
+  border-right: 1px solid #94a3b8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* RJ45 active state glow inside the hole and border */
 .port-dot.active {
-  background: var(--success);
-  box-shadow: 0 0 3px var(--success), inset 0 0 1px rgba(0, 0, 0, 0.3);
+  background: rgba(16, 185, 129, 0.15);
+  border-color: var(--success);
+  box-shadow: 0 0 6px var(--success), inset 0 2px 4px rgba(0, 0, 0, 0.9);
+}
+.port-dot.active::after {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: var(--success);
 }
 
 .port-dot.poe {
-  background: var(--warning);
-  box-shadow: 0 0 3px var(--warning), inset 0 0 1px rgba(0, 0, 0, 0.3);
+  background: rgba(245, 158, 11, 0.15);
+  border-color: var(--warning);
+  box-shadow: 0 0 6px var(--warning), inset 0 2px 4px rgba(0, 0, 0, 0.9);
+}
+.port-dot.poe::after {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: var(--warning);
 }
 
 .port-dot.uplink {
-  background: var(--accent);
-  box-shadow: 0 0 3px var(--accent), inset 0 0 1px rgba(0, 0, 0, 0.3);
+  background: rgba(59, 130, 246, 0.15);
+  border-color: var(--accent);
+  box-shadow: 0 0 6px var(--accent), inset 0 2px 4px rgba(0, 0, 0, 0.9);
+}
+.port-dot.uplink::after {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: var(--accent);
+}
+
+.patch-panel-ports .port-dot {
+  width: 14px;
+  height: 12px;
+}
+.patch-panel-ports .port-dot::after {
+  width: 6px;
+  left: 3px;
 }
 
 /* Brush strip & shelf plate */

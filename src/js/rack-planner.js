@@ -939,9 +939,9 @@ document.addEventListener("DOMContentLoaded", () => {
         portsHtml = `<div class="device-shelf-plate" title="Equipment Shelf Tray"></div>`;
       } else if (dev.ports > 0) {
         if (dev.type === "patch-panel") {
-          // Render patch panel ports in a single row of 24
+          // Render patch panel ports in a single row of 24 evenly spaced
           const cols = dev.ports;
-          portsHtml += `<div class="device-ports" style="grid-template-rows: repeat(1, 5px); grid-template-columns: repeat(${cols}, auto);">`;
+          portsHtml += `<div class="device-ports patch-panel-ports" style="grid-template-columns: repeat(${cols}, 1fr);">`;
         } else {
           // Switches and routers render in 2 rows
           const cols = Math.ceil(dev.ports / 2);
