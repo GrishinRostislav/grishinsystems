@@ -252,6 +252,8 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
+  min-width: 320px;
+  flex-shrink: 0;
 }
 
 .cabinet-header {
@@ -281,9 +283,11 @@
   border-bottom: 20px solid #1e293b;
   width: 100%;
   max-width: 440px;
+  min-width: 280px;
   min-height: 400px;
   box-shadow: inset 0 0 10px rgba(0,0,0,0.9);
   padding: 0 4px;
+  flex-shrink: 0;
 }
 
 /* Rack Rails (left & right mounting holes) */
@@ -321,6 +325,7 @@
   height: 42px; /* 1U Height representation */
   border-bottom: 1px solid rgba(51, 65, 85, 0.25);
   position: relative;
+  flex-shrink: 0;
 }
 
 .rack-slot.drop-hover {
