@@ -394,7 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Setup clear & print buttons
-    document.getElementById("menu-file-clear").addEventListener("click", () => {
+    document.getElementById("btn-clear").addEventListener("click", () => {
       if (confirm("Are you sure you want to clear the entire rack configuration?")) {
         state.placedDevices = [];
         saveState();
@@ -402,7 +402,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    document.getElementById("menu-file-print").addEventListener("click", () => {
+    document.getElementById("btn-print").addEventListener("click", () => {
       window.print();
     });
 
@@ -429,6 +429,22 @@ document.addEventListener("DOMContentLoaded", () => {
       }, { passive: false });
     }
 
+    // BOM Drawer Toggle
+    if (bomToggleEl) {
+      bomToggleEl.addEventListener("click", () => {
+        bomDrawerEl.classList.toggle("open");
+      });
+    }
+    if (bomCloseEl) {
+      bomCloseEl.addEventListener("click", () => {
+        bomDrawerEl.classList.remove("open");
+      });
+    }
+    if (bomHandleEl) {
+      bomHandleEl.addEventListener("click", () => {
+        bomDrawerEl.classList.remove("open");
+      });
+    }
 
     // Apply initial zoom
     applyZoom();
@@ -463,9 +479,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initial render & validation
     renderCatalog("switches");
     update();
-    
-    // Initialize UE5 Window Manager
-    window.ueWindowManager = new WindowManager();
   }
 
   // Load / Save State
@@ -1674,168 +1687,3 @@ document.addEventListener("DOMContentLoaded", () => {
   // Fire initialization
   init();
 });
-
-// --- UE5 WINDOW MANAGER ---
-class WindowManager {
-  constructor() {
-    this.windows = document.querySelectorAll('.ue-window');
-    this.desktop = document.getElementById('ue-desktop');
-    this.highestZ = 20;
-    this.state = JSON.parse(localStorage.getItem('ue-window-state')) || {};
-    
-    this.init();
-  }
-
-  init() {
-    this.windows.forEach(win => {
-      const id = win.dataset.window;
-      const header = win.querySelector('.ue-window-header');
-      const resizer = win.querySelector('.ue-resize-handle');
-      const closeBtn = win.querySelector('.ue-window-close');
-      
-      // Restore state
-      if (this.state[id]) {
-        const s = this.state[id];
-        if (s.hidden) win.style.display = 'none';
-        else win.style.display = 'flex';
-        
-        if (s.x) win.style.left = s.x;
-        if (s.y) win.style.top = s.y;
-        if (s.w) win.style.width = s.w;
-        if (s.h) win.style.height = s.h;
-      }
-
-      // Focus
-      win.addEventListener('mousedown', () => this.focus(win));
-      
-      // Close
-      if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-          win.style.display = 'none';
-          this.saveState(id, { hidden: true });
-          this.updateMenuChecks();
-        });
-      }
-
-      // Drag
-      if (header) {
-        header.addEventListener('mousedown', (e) => {
-          if (e.target === closeBtn) return;
-          this.focus(win);
-          
-          let startX = e.clientX;
-          let startY = e.clientY;
-          let startLeft = parseInt(window.getComputedStyle(win).left, 10) || 0;
-          let startTop = parseInt(window.getComputedStyle(win).top, 10) || 0;
-
-          const onMouseMove = (moveEvent) => {
-            const dx = moveEvent.clientX - startX;
-            const dy = moveEvent.clientY - startY;
-            
-            let newLeft = startLeft + dx;
-            let newTop = startTop + dy;
-            
-            // Edge snapping (docking hint)
-            const snapDist = 15;
-            if (newLeft < snapDist) newLeft = 0;
-            if (newTop < snapDist) newTop = 0;
-            
-            if (newLeft + win.offsetWidth > this.desktop.offsetWidth - snapDist) {
-               newLeft = this.desktop.offsetWidth - win.offsetWidth;
-            }
-            if (newTop + win.offsetHeight > this.desktop.offsetHeight - snapDist) {
-               newTop = this.desktop.offsetHeight - win.offsetHeight;
-            }
-            
-            win.style.left = newLeft + 'px';
-            win.style.top = newTop + 'px';
-          };
-
-          const onMouseUp = () => {
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
-            this.saveState(id, { x: win.style.left, y: win.style.top });
-          };
-
-          document.addEventListener('mousemove', onMouseMove);
-          document.addEventListener('mouseup', onMouseUp);
-        });
-      }
-
-      // Resize
-      if (resizer) {
-        resizer.addEventListener('mousedown', (e) => {
-          e.stopPropagation();
-          this.focus(win);
-          let startX = e.clientX;
-          let startY = e.clientY;
-          let startWidth = parseInt(window.getComputedStyle(win).width, 10) || 200;
-          let startHeight = parseInt(window.getComputedStyle(win).height, 10) || 100;
-
-          const onMouseMove = (moveEvent) => {
-            const dx = moveEvent.clientX - startX;
-            const dy = moveEvent.clientY - startY;
-            win.style.width = Math.max(200, startWidth + dx) + 'px';
-            win.style.height = Math.max(100, startHeight + dy) + 'px';
-          };
-
-          const onMouseUp = () => {
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
-            this.saveState(id, { w: win.style.width, h: win.style.height });
-          };
-
-          document.addEventListener('mousemove', onMouseMove);
-          document.addEventListener('mouseup', onMouseUp);
-        });
-      }
-    });
-    
-    this.initMenu();
-  }
-
-  focus(win) {
-    this.windows.forEach(w => w.classList.remove('active'));
-    win.classList.add('active');
-    this.highestZ++;
-    win.style.zIndex = this.highestZ;
-  }
-
-  saveState(id, props) {
-    if (!this.state[id]) this.state[id] = {};
-    Object.assign(this.state[id], props);
-    localStorage.setItem('ue-window-state', JSON.stringify(this.state));
-  }
-
-  initMenu() {
-    const toggles = document.querySelectorAll('[data-toggle-window]');
-    toggles.forEach(t => {
-      const id = t.dataset.toggleWindow;
-      t.addEventListener('click', () => {
-        const win = document.getElementById('win-' + id);
-        if (win) {
-          const isHidden = win.style.display === 'none';
-          win.style.display = isHidden ? 'flex' : 'none';
-          this.saveState(id, { hidden: !isHidden });
-          this.updateMenuChecks();
-          if (isHidden) this.focus(win);
-        }
-      });
-    });
-    this.updateMenuChecks();
-  }
-
-  updateMenuChecks() {
-    const toggles = document.querySelectorAll('[data-toggle-window]');
-    toggles.forEach(t => {
-      const id = t.dataset.toggleWindow;
-      const win = document.getElementById('win-' + id);
-      if (win) {
-        const isHidden = win.style.display === 'none';
-        const name = t.textContent.replace('✓ ', '').trim();
-        t.textContent = isHidden ? name : '✓ ' + name;
-      }
-    });
-  }
-}
-
