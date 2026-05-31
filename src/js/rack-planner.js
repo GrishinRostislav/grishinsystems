@@ -949,10 +949,18 @@ document.addEventListener("DOMContentLoaded", () => {
       return sum;
     }, 0);
     
-    let remainingPoeForSwitches = totalPoeDevices;
-    let remainingNonPoeForSwitches = Math.max(0, (totalDropPoints + state.localLines + localRackSources) - totalPoeDevices);
-    let remainingPoeForPanels = Math.min(totalDropPoints, totalPoeDevices);
-    let remainingNonPoeForPanels = Math.max(0, totalDropPoints - remainingPoeForPanels);
+    let availablePatchPanelPorts = state.placedDevices.reduce((sum, d) => sum + (d.type === "patch-panel" ? d.ports : 0), 0);
+    
+    // Wall drops can only connect to the switch IF they pass through the patch panel
+    let patchedPoe = Math.min(totalPoeDevices, availablePatchPanelPorts);
+    let patchedNonPoe = Math.min(Math.max(0, totalDropPoints - totalPoeDevices), Math.max(0, availablePatchPanelPorts - patchedPoe));
+
+    let remainingPoeForSwitches = patchedPoe;
+    // localLines and localRackSources go direct to switch without patch panel
+    let remainingNonPoeForSwitches = patchedNonPoe + state.localLines + localRackSources;
+    
+    let remainingPoeForPanels = patchedPoe;
+    let remainingNonPoeForPanels = patchedNonPoe;
 
     let availableOutlets = state.placedDevices.reduce((sum, d) => sum + (d.outlets || 0), 0);
 
