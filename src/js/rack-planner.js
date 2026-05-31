@@ -1133,6 +1133,7 @@ document.addEventListener("DOMContentLoaded", () => {
           portsHtml += `<span class="${classStr}"></span>`;
         }
         portsHtml += `</div>`;
+        if (dev.brand === "apple") portsHtml = "";
       }
 
       // Add LEDs
@@ -1161,7 +1162,7 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (dev.brand === "araknis") logoText = "Araknis";
         else if (dev.brand === "denon") logoText = "Denon";
         else if (dev.brand === "marantz") logoText = "Marantz";
-        else if (dev.brand === "apple") logoText = "Apple";
+        else if (dev.brand === "apple") logoText = "Apple TV";
         else if (dev.brand === "sony") logoText = "Sony";
         else if (dev.brand === "sonos") logoText = "Sonos";
         else if (dev.brand === "control4") logoText = "C4";
@@ -1177,7 +1178,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ${portsHtml}
         </div>
         <div class="device-faceplate-bottom">
-          <span class="device-faceplate-label">${dev.name}</span>
+          <span class="device-faceplate-label">${dev.brand === "apple" ? "" : dev.name}</span>
           <button class="device-delete-btn" title="Remove Device"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
         </div>
       `;
