@@ -1144,19 +1144,21 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
       }
 
-      // Brand logo text
+      // Brand logo text (omitted on switches to save horizontal space for ports)
       let logoText = "";
-      if (dev.brand === "ubiquiti") logoText = "U";
-      else if (dev.brand === "cisco") logoText = "Cisco";
-      else if (dev.brand === "mikrotik") logoText = "MikroTik";
-      else if (dev.brand === "cyberpower") logoText = "CP";
-      else if (dev.brand === "tplink") logoText = "TP-Link";
-      else if (dev.brand === "araknis") logoText = "Araknis";
-      else if (dev.brand === "denon") logoText = "Denon";
-      else if (dev.brand === "marantz") logoText = "Marantz";
-      else if (dev.brand === "apple") logoText = "Apple";
-      else if (dev.brand === "sony") logoText = "Sony";
-      else if (dev.brand === "sonos") logoText = "Sonos";
+      if (dev.type !== "switch") {
+        if (dev.brand === "ubiquiti") logoText = "U";
+        else if (dev.brand === "cisco") logoText = "Cisco";
+        else if (dev.brand === "mikrotik") logoText = "MikroTik";
+        else if (dev.brand === "cyberpower") logoText = "CP";
+        else if (dev.brand === "tplink") logoText = "TP-Link";
+        else if (dev.brand === "araknis") logoText = "Araknis";
+        else if (dev.brand === "denon") logoText = "Denon";
+        else if (dev.brand === "marantz") logoText = "Marantz";
+        else if (dev.brand === "apple") logoText = "Apple";
+        else if (dev.brand === "sony") logoText = "Sony";
+        else if (dev.brand === "sonos") logoText = "Sonos";
+      }
 
       const startSlot = dev.slot;
       const endSlot = dev.slot - dev.u + 1;
