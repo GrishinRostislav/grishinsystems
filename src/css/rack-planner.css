@@ -648,13 +648,11 @@ body.dragging-active .placed-device * {
 .led.glowing {
   background: var(--success);
   box-shadow: 0 0 4px var(--success);
-  animation: pulse-led 2s ease-in-out infinite;
 }
 
 .led.orange {
   background: var(--warning);
   box-shadow: 0 0 4px var(--warning);
-  animation: pulse-led 2.5s ease-in-out infinite;
 }
 
 /* Port grids */
