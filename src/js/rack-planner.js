@@ -874,7 +874,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateStatusBar() {
-    const totalU = state.placedDevices.reduce((s, d) => s + d.u, 0);
+    const uniqueOccupiedUs = new Set();
+    state.placedDevices.forEach(d => {
+       for (let i = 0; i < d.u; i++) uniqueOccupiedUs.add(d.slot - i);
+    });
+    const totalU = uniqueOccupiedUs.size;
     const totalPorts = state.placedDevices.reduce((s, d) => s + (d.type === "switch" ? d.ports : 0), 0);
     const totalPoe = state.placedDevices.reduce((s, d) => s + (d.type === "switch" ? d.poe_budget : 0), 0);
     let totalCost = state.placedDevices.reduce((s, d) => s + d.cost, 0);
