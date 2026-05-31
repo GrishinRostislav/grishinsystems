@@ -137,6 +137,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const manifestPoeBudgetEl = document.getElementById("manifest-poe-budget");
   const manifestOutletCountEl = document.getElementById("manifest-outlet-count");
   const manifestTotalCostEl = document.getElementById("manifest-total-cost");
+  
+  // Manifest Header Elements for Sorting
+  const thType = document.getElementById("th-type");
+  const thName = document.getElementById("th-name");
+  const thQty = document.getElementById("th-qty");
+  const thCost = document.getElementById("th-cost");
 
   // Custom Device Modal Elements
   const addCustomModalEl = document.getElementById("custom-device-modal");
@@ -372,10 +378,6 @@ document.addEventListener("DOMContentLoaded", () => {
     customFormEl.addEventListener("submit", handleCustomDeviceSubmit);
 
     // Sort columns click listeners
-    const thType = document.getElementById("th-type");
-    const thName = document.getElementById("th-name");
-    const thQty = document.getElementById("th-qty");
-    const thCost = document.getElementById("th-cost");
 
     function handleSortClick(colName) {
       if (state.bomSortColumn === colName) {
