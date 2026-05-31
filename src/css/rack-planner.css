@@ -668,10 +668,38 @@ body.dragging-active .placed-device * {
   border-color: var(--success);
 }
 
+.port-dot.poe-capable {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.port-dot.poe-capable::before {
+  content: "⚡";
+  font-size: 7px;
+  line-height: 1;
+  opacity: 0.3;
+  color: #fff;
+  z-index: 2;
+  margin-top: 1px;
+}
+
 .port-dot.poe {
   background: rgba(245, 158, 11, 0.15);
   border-color: var(--warning);
   box-shadow: 0 0 6px var(--warning), inset 0 2px 4px rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.port-dot.poe::before {
+  content: "⚡";
+  font-size: 7px;
+  line-height: 1;
+  opacity: 1;
+  color: #fff;
+  z-index: 2;
+  margin-top: 1px;
+  text-shadow: 0 0 3px var(--warning);
 }
 .port-dot.poe::after {
   background: rgba(245, 158, 11, 0.15);

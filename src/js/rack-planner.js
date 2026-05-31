@@ -955,6 +955,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const isUplinkPort = (i === 0); // Port 1 is designated as the uplink port
             const isPoeCapable = dev.poe_ports > 0 && i < dev.poe_ports;
             
+            if (isPoeCapable) {
+              classStr += " poe-capable";
+            }
+            
             if (isUplinkPort) {
               classStr += " uplink";
             } else if (isPoeCapable && remainingPoeForSwitches > 0) {
