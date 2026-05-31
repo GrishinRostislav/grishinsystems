@@ -102,7 +102,8 @@ document.addEventListener("DOMContentLoaded", () => {
     draggedPresetId: null,
     draggedInstanceId: null,
     lastAddedInstanceId: null, // Keep track of the last added device to flash animate it
-    bomCustomOrder: [] // Custom order list for the Bill of Materials layout
+    bomSortColumn: null, // Sort column (null for default, "type", "name", "qty", "cost")
+    bomSortOrder: "asc"  // Sort order ("asc" or "desc")
   };
 
   // Selectors
@@ -370,6 +371,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
     customFormEl.addEventListener("submit", handleCustomDeviceSubmit);
 
+    // Sort columns click listeners
+    const thType = document.getElementById("th-type");
+    const thName = document.getElementById("th-name");
+    const thQty = document.getElementById("th-qty");
+    const thCost = document.getElementById("th-cost");
+
+    function handleSortClick(colName) {
+      if (state.bomSortColumn === colName) {
+        state.bomSortOrder = state.bomSortOrder === "asc" ? "desc" : "asc";
+      } else {
+        state.bomSortColumn = colName;
+        state.bomSortOrder = "asc";
+      }
+      saveState();
+      update();
+    }
+
+    thType?.addEventListener("click", () => handleSortClick("type"));
+    thName?.addEventListener("click", () => handleSortClick("name"));
+    thQty?.addEventListener("click", () => handleSortClick("qty"));
+    thCost?.addEventListener("click", () => handleSortClick("cost"));
+
     // Initial render & validation
     renderCatalog("switches");
     update();
@@ -383,7 +406,8 @@ document.addEventListener("DOMContentLoaded", () => {
       localLines: state.localLines,
       endpoints: state.endpoints,
       placedDevices: state.placedDevices,
-      bomCustomOrder: state.bomCustomOrder
+      bomSortColumn: state.bomSortColumn,
+      bomSortOrder: state.bomSortOrder
     }));
   }
 
@@ -396,7 +420,8 @@ document.addEventListener("DOMContentLoaded", () => {
         state.dropPoints = parsed.dropPoints !== undefined ? parsed.dropPoints : 12;
         state.localLines = parsed.localLines !== undefined ? parsed.localLines : 2;
         state.placedDevices = parsed.placedDevices || [];
-        state.bomCustomOrder = parsed.bomCustomOrder || [];
+        state.bomSortColumn = parsed.bomSortColumn !== undefined ? parsed.bomSortColumn : null;
+        state.bomSortOrder = parsed.bomSortOrder !== undefined ? parsed.bomSortOrder : "asc";
         
         if (parsed.endpoints) {
           state.endpoints = parsed.endpoints;
@@ -1212,8 +1237,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     totalCost += keystoneTotalCost + rj45TotalCost;
 
-    // 2. Gather all individual manifest items
-    let bomItems = [];
+    // 2. Gather and group manifest items
+    const groups = {};
 
     // Placed rack devices
     state.placedDevices.forEach(dev => {
@@ -1229,50 +1254,73 @@ document.addEventListener("DOMContentLoaded", () => {
         else { typeLabel = "Accessory"; typeGroup = "misc"; }
       }
 
-      bomItems.push({
-        id: dev.instanceId,
-        type: typeLabel,
-        typeGroup: typeGroup,
-        name: dev.name,
-        cost: dev.cost
-      });
+      // Group key: custom devices are grouped by their name/specs, preset devices by ID
+      const isCustom = dev.id.startsWith("custom_") || dev.brand === "generic";
+      const key = isCustom 
+        ? `custom_${dev.name}_${dev.brand}_${dev.type}_${dev.cost}`
+        : dev.id;
+
+      if (!groups[key]) {
+        groups[key] = {
+          id: key,
+          type: typeLabel,
+          typeGroup: typeGroup,
+          name: dev.name,
+          qty: 0,
+          cost: 0
+        };
+      }
+      groups[key].qty++;
+      groups[key].cost += dev.cost;
     });
 
     // PoE Endpoints
     state.endpoints.forEach(ep => {
-      bomItems.push({
-        id: "ep_" + ep.id,
-        type: "Endpoint",
-        typeGroup: "endpoint",
-        name: `${ep.name} (Qty: ${ep.qty})`,
-        cost: ep.cost * ep.qty
-      });
+      const key = "ep_" + ep.id;
+      if (!groups[key]) {
+        groups[key] = {
+          id: key,
+          type: "Endpoint",
+          typeGroup: "endpoint",
+          name: ep.name,
+          qty: 0,
+          cost: 0
+        };
+      }
+      groups[key].qty += ep.qty;
+      groups[key].cost += ep.cost * ep.qty;
     });
 
     // Cabling Accessories
     if (keystoneQty > 0) {
-      bomItems.push({
-        id: "acc_keystones",
+      const key = "acc_keystones";
+      groups[key] = {
+        id: key,
         type: "Accessory",
         typeGroup: "accessory",
-        name: `RJ45 Keystone Jack (Cat6) (Qty: ${keystoneQty})`,
+        name: "RJ45 Keystone Jack (Cat6)",
         subText: "(2 per Wall Port, 1 per PoE Endpoint)",
+        qty: keystoneQty,
         cost: keystoneTotalCost
-      });
+      };
     }
 
     if (rj45Qty > 0) {
-      bomItems.push({
-        id: "acc_rj45",
+      const key = "acc_rj45";
+      groups[key] = {
+        id: key,
         type: "Accessory",
         typeGroup: "accessory",
-        name: `RJ45 Pass-Through Connector (Cat6) (Qty: ${rj45Qty})`,
+        name: "RJ45 Pass-Through Connector (Cat6)",
         subText: "(1 per PoE Endpoint)",
+        qty: rj45Qty,
         cost: rj45TotalCost
-      });
+      };
     }
 
-    // 3. Sort items according to type group default order OR user custom order
+    let bomItems = Object.values(groups);
+
+    // 3. Sort items according to sort state or default group order
     const defaultGroupOrder = {
       "router": 1,
       "switch": 2,
@@ -1283,45 +1331,58 @@ document.addEventListener("DOMContentLoaded", () => {
       "accessory": 7
     };
 
-    const validIds = bomItems.map(item => item.id);
-    state.bomCustomOrder = (state.bomCustomOrder || []).filter(id => validIds.includes(id));
-
-    bomItems.forEach(item => {
-      if (!state.bomCustomOrder.includes(item.id)) {
-        const itemGroupVal = defaultGroupOrder[item.typeGroup] || 99;
-        let insertIdx = state.bomCustomOrder.length;
-        
-        for (let i = 0; i < state.bomCustomOrder.length; i++) {
-          const existingId = state.bomCustomOrder[i];
-          const existingItem = bomItems.find(x => x.id === existingId);
-          if (existingItem) {
-            const existingGroupVal = defaultGroupOrder[existingItem.typeGroup] || 99;
-            if (existingGroupVal > itemGroupVal) {
-              insertIdx = i;
-              break;
-            }
-          }
+    if (state.bomSortColumn) {
+      bomItems.sort((a, b) => {
+        let valA, valB;
+        if (state.bomSortColumn === "type") {
+          valA = a.type.toLowerCase();
+          valB = b.type.toLowerCase();
+        } else if (state.bomSortColumn === "name") {
+          valA = a.name.toLowerCase();
+          valB = b.name.toLowerCase();
+        } else if (state.bomSortColumn === "qty") {
+          valA = a.qty;
+          valB = b.qty;
+        } else if (state.bomSortColumn === "cost") {
+          valA = a.cost;
+          valB = b.cost;
         }
-        state.bomCustomOrder.splice(insertIdx, 0, item.id);
-      }
-    });
 
-    bomItems.sort((a, b) => {
-      return state.bomCustomOrder.indexOf(a.id) - state.bomCustomOrder.indexOf(b.id);
-    });
+        if (valA < valB) return state.bomSortOrder === "asc" ? -1 : 1;
+        if (valA > valB) return state.bomSortOrder === "asc" ? 1 : -1;
+        return 0;
+      });
+    } else {
+      // Default sorting: Group by device types and then by name
+      bomItems.sort((a, b) => {
+        const orderA = defaultGroupOrder[a.typeGroup] || 99;
+        const orderB = defaultGroupOrder[b.typeGroup] || 99;
+        if (orderA !== orderB) return orderA - orderB;
+        return a.name.localeCompare(b.name);
+      });
+    }
+
+    // Update sorting arrow indicator icons in table headers
+    const cols = { type: thType, name: thName, qty: thQty, cost: thCost };
+    for (const key in cols) {
+      const th = cols[key];
+      if (!th) continue;
+      const iconEl = th.querySelector(".sort-icon");
+      if (!iconEl) continue;
+      
+      if (state.bomSortColumn === key) {
+        iconEl.textContent = state.bomSortOrder === "asc" ? " ▲" : " ▼";
+        iconEl.style.opacity = "1";
+        iconEl.style.color = "var(--accent-cyan)";
+      } else {
+        iconEl.textContent = " ⇅";
+        iconEl.style.opacity = "0.3";
+        iconEl.style.color = "inherit";
+      }
+    }
 
     // 4. Render rows to the table
-    bomItems.forEach((item, idx) => {
-      const isFirst = idx === 0;
-      const isLast = idx === bomItems.length - 1;
-
-      const orderBtnsHtml = `
-        <td class="no-print" style="text-align: center; white-space: nowrap; padding: 6px 4px;">
-          <button type="button" class="bom-order-btn bom-order-up" data-id="${item.id}" ${isFirst ? 'disabled style="opacity: 0.3; cursor: not-allowed;"' : ''} title="Move Up">▲</button>
-          <button type="button" class="bom-order-btn bom-order-down" data-id="${item.id}" ${isLast ? 'disabled style="opacity: 0.3; cursor: not-allowed;"' : ''} title="Move Down">▼</button>
-        </td>
-      `;
-
+    bomItems.forEach(item => {
       let colorVar = "var(--accent-cyan)";
       if (item.typeGroup === "endpoint") colorVar = "var(--accent)";
       else if (item.typeGroup === "accessory") colorVar = "var(--text-muted)";
@@ -1330,27 +1391,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        ${orderBtnsHtml}
         <td style="font-weight: 700; color: ${colorVar}; font-family: monospace;">${item.type}</td>
         <td><strong>${item.name}</strong>${subTextHtml}</td>
-        <td>$${item.cost.toFixed(2).replace(".00", "")}</td>
+        <td style="text-align: center;">${item.qty}</td>
+        <td style="text-align: right; font-family: monospace; font-weight: 500;">$${item.cost.toFixed(2).replace(".00", "")}</td>
       `;
       manifestBodyEl.appendChild(tr);
-    });
-
-    // Add event listeners for ordering buttons
-    manifestBodyEl.querySelectorAll(".bom-order-up").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const id = btn.dataset.id;
-        moveBomItem(id, -1);
-      });
-    });
-
-    manifestBodyEl.querySelectorAll(".bom-order-down").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const id = btn.dataset.id;
-        moveBomItem(id, 1);
-      });
     });
 
     // Update aggregated totals card values
@@ -1359,22 +1405,6 @@ document.addEventListener("DOMContentLoaded", () => {
     manifestPoeBudgetEl.textContent = `${totalPoe}W`;
     manifestOutletCountEl.textContent = totalOutlets.toString();
     manifestTotalCostEl.textContent = `$${Math.round(totalCost)}`;
-  }
-
-  function moveBomItem(id, direction) {
-    const idx = state.bomCustomOrder.indexOf(id);
-    if (idx === -1) return;
-    
-    const targetIdx = idx + direction;
-    if (targetIdx < 0 || targetIdx >= state.bomCustomOrder.length) return;
-    
-    // Swap the elements in state.bomCustomOrder
-    const temp = state.bomCustomOrder[idx];
-    state.bomCustomOrder[idx] = state.bomCustomOrder[targetIdx];
-    state.bomCustomOrder[targetIdx] = temp;
-    
-    saveState();
-    update();
   }
 
   // Modal Controllers for Custom/Generic Add

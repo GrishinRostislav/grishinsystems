@@ -166,10 +166,10 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
             <table class="manifest-table">
               <thead>
                 <tr>
-                  <th class="no-print" style="width: 60px; text-align: center;">Order</th>
-                  <th>Type</th>
-                  <th>Device / Description</th>
-                  <th>Est. Cost</th>
+                  <th id="th-type" class="sortable" style="cursor: pointer; user-select: none;">Type <span class="sort-icon"></span></th>
+                  <th id="th-name" class="sortable" style="cursor: pointer; user-select: none;">Device / Description <span class="sort-icon"></span></th>
+                  <th id="th-qty" class="sortable" style="cursor: pointer; user-select: none; text-align: center; width: 80px;">Qty <span class="sort-icon"></span></th>
+                  <th id="th-cost" class="sortable" style="cursor: pointer; user-select: none; text-align: right; width: 100px;">Est. Cost <span class="sort-icon"></span></th>
                 </tr>
               </thead>
               <tbody id="manifest-body">

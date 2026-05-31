@@ -677,6 +677,15 @@
   color: var(--text-secondary);
 }
 
+.manifest-table th.sortable {
+  transition: var(--transition);
+}
+
+.manifest-table th.sortable:hover {
+  color: var(--accent-cyan);
+  background: rgba(6, 182, 212, 0.08);
+}
+
 .manifest-table td {
   font-size: 14px;
 }
