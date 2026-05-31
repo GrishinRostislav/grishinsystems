@@ -980,11 +980,48 @@ document.addEventListener("DOMContentLoaded", () => {
     // Collect all other devices
     const otherDevices = state.placedDevices.filter(d => d.instanceId !== insertedInstanceId);
 
-    // Partition relative to targetDev's original position if moving, or targetSlot if newly added
-    const pivotSlot = targetDev._originalSlot !== undefined ? targetDev._originalSlot : targetSlot;
+    // Partition based on preferred shift direction to create a natural slide cascade
+    const above = [];
+    const below = [];
+    
+    const S_old = targetDev._originalSlot;
+    const S_new = targetSlot;
 
-    const above = otherDevices.filter(d => d.slot > pivotSlot);
-    const below = otherDevices.filter(d => d.slot <= pivotSlot);
+    otherDevices.forEach(d => {
+      let preferredDirection = "down";
+      
+      if (S_old !== undefined) {
+        if (S_new > S_old) { // Moved UP
+          if (d.slot > S_old && d.slot <= S_new) {
+            preferredDirection = "down"; // Elements passed over slide down
+          } else if (d.slot > S_new) {
+            preferredDirection = "up";   // Elements above target slide up
+          } else {
+            preferredDirection = "down"; // Elements below slide down
+          }
+        } else if (S_new < S_old) { // Moved DOWN
+          if (d.slot >= S_new && d.slot < S_old) {
+            preferredDirection = "up";   // Elements passed over slide up
+          } else if (d.slot > S_old) {
+            preferredDirection = "up";   // Elements above slide up
+          } else {
+            preferredDirection = "down"; // Elements below slide down
+          }
+        }
+      } else { // Newly Added Device
+        if (d.slot >= S_new) {
+          preferredDirection = "up";
+        } else {
+          preferredDirection = "down";
+        }
+      }
+
+      if (preferredDirection === "up") {
+        above.push(d);
+      } else {
+        below.push(d);
+      }
+    });
 
     // Sort: below descending (highest first) to push down, above ascending (lowest first) to push up
     below.sort((a, b) => b.slot - a.slot);
@@ -1002,7 +1039,8 @@ document.addEventListener("DOMContentLoaded", () => {
       for (let u = dev.slot; u >= dev.u; u--) {
         let fits = true;
         for (let i = 0; i < dev.u; i++) {
-          if (occupied.has(u - i)) {
+          const checkU = u - i;
+          if (checkU <= 0 || occupied.has(checkU)) {
             fits = false;
             break;
           }
@@ -1017,7 +1055,8 @@ document.addEventListener("DOMContentLoaded", () => {
         for (let u = dev.u; u <= state.rackSize; u++) {
           let fits = true;
           for (let i = 0; i < dev.u; i++) {
-            if (occupied.has(u - i)) {
+            const checkU = u - i;
+            if (checkU <= 0 || occupied.has(checkU)) {
               fits = false;
               break;
             }
