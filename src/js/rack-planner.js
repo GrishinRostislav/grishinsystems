@@ -943,7 +943,9 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Local sources needing ports
     const localRackSources = state.placedDevices.reduce((sum, d) => {
-      if (d.type !== "switch" && d.type !== "patch-panel" && d.ports > 0) {
+      if (d.type === "router") {
+        return sum + 1; // Only 1 LAN uplink goes from router to switch
+      } else if (d.type !== "switch" && d.type !== "patch-panel" && d.ports > 0) {
         return sum + d.ports;
       }
       return sum;
@@ -1087,8 +1089,11 @@ document.addEventListener("DOMContentLoaded", () => {
               classStr += " active";
               remainingNonPoeForPanels--;
             }
+          } else if (dev.type === "router") {
+            // For routers, typically 1 WAN and 1 LAN uplink are active
+            if (i < 2) classStr += " active";
           } else {
-            // For routers, sources, and misc devices, show their ports as actively connected
+            // For sources and misc devices, show their ports as actively connected
             classStr += " active";
           }
           
@@ -1363,6 +1368,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const uplinkPorts = numSwitches; // 1 uplink port per switch
     
     const localRackSources = state.placedDevices.reduce((sum, d) => {
+      if (d.type === "router") return sum + 1; // Only 1 LAN uplink goes to switch
       if (d.type !== "switch" && d.type !== "patch-panel" && d.ports > 0) return sum + d.ports;
       return sum;
     }, 0);
