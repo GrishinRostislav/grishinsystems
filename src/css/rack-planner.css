@@ -161,8 +161,11 @@
 }
 
 .rp-sidebar--right::-webkit-scrollbar-thumb {
-  background: var(--glass-border);
+  background: #374151;
   border-radius: 3px;
+}
+.rp-sidebar--right::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
 }
 
 .rp-sidebar-head {
@@ -300,8 +303,11 @@
 }
 
 .catalog-list::-webkit-scrollbar-thumb {
-  background: var(--glass-border);
+  background: #374151;
   border-radius: 3px;
+}
+.catalog-list::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
 }
 
 .catalog-item {
@@ -1218,8 +1224,11 @@ body.dragging-active .placed-device * {
 }
 
 .rp-bom-body::-webkit-scrollbar-thumb {
-  background: var(--glass-border);
+  background: #374151;
   border-radius: 3px;
+}
+.rp-bom-body::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
 }
 
 .manifest-grid {
@@ -1331,8 +1340,11 @@ body.dragging-active .placed-device * {
 }
 
 .endpoint-list-wrapper::-webkit-scrollbar-thumb {
-  background: var(--glass-border);
+  background: #374151;
   border-radius: 3px;
+}
+.endpoint-list-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
 }
 
 .endpoint-table {
@@ -1496,8 +1508,11 @@ body.dragging-active .placed-device * {
 }
 
 .modal-content::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: #374151;
   border-radius: 3px;
+}
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
 }
 
 .modal-overlay.open .modal-content {
