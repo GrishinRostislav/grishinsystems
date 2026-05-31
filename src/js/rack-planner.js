@@ -954,6 +954,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let remainingPoeForPanels = Math.min(totalDropPoints, totalPoeDevices);
     let remainingNonPoeForPanels = Math.max(0, totalDropPoints - remainingPoeForPanels);
 
+    let availableOutlets = state.placedDevices.reduce((sum, d) => sum + (d.outlets || 0), 0);
+
     // Sort devices by slot descending to ensure consistent top-down port allocation
     const sortedDevices = [...state.placedDevices].sort((a, b) => b.slot - a.slot);
 
@@ -1088,13 +1090,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Add LEDs
-      let ledsHtml = `
-        <div class="device-leds">
-          <span class="led glowing"></span>
-          <span class="led glowing"></span>
-          ${dev.requires_power ? '<span class="led glowing"></span>' : ''}
-        </div>
-      `;
+      let ledsHtml = "";
+      if (dev.requires_power) {
+        let isPowered = false;
+        if (availableOutlets > 0) {
+          isPowered = true;
+          availableOutlets--;
+        }
+        ledsHtml = `
+          <div class="device-leds">
+            <span class="led ${isPowered ? 'glowing' : ''}"></span>
+          </div>
+        `;
+      }
 
       // Brand logo text
       let logoText = "";
