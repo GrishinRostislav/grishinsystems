@@ -11,12 +11,18 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "usw-pro-24-poe", name: "UniFi USW-Pro-24-PoE", brand: "ubiquiti", u: 1, ports: 24, poe_ports: 24, poe_budget: 400, outlets: 0, requires_power: true, type: "switch", cost: 699 },
       { id: "usw-pro-48-poe", name: "UniFi USW-Pro-48-PoE", brand: "ubiquiti", u: 1, ports: 48, poe_ports: 48, poe_budget: 600, outlets: 0, requires_power: true, type: "switch", cost: 1099 },
       { id: "usw-pro-max-48-poe", name: "UniFi USW-Pro-Max-48-PoE", brand: "ubiquiti", u: 1, ports: 48, poe_ports: 48, poe_budget: 720, outlets: 0, requires_power: true, type: "switch", cost: 1299 },
+      { id: "usw-24", name: "UniFi USW-24 (Non-PoE)", brand: "ubiquiti", u: 1, ports: 24, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "switch", cost: 229 },
+      { id: "usw-48", name: "UniFi USW-48 (Non-PoE)", brand: "ubiquiti", u: 1, ports: 48, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "switch", cost: 399 },
       { id: "cisco-c1000-24fp", name: "Cisco Catalyst 1000 24FP", brand: "cisco", u: 1, ports: 24, poe_ports: 24, poe_budget: 370, outlets: 0, requires_power: true, type: "switch", cost: 850 },
+      { id: "cisco-1000-24-npoe", name: "Cisco Catalyst 1000 24G (Non-PoE)", brand: "cisco", u: 1, ports: 24, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "switch", cost: 550 },
       { id: "cisco-9200l-48p", name: "Cisco Catalyst 9200L 48P", brand: "cisco", u: 1, ports: 48, poe_ports: 48, poe_budget: 740, outlets: 0, requires_power: true, type: "switch", cost: 1850 },
+      { id: "cisco-1000-48-npoe", name: "Cisco Catalyst 1000 48G (Non-PoE)", brand: "cisco", u: 1, ports: 48, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "switch", cost: 999 },
       { id: "mikrotik-crs328", name: "MikroTik CRS328-24P-4S+", brand: "mikrotik", u: 1, ports: 24, poe_ports: 24, poe_budget: 450, outlets: 0, requires_power: true, type: "switch", cost: 489 },
       { id: "mikrotik-crs326", name: "MikroTik CRS326-24G (Non-PoE)", brand: "mikrotik", u: 1, ports: 24, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "switch", cost: 199 },
       { id: "tplink-sg3428xmp", name: "TP-Link JetStream SG3428XMP", brand: "tplink", u: 1, ports: 24, poe_ports: 24, poe_budget: 384, outlets: 0, requires_power: true, type: "switch", cost: 399 },
       { id: "araknis-210-8p", name: "Araknis AN-210-SW-F-8-PoE", brand: "araknis", u: 1, ports: 8, poe_ports: 8, poe_budget: 130, outlets: 0, requires_power: true, type: "switch", cost: 350 },
+      { id: "araknis-210-24", name: "Araknis AN-210-SW-F-24 (Non-PoE)", brand: "araknis", u: 1, ports: 24, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "switch", cost: 499 },
+      { id: "araknis-210-48", name: "Araknis AN-210-SW-F-48 (Non-PoE)", brand: "araknis", u: 1, ports: 48, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "switch", cost: 899 },
       { id: "araknis-310-24p", name: "Araknis AN-310-SW-F-24-PoE", brand: "araknis", u: 1, ports: 24, poe_ports: 24, poe_budget: 375, outlets: 0, requires_power: true, type: "switch", cost: 850 },
       { id: "araknis-810-48p", name: "Araknis AN-810-SW-F-48-PoE", brand: "araknis", u: 1, ports: 48, poe_ports: 48, poe_budget: 740, outlets: 0, requires_power: true, type: "switch", cost: 1650 },
       { id: "araknis-620-8p", name: "Araknis AN-620-SW-R-8-PoE (2.5G)", brand: "araknis", u: 1, ports: 8, poe_ports: 8, poe_budget: 240, outlets: 0, requires_power: true, type: "switch", cost: 750 },
@@ -38,6 +44,25 @@ document.addEventListener("DOMContentLoaded", () => {
     power: [
       { id: "ups-cyberpower-2u", name: "CyberPower 1500VA UPS", brand: "cyberpower", u: 2, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 8, requires_power: true, type: "power", cost: 249 },
       { id: "pdu-apc-1u", name: "APC 1U PDU Rackmount", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 10, requires_power: true, type: "power", cost: 99 }
+    ],
+    video: [
+      { id: "tv-samsung-65", name: "Samsung 65\" QLED 4K Smart TV", brand: "generic", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 899 },
+      { id: "tv-sony-75", name: "Sony 75\" Bravia XR 4K TV", brand: "sony", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1499 },
+      { id: "proj-epson-4k", name: "Epson Pro Cinema LS12000 Projector", brand: "generic", u: 2, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 4999 },
+      { id: "araknis-hdmi-matrix", name: "Araknis 4x4 HDMI Matrix Switcher", brand: "araknis", u: 1, ports: 8, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1250 }
+    ],
+    theater: [
+      { id: "avr-denon-s570", name: "Denon AVR-S570H 5.2-Ch (1 Zone)", brand: "denon", u: 3, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 399 },
+      { id: "avr-denon-x2800", name: "Denon AVR-X2800H 7.2-Ch (2 Zones)", brand: "denon", u: 3, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1199 },
+      { id: "avr-marantz-c50", name: "Marantz Cinema 50 9.4-Ch (3 Zones)", brand: "marantz", u: 4, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 2500 },
+      { id: "amp-sonos", name: "Sonos Amp 125W (2-Ch Stereo Zone)", brand: "sonos", u: 1, ports: 2, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 699 }
+    ],
+    sources: [
+      { id: "apple-tv-4k", name: "Apple TV 4K Media Player", brand: "apple", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 149 },
+      { id: "sony-ps5", name: "Sony PlayStation 5 Console", brand: "sony", u: 3, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 499 },
+      { id: "cable-box", name: "Generic Cable / Satellite Box", brand: "generic", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 99 },
+      { id: "nv-shield", name: "NVIDIA Shield TV Pro Media Player", brand: "generic", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 199 },
+      { id: "sonos-port", name: "Sonos Port Audio Streamer", brand: "sonos", u: 1, ports: 2, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 449 }
     ],
     misc: [
       { id: "organizer-1u", name: "1U Brush Cable Organizer", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: false, type: "misc", cost: 20 },
@@ -899,6 +924,11 @@ document.addEventListener("DOMContentLoaded", () => {
       else if (dev.brand === "cyberpower") logoText = "CP";
       else if (dev.brand === "tplink") logoText = "TP-Link";
       else if (dev.brand === "araknis") logoText = "Araknis";
+      else if (dev.brand === "denon") logoText = "Denon";
+      else if (dev.brand === "marantz") logoText = "Marantz";
+      else if (dev.brand === "apple") logoText = "Apple";
+      else if (dev.brand === "sony") logoText = "Sony";
+      else if (dev.brand === "sonos") logoText = "Sonos";
 
       const startSlot = dev.slot;
       const endSlot = dev.slot - dev.u + 1;
@@ -1289,10 +1319,27 @@ document.addEventListener("DOMContentLoaded", () => {
       else if (dev.type === "patch-panel") { typeLabel = "Patch Panel"; typeGroup = "patch-panel"; }
       else if (dev.type === "router") { typeLabel = "Router"; typeGroup = "router"; }
       else if (dev.type === "power") { typeLabel = "Power/UPS"; typeGroup = "power"; }
-      else if (dev.type === "misc") {
-        if (dev.name.toLowerCase().includes("shelf")) { typeLabel = "Shelf"; typeGroup = "misc"; }
-        else if (dev.name.toLowerCase().includes("organizer")) { typeLabel = "Organizer"; typeGroup = "misc"; }
-        else { typeLabel = "Accessory"; typeGroup = "misc"; }
+      else {
+        const lowerName = dev.name.toLowerCase();
+        if (dev.brand === "denon" || dev.brand === "marantz" || lowerName.includes("receiver") || lowerName.includes("avr")) {
+          typeLabel = "AV Receiver";
+          typeGroup = "theater";
+        } else if (dev.brand === "apple" || dev.brand === "sony" || lowerName.includes("playstation") || lowerName.includes("box") || dev.brand === "sonos") {
+          typeLabel = "Source / Console";
+          typeGroup = "sources";
+        } else if (lowerName.includes("tv") || lowerName.includes("projector") || lowerName.includes("matrix") || lowerName.includes("display")) {
+          typeLabel = "Video Device";
+          typeGroup = "video";
+        } else if (lowerName.includes("shelf")) {
+          typeLabel = "Rack Shelf";
+          typeGroup = "misc";
+        } else if (lowerName.includes("organizer") || lowerName.includes("brush")) {
+          typeLabel = "Cable Manager";
+          typeGroup = "misc";
+        } else {
+          typeLabel = "Accessory";
+          typeGroup = "misc";
+        }
       }
 
       // Group key: custom devices are grouped by their name/specs, preset devices by ID
@@ -1367,9 +1414,12 @@ document.addEventListener("DOMContentLoaded", () => {
       "switch": 2,
       "patch-panel": 3,
       "power": 4,
-      "misc": 5,
-      "endpoint": 6,
-      "accessory": 7
+      "video": 5,
+      "theater": 6,
+      "sources": 7,
+      "misc": 8,
+      "endpoint": 9,
+      "accessory": 10
     };
 
     if (state.bomSortColumn) {
