@@ -6,219 +6,214 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
 
 <link rel="stylesheet" href="/css/rack-planner.css">
 
-<section class="section-grid" style="padding-top: 140px; min-height: 100vh;">
-  <div class="container">
-    
-    <!-- Header -->
-    <div class="section-header fade-in visible" style="margin-bottom: 40px;">
-      <div class="section-label">Interactive Tools</div>
-      <h1 class="section-title">2D Server Rack Planner</h1>
-      <p class="section-subtitle">Design your cabinet layout, stack real equipment, and automatically validate space, port capacity, PoE power budget, and outlets.</p>
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- Full-Viewport App Shell                                    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="rp-app" id="rp-app">
+
+  <!-- ─── App Toolbar ─────────────────────────────────────── -->
+  <div class="rp-toolbar">
+    <div class="rp-toolbar-left">
+      <span class="rp-toolbar-icon">⬡</span>
+      <span class="rp-toolbar-title">Rack Planner</span>
+      <span class="rp-toolbar-badge">2D</span>
     </div>
-
-    <!-- Main Layout Grid -->
-    <div class="planner-layout">
-      
-      <!-- Left Sidebar: Specifications & Validation -->
-      <div class="planner-sidebar-left">
-        <!-- 1. Project Specifications -->
-        <div class="glass-card panel-section fade-in visible">
-          <h2 class="panel-title">📋 Project Specifications</h2>
-          <div class="form-grid" style="margin-bottom: 20px;">
-            <div class="form-group">
-              <label for="input-drops" title="Standard wall outlets and ethernet jacks around the building">Wall Ports (RJ45)</label>
-              <input type="number" id="input-drops" min="0" max="240" value="12">
-            </div>
-            <div class="form-group">
-              <label for="input-local-links" title="Uplinks, controllers, servers, and local gear plugged directly to switch without patch panel">Local Cabinet Lines</label>
-              <input type="number" id="input-local-links" min="0" max="48" value="2">
-            </div>
-            <div class="form-group">
-              <label for="input-rack-size">Cabinet Size</label>
-              <select id="input-rack-size">
-                <option value="9">9U Cabinet</option>
-                <option value="12">12U Cabinet</option>
-                <option value="18" selected>18U Cabinet</option>
-                <option value="24">24U Cabinet</option>
-                <option value="42">42U Cabinet</option>
-              </select>
-            </div>
-          </div>
-          
-          <h3 style="font-size: 11px; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; color: var(--text-secondary); border-top: 1px solid var(--glass-border); padding-top: 15px; letter-spacing: 0.5px;">📡 PoE Endpoints (External)</h3>
-          <div style="margin-bottom: 12px;">
-            <button type="button" class="btn btn-primary" id="btn-open-endpoint-modal" style="width: 100%; justify-content: center; padding: 10px; font-size: 13px; font-weight: 700; height: 40px; border-radius: var(--radius-sm); border: none; cursor: pointer; transition: var(--transition);">+ Add PoE Endpoint</button>
-          </div>
-          
-          <div class="endpoint-list-wrapper">
-            <table class="endpoint-table" id="endpoint-table">
-              <thead>
-                <tr>
-                  <th style="width: 25px;"></th>
-                  <th>Model</th>
-                  <th style="text-align: center; width: 65px;">Type</th>
-                  <th style="text-align: center; width: 40px;">Qty</th>
-                  <th style="text-align: right; width: 70px;">Power</th>
-                  <th style="text-align: right; width: 40px;">Del</th>
-                </tr>
-              </thead>
-              <tbody id="endpoint-list-body">
-                <!-- Dynamically populated via JS -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- 2. Real-Time Validation Checks -->
-        <div class="glass-card panel-section fade-in visible">
-          <h2 class="panel-title">🛡️ Cabinet Validation Checks</h2>
-          <div class="validation-grid">
-            
-            <div class="validation-card valid" id="val-space">
-              <span class="validation-status-dot"></span>
-              <span class="validation-icon">📦</span>
-              <span class="validation-name">Rack Space</span>
-              <span class="validation-value">0U / 18U Used</span>
-            </div>
-
-            <div class="validation-card valid" id="val-switch-ports">
-              <span class="validation-status-dot"></span>
-              <span class="validation-icon">🔌</span>
-              <span class="validation-name">Switch Ports</span>
-              <span class="validation-value">0 / 24 Ports</span>
-            </div>
-
-            <div class="validation-card valid" id="val-patch-ports">
-              <span class="validation-status-dot"></span>
-              <span class="validation-icon">🎛️</span>
-              <span class="validation-name">Patch Panels</span>
-              <span class="validation-value">0 / 24 Ports</span>
-            </div>
-
-            <div class="validation-card valid" id="val-poe">
-              <span class="validation-status-dot"></span>
-              <span class="validation-icon">⚡</span>
-              <span class="validation-name">PoE Load</span>
-              <span class="validation-value">0W / 0W</span>
-            </div>
-
-            <div class="validation-card valid" id="val-outlets">
-              <span class="validation-status-dot"></span>
-              <span class="validation-icon">🔌</span>
-              <span class="validation-name">Power Outlets</span>
-              <span class="validation-value">0 / 0 plugs</span>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- Middle Column: Visual Cabinet -->
-      <div class="cabinet-wrapper fade-in visible">
-        <div class="cabinet-header">
-          <span class="cabinet-tag">2D Visual Elevation</span>
-        </div>
-        
-        <!-- The visual metal rack framework -->
-        <div class="cabinet-rack" id="cabinet-rack">
-          <!-- Rendered dynamically by JS -->
-        </div>
-      </div>
-
-      <!-- Right Sidebar: Equipment Library Catalog -->
-      <div class="planner-sidebar-right">
-        <!-- 3. Hardware Catalog -->
-        <div class="glass-card panel-section fade-in visible">
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; margin-bottom: 16px;">
-            <h2 class="panel-title" style="border: none; margin: 0; padding: 0;">🛠️ Equipment Library</h2>
-            <button id="btn-add-custom" style="font-size: 12px; font-weight: 700; border: 1px solid var(--accent); color: var(--accent); padding: 4px 10px; border-radius: 4px; background: transparent; cursor: pointer; transition: var(--transition);">+ Custom Device</button>
-          </div>
-          
-          <div class="catalog-tabs" id="catalog-tabs">
-            <button class="catalog-tab active" data-tab="switches">Switches</button>
-            <button class="catalog-tab" data-tab="panels">Patch Panels</button>
-            <button class="catalog-tab" data-tab="routers">Routers / Firewalls</button>
-            <button class="catalog-tab" data-tab="power">UPS & PDUs</button>
-            <button class="catalog-tab" data-tab="theater">Theater & Audio</button>
-            <button class="catalog-tab" data-tab="sources">Source Devices</button>
-            <button class="catalog-tab" data-tab="misc">Shelves & Organizers</button>
-          </div>
-
-          <div class="catalog-search-wrapper">
-            <input type="text" id="catalog-search" placeholder="🔍 Search library items..." autocomplete="off">
-            <button id="catalog-search-clear" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; display: none; font-size: 14px; padding: 4px;">✕</button>
-          </div>
-
-          <div class="catalog-list" id="catalog-list">
-            <!-- Dynamically populated via JS -->
-          </div>
-        </div>
-      </div>
-
+    <div class="rp-toolbar-center">
+      <label class="rp-toolbar-select-label" for="input-rack-size">Cabinet</label>
+      <select id="input-rack-size" class="rp-toolbar-select">
+        <option value="9">9U</option>
+        <option value="12">12U</option>
+        <option value="18" selected>18U</option>
+        <option value="24">24U</option>
+        <option value="42">42U</option>
+      </select>
     </div>
-
-    <!-- Detailed Manifest / Bill of Materials -->
-    <div class="manifest-section fade-in visible">
-      <div class="manifest-card">
-        <h2 class="panel-title" style="font-size: 22px; margin-bottom: 24px;">📝 Bill of Materials & Manifest</h2>
-        
-        <div class="manifest-grid">
-          
-          <!-- Manifest table -->
-          <div class="manifest-table-wrapper">
-            <table class="manifest-table">
-              <thead>
-                <tr>
-                  <th id="th-type" class="sortable" style="cursor: pointer; user-select: none;">Type <span class="sort-icon"></span></th>
-                  <th id="th-name" class="sortable" style="cursor: pointer; user-select: none;">Device / Description <span class="sort-icon"></span></th>
-                  <th id="th-qty" class="sortable" style="cursor: pointer; user-select: none; text-align: center; width: 80px;">Qty <span class="sort-icon"></span></th>
-                  <th id="th-cost" class="sortable" style="cursor: pointer; user-select: none; text-align: right; width: 100px;">Est. Cost <span class="sort-icon"></span></th>
-                </tr>
-              </thead>
-              <tbody id="manifest-body">
-                <!-- Dynamically populated via JS -->
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Total specs box -->
-          <div class="manifest-summary-card">
-            <h3>Layout Specifications</h3>
-            
-            <div class="summary-row">
-              <span>Total U Space:</span>
-              <span id="manifest-u-count" style="font-weight: 700;">0U / 18U</span>
-            </div>
-            <div class="summary-row">
-              <span>Switch Ports Placed:</span>
-              <span id="manifest-port-count" style="font-weight: 700;">0</span>
-            </div>
-            <div class="summary-row">
-              <span>PoE Power Pool:</span>
-              <span id="manifest-poe-budget" style="font-weight: 700;">0W</span>
-            </div>
-            <div class="summary-row">
-              <span>PDU/UPS Plugs:</span>
-              <span id="manifest-outlet-count" style="font-weight: 700;">0</span>
-            </div>
-
-            <div class="summary-row total">
-              <span>Est. Cost:</span>
-              <span id="manifest-total-cost" style="color: var(--accent-cyan);">$0</span>
-            </div>
-
-            <div class="manifest-ctas">
-              <button class="btn btn-primary" id="btn-print" style="flex: 1; justify-content: center; padding: 10px 16px; font-size: 14px;">🖨️ Print Manifest</button>
-              <button class="btn btn-secondary" id="btn-clear" style="flex: 1; justify-content: center; padding: 10px 16px; font-size: 14px; border-color: var(--danger); color: var(--danger);">✕ Clear Rack</button>
-            </div>
-          </div>
-
-        </div>
-      </div>
+    <div class="rp-toolbar-right">
+      <button class="rp-toolbar-btn" id="btn-bom-toggle" title="Bill of Materials">📋 <span class="rp-btn-label">BOM</span></button>
+      <button class="rp-toolbar-btn" id="btn-print" title="Print Manifest">🖨️ <span class="rp-btn-label">Print</span></button>
+      <button class="rp-toolbar-btn rp-toolbar-btn--danger" id="btn-clear" title="Clear Rack">✕ <span class="rp-btn-label">Clear</span></button>
     </div>
-
   </div>
-</section>
+
+  <!-- ─── Main 3-Column Area ──────────────────────────────── -->
+  <div class="rp-main">
+
+    <!-- ── Left Sidebar: Component Library ──────────────── -->
+    <div class="rp-sidebar rp-sidebar--left" id="rp-sidebar-left">
+      <div class="rp-sidebar-head">
+        <h3>Components</h3>
+        <button id="btn-add-custom" class="rp-btn-sm" title="Add Custom Device">+ Custom</button>
+      </div>
+
+      <div class="rp-search-wrap">
+        <input type="text" id="catalog-search" class="rp-search-input" placeholder="Search equipment…" autocomplete="off">
+        <button id="catalog-search-clear" class="rp-search-clear" style="display:none;">✕</button>
+      </div>
+
+      <div class="catalog-tabs" id="catalog-tabs">
+        <button class="catalog-tab active" data-tab="switches">Switches</button>
+        <button class="catalog-tab" data-tab="panels">Panels</button>
+        <button class="catalog-tab" data-tab="routers">Routers</button>
+        <button class="catalog-tab" data-tab="power">Power</button>
+        <button class="catalog-tab" data-tab="theater">Theater</button>
+        <button class="catalog-tab" data-tab="sources">Sources</button>
+        <button class="catalog-tab" data-tab="misc">Misc</button>
+      </div>
+
+      <div class="catalog-list" id="catalog-list">
+        <!-- Dynamically populated via JS -->
+      </div>
+    </div>
+
+    <!-- ── Center: Zoomable Canvas ─────────────────────── -->
+    <div class="rp-canvas" id="rp-canvas">
+      <div class="rp-canvas-content" id="rp-canvas-content">
+        <div class="cabinet-wrapper">
+          <div class="cabinet-rack" id="cabinet-rack">
+            <!-- Rendered dynamically by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Right Sidebar: Tools & Settings ─────────────── -->
+    <div class="rp-sidebar rp-sidebar--right" id="rp-sidebar-right">
+
+      <!-- Project Settings -->
+      <div class="rp-panel">
+        <div class="rp-panel-head"><span>📋</span><h4>Project Settings</h4></div>
+        <div class="rp-settings-grid">
+          <div class="rp-setting">
+            <label for="input-drops">Wall Ports</label>
+            <input type="number" id="input-drops" min="0" max="240" value="12">
+          </div>
+          <div class="rp-setting">
+            <label for="input-local-links">Local Lines</label>
+            <input type="number" id="input-local-links" min="0" max="48" value="2">
+          </div>
+        </div>
+      </div>
+
+      <!-- PoE Endpoints -->
+      <div class="rp-panel">
+        <div class="rp-panel-head"><span>📡</span><h4>PoE Endpoints</h4></div>
+        <button type="button" class="rp-btn-full" id="btn-open-endpoint-modal">+ Add Endpoint</button>
+        <div class="endpoint-list-wrapper">
+          <table class="endpoint-table" id="endpoint-table">
+            <thead>
+              <tr>
+                <th style="width:22px;"></th>
+                <th>Model</th>
+                <th style="text-align:center;width:50px;">Type</th>
+                <th style="text-align:center;width:32px;">Qty</th>
+                <th style="text-align:right;width:50px;">W</th>
+                <th style="text-align:right;width:28px;"></th>
+              </tr>
+            </thead>
+            <tbody id="endpoint-list-body">
+              <!-- Dynamically populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Validation Checks -->
+      <div class="rp-panel">
+        <div class="rp-panel-head"><span>🛡️</span><h4>Validation</h4></div>
+        <div class="rp-val-list">
+          <div class="rp-val-item validation-card valid" id="val-space">
+            <span class="rp-val-dot"></span>
+            <span class="validation-icon">📦</span>
+            <span class="validation-name">Rack Space</span>
+            <span class="validation-value">0U / 18U</span>
+          </div>
+          <div class="rp-val-item validation-card valid" id="val-switch-ports">
+            <span class="rp-val-dot"></span>
+            <span class="validation-icon">🔌</span>
+            <span class="validation-name">Switch Ports</span>
+            <span class="validation-value">0 / 24</span>
+          </div>
+          <div class="rp-val-item validation-card valid" id="val-patch-ports">
+            <span class="rp-val-dot"></span>
+            <span class="validation-icon">🎛️</span>
+            <span class="validation-name">Patch Panels</span>
+            <span class="validation-value">0 / 24</span>
+          </div>
+          <div class="rp-val-item validation-card valid" id="val-poe">
+            <span class="rp-val-dot"></span>
+            <span class="validation-icon">⚡</span>
+            <span class="validation-name">PoE Load</span>
+            <span class="validation-value">0W / 0W</span>
+          </div>
+          <div class="rp-val-item validation-card valid" id="val-outlets">
+            <span class="rp-val-dot"></span>
+            <span class="validation-icon">🔌</span>
+            <span class="validation-name">Outlets</span>
+            <span class="validation-value">0 / 0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Bottom Status Bar ───────────────────────────────── -->
+  <div class="rp-statusbar">
+    <div class="rp-status-left">
+      <span class="rp-status-chip" id="status-space">📦 0U / 18U</span>
+      <span class="rp-status-chip" id="status-ports">🔌 0 Ports</span>
+      <span class="rp-status-chip" id="status-poe">⚡ 0W PoE</span>
+      <span class="rp-status-chip" id="status-cost">💰 $0</span>
+    </div>
+    <div class="rp-status-right">
+      <button class="rp-zoom-btn" id="zoom-out" title="Zoom Out">−</button>
+      <input type="range" id="zoom-slider" class="rp-zoom-slider" min="25" max="200" value="100" step="5">
+      <button class="rp-zoom-btn" id="zoom-in" title="Zoom In">+</button>
+      <span class="rp-zoom-label" id="zoom-label">100%</span>
+      <button class="rp-zoom-btn" id="zoom-fit" title="Fit to View">⊡</button>
+    </div>
+  </div>
+
+  <!-- ─── BOM Drawer (slides up from bottom) ──────────────── -->
+  <div class="rp-bom-drawer" id="rp-bom-drawer">
+    <div class="rp-bom-handle" id="rp-bom-handle"><div class="rp-bom-handle-bar"></div></div>
+    <div class="rp-bom-header">
+      <h3>📝 Bill of Materials &amp; Manifest</h3>
+      <button class="rp-bom-close" id="btn-bom-close">✕</button>
+    </div>
+    <div class="rp-bom-body">
+      <div class="manifest-grid">
+        <div class="manifest-table-wrapper">
+          <table class="manifest-table">
+            <thead>
+              <tr>
+                <th id="th-type" class="sortable" style="cursor:pointer;user-select:none;">Type <span class="sort-icon"></span></th>
+                <th id="th-name" class="sortable" style="cursor:pointer;user-select:none;">Device <span class="sort-icon"></span></th>
+                <th id="th-qty" class="sortable" style="cursor:pointer;user-select:none;text-align:center;width:80px;">Qty <span class="sort-icon"></span></th>
+                <th id="th-cost" class="sortable" style="cursor:pointer;user-select:none;text-align:right;width:100px;">Cost <span class="sort-icon"></span></th>
+              </tr>
+            </thead>
+            <tbody id="manifest-body">
+              <!-- Dynamically populated via JS -->
+            </tbody>
+          </table>
+        </div>
+        <div class="manifest-summary-card">
+          <h3>Specifications</h3>
+          <div class="summary-row"><span>U Space:</span><span id="manifest-u-count" style="font-weight:700;">0U / 18U</span></div>
+          <div class="summary-row"><span>Switch Ports:</span><span id="manifest-port-count" style="font-weight:700;">0</span></div>
+          <div class="summary-row"><span>PoE Budget:</span><span id="manifest-poe-budget" style="font-weight:700;">0W</span></div>
+          <div class="summary-row"><span>PDU/UPS Plugs:</span><span id="manifest-outlet-count" style="font-weight:700;">0</span></div>
+          <div class="summary-row total"><span>Est. Cost:</span><span id="manifest-total-cost" style="color:var(--accent-cyan);">$0</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- Modals (same structure, just repositioned after .rp-app)   -->
+<!-- ═══════════════════════════════════════════════════════════ -->
 
 <!-- Add Custom/Generic Device Overlay Modal -->
 <div class="modal-overlay" id="custom-device-modal">
@@ -227,14 +222,12 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
       <h3>Add Custom Hardware</h3>
       <button class="modal-close" id="modal-close">✕</button>
     </div>
-    
     <form id="custom-device-form">
-      <div class="form-group" style="margin-bottom: 12px;">
+      <div class="form-group" style="margin-bottom:12px;">
         <label for="custom-name">Device Model Name</label>
         <input type="text" id="custom-name" placeholder="e.g. Ubiquiti USW-Lite-16-PoE" required>
       </div>
-
-      <div class="form-grid" style="margin-bottom: 12px;">
+      <div class="form-grid" style="margin-bottom:12px;">
         <div class="form-group">
           <label for="custom-brand">Brand Style</label>
           <select id="custom-brand">
@@ -258,22 +251,18 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
           </select>
         </div>
       </div>
-
-      <div class="form-group" style="margin-bottom: 12px;">
+      <div class="form-group" style="margin-bottom:12px;">
         <label for="custom-target-slot">Mount Position (U Slot)</label>
-        <select id="custom-target-slot" required>
-          <!-- Dynamically populated with free slots -->
-        </select>
+        <select id="custom-target-slot" required></select>
       </div>
-
-      <div class="form-grid" style="margin-bottom: 12px;">
+      <div class="form-grid" style="margin-bottom:12px;">
         <div class="form-group">
           <label for="custom-u">Height (U)</label>
           <select id="custom-u">
-            <option value="1" selected>1U Slot</option>
-            <option value="2">2U Slots</option>
-            <option value="3">3U Slots</option>
-            <option value="4">4U Slots</option>
+            <option value="1" selected>1U</option>
+            <option value="2">2U</option>
+            <option value="3">3U</option>
+            <option value="4">4U</option>
           </select>
         </div>
         <div class="form-group">
@@ -281,8 +270,7 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
           <input type="number" id="custom-cost" min="0" value="100">
         </div>
       </div>
-
-      <div class="form-grid" style="margin-bottom: 16px;">
+      <div class="form-grid" style="margin-bottom:16px;">
         <div class="form-group">
           <label for="custom-ports">Ports (RJ45)</label>
           <input type="number" id="custom-ports" min="0" value="0">
@@ -292,8 +280,7 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
           <input type="number" id="custom-poe-ports" min="0" value="0">
         </div>
       </div>
-
-      <div class="form-grid" style="margin-bottom: 16px;">
+      <div class="form-grid" style="margin-bottom:16px;">
         <div class="form-group">
           <label for="custom-poe-budget">PoE Budget (W)</label>
           <input type="number" id="custom-poe-budget" min="0" value="0">
@@ -303,13 +290,11 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
           <input type="number" id="custom-outlets" min="0" value="0">
         </div>
       </div>
-
-      <div class="form-group" style="flex-direction: row; gap: 8px; align-items: center; margin-bottom: 20px;">
-        <input type="checkbox" id="custom-power" checked style="width: auto;">
-        <label for="custom-power" style="cursor: pointer; text-transform: none; font-size: 14px; color: var(--text);">Requires AC Power Connection</label>
+      <div class="form-group" style="flex-direction:row;gap:8px;align-items:center;margin-bottom:20px;">
+        <input type="checkbox" id="custom-power" checked style="width:auto;">
+        <label for="custom-power" style="cursor:pointer;text-transform:none;font-size:14px;color:var(--text);">Requires AC Power</label>
       </div>
-
-      <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;">Add Device to Cabinet</button>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;">Add Device to Cabinet</button>
     </form>
   </div>
 </div>
@@ -321,36 +306,29 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
       <h3>Add PoE Endpoint Device</h3>
       <button class="modal-close" id="modal-endpoint-close">✕</button>
     </div>
-    
     <form id="endpoint-device-form">
-      <div class="form-group" style="margin-bottom: 16px;">
+      <div class="form-group" style="margin-bottom:16px;">
         <label for="endpoint-category">Device Category</label>
-        <select id="endpoint-category" style="width: 100%;">
-          <option value="wireless">Wi-Fi & Bridges (Wireless APs/Antennas)</option>
+        <select id="endpoint-category" style="width:100%;">
+          <option value="wireless">Wi-Fi &amp; Bridges</option>
           <option value="cctv" selected>IP CCTV Cameras</option>
-          <option value="access">Access Control & Doorbells</option>
-          <option value="voip">VoIP Phones & Displays</option>
+          <option value="access">Access Control &amp; Doorbells</option>
+          <option value="voip">VoIP Phones &amp; Displays</option>
         </select>
       </div>
-
-      <div class="form-group" style="margin-bottom: 16px;">
-        <label for="endpoint-search">Filter Models by Name / Brand</label>
-        <input type="text" id="endpoint-search" placeholder="Type to filter presets..." autocomplete="off">
+      <div class="form-group" style="margin-bottom:16px;">
+        <label for="endpoint-search">Filter Models</label>
+        <input type="text" id="endpoint-search" placeholder="Type to filter…" autocomplete="off">
       </div>
-
-      <div class="form-group" style="margin-bottom: 16px;">
-        <label for="endpoint-model">Select Model Preset</label>
-        <select id="endpoint-model" style="width: 100%;">
-          <!-- Dynamically populated and filtered via JS -->
-        </select>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label for="endpoint-model">Select Model</label>
+        <select id="endpoint-model" style="width:100%;"></select>
       </div>
-
-      <div class="form-group" style="margin-bottom: 24px;">
+      <div class="form-group" style="margin-bottom:24px;">
         <label for="endpoint-qty">Quantity</label>
-        <input type="number" id="endpoint-qty" min="1" max="96" value="4" style="width: 100%;" required>
+        <input type="number" id="endpoint-qty" min="1" max="96" value="4" style="width:100%;" required>
       </div>
-
-      <button type="submit" class="btn btn-primary" id="btn-add-endpoint" style="width: 100%; justify-content: center; padding: 12px; font-weight: 700;">Add to Project Inventory</button>
+      <button type="submit" class="btn btn-primary" id="btn-add-endpoint" style="width:100%;justify-content:center;padding:12px;font-weight:700;">Add to Project</button>
     </form>
   </div>
 </div>

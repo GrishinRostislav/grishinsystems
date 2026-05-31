@@ -122,7 +122,8 @@ document.addEventListener("DOMContentLoaded", () => {
     draggedInstanceId: null,
     lastAddedInstanceId: null, // Keep track of the last added device to flash animate it
     bomSortColumn: null, // Sort column (null for default, "type", "name", "qty", "cost")
-    bomSortOrder: "asc"  // Sort order ("asc" or "desc")
+    bomSortOrder: "asc",  // Sort order ("asc" or "desc")
+    zoomLevel: 1.0
   };
 
   // Selectors
@@ -167,6 +168,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const addCustomModalEl = document.getElementById("custom-device-modal");
   const customFormEl = document.getElementById("custom-device-form");
   let customTargetSlot = null;
+
+  // Zoom & App Elements
+  const canvasEl = document.getElementById("rp-canvas");
+  const canvasContentEl = document.getElementById("rp-canvas-content");
+  const zoomSliderEl = document.getElementById("zoom-slider");
+  const zoomLabelEl = document.getElementById("zoom-label");
+  const zoomInEl = document.getElementById("zoom-in");
+  const zoomOutEl = document.getElementById("zoom-out");
+  const zoomFitEl = document.getElementById("zoom-fit");
+  const bomDrawerEl = document.getElementById("rp-bom-drawer");
+  const bomToggleEl = document.getElementById("btn-bom-toggle");
+  const bomCloseEl = document.getElementById("btn-bom-close");
+  const bomHandleEl = document.getElementById("rp-bom-handle");
+  // Status bar elements
+  const statusSpaceEl = document.getElementById("status-space");
+  const statusPortsEl = document.getElementById("status-ports");
+  const statusPoeEl = document.getElementById("status-poe");
+  const statusCostEl = document.getElementById("status-cost");
 
   // Initialize
   function init() {
@@ -387,6 +406,49 @@ document.addEventListener("DOMContentLoaded", () => {
       window.print();
     });
 
+    // Zoom Controls
+    if (zoomInEl) {
+      zoomInEl.addEventListener("click", () => setZoom(state.zoomLevel + 0.1));
+    }
+    if (zoomOutEl) {
+      zoomOutEl.addEventListener("click", () => setZoom(state.zoomLevel - 0.1));
+    }
+    if (zoomSliderEl) {
+      zoomSliderEl.addEventListener("input", (e) => setZoom(parseInt(e.target.value) / 100));
+    }
+    if (zoomFitEl) {
+      zoomFitEl.addEventListener("click", fitToView);
+    }
+    if (canvasEl) {
+      canvasEl.addEventListener("wheel", (e) => {
+        if (e.ctrlKey || e.metaKey) {
+          e.preventDefault();
+          const delta = e.deltaY > 0 ? -0.05 : 0.05;
+          setZoom(state.zoomLevel + delta);
+        }
+      }, { passive: false });
+    }
+
+    // BOM Drawer Toggle
+    if (bomToggleEl) {
+      bomToggleEl.addEventListener("click", () => {
+        bomDrawerEl.classList.toggle("open");
+      });
+    }
+    if (bomCloseEl) {
+      bomCloseEl.addEventListener("click", () => {
+        bomDrawerEl.classList.remove("open");
+      });
+    }
+    if (bomHandleEl) {
+      bomHandleEl.addEventListener("click", () => {
+        bomDrawerEl.classList.remove("open");
+      });
+    }
+
+    // Apply initial zoom
+    applyZoom();
+
     // Setup Custom Device Modal Close
     document.getElementById("btn-add-custom").addEventListener("click", openCustomDeviceModal);
     document.getElementById("modal-close").addEventListener("click", closeModal);
@@ -428,7 +490,8 @@ document.addEventListener("DOMContentLoaded", () => {
       endpoints: state.endpoints,
       placedDevices: state.placedDevices,
       bomSortColumn: state.bomSortColumn,
-      bomSortOrder: state.bomSortOrder
+      bomSortOrder: state.bomSortOrder,
+      zoomLevel: state.zoomLevel
     }));
   }
 
@@ -443,6 +506,7 @@ document.addEventListener("DOMContentLoaded", () => {
         state.placedDevices = parsed.placedDevices || [];
         state.bomSortColumn = parsed.bomSortColumn !== undefined ? parsed.bomSortColumn : null;
         state.bomSortOrder = parsed.bomSortOrder !== undefined ? parsed.bomSortOrder : "asc";
+        state.zoomLevel = parsed.zoomLevel || 1.0;
         
         if (parsed.endpoints) {
           state.endpoints = parsed.endpoints;
@@ -768,6 +832,20 @@ document.addEventListener("DOMContentLoaded", () => {
     renderEndpointList();
     runValidations();
     renderManifest();
+    updateStatusBar();
+  }
+
+  function updateStatusBar() {
+    const totalU = state.placedDevices.reduce((s, d) => s + d.u, 0);
+    const totalPorts = state.placedDevices.reduce((s, d) => s + (d.type === "switch" ? d.ports : 0), 0);
+    const totalPoe = state.placedDevices.reduce((s, d) => s + (d.type === "switch" ? d.poe_budget : 0), 0);
+    let totalCost = state.placedDevices.reduce((s, d) => s + d.cost, 0);
+    state.endpoints.forEach(e => { totalCost += e.cost * e.qty; });
+
+    if (statusSpaceEl) statusSpaceEl.textContent = `📦 ${totalU}U / ${state.rackSize}U`;
+    if (statusPortsEl) statusPortsEl.textContent = `🔌 ${totalPorts} Ports`;
+    if (statusPoeEl) statusPoeEl.textContent = `⚡ ${totalPoe}W PoE`;
+    if (statusCostEl) statusCostEl.textContent = `💰 $${totalCost.toLocaleString()}`;
   }
 
   // Render visual cabinet rack
@@ -1251,7 +1329,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateValCard(cardEl, status, icon, title, valText) {
-    cardEl.className = `validation-card ${status}`;
+    cardEl.classList.remove("valid", "warning", "danger");
+    cardEl.classList.add(status);
     cardEl.querySelector(".validation-icon").textContent = icon;
     cardEl.querySelector(".validation-name").textContent = title;
     cardEl.querySelector(".validation-value").textContent = valText;
@@ -1571,6 +1650,34 @@ document.addEventListener("DOMContentLoaded", () => {
     saveState();
     update();
     closeModal();
+  }
+
+  // ─── Zoom Functions ─────────────────────────────────
+  function setZoom(level) {
+    state.zoomLevel = Math.max(0.25, Math.min(2.0, level));
+    applyZoom();
+  }
+
+  function applyZoom() {
+    if (canvasContentEl) {
+      canvasContentEl.style.transform = `scale(${state.zoomLevel})`;
+    }
+    if (zoomSliderEl) {
+      zoomSliderEl.value = Math.round(state.zoomLevel * 100);
+    }
+    if (zoomLabelEl) {
+      zoomLabelEl.textContent = Math.round(state.zoomLevel * 100) + "%";
+    }
+  }
+
+  function fitToView() {
+    if (!canvasEl || !canvasContentEl) return;
+    const canvasRect = canvasEl.getBoundingClientRect();
+    const rackHeight = state.rackSize * 42 + 36 + 48; // slots + borders + padding
+    const rackWidth = 440 + 32; // rack width + padding
+    const scaleH = (canvasRect.height - 48) / rackHeight;
+    const scaleW = (canvasRect.width - 48) / rackWidth;
+    setZoom(Math.min(scaleH, scaleW, 2.0));
   }
 
   // Fire initialization
