@@ -19,9 +19,8 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
     <!-- Main Layout Grid -->
     <div class="planner-layout">
       
-      <!-- Left Column: Controls & Catalog -->
-      <div class="control-panel">
-        
+      <!-- Left Sidebar: Specifications & Validation -->
+      <div class="planner-sidebar-left">
         <!-- 1. Project Specifications -->
         <div class="glass-card panel-section fade-in visible">
           <h2 class="panel-title">📋 Project Specifications</h2>
@@ -112,7 +111,22 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
 
           </div>
         </div>
+      </div>
 
+      <!-- Middle Column: Visual Cabinet -->
+      <div class="cabinet-wrapper fade-in visible">
+        <div class="cabinet-header">
+          <span class="cabinet-tag">2D Visual Elevation</span>
+        </div>
+        
+        <!-- The visual metal rack framework -->
+        <div class="cabinet-rack" id="cabinet-rack">
+          <!-- Rendered dynamically by JS -->
+        </div>
+      </div>
+
+      <!-- Right Sidebar: Equipment Library Catalog -->
+      <div class="planner-sidebar-right">
         <!-- 3. Hardware Catalog -->
         <div class="glass-card panel-section fade-in visible">
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; margin-bottom: 16px;">
@@ -138,19 +152,6 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
           <div class="catalog-list" id="catalog-list">
             <!-- Dynamically populated via JS -->
           </div>
-        </div>
-
-      </div>
-
-      <!-- Right Column: Visual Cabinet -->
-      <div class="cabinet-wrapper fade-in visible">
-        <div class="cabinet-header">
-          <span class="cabinet-tag">2D Visual Elevation</span>
-        </div>
-        
-        <!-- The visual metal rack framework -->
-        <div class="cabinet-rack" id="cabinet-rack">
-          <!-- Rendered dynamically by JS -->
         </div>
       </div>
 
