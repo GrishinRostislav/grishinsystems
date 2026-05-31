@@ -966,6 +966,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let availableOutlets = state.placedDevices.reduce((sum, d) => sum + (d.outlets || 0), 0);
 
+    const activeSwitches = state.placedDevices.filter(d => d.type === "switch");
+    const hasRouter = state.placedDevices.some(d => d.type === "router");
+    
+    // Core switch is the one with the most ports, then highest slot
+    const sortedSwitches = [...activeSwitches].sort((a, b) => {
+      if (b.ports !== a.ports) return b.ports - a.ports;
+      return b.slot - a.slot;
+    });
+    const coreSwitchId = sortedSwitches.length > 0 ? sortedSwitches[0].instanceId : null;
+    const coreUplinks = (hasRouter ? 1 : 0) + Math.max(0, activeSwitches.length - 1);
+
     // Sort devices by slot descending to ensure consistent top-down port allocation
     const sortedDevices = [...state.placedDevices].sort((a, b) => b.slot - a.slot);
 
@@ -1055,8 +1066,11 @@ document.addEventListener("DOMContentLoaded", () => {
           // Render patch panel ports in a single row of 24 evenly spaced
           const cols = dev.ports;
           portsHtml += `<div class="device-ports patch-panel-ports" style="grid-template-columns: repeat(${cols}, 1fr);">`;
+        } else if (dev.type === "router") {
+          const cols = dev.ports;
+          portsHtml += `<div class="device-ports" style="grid-template-columns: repeat(${cols}, auto);">`;
         } else {
-          // Switches and routers render in 2 rows
+          // Switches render in 2 rows
           const cols = Math.ceil(dev.ports / 2);
           portsHtml += `<div class="device-ports" style="grid-template-columns: repeat(${cols}, auto);">`;
         }
@@ -1065,7 +1079,8 @@ document.addEventListener("DOMContentLoaded", () => {
           let classStr = "port-dot";
           
           if (dev.type === "switch") {
-            const isUplinkPort = (i === 0); // Port 1 is designated as the uplink port
+            const uplinksNeeded = dev.instanceId === coreSwitchId ? coreUplinks : 1;
+            const isUplinkPort = (i < uplinksNeeded);
             const isPoeCapable = dev.poe_ports > 0 && i < dev.poe_ports;
             
             if (isPoeCapable) {
@@ -1090,8 +1105,14 @@ document.addEventListener("DOMContentLoaded", () => {
               remainingNonPoeForPanels--;
             }
           } else if (dev.type === "router") {
-            // For routers, typically 1 WAN and 1 LAN uplink are active
-            if (i < 2) classStr += " active";
+            const numWan = dev.name.includes("2WAN") || dev.name.includes("4L2W") ? 2 : 1;
+            
+            if (i < numWan) {
+              classStr += " uplink"; // Color WAN ports blue
+              if (i === numWan - 1) classStr += " wan-last"; // Gap between WAN and LAN
+            } else if (i === numWan) {
+              classStr += " uplink"; // LAN uplink to switch is also part of backbone
+            }
           } else {
             // For sources and misc devices, show their ports as actively connected
             classStr += " active";

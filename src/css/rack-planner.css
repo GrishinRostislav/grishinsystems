@@ -761,6 +761,10 @@ body.dragging-active .placed-device * {
   border-color: var(--accent);
 }
 
+.port-dot.wan-last {
+  margin-right: 20px; /* Gap between WAN and LAN */
+}
+
 .patch-panel-ports .port-dot {
   width: 14px;
   height: 12px;
