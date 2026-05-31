@@ -513,8 +513,21 @@
 }
 
 /* ----------------------------------------------------------
-   7. PLACED DEVICES
+   7. PLACED DEVICES & ACCESSORIES
    ---------------------------------------------------------- */
+.rack-shelf-bg {
+  position: absolute;
+  bottom: 1px;
+  left: 37px;
+  right: 6px;
+  height: 6px;
+  background: linear-gradient(to bottom, #475569, #1e293b);
+  border-bottom: 2px solid #0f172a;
+  border-radius: 2px;
+  z-index: 4; /* Below placed devices (which are z-index 5) */
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.1);
+}
+
 .placed-device {
   position: absolute;
   left: 37px;

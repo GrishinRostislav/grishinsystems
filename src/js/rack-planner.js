@@ -49,14 +49,14 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "avr-denon-s570", name: "Denon AVR-S570H 5.2-Ch (1 Zone)", brand: "denon", u: 3, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 399 },
       { id: "avr-denon-x2800", name: "Denon AVR-X2800H 7.2-Ch (2 Zones)", brand: "denon", u: 3, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1199 },
       { id: "avr-marantz-c50", name: "Marantz Cinema 50 9.4-Ch (3 Zones)", brand: "marantz", u: 4, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 2500 },
-      { id: "amp-sonos", name: "Sonos Amp 125W (2-Ch Stereo Zone)", brand: "sonos", u: 1, ports: 2, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 699 }
+      { id: "amp-sonos", name: "Sonos Amp 125W (2-Ch Stereo Zone)", brand: "sonos", u: 1, width_fraction: 0.5, ports: 2, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 699 }
     ],
     sources: [
-      { id: "apple-tv-4k", name: "Apple TV 4K Media Player", brand: "apple", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 149 },
-      { id: "sony-ps5", name: "Sony PlayStation 5 Console", brand: "sony", u: 3, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 499 },
-      { id: "cable-box", name: "Generic Cable / Satellite Box", brand: "generic", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 99 },
-      { id: "nv-shield", name: "NVIDIA Shield TV Pro Media Player", brand: "generic", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 199 },
-      { id: "sonos-port", name: "Sonos Port Audio Streamer", brand: "sonos", u: 1, ports: 2, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 449 }
+      { id: "apple-tv-4k", name: "Apple TV 4K Media Player", brand: "apple", u: 1, width_fraction: 0.25, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 149 },
+      { id: "sony-ps5", name: "Sony PlayStation 5 Console", brand: "sony", u: 3, width_fraction: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 499 },
+      { id: "cable-box", name: "Generic Cable / Satellite Box", brand: "generic", u: 1, width_fraction: 0.5, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 99 },
+      { id: "nv-shield", name: "NVIDIA Shield TV Pro Media Player", brand: "generic", u: 1, width_fraction: 0.25, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 199 },
+      { id: "sonos-port", name: "Sonos Port Audio Streamer", brand: "sonos", u: 1, width_fraction: 0.33, ports: 2, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 449 }
     ],
     misc: [
       { id: "organizer-1u", name: "1U Brush Cable Organizer", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: false, type: "misc", cost: 20 },
@@ -758,7 +758,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Quick Click action - Find first empty slot that fits
       itemEl.querySelector(".catalog-item-action").addEventListener("click", (e) => {
-        const slot = findFirstAvailableSlot(item.u);
+        const slot = findFirstAvailableSlot(item.u, item.width_fraction || 1);
         if (slot) {
           addDevice(item.id, slot);
           
@@ -784,12 +784,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Check if U slots are occupied
-  function isSlotOccupied(slot, height, excludeInstanceId = null) {
+  function isSlotOccupied(slot, height, excludeInstanceId = null, incomingFraction = 1) {
     for (let i = 0; i < height; i++) {
       const targetU = slot - i;
       if (targetU <= 0 || targetU > state.rackSize) return true; // Out of bounds
       
-      const collision = state.placedDevices.find(dev => {
+      const occupyingDevices = state.placedDevices.filter(dev => {
         if (excludeInstanceId && dev.instanceId === excludeInstanceId) return false;
         // Device occupies slots from dev.slot down to dev.slot - dev.u + 1
         const devStart = dev.slot;
@@ -797,7 +797,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return targetU <= devStart && targetU >= devEnd;
       });
 
-      if (collision) return true;
+      const totalFraction = occupyingDevices.reduce((sum, dev) => sum + (dev.width_fraction || 1), 0);
+      if (totalFraction + incomingFraction > 1.01) return true;
     }
     return false;
   }
@@ -812,9 +813,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Find first slot starting from top that can accommodate item
-  function findFirstAvailableSlot(height) {
+  function findFirstAvailableSlot(height, incomingFraction = 1) {
     for (let u = state.rackSize; u >= height; u--) {
-      if (!isSlotOccupied(u, height)) {
+      if (!isSlotOccupied(u, height, null, incomingFraction)) {
         return u;
       }
     }
@@ -937,13 +938,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalPoeDevices = endpointQtyCount;
     const totalDropPoints = state.dropPoints + endpointQtyCount;
     
+    // Local sources needing ports
+    const localRackSources = state.placedDevices.reduce((sum, d) => {
+      if (d.type !== "switch" && d.type !== "patch-panel" && d.ports > 0) {
+        return sum + d.ports;
+      }
+      return sum;
+    }, 0);
+    
     let remainingPoeForSwitches = totalPoeDevices;
-    let remainingNonPoeForSwitches = Math.max(0, (totalDropPoints + state.localLines) - totalPoeDevices);
+    let remainingNonPoeForSwitches = Math.max(0, (totalDropPoints + state.localLines + localRackSources) - totalPoeDevices);
     let remainingPoeForPanels = Math.min(totalDropPoints, totalPoeDevices);
     let remainingNonPoeForPanels = Math.max(0, totalDropPoints - remainingPoeForPanels);
 
     // Sort devices by slot descending to ensure consistent top-down port allocation
     const sortedDevices = [...state.placedDevices].sort((a, b) => b.slot - a.slot);
+
+    const slotLeftOffsets = {}; // Track horizontal position for fractional devices
 
     // Place devices absolutely in their correct slot positions
     sortedDevices.forEach(dev => {
@@ -963,8 +974,31 @@ document.addEventListener("DOMContentLoaded", () => {
       devEl.draggable = true;
       devEl.style.height = `${dev.u * 42 - 3}px`; // 1U = 42px. Subtract a little padding
       
+      const widthFrac = dev.width_fraction || 1;
+      if (!slotLeftOffsets[dev.slot]) slotLeftOffsets[dev.slot] = 0;
+      const currentLeft = slotLeftOffsets[dev.slot];
+      
+      for (let i = 0; i < dev.u; i++) {
+        const u = dev.slot - i;
+        if (!slotLeftOffsets[u]) slotLeftOffsets[u] = 0;
+        slotLeftOffsets[u] = Math.max(slotLeftOffsets[u], currentLeft + widthFrac);
+      }
+
+      // Add shelf background if it's the first fractional device in the slot
+      if (widthFrac < 1 && currentLeft === 0) {
+        const shelfBg = document.createElement("div");
+        shelfBg.className = "rack-shelf-bg";
+        slotEl.appendChild(shelfBg);
+      }
+      
+      // Calculate layout
+      const paddingLeft = 37;
+      const totalPadding = 43; // 37px left + 6px right
+      devEl.style.left = `calc(${paddingLeft}px + (100% - ${totalPadding}px) * ${currentLeft})`;
+      devEl.style.width = `calc((100% - ${totalPadding}px) * ${widthFrac})`;
+      devEl.style.right = 'auto'; // override CSS default
+      
       // Calculate top position of the absolute element
-      // Standard slot height is 42px
       const slotsFromTop = state.rackSize - dev.slot;
       const topPosPx = slotsFromTop * 42 + 1;
       devEl.style.top = `${topPosPx}px`;
@@ -1173,95 +1207,70 @@ document.addEventListener("DOMContentLoaded", () => {
     below.sort((a, b) => b.slot - a.slot);
     above.sort((a, b) => a.slot - b.slot);
 
-    // Initialize occupied slots set with targetDev
-    const occupied = new Set();
-    for (let i = 0; i < targetDev.u; i++) {
-      occupied.add(targetSlot - i);
+    // Initialize occupied slots map
+    const occupied = new Map();
+    function addOccupied(s, u, fraction) {
+      for (let i = 0; i < u; i++) {
+        const checkU = s - i;
+        occupied.set(checkU, (occupied.get(checkU) || 0) + fraction);
+      }
     }
+    function fits(s, u, fraction) {
+      for (let i = 0; i < u; i++) {
+        const checkU = s - i;
+        if (checkU <= 0 || checkU > state.rackSize) return false;
+        if ((occupied.get(checkU) || 0) + fraction > 1.01) return false;
+      }
+      return true;
+    }
+
+    addOccupied(targetSlot, targetDev.u, targetDev.width_fraction || 1);
 
     // Process below group (push down)
     below.forEach(dev => {
+      const frac = dev.width_fraction || 1;
       let slotFound = null;
       for (let u = dev.slot; u >= dev.u; u--) {
-        let fits = true;
-        for (let i = 0; i < dev.u; i++) {
-          const checkU = u - i;
-          if (checkU <= 0 || occupied.has(checkU)) {
-            fits = false;
-            break;
-          }
-        }
-        if (fits) {
+        if (fits(u, dev.u, frac)) {
           slotFound = u;
           break;
         }
       }
-      // If couldn't push down, search upwards
       if (slotFound === null) {
         for (let u = dev.u; u <= state.rackSize; u++) {
-          let fits = true;
-          for (let i = 0; i < dev.u; i++) {
-            const checkU = u - i;
-            if (checkU <= 0 || occupied.has(checkU)) {
-              fits = false;
-              break;
-            }
-          }
-          if (fits) {
+          if (fits(u, dev.u, frac)) {
             slotFound = u;
             break;
           }
         }
       }
-
       if (slotFound !== null) {
         dev.slot = slotFound;
-        for (let i = 0; i < dev.u; i++) {
-          occupied.add(slotFound - i);
-        }
+        addOccupied(slotFound, dev.u, frac);
       }
     });
 
     // Process above group (push up)
     above.forEach(dev => {
+      const frac = dev.width_fraction || 1;
       let slotFound = null;
       for (let u = dev.slot; u <= state.rackSize; u++) {
-        let fits = true;
-        for (let i = 0; i < dev.u; i++) {
-          const checkU = u - i;
-          if (checkU <= 0 || occupied.has(checkU)) {
-            fits = false;
-            break;
-          }
-        }
-        if (fits) {
+        if (fits(u, dev.u, frac)) {
           slotFound = u;
           break;
         }
       }
-      // If couldn't push up, search downwards
       if (slotFound === null) {
         for (let u = state.rackSize; u >= dev.u; u--) {
-          let fits = true;
-          for (let i = 0; i < dev.u; i++) {
-            const checkU = u - i;
-            if (checkU <= 0 || occupied.has(checkU)) {
-              fits = false;
-              break;
-            }
-          }
-          if (fits) {
+          if (fits(u, dev.u, frac)) {
             slotFound = u;
             break;
           }
         }
       }
-
       if (slotFound !== null) {
         dev.slot = slotFound;
-        for (let i = 0; i < dev.u; i++) {
-          occupied.add(slotFound - i);
-        }
+        addOccupied(slotFound, dev.u, frac);
       }
     });
 
