@@ -1529,7 +1529,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const keystoneTotalCost = keystoneQty * keystoneUnitCost;
     const rj45TotalCost = rj45Qty * rj45UnitCost;
 
-    totalCost += keystoneTotalCost + rj45TotalCost;
+    let hdmiQty = 0;
+    let patchcordQty = totalPoEEndPoints;
+    let switchCount = 0;
+
+    state.placedDevices.forEach(dev => {
+      const ln = dev.name.toLowerCase();
+      if (ln.includes("apple tv") || ln.includes("playstation") || ln.includes("cable") || ln.includes("shield") || ln.includes("core 1") || ln.includes("core 3") || ln.includes("core 5") || dev.brand === "denon" || dev.brand === "marantz" || ln.includes("receiver") || ln.includes("avr")) {
+        hdmiQty += 1;
+      }
+      if (dev.type === "switch") {
+        switchCount++;
+      } else if (dev.type !== "patch-panel" && dev.type !== "power" && dev.ports) {
+        patchcordQty += dev.ports;
+      }
+    });
+
+    if (switchCount > 1) {
+      patchcordQty += (switchCount - 1);
+    }
+
+    const patchcordUnitCost = 3.00;
+    const hdmiUnitCost = 15.00;
+    const patchcordTotalCost = patchcordQty * patchcordUnitCost;
+    const hdmiTotalCost = hdmiQty * hdmiUnitCost;
+
+    totalCost += keystoneTotalCost + rj45TotalCost + patchcordTotalCost + hdmiTotalCost;
 
     // 2. Gather and group manifest items
     const groups = {};
@@ -1623,6 +1648,32 @@ document.addEventListener("DOMContentLoaded", () => {
         subText: "(1 per PoE Endpoint)",
         qty: rj45Qty,
         cost: rj45TotalCost
+      };
+    }
+
+    if (patchcordQty > 0) {
+      const key = "acc_patchcords";
+      groups[key] = {
+        id: key,
+        type: "Accessory",
+        typeGroup: "accessory",
+        name: "Network Patch Cable (Assorted Lengths)",
+        subText: "",
+        qty: patchcordQty,
+        cost: patchcordTotalCost
+      };
+    }
+
+    if (hdmiQty > 0) {
+      const key = "acc_hdmi";
+      groups[key] = {
+        id: key,
+        type: "Accessory",
+        typeGroup: "accessory",
+        name: "4K/8K HDMI Cable (Assorted Lengths)",
+        subText: "",
+        qty: hdmiQty,
+        cost: hdmiTotalCost
       };
     }
 
