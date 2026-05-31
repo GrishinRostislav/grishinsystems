@@ -20,8 +20,19 @@
 
 .rp-main {
   display: grid;
-  grid-template-columns: 280px 1fr 300px;
+  grid-template-columns: var(--left-width, 280px) 4px 1fr 4px var(--right-width, 300px);
   overflow: hidden;
+}
+
+.rp-resizer {
+  background: rgba(255, 255, 255, 0.05);
+  cursor: col-resize;
+  transition: background 0.2s;
+  z-index: 10;
+}
+
+.rp-resizer:hover, .rp-resizer.active {
+  background: var(--accent);
 }
 
 /* ----------------------------------------------------------
@@ -1699,7 +1710,7 @@ body.dragging-active .placed-device * {
    ---------------------------------------------------------- */
 @media (max-width: 1024px) {
   .rp-main {
-    grid-template-columns: 240px 1fr 260px;
+    grid-template-columns: var(--left-width, 240px) 4px 1fr 4px var(--right-width, 260px);
   }
 
   .rp-btn-label {
@@ -1714,6 +1725,9 @@ body.dragging-active .placed-device * {
 @media (max-width: 768px) {
   .rp-main {
     grid-template-columns: 1fr;
+  }
+  .rp-resizer {
+    display: none;
   }
 
   .rp-sidebar {

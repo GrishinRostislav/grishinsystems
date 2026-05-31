@@ -1684,6 +1684,66 @@ document.addEventListener("DOMContentLoaded", () => {
     setZoom(Math.min(scaleH, scaleW, 2.0));
   }
 
+  // --- Sidebar Resizer Logic ---
+  const resizerLeft = document.getElementById("rp-resizer-left");
+  const resizerRight = document.getElementById("rp-resizer-right");
+  const mainEl = document.querySelector(".rp-main");
+
+  // Load saved widths
+  const savedLeft = localStorage.getItem("rp-left-width");
+  const savedRight = localStorage.getItem("rp-right-width");
+  if (savedLeft) mainEl.style.setProperty("--left-width", savedLeft + "px");
+  if (savedRight) mainEl.style.setProperty("--right-width", savedRight + "px");
+
+  function initResizer(resizer, side) {
+    if (!resizer) return;
+    
+    let startX = 0;
+    let startWidth = 0;
+
+    const onMouseMove = (e) => {
+      const dx = e.clientX - startX;
+      let newWidth;
+      
+      if (side === "left") {
+        newWidth = Math.max(200, Math.min(600, startWidth + dx));
+        mainEl.style.setProperty("--left-width", newWidth + "px");
+      } else {
+        newWidth = Math.max(200, Math.min(600, startWidth - dx));
+        mainEl.style.setProperty("--right-width", newWidth + "px");
+      }
+    };
+
+    const onMouseUp = () => {
+      resizer.classList.remove("active");
+      document.body.style.cursor = "default";
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+      
+      // Save
+      if (side === "left") {
+        localStorage.setItem("rp-left-width", mainEl.style.getPropertyValue("--left-width").replace("px", ""));
+      } else {
+        localStorage.setItem("rp-right-width", mainEl.style.getPropertyValue("--right-width").replace("px", ""));
+      }
+      fitToView(); // Re-adjust canvas zoom if needed
+    };
+
+    resizer.addEventListener("mousedown", (e) => {
+      startX = e.clientX;
+      const currentWidth = window.getComputedStyle(mainEl).getPropertyValue(`--${side}-width`);
+      startWidth = parseInt(currentWidth) || (side === "left" ? 280 : 300);
+      
+      resizer.classList.add("active");
+      document.body.style.cursor = "col-resize";
+      document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mouseup", onMouseUp);
+    });
+  }
+
+  initResizer(resizerLeft, "left");
+  initResizer(resizerRight, "right");
+
   // Fire initialization
   init();
 });
