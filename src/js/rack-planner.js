@@ -1133,7 +1133,6 @@ document.addEventListener("DOMContentLoaded", () => {
           portsHtml += `<span class="${classStr}"></span>`;
         }
         portsHtml += `</div>`;
-        if (dev.brand === "apple") portsHtml = "";
       }
 
       // Add LEDs
