@@ -1077,6 +1077,9 @@ document.addEventListener("DOMContentLoaded", () => {
               classStr += " active";
               remainingNonPoeForPanels--;
             }
+          } else {
+            // For routers, sources, and misc devices, show their ports as actively connected
+            classStr += " active";
           }
           
           portsHtml += `<span class="${classStr}"></span>`;
