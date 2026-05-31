@@ -1012,8 +1012,15 @@ document.addEventListener("DOMContentLoaded", () => {
       // Calculate layout
       const paddingLeft = 37;
       const totalPadding = 43; // 37px left + 6px right
-      devEl.style.left = `calc(${paddingLeft}px + (100% - ${totalPadding}px) * ${currentLeft})`;
-      devEl.style.width = `calc((100% - ${totalPadding}px) * ${widthFrac})`;
+      
+      if (widthFrac < 1) {
+        // Add horizontal gap (2px margin on each side = 4px between items)
+        devEl.style.left = `calc(${paddingLeft}px + (100% - ${totalPadding}px) * ${currentLeft} + 2px)`;
+        devEl.style.width = `calc((100% - ${totalPadding}px) * ${widthFrac} - 4px)`;
+      } else {
+        devEl.style.left = `calc(${paddingLeft}px + (100% - ${totalPadding}px) * ${currentLeft})`;
+        devEl.style.width = `calc((100% - ${totalPadding}px) * ${widthFrac})`;
+      }
       devEl.style.right = 'auto'; // override CSS default
       
       // Calculate top position of the absolute element
