@@ -977,6 +977,16 @@
   animation: flash-green 1.2s ease-out;
 }
 
+.placed-device.drop-hover {
+  border: 1.5px dashed var(--accent) !important;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.4) !important;
+  filter: brightness(1.2);
+}
+
+body.dragging-active .placed-device * {
+  pointer-events: none !important;
+}
+
 /* General BOM order buttons */
 .bom-order-btn {
   background: transparent;

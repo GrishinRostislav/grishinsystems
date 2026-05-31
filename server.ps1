@@ -6,8 +6,16 @@ Write-Host 'Server started on http://localhost:8765'
 while ($listener.IsListening) {
     $ctx = $listener.GetContext()
     $path = $ctx.Request.Url.LocalPath
-    if ($path -eq '/') { $path = '/index.html' }
-    $filePath = Join-Path 'c:\Users\Ross\Documents\Projects\grishinsystems' $path.TrimStart('/')
+    $cleanPath = $path.TrimStart('/').Replace('/', [System.IO.Path]::DirectorySeparatorChar)
+    if ($cleanPath -eq '') { $cleanPath = 'index.html' }
+    
+    $basePath = Join-Path $PSScriptRoot '_site'
+    $filePath = Join-Path $basePath $cleanPath
+    
+    if (Test-Path -Path $filePath -PathType Container) {
+        $filePath = Join-Path $filePath 'index.html'
+    }
+    
     if (Test-Path $filePath) {
         $bytes = [System.IO.File]::ReadAllBytes($filePath)
         $ext = [System.IO.Path]::GetExtension($filePath)

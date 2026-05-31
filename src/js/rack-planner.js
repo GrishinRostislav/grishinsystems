@@ -599,11 +599,13 @@ document.addEventListener("DOMContentLoaded", () => {
         state.draggedInstanceId = null;
         e.dataTransfer.setData("text/plain", item.id);
         itemEl.style.opacity = "0.5";
+        document.body.classList.add("dragging-active");
       });
 
       itemEl.addEventListener("dragend", () => {
         itemEl.style.opacity = "1";
         state.draggedPresetId = null;
+        document.body.classList.remove("dragging-active");
       });
 
       // Quick Click action - Find first empty slot that fits
@@ -900,12 +902,41 @@ document.addEventListener("DOMContentLoaded", () => {
       devEl.addEventListener("dragstart", (e) => {
         state.draggedInstanceId = dev.instanceId;
         state.draggedPresetId = null;
+        e.dataTransfer.setData("text/plain", dev.instanceId);
+        e.dataTransfer.effectAllowed = "move";
         devEl.style.opacity = "0.4";
+        document.body.classList.add("dragging-active");
       });
 
       devEl.addEventListener("dragend", () => {
         devEl.style.opacity = "1";
         state.draggedInstanceId = null;
+        document.body.classList.remove("dragging-active");
+      });
+
+      // Allow dropping other devices on top of this device to slide them non-destructively
+      devEl.addEventListener("dragover", (e) => {
+        if (state.draggedInstanceId === dev.instanceId) return; // Prevent dragover on self
+        e.preventDefault();
+        e.stopPropagation();
+        devEl.classList.add("drop-hover");
+      });
+
+      devEl.addEventListener("dragleave", () => {
+        devEl.classList.remove("drop-hover");
+      });
+
+      devEl.addEventListener("drop", (e) => {
+        if (state.draggedInstanceId === dev.instanceId) return; // Prevent drop on self
+        e.preventDefault();
+        e.stopPropagation();
+        devEl.classList.remove("drop-hover");
+        
+        if (state.draggedPresetId) {
+          addDevice(state.draggedPresetId, dev.slot);
+        } else if (state.draggedInstanceId) {
+          moveDevice(state.draggedInstanceId, dev.slot);
+        }
       });
 
       cabinetRackEl.appendChild(devEl);
