@@ -836,8 +836,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!foundPreset) return;
 
-    const totalUUsed = state.placedDevices.reduce((sum, d) => sum + d.u, 0);
-    if (totalUUsed + foundPreset.u > state.rackSize) {
+    if (findFirstAvailableSlot(foundPreset.u, foundPreset.width_fraction || 1) === null) {
       alert(`Not enough space in the rack cabinet to add ${foundPreset.name} (${foundPreset.u}U).`);
       return;
     }
@@ -954,7 +953,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // Sort devices by slot descending to ensure consistent top-down port allocation
     const sortedDevices = [...state.placedDevices].sort((a, b) => b.slot - a.slot);
 
+    // Precalculate total fractional width used per slot to center them
+    const slotTotalFraction = {};
+    sortedDevices.forEach(dev => {
+      const frac = dev.width_fraction || 1;
+      for (let i = 0; i < dev.u; i++) {
+        const u = dev.slot - i;
+        slotTotalFraction[u] = (slotTotalFraction[u] || 0) + frac;
+      }
+    });
+
     const slotLeftOffsets = {}; // Track horizontal position for fractional devices
+    const slotHasShelf = {}; // Track if shelf background was added
 
     // Place devices absolutely in their correct slot positions
     sortedDevices.forEach(dev => {
@@ -975,17 +985,25 @@ document.addEventListener("DOMContentLoaded", () => {
       devEl.style.height = `${dev.u * 42 - 3}px`; // 1U = 42px. Subtract a little padding
       
       const widthFrac = dev.width_fraction || 1;
-      if (!slotLeftOffsets[dev.slot]) slotLeftOffsets[dev.slot] = 0;
+      
+      if (slotLeftOffsets[dev.slot] === undefined) {
+        const totalFrac = Math.min(1, slotTotalFraction[dev.slot] || 1);
+        slotLeftOffsets[dev.slot] = (1 - totalFrac) / 2;
+      }
       const currentLeft = slotLeftOffsets[dev.slot];
       
       for (let i = 0; i < dev.u; i++) {
         const u = dev.slot - i;
-        if (!slotLeftOffsets[u]) slotLeftOffsets[u] = 0;
+        if (slotLeftOffsets[u] === undefined) {
+           const tFrac = Math.min(1, slotTotalFraction[u] || 1);
+           slotLeftOffsets[u] = (1 - tFrac) / 2;
+        }
         slotLeftOffsets[u] = Math.max(slotLeftOffsets[u], currentLeft + widthFrac);
       }
 
       // Add shelf background if it's the first fractional device in the slot
-      if (widthFrac < 1 && currentLeft === 0) {
+      if (widthFrac < 1 && !slotHasShelf[dev.slot]) {
+        slotHasShelf[dev.slot] = true;
         const shelfBg = document.createElement("div");
         shelfBg.className = "rack-shelf-bg";
         slotEl.appendChild(shelfBg);
