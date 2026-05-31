@@ -1318,7 +1318,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // Validation Logic
   function runValidations() {
     // 1. Space validation
-    const totalUUsed = state.placedDevices.reduce((sum, d) => sum + d.u, 0);
+    const uniqueOccupiedUs = new Set();
+    state.placedDevices.forEach(d => {
+       for (let i = 0; i < d.u; i++) uniqueOccupiedUs.add(d.slot - i);
+    });
+    const totalUUsed = uniqueOccupiedUs.size;
     const uPercent = Math.min(Math.round((totalUUsed / state.rackSize) * 100), 100);
     
     let spaceStatus = "valid";
@@ -1335,7 +1339,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const numSwitches = activeSwitches.length;
     const uplinkPorts = numSwitches; // 1 uplink port per switch
     
-    const switchPortsNeeded = totalDropPoints + state.localLines + uplinkPorts;
+    const localRackSources = state.placedDevices.reduce((sum, d) => {
+      if (d.type !== "switch" && d.type !== "patch-panel" && d.ports > 0) return sum + d.ports;
+      return sum;
+    }, 0);
+    
+    const switchPortsNeeded = totalDropPoints + state.localLines + localRackSources + uplinkPorts;
     const totalSwitchPorts = state.placedDevices.reduce((sum, d) => sum + (d.type === "switch" ? d.ports : 0), 0);
     
     let switchStatus = "valid";
