@@ -1530,7 +1530,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const rj45TotalCost = rj45Qty * rj45UnitCost;
 
     let hdmiQty = 0;
-    let patchcordQty = totalPoEEndPoints;
+    let patchcordQty = totalPoEEndPoints + totalWallPorts;
     let switchCount = 0;
 
     state.placedDevices.forEach(dev => {
