@@ -361,16 +361,18 @@
   background: #0a0f1a;
   background-image: radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   background-size: 20px 20px;
-  overflow: hidden;
+  overflow: auto;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   position: relative;
+  padding: 40px 0;
 }
 
 .rp-canvas-content {
   transition: transform 0.15s ease;
-  transform-origin: center center;
+  transform-origin: top center;
+  margin: 0 auto;
 }
 
 /* ----------------------------------------------------------
@@ -1051,7 +1053,7 @@ body.dragging-active .placed-device * {
   height: 45vh;
   background: #111827;
   border-top: 2px solid var(--accent);
-  transform: translateY(100%);
+  transform: translateY(calc(100% + 36px));
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 40;
   display: flex;

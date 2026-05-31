@@ -27,6 +27,13 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
         <option value="24">24U</option>
         <option value="42">42U</option>
       </select>
+      <div class="rp-toolbar-zoom" style="display:flex; align-items:center; gap:8px; margin-left: 16px;">
+        <button class="rp-zoom-btn" id="zoom-out" title="Zoom Out">−</button>
+        <input type="range" id="zoom-slider" class="rp-zoom-slider" min="25" max="200" value="100" step="5">
+        <button class="rp-zoom-btn" id="zoom-in" title="Zoom In">+</button>
+        <span class="rp-zoom-label" id="zoom-label">100%</span>
+        <button class="rp-zoom-btn" id="zoom-fit" title="Fit to View">⊡</button>
+      </div>
     </div>
     <div class="rp-toolbar-right">
       <button class="rp-toolbar-btn" id="btn-bom-toggle" title="Bill of Materials">📋 <span class="rp-btn-label">BOM</span></button>
@@ -165,11 +172,6 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
       <span class="rp-status-chip" id="status-cost">💰 $0</span>
     </div>
     <div class="rp-status-right">
-      <button class="rp-zoom-btn" id="zoom-out" title="Zoom Out">−</button>
-      <input type="range" id="zoom-slider" class="rp-zoom-slider" min="25" max="200" value="100" step="5">
-      <button class="rp-zoom-btn" id="zoom-in" title="Zoom In">+</button>
-      <span class="rp-zoom-label" id="zoom-label">100%</span>
-      <button class="rp-zoom-btn" id="zoom-fit" title="Fit to View">⊡</button>
     </div>
   </div>
 
