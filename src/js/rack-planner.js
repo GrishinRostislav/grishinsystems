@@ -358,7 +358,7 @@ document.addEventListener("DOMContentLoaded", () => {
           let fits = true;
           for (let i = 0; i < dev.u; i++) {
             const checkU = u - i;
-            if (checkU <= 0 || isSlotOccupiedInList(checkU, adjustedDevices)) {
+            if (checkU <= 0 || isSlotOccupiedInList(checkU, adjustedDevices, dev.width_fraction || 1)) {
               fits = false;
               break;
             }
@@ -376,7 +376,7 @@ document.addEventListener("DOMContentLoaded", () => {
             let fits = true;
             for (let i = 0; i < dev.u; i++) {
               const checkU = u - i;
-              if (checkU <= 0 || isSlotOccupiedInList(checkU, adjustedDevices)) {
+              if (checkU <= 0 || isSlotOccupiedInList(checkU, adjustedDevices, dev.width_fraction || 1)) {
                 fits = false;
                 break;
               }
@@ -804,12 +804,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Check if slot U is occupied in a custom list of devices
-  function isSlotOccupiedInList(u, list) {
-    return list.some(dev => {
+  function isSlotOccupiedInList(u, list, incomingFraction = 1) {
+    const occupyingDevices = list.filter(dev => {
       const start = dev.slot;
       const end = dev.slot - dev.u + 1;
       return u <= start && u >= end;
     });
+    
+    if (occupyingDevices.length > 0) {
+      const totalFraction = occupyingDevices.reduce((sum, dev) => sum + (dev.width_fraction || 1), 0);
+      if (totalFraction + incomingFraction > 1.01) return true;
+    }
+    return false;
   }
 
   // Find first slot starting from top that can accommodate item
