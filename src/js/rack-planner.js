@@ -1108,7 +1108,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const numWan = dev.name.includes("2WAN") || dev.name.includes("4L2W") ? 2 : 1;
             
             if (i < numWan) {
-              classStr += " uplink"; // Color WAN ports blue
+              classStr += " wan-port"; // Color WAN ports red and label them
               if (i === numWan - 1) classStr += " wan-last"; // Gap between WAN and LAN
             } else if (i === numWan) {
               classStr += " uplink"; // LAN uplink to switch is also part of backbone
