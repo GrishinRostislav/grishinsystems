@@ -168,6 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const addCustomModalEl = document.getElementById("custom-device-modal");
   const customFormEl = document.getElementById("custom-device-form");
   let customTargetSlot = null;
+  let editingEndpointIndex = null;
 
   // Zoom & App Elements
   const canvasEl = document.getElementById("rp-canvas");
@@ -214,8 +215,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // Open Endpoint Modal
     if (btnOpenEndpointModalEl) {
       btnOpenEndpointModalEl.addEventListener("click", () => {
+        editingEndpointIndex = null;
         if (endpointFormEl) {
           endpointFormEl.reset(); // Reset form which triggers the 'reset' listener below
+          const headerTitle = document.querySelector("#endpoint-device-modal .modal-header h3");
+          if (headerTitle) headerTitle.textContent = "Add PoE Endpoint Device";
+          const addBtn = document.getElementById("btn-add-endpoint");
+          if (addBtn) addBtn.textContent = "Add to Project";
         }
         endpointModalEl.classList.add("open");
       });
@@ -296,11 +302,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const endpointPreset = poeEndpointDatabase.find(ep => ep.id === endpointId);
         if (!endpointPreset) return;
         
-        const existing = state.endpoints.find(ep => ep.id === endpointId);
-        if (existing) {
-          existing.qty += qty;
-        } else {
-          state.endpoints.push({
+        if (editingEndpointIndex !== null) {
+          state.endpoints[editingEndpointIndex] = {
             id: endpointPreset.id,
             name: endpointPreset.name,
             brand: endpointPreset.brand,
@@ -309,7 +312,24 @@ document.addEventListener("DOMContentLoaded", () => {
             wattage: endpointPreset.wattage,
             poeClass: endpointPreset.poeClass,
             cost: endpointPreset.cost
-          });
+          };
+          editingEndpointIndex = null;
+        } else {
+          const existing = state.endpoints.find(ep => ep.id === endpointId);
+          if (existing) {
+            existing.qty += qty;
+          } else {
+            state.endpoints.push({
+              id: endpointPreset.id,
+              name: endpointPreset.name,
+              brand: endpointPreset.brand,
+              category: endpointPreset.category,
+              qty: qty,
+              wattage: endpointPreset.wattage,
+              poeClass: endpointPreset.poeClass,
+              cost: endpointPreset.cost
+            });
+          }
         }
         
         saveState();
@@ -608,7 +628,8 @@ document.addEventListener("DOMContentLoaded", () => {
         <td style="padding: 6px 8px; text-align: center;"><span class="endpoint-badge badge-${ep.category}">${catLabel}</span></td>
         <td style="padding: 6px 8px; text-align: center; font-family: monospace;">${ep.qty}</td>
         <td style="padding: 6px 8px; text-align: right; font-family: monospace; color: var(--accent-cyan);">${totalWattage}W</td>
-        <td style="padding: 6px 8px; text-align: right;">
+        <td style="padding: 6px 8px; text-align: right; white-space: nowrap;">
+          <button type="button" class="endpoint-edit-btn" title="Edit Device" style="background:none;border:none;cursor:pointer;padding:2px 4px;opacity:0.7;margin-right:4px;">✏️</button>
           <button type="button" class="endpoint-delete-btn" title="Remove Device">✕</button>
         </td>
       `;
@@ -648,6 +669,23 @@ document.addEventListener("DOMContentLoaded", () => {
       tr.addEventListener("dragend", () => {
         tr.classList.remove("dragging-row");
         state.draggedEndpointIndex = undefined;
+      });
+      
+      tr.querySelector(".endpoint-edit-btn").addEventListener("click", () => {
+        editingEndpointIndex = index;
+        const epToEdit = state.endpoints[index];
+        
+        selectEndpointCatEl.value = epToEdit.category;
+        populateEndpointDropdown();
+        selectEndpointModelEl.value = epToEdit.id;
+        inputEndpointQtyEl.value = epToEdit.qty;
+        
+        const headerTitle = document.querySelector("#endpoint-device-modal .modal-header h3");
+        if (headerTitle) headerTitle.textContent = "Edit PoE Endpoint Device";
+        const addBtn = document.getElementById("btn-add-endpoint");
+        if (addBtn) addBtn.textContent = "Save Changes";
+        
+        endpointModalEl.classList.add("open");
       });
       
       tr.querySelector(".endpoint-delete-btn").addEventListener("click", () => {
