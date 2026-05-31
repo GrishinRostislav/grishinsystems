@@ -45,12 +45,6 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "ups-cyberpower-2u", name: "CyberPower 1500VA UPS", brand: "cyberpower", u: 2, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 8, requires_power: true, type: "power", cost: 249 },
       { id: "pdu-apc-1u", name: "APC 1U PDU Rackmount", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 10, requires_power: true, type: "power", cost: 99 }
     ],
-    video: [
-      { id: "tv-samsung-65", name: "Samsung 65\" QLED 4K Smart TV", brand: "generic", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 899 },
-      { id: "tv-sony-75", name: "Sony 75\" Bravia XR 4K TV", brand: "sony", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1499 },
-      { id: "proj-epson-4k", name: "Epson Pro Cinema LS12000 Projector", brand: "generic", u: 2, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 4999 },
-      { id: "araknis-hdmi-matrix", name: "Araknis 4x4 HDMI Matrix Switcher", brand: "araknis", u: 1, ports: 8, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1250 }
-    ],
     theater: [
       { id: "avr-denon-s570", name: "Denon AVR-S570H 5.2-Ch (1 Zone)", brand: "denon", u: 3, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 399 },
       { id: "avr-denon-x2800", name: "Denon AVR-X2800H 7.2-Ch (2 Zones)", brand: "denon", u: 3, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1199 },
@@ -1327,9 +1321,6 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (dev.brand === "apple" || dev.brand === "sony" || lowerName.includes("playstation") || lowerName.includes("box") || dev.brand === "sonos") {
           typeLabel = "Source / Console";
           typeGroup = "sources";
-        } else if (lowerName.includes("tv") || lowerName.includes("projector") || lowerName.includes("matrix") || lowerName.includes("display")) {
-          typeLabel = "Video Device";
-          typeGroup = "video";
         } else if (lowerName.includes("shelf")) {
           typeLabel = "Rack Shelf";
           typeGroup = "misc";
@@ -1414,12 +1405,11 @@ document.addEventListener("DOMContentLoaded", () => {
       "switch": 2,
       "patch-panel": 3,
       "power": 4,
-      "video": 5,
-      "theater": 6,
-      "sources": 7,
-      "misc": 8,
-      "endpoint": 9,
-      "accessory": 10
+      "theater": 5,
+      "sources": 6,
+      "misc": 7,
+      "endpoint": 8,
+      "accessory": 9
     };
 
     if (state.bomSortColumn) {
