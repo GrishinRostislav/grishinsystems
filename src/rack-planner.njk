@@ -9,71 +9,59 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
 <!-- ═══════════════════════════════════════════════════════════ -->
 <!-- Full-Viewport App Shell                                    -->
 <!-- ═══════════════════════════════════════════════════════════ -->
-<div class="rp-app" id="rp-app">
-
-  <!-- ─── App Toolbar ─────────────────────────────────────── -->
-  <div class="rp-toolbar">
-    <div class="rp-toolbar-left">
-      <span class="rp-toolbar-icon">⬡</span>
-      <span class="rp-toolbar-title">Rack Planner</span>
-      <span class="rp-toolbar-badge">2D</span>
+<div class="ue-app" id="rp-app">
+  <!-- ─── Top Menu Bar ─────────────────────────────────────── -->
+  <div class="ue-menubar">
+    <div class="ue-menu-left">
+      <div class="ue-menu-item">
+        File
+        <div class="ue-dropdown">
+          <div class="ue-dropdown-item" id="menu-file-print">🖨️ Print Manifest</div>
+          <div class="ue-dropdown-item danger" id="menu-file-clear">✕ Clear Rack</div>
+        </div>
+      </div>
+      <div class="ue-menu-item">
+        View
+        <div class="ue-dropdown">
+          <div class="ue-dropdown-item" data-toggle-window="catalog">✓ Components</div>
+          <div class="ue-dropdown-item" data-toggle-window="settings">✓ Project Settings</div>
+          <div class="ue-dropdown-item" data-toggle-window="endpoints">✓ PoE Endpoints</div>
+          <div class="ue-dropdown-item" data-toggle-window="validation">✓ Validation</div>
+          <div class="ue-dropdown-item" data-toggle-window="bom">  Bill of Materials</div>
+        </div>
+      </div>
+      <div class="ue-menu-item">
+        Help
+        <div class="ue-dropdown">
+          <div class="ue-dropdown-item" id="menu-help-about">About Rack Planner</div>
+        </div>
+      </div>
     </div>
-    <div class="rp-toolbar-center">
-      <label class="rp-toolbar-select-label" for="input-rack-size">Cabinet</label>
-      <select id="input-rack-size" class="rp-toolbar-select">
+
+    <div class="ue-menu-center">
+      <span class="ue-toolbar-title">Rack Planner 2D</span>
+      <select id="input-rack-size" class="ue-toolbar-select">
         <option value="9">9U</option>
         <option value="12">12U</option>
         <option value="18" selected>18U</option>
         <option value="24">24U</option>
         <option value="42">42U</option>
       </select>
-      <div class="rp-toolbar-zoom" style="display:flex; align-items:center; gap:8px; margin-left: 16px;">
-        <button class="rp-zoom-btn" id="zoom-out" title="Zoom Out">−</button>
-        <input type="range" id="zoom-slider" class="rp-zoom-slider" min="25" max="200" value="100" step="5">
-        <button class="rp-zoom-btn" id="zoom-in" title="Zoom In">+</button>
-        <span class="rp-zoom-label" id="zoom-label">100%</span>
-        <button class="rp-zoom-btn" id="zoom-fit" title="Fit to View">⊡</button>
-      </div>
     </div>
-    <div class="rp-toolbar-right">
-      <button class="rp-toolbar-btn" id="btn-bom-toggle" title="Bill of Materials">📋 <span class="rp-btn-label">BOM</span></button>
-      <button class="rp-toolbar-btn" id="btn-print" title="Print Manifest">🖨️ <span class="rp-btn-label">Print</span></button>
-      <button class="rp-toolbar-btn rp-toolbar-btn--danger" id="btn-clear" title="Clear Rack">✕ <span class="rp-btn-label">Clear</span></button>
+
+    <div class="ue-menu-right">
+      <span class="ue-status-chip" id="status-space">📦 0U / 18U</span>
+      <span class="ue-status-chip" id="status-ports">🔌 0 Ports</span>
+      <span class="ue-status-chip" id="status-poe">⚡ 0W PoE</span>
+      <span class="ue-status-chip" id="status-cost">💰 $0</span>
     </div>
   </div>
 
-  <!-- ─── Main 3-Column Area ──────────────────────────────── -->
-  <div class="rp-main">
-
-    <!-- ── Left Sidebar: Component Library ──────────────── -->
-    <div class="rp-sidebar rp-sidebar--left" id="rp-sidebar-left">
-      <div class="rp-sidebar-head">
-        <h3>Components</h3>
-        <button id="btn-add-custom" class="rp-btn-sm" title="Add Custom Device">+ Custom</button>
-      </div>
-
-      <div class="rp-search-wrap">
-        <input type="text" id="catalog-search" class="rp-search-input" placeholder="Search equipment…" autocomplete="off">
-        <button id="catalog-search-clear" class="rp-search-clear" style="display:none;">✕</button>
-      </div>
-
-      <div class="catalog-tabs" id="catalog-tabs">
-        <button class="catalog-tab active" data-tab="switches">Switches</button>
-        <button class="catalog-tab" data-tab="panels">Panels</button>
-        <button class="catalog-tab" data-tab="routers">Routers</button>
-        <button class="catalog-tab" data-tab="power">Power</button>
-        <button class="catalog-tab" data-tab="theater">Theater</button>
-        <button class="catalog-tab" data-tab="sources">Sources</button>
-        <button class="catalog-tab" data-tab="misc">Misc</button>
-      </div>
-
-      <div class="catalog-list" id="catalog-list">
-        <!-- Dynamically populated via JS -->
-      </div>
-    </div>
-
-    <!-- ── Center: Zoomable Canvas ─────────────────────── -->
-    <div class="rp-canvas" id="rp-canvas">
+  <!-- ─── Desktop Area ─────────────────────────────────────── -->
+  <div class="ue-desktop" id="ue-desktop">
+    
+    <!-- Viewport (Canvas Background) -->
+    <div class="ue-viewport rp-canvas" id="rp-canvas">
       <div class="rp-canvas-content" id="rp-canvas-content">
         <div class="cabinet-wrapper">
           <div class="cabinet-rack" id="cabinet-rack">
@@ -83,12 +71,52 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
       </div>
     </div>
 
-    <!-- ── Right Sidebar: Tools & Settings ─────────────── -->
-    <div class="rp-sidebar rp-sidebar--right" id="rp-sidebar-right">
+    <!-- Viewport Zoom Controls -->
+    <div class="ue-viewport-zoom">
+      <button class="rp-zoom-btn" id="zoom-out" title="Zoom Out">−</button>
+      <input type="range" id="zoom-slider" class="rp-zoom-slider" min="25" max="200" value="100" step="5">
+      <button class="rp-zoom-btn" id="zoom-in" title="Zoom In">+</button>
+      <span class="rp-zoom-label" id="zoom-label">100%</span>
+      <button class="rp-zoom-btn" id="zoom-fit" title="Fit to View">⊡</button>
+    </div>
 
-      <!-- Project Settings -->
-      <div class="rp-panel">
-        <div class="rp-panel-head"><span>📋</span><h4>Project Settings</h4></div>
+    <!-- WINDOW: Catalog -->
+    <div class="ue-window" id="win-catalog" data-window="catalog" style="width:280px; height:600px; left:20px; top:20px; display:flex;">
+      <div class="ue-window-header">
+        <span class="ue-window-title">Components</span>
+        <button class="ue-window-close">✕</button>
+      </div>
+      <div class="ue-window-content rp-sidebar">
+        <div class="rp-sidebar-head" style="padding-bottom: 8px;">
+          <button id="btn-add-custom" class="rp-btn-sm" style="width:100%;">+ Custom Device</button>
+        </div>
+        <div class="rp-search-wrap">
+          <input type="text" id="catalog-search" class="rp-search-input" placeholder="Search equipment…" autocomplete="off">
+          <button id="catalog-search-clear" class="rp-search-clear" style="display:none;">✕</button>
+        </div>
+        <div class="catalog-tabs" id="catalog-tabs">
+          <button class="catalog-tab active" data-tab="switches">Switches</button>
+          <button class="catalog-tab" data-tab="panels">Panels</button>
+          <button class="catalog-tab" data-tab="routers">Routers</button>
+          <button class="catalog-tab" data-tab="power">Power</button>
+          <button class="catalog-tab" data-tab="theater">Theater</button>
+          <button class="catalog-tab" data-tab="sources">Sources</button>
+          <button class="catalog-tab" data-tab="misc">Misc</button>
+        </div>
+        <div class="catalog-list" id="catalog-list">
+          <!-- Dynamically populated via JS -->
+        </div>
+      </div>
+      <div class="ue-resize-handle"></div>
+    </div>
+
+    <!-- WINDOW: Settings -->
+    <div class="ue-window" id="win-settings" data-window="settings" style="width:280px; height:auto; right:20px; top:20px; display:flex;">
+      <div class="ue-window-header">
+        <span class="ue-window-title">Project Settings</span>
+        <button class="ue-window-close">✕</button>
+      </div>
+      <div class="ue-window-content rp-panel" style="border:none; border-radius:0; box-shadow:none; margin:0;">
         <div class="rp-settings-grid">
           <div class="rp-setting">
             <label for="input-drops">Wall Ports</label>
@@ -100,12 +128,20 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
           </div>
         </div>
       </div>
+      <div class="ue-resize-handle"></div>
+    </div>
 
-      <!-- PoE Endpoints -->
-      <div class="rp-panel">
-        <div class="rp-panel-head"><span>📡</span><h4>PoE Endpoints</h4></div>
-        <button type="button" class="rp-btn-full" id="btn-open-endpoint-modal">+ Add Endpoint</button>
-        <div class="endpoint-list-wrapper">
+    <!-- WINDOW: PoE Endpoints -->
+    <div class="ue-window" id="win-endpoints" data-window="endpoints" style="width:340px; height:300px; right:20px; top:120px; display:flex;">
+      <div class="ue-window-header">
+        <span class="ue-window-title">PoE Endpoints</span>
+        <button class="ue-window-close">✕</button>
+      </div>
+      <div class="ue-window-content rp-panel" style="border:none; border-radius:0; box-shadow:none; margin:0; display:flex; flex-direction:column; height:100%;">
+        <div style="padding: 12px; padding-bottom: 0;">
+          <button type="button" class="rp-btn-full" id="btn-open-endpoint-modal">+ Add Endpoint</button>
+        </div>
+        <div class="endpoint-list-wrapper" style="flex:1;">
           <table class="endpoint-table" id="endpoint-table">
             <thead>
               <tr>
@@ -123,10 +159,16 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
           </table>
         </div>
       </div>
+      <div class="ue-resize-handle"></div>
+    </div>
 
-      <!-- Validation Checks -->
-      <div class="rp-panel">
-        <div class="rp-panel-head"><span>🛡️</span><h4>Validation</h4></div>
+    <!-- WINDOW: Validation -->
+    <div class="ue-window" id="win-validation" data-window="validation" style="width:280px; height:auto; right:20px; top:450px; display:flex;">
+      <div class="ue-window-header">
+        <span class="ue-window-title">Validation</span>
+        <button class="ue-window-close">✕</button>
+      </div>
+      <div class="ue-window-content rp-panel" style="border:none; border-radius:0; box-shadow:none; margin:0;">
         <div class="rp-val-list">
           <div class="rp-val-item validation-card valid" id="val-space">
             <span class="rp-val-dot"></span>
@@ -160,57 +202,46 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
           </div>
         </div>
       </div>
+      <div class="ue-resize-handle"></div>
     </div>
-  </div>
 
-  <!-- ─── Bottom Status Bar ───────────────────────────────── -->
-  <div class="rp-statusbar">
-    <div class="rp-status-left">
-      <span class="rp-status-chip" id="status-space">📦 0U / 18U</span>
-      <span class="rp-status-chip" id="status-ports">🔌 0 Ports</span>
-      <span class="rp-status-chip" id="status-poe">⚡ 0W PoE</span>
-      <span class="rp-status-chip" id="status-cost">💰 $0</span>
-    </div>
-    <div class="rp-status-right">
-    </div>
-  </div>
-
-  <!-- ─── BOM Drawer (slides up from bottom) ──────────────── -->
-  <div class="rp-bom-drawer" id="rp-bom-drawer">
-    <div class="rp-bom-handle" id="rp-bom-handle"><div class="rp-bom-handle-bar"></div></div>
-    <div class="rp-bom-header">
-      <h3>📝 Bill of Materials &amp; Manifest</h3>
-      <button class="rp-bom-close" id="btn-bom-close">✕</button>
-    </div>
-    <div class="rp-bom-body">
-      <div class="manifest-grid">
-        <div class="manifest-table-wrapper">
-          <table class="manifest-table">
-            <thead>
-              <tr>
-                <th id="th-type" class="sortable" style="cursor:pointer;user-select:none;">Type <span class="sort-icon"></span></th>
-                <th id="th-name" class="sortable" style="cursor:pointer;user-select:none;">Device <span class="sort-icon"></span></th>
-                <th id="th-qty" class="sortable" style="cursor:pointer;user-select:none;text-align:center;width:80px;">Qty <span class="sort-icon"></span></th>
-                <th id="th-cost" class="sortable" style="cursor:pointer;user-select:none;text-align:right;width:100px;">Cost <span class="sort-icon"></span></th>
-              </tr>
-            </thead>
-            <tbody id="manifest-body">
-              <!-- Dynamically populated via JS -->
-            </tbody>
-          </table>
-        </div>
-        <div class="manifest-summary-card">
-          <h3>Specifications</h3>
-          <div class="summary-row"><span>U Space:</span><span id="manifest-u-count" style="font-weight:700;">0U / 18U</span></div>
-          <div class="summary-row"><span>Switch Ports:</span><span id="manifest-port-count" style="font-weight:700;">0</span></div>
-          <div class="summary-row"><span>PoE Budget:</span><span id="manifest-poe-budget" style="font-weight:700;">0W</span></div>
-          <div class="summary-row"><span>PDU/UPS Plugs:</span><span id="manifest-outlet-count" style="font-weight:700;">0</span></div>
-          <div class="summary-row total"><span>Est. Cost:</span><span id="manifest-total-cost" style="color:var(--accent-cyan);">$0</span></div>
+    <!-- WINDOW: BOM Manifest -->
+    <div class="ue-window" id="win-bom" data-window="bom" style="width:600px; height:300px; left:320px; bottom:20px; display:none;">
+      <div class="ue-window-header">
+        <span class="ue-window-title">Bill of Materials &amp; Manifest</span>
+        <button class="ue-window-close">✕</button>
+      </div>
+      <div class="ue-window-content" style="display:flex; flex-direction:column; height:100%; background:#0a0f1a;">
+        <div class="manifest-grid" style="height:100%;">
+          <div class="manifest-table-wrapper" style="height:100%; overflow:auto;">
+            <table class="manifest-table">
+              <thead>
+                <tr>
+                  <th id="th-type" class="sortable" style="cursor:pointer;user-select:none;">Type <span class="sort-icon"></span></th>
+                  <th id="th-name" class="sortable" style="cursor:pointer;user-select:none;">Device <span class="sort-icon"></span></th>
+                  <th id="th-qty" class="sortable" style="cursor:pointer;user-select:none;text-align:center;width:80px;">Qty <span class="sort-icon"></span></th>
+                  <th id="th-cost" class="sortable" style="cursor:pointer;user-select:none;text-align:right;width:100px;">Cost <span class="sort-icon"></span></th>
+                </tr>
+              </thead>
+              <tbody id="manifest-body">
+                <!-- Dynamically populated via JS -->
+              </tbody>
+            </table>
+          </div>
+          <div class="manifest-summary-card">
+            <h3>Specifications</h3>
+            <div class="summary-row"><span>U Space:</span><span id="manifest-u-count" style="font-weight:700;">0U / 18U</span></div>
+            <div class="summary-row"><span>Switch Ports:</span><span id="manifest-port-count" style="font-weight:700;">0</span></div>
+            <div class="summary-row"><span>PoE Budget:</span><span id="manifest-poe-budget" style="font-weight:700;">0W</span></div>
+            <div class="summary-row"><span>PDU/UPS Plugs:</span><span id="manifest-outlet-count" style="font-weight:700;">0</span></div>
+            <div class="summary-row total"><span>Est. Cost:</span><span id="manifest-total-cost" style="color:var(--accent-cyan);">$0</span></div>
+          </div>
         </div>
       </div>
+      <div class="ue-resize-handle"></div>
     </div>
-  </div>
 
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
