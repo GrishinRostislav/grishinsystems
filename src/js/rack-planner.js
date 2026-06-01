@@ -1252,7 +1252,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const rackWrapper = document.createElement("div");
       rackWrapper.className = "print-rack-wrapper";
-      rackWrapper.style.pageBreakAfter = "always";
+      if (chunkEnd > 1) {
+        rackWrapper.style.pageBreakAfter = "always";
+      }
       rackWrapper.style.marginBottom = "40px";
 
       // Clone the print header for each chunk
