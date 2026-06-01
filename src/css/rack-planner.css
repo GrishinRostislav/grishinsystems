@@ -1747,12 +1747,14 @@ body.dragging-active .placed-device * {
   .rp-print-header p { margin: 2px 0; font-size: 14px; color: #555 !important; }
   .rp-print-header-right { text-align: right; }
 
+  .header, .footer, .mobile-nav,
   .rp-toolbar,
   .rp-sidebar,
   .rp-statusbar,
   .rp-resizer,
   .device-delete-btn,
-  .rp-bom-handle {
+  .rp-bom-handle,
+  .rp-bom-close {
     display: none !important;
   }
 
@@ -1760,6 +1762,10 @@ body.dragging-active .placed-device * {
     position: static !important;
     display: block !important;
     height: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
     overflow: visible !important;
   }
 
