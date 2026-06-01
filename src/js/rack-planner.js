@@ -348,8 +348,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const newSize = parseInt(e.target.value) || 18;
       const adjustedDevices = [];
       
-      // Sort devices bottom-up (ascending by slot) to preserve relative order when sliding
-      const sorted = [...state.placedDevices].sort((a, b) => a.slot - b.slot);
+      // Deep clone devices so we don't mutate state on failure
+      const sorted = JSON.parse(JSON.stringify(state.placedDevices)).sort((a, b) => a.slot - b.slot);
       
       sorted.forEach(dev => {
         // Calculate preferred slot relative to the top of the cabinet
@@ -398,10 +398,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (targetSlot !== null) {
           dev.slot = targetSlot;
           adjustedDevices.push(dev);
-        } else {
-          console.warn(`Device ${dev.name} could not fit in the resized rack and was removed.`);
         }
       });
+      
+      if (adjustedDevices.length < state.placedDevices.length) {
+        alert("Ошибка: Невозможно уменьшить размер шкафа, так как установленное оборудование не поместится. Удалите часть устройств перед уменьшением шкафа.");
+        rackSizeSelectEl.value = state.rackSize;
+        return;
+      }
       
       state.rackSize = newSize;
       // Store devices sorted top-down in state
