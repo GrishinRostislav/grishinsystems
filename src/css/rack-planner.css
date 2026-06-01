@@ -1725,6 +1725,10 @@ body.dragging-active .placed-device * {
   display: none;
 }
 
+.print-only {
+  display: none;
+}
+
 @media print {
   @page {
     margin: 10mm;
@@ -1797,9 +1801,7 @@ body.dragging-active .placed-device * {
 
   #print-header-bom { order: 0 !important; }
   #print-header-rack { 
-    order: 2 !important; 
-    page-break-after: avoid !important;
-    break-after: avoid !important;
+    display: none !important;
   }
 
   .rp-canvas {
@@ -1807,6 +1809,14 @@ body.dragging-active .placed-device * {
     height: auto !important;
     overflow: visible !important;
     padding: 0 !important;
+    display: block !important;
+  }
+
+  #cabinet-rack {
+    display: none !important;
+  }
+
+  .print-only {
     display: block !important;
   }
 

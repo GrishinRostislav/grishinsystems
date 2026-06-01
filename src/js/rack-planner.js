@@ -1235,6 +1235,74 @@ document.addEventListener("DOMContentLoaded", () => {
 
       cabinetRackEl.appendChild(devEl);
     });
+
+    // Automatically generate 14U print chunks
+    generatePrintRacks();
+  }
+
+  function generatePrintRacks() {
+    const printContainer = document.getElementById("print-racks-container");
+    if (!printContainer) return;
+    printContainer.innerHTML = "";
+
+    const chunkSize = 14;
+    for (let chunkStart = state.rackSize; chunkStart >= 1; chunkStart -= chunkSize) {
+      const chunkEnd = Math.max(1, chunkStart - chunkSize + 1);
+      const actualSize = chunkStart - chunkEnd + 1;
+
+      const rackWrapper = document.createElement("div");
+      rackWrapper.className = "print-rack-wrapper";
+      rackWrapper.style.pageBreakAfter = "always";
+      rackWrapper.style.marginBottom = "40px";
+
+      // Clone the print header for each chunk
+      const headerClone = document.getElementById("print-header-rack").cloneNode(true);
+      headerClone.id = ""; // remove duplicate ID
+      headerClone.style.setProperty("display", "flex", "important"); // Override the display:none of the original in CSS
+      headerClone.style.setProperty("page-break-after", "avoid", "important");
+      headerClone.style.setProperty("break-after", "avoid", "important");
+      headerClone.style.marginBottom = "10px";
+      rackWrapper.appendChild(headerClone);
+
+      const cabinetRack = document.createElement("div");
+      cabinetRack.className = "cabinet-rack";
+      cabinetRack.style.minHeight = `${actualSize * 42}px`;
+      
+      const slotsContainer = document.createElement("div");
+      slotsContainer.className = "rack-slots-container";
+
+      for (let u = chunkStart; u >= chunkEnd; u--) {
+        const slotEl = document.createElement("div");
+        slotEl.className = "rack-slot";
+        slotEl.dataset.u = u;
+        const numEl = document.createElement("div");
+        numEl.className = "slot-number";
+        numEl.textContent = `${u}U`;
+        slotEl.appendChild(numEl);
+        slotsContainer.appendChild(slotEl);
+      }
+      cabinetRack.appendChild(slotsContainer);
+
+      // Clone devices that belong to this chunk (based on their top position)
+      const chunkTopPx = (state.rackSize - chunkStart) * 42;
+      const chunkBottomPx = (state.rackSize - chunkEnd) * 42; // This is the top of the last slot in the chunk
+
+      Array.from(cabinetRackEl.children).forEach(el => {
+        if (el.classList.contains("placed-device")) {
+          const topPx = parseInt(el.style.top || "0");
+          // If the device starts within this chunk's physical bounds
+          if (topPx >= chunkTopPx && topPx <= chunkBottomPx) {
+            const clone = el.cloneNode(true);
+            // Recalculate top position relative to this chunk
+            clone.style.top = `${topPx - chunkTopPx + 1}px`;
+            cabinetRack.appendChild(clone);
+          }
+        }
+      });
+
+      rackWrapper.appendChild(cabinetRack);
+      printContainer.appendChild(rackWrapper);
+    }
   }
 
   // Resolve collisions by sliding other devices out of the way non-destructively
