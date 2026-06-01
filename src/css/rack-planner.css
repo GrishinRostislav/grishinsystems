@@ -1749,7 +1749,7 @@ body.dragging-active .placed-device * {
     align-items: center;
     border-bottom: 2px solid #000;
     padding-bottom: 10px;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
   }
   .rp-print-header h2 { margin: 0; font-size: 24px; color: black !important; }
   .rp-print-header p { margin: 2px 0; font-size: 14px; color: #555 !important; }
@@ -1788,21 +1788,22 @@ body.dragging-active .placed-device * {
     padding: 0 !important;
     overflow: visible !important;
     order: 3 !important;
+    page-break-inside: avoid !important;
   }
 
   #print-header-bom { order: 0 !important; }
-  #print-header-rack { order: 2 !important; }
+  #print-header-rack { order: 2 !important; } /* Ineffective for flex ordering, but harmless */
 
   .rp-canvas {
     background: white !important;
     height: auto !important;
     overflow: visible !important;
-    padding: 20px 0 !important;
+    padding: 0 !important;
     display: block !important;
   }
 
   .cabinet-rack {
-    margin: 0 auto 40px auto !important;
+    margin: 0 auto !important;
     page-break-inside: avoid;
     background: #fff !important;
     border: 2px solid #ccc !important;
