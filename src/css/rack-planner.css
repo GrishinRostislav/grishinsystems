@@ -1726,13 +1726,21 @@ body.dragging-active .placed-device * {
 }
 
 @media print {
-  html, body {
+  html, body, .rp-app, .rp-main, .rp-canvas, .rp-canvas-content, .cabinet-wrapper, .rp-print-header {
     background: white !important;
+    background-color: white !important;
+    background-image: none !important;
     color: black !important;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
+  }
+
+  html, body {
     height: auto !important;
     overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
   }
 
   .rp-print-header {
@@ -1786,6 +1794,10 @@ body.dragging-active .placed-device * {
     border-bottom: 2px solid #ccc !important;
     box-shadow: none !important;
   }
+  .cabinet-rack::before,
+  .cabinet-rack::after {
+    display: none !important;
+  }
   
   .cabinet-post {
     background: #f1f5f9 !important;
@@ -1794,8 +1806,10 @@ body.dragging-active .placed-device * {
   }
   
   .slot-number {
+    background: #fff !important;
     color: #666 !important;
     border-bottom: 1px solid #ddd !important;
+    border-right: 1px solid #ddd !important;
   }
 
   .placed-device {
