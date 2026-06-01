@@ -1726,6 +1726,10 @@ body.dragging-active .placed-device * {
 }
 
 @media print {
+  @page {
+    margin: 10mm;
+  }
+
   html, body, .rp-app, .rp-main, .rp-canvas, .rp-canvas-content, .cabinet-wrapper, .rp-print-header {
     background: white !important;
     background-color: white !important;
@@ -1792,7 +1796,11 @@ body.dragging-active .placed-device * {
   }
 
   #print-header-bom { order: 0 !important; }
-  #print-header-rack { order: 2 !important; } /* Ineffective for flex ordering, but harmless */
+  #print-header-rack { 
+    order: 2 !important; 
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
 
   .rp-canvas {
     background: white !important;
