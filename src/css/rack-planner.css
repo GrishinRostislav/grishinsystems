@@ -1781,7 +1781,9 @@ body.dragging-active .placed-device * {
     margin: 0 auto 40px auto !important;
     page-break-inside: avoid;
     background: #fff !important;
-    border: 2px solid #000 !important;
+    border: 2px solid #ccc !important;
+    border-top: 2px solid #ccc !important;
+    border-bottom: 2px solid #ccc !important;
     box-shadow: none !important;
   }
   
@@ -1798,7 +1800,7 @@ body.dragging-active .placed-device * {
 
   .placed-device {
     background: #f8fafc !important;
-    border: 1px solid #000 !important;
+    border: 1px solid #ccc !important;
     box-shadow: none !important;
   }
   
