@@ -402,7 +402,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       
       if (adjustedDevices.length < state.placedDevices.length) {
-        alert("Ошибка: Невозможно уменьшить размер шкафа, так как установленное оборудование не поместится. Удалите часть устройств перед уменьшением шкафа.");
+        alert("Error: Cannot reduce cabinet size because installed equipment would exceed the new height. Please remove some devices before shrinking the cabinet.");
         rackSizeSelectEl.value = state.rackSize;
         return;
       }
