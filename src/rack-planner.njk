@@ -7,12 +7,9 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
 <link rel="stylesheet" href="/css/rack-planner.css">
 
 <!-- ═══════════════════════════════════════════════════════════ -->
-<!-- Full-Viewport App Shell                                    -->
-<!-- ═══════════════════════════════════════════════════════════ -->
 <div class="rp-app" id="rp-app">
-
-  <!-- Printable Header -->
-  <div class="rp-print-header">
+  <!-- Printable Header 1 (BOM) -->
+  <div class="rp-print-header" id="print-header-bom">
     <div class="rp-print-header-left">
       <h2>Grishin Systems</h2>
       <p>Server Rack Layout & Materials Planner</p>
@@ -56,6 +53,18 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
 
   <!-- ─── Main 3-Column Area ──────────────────────────────── -->
   <div class="rp-main">
+
+    <!-- Printable Header 2 (Rack) -->
+    <div class="rp-print-header" id="print-header-rack">
+      <div class="rp-print-header-left">
+        <h2>Grishin Systems</h2>
+        <p>Server Rack Layout & Materials Planner</p>
+      </div>
+      <div class="rp-print-header-right">
+        <p>grishinsystems.com</p>
+        <p>ross@grishinsystems.com | 780-599-0885</p>
+      </div>
+    </div>
 
     <!-- ── Left Sidebar: Component Library ──────────────── -->
     <div class="rp-sidebar rp-sidebar--left" id="rp-sidebar-left">

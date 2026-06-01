@@ -1766,7 +1766,19 @@ body.dragging-active .placed-device * {
     display: none !important;
   }
 
-  .rp-app, .rp-main {
+  .rp-app {
+    position: static !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .rp-main {
     position: static !important;
     display: block !important;
     height: auto !important;
@@ -1775,7 +1787,11 @@ body.dragging-active .placed-device * {
     margin: 0 !important;
     padding: 0 !important;
     overflow: visible !important;
+    order: 3 !important;
   }
+
+  #print-header-bom { order: 0 !important; }
+  #print-header-rack { order: 2 !important; }
 
   .rp-canvas {
     background: white !important;
@@ -1841,7 +1857,10 @@ body.dragging-active .placed-device * {
     box-shadow: none !important;
     border: none !important;
     padding: 0 !important;
-    page-break-before: always;
+    page-break-before: auto !important;
+    page-break-after: always !important;
+    order: 1 !important;
+    margin-bottom: 20px !important;
   }
 
   .rp-bom-drawer * {
