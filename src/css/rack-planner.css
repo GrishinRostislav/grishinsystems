@@ -1722,48 +1722,77 @@ body.dragging-active .placed-device * {
    16. PRINT STYLES
    ---------------------------------------------------------- */
 @media print {
+  html, body {
+    background: white !important;
+    color: black !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
   .rp-toolbar,
   .rp-sidebar,
   .rp-statusbar,
-  .rp-bom-drawer,
-  .device-actions,
+  .rp-resizer,
+  .device-delete-btn,
   .rp-bom-handle {
     display: none !important;
   }
 
-  .rp-app {
-    position: static;
-    display: block;
-  }
-
-  .rp-main {
-    display: block;
+  .rp-app, .rp-main {
+    position: static !important;
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
   }
 
   .rp-canvas {
     background: white !important;
-    background-image: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 20px 0 !important;
+    display: block !important;
   }
 
   .cabinet-rack {
-    border-color: #000 !important;
-    background: white !important;
+    margin: 0 auto 40px auto !important;
+    page-break-inside: avoid;
+    /* Keep dark mode styling for the rack itself so ports/leds look correct */
   }
 
-  .placed-device {
-    background: #f1f5f9 !important;
-    border: 1px solid #000 !important;
+  .rp-bom-drawer {
+    position: static !important;
+    transform: none !important;
+    display: block !important;
+    height: auto !important;
+    background: white !important;
     color: black !important;
     box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
   }
 
-  .placed-device * {
+  .rp-bom-drawer * {
     color: black !important;
+    border-color: #ccc !important;
   }
 
-  .slot-number {
-    background: #e2e8f0 !important;
-    color: #333 !important;
+  .rp-bom-header {
+    background: none !important;
+    border-bottom: 2px solid #000 !important;
+    color: black !important;
+    padding: 0 0 10px 0 !important;
+  }
+
+  .manifest-grid th {
+    background: #f1f5f9 !important;
+    color: black !important;
+    font-weight: bold !important;
+  }
+
+  .manifest-grid td {
+    color: black !important;
   }
 }
 
