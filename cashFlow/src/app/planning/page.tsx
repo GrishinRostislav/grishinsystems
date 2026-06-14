@@ -119,7 +119,15 @@ function PlanningContent() {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Financial Planning</h1>
+      <div className={styles.header}>
+        <div>
+          <h1 className={styles.title}>Financial Planning</h1>
+          <p className={styles.subtitle}>Schedule and manage your recurring bills and income.</p>
+        </div>
+        <button className={styles.btnPrimary} onClick={() => { setEditingSched(null); setIsModalOpen(true); }}>
+          + Add Scheduled Transaction
+        </button>
+      </div>
 
       {pending.length > 0 && (
         <div className={styles.pendingSection}>
@@ -199,9 +207,7 @@ function PlanningContent() {
         )}
       </div>
 
-      <button className={styles.fab} onClick={() => { setEditingSched(null); setIsModalOpen(true); }}>
-        +
-      </button>
+
 
       <ScheduledTransactionModal 
         isOpen={isModalOpen}

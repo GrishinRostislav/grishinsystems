@@ -29,15 +29,15 @@ export default function LoginPage() {
       
       if (res.status === 429) {
         setFrozen(true);
-        setError("Превышено количество попыток. Доступ заблокирован на 10 минут.");
+        setError("Too many attempts. Access locked for 10 minutes.");
       } else if (!res.ok) {
-        setError(data.error === "Invalid password" ? "Неверный пароль" : (data.error || "Неверный пароль"));
+        setError(data.error === "Invalid password" ? "Invalid password" : (data.error || "Invalid password"));
       } else {
         router.push("/");
         router.refresh();
       }
     } catch (err) {
-      setError("Ошибка соединения");
+      setError("Connection error");
     } finally {
       setLoading(false);
     }
@@ -47,19 +47,19 @@ export default function LoginPage() {
     <div className={styles.container}>
       <div className={styles.card}>
         <h1 className={styles.title}>CashFlow</h1>
-        <p className={styles.subtitle}>Введите пароль для доступа к финансам</p>
+        <p className={styles.subtitle}>Enter password to access finances</p>
 
         {frozen ? (
           <div className={styles.frozen}>
-            Превышено количество попыток входа (3).
+            Too many failed login attempts (3).
             <br/><br/>
-            Вход закрыт в целях безопасности. Повторите попытку через 10 минут.
+            Access is locked for security reasons. Please try again in 10 minutes.
           </div>
         ) : (
           <form onSubmit={handleLogin} className={styles.form}>
             <input
               type="password"
-              placeholder="Пароль"
+              placeholder="Password"
               className={styles.input}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -67,7 +67,7 @@ export default function LoginPage() {
               autoFocus
             />
             <button type="submit" className={styles.button} disabled={loading || !password}>
-              {loading ? "Проверка..." : "Войти"}
+              {loading ? "Checking..." : "Log In"}
             </button>
             {error && <div className={styles.error}>{error}</div>}
           </form>

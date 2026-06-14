@@ -52,7 +52,7 @@ export default function Topbar() {
           {dropdownOpen && (
             <div className={styles.dropdown} onClick={(e) => e.stopPropagation()}>
               <div className={styles.dropdownItem} onClick={handleLogout}>
-                Выйти (Logout)
+                Logout
               </div>
             </div>
           )}
