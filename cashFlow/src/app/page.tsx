@@ -139,7 +139,7 @@ export default function Home() {
                 <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `$${Number(val).toFixed(0)}`} />
                 <Tooltip 
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} 
-                  formatter={(val: number) => formatCurrency(val)} 
+                  formatter={(val: any) => formatCurrency(Number(val))} 
                 />
                 <Legend verticalAlign="top" height={36}/>
                 <Area type="monotone" dataKey="prevBalance" name="Previous Balance" stroke="#cbd5e1" strokeDasharray="5 5" strokeWidth={2} fill="none" />
@@ -177,7 +177,7 @@ export default function Home() {
                   <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${Number(value).toFixed(0)}`} />
                   <Tooltip 
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                    formatter={(value: number) => formatCurrency(value)}
+                    formatter={(value: any) => formatCurrency(Number(value))}
                   />
                   <Legend verticalAlign="top" height={36}/>
                   <Area type="monotone" name="Prev Income" dataKey="prevIncome" stroke="#99f6e4" strokeDasharray="4 4" strokeWidth={2} fill="none" />
@@ -213,7 +213,7 @@ export default function Home() {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                    <Tooltip formatter={(value: any) => formatCurrency(Number(value))} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
