@@ -208,8 +208,16 @@ export default function Home() {
                       dataKey="value"
                       labelLine={true}
                       label={({ name, percent, x, y, cx }) => (
-                        <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" fontSize={12}>
-                          {`${((percent || 0) * 100).toFixed(0)}%`}
+                        <text 
+                          x={x} 
+                          y={y} 
+                          fill="#1A2B4C" 
+                          textAnchor={x > cx ? 'start' : 'end'} 
+                          dominantBaseline="central" 
+                          fontSize={11}
+                          fontWeight={500}
+                        >
+                          {`${name} (${((percent || 0) * 100).toFixed(0)}%)`}
                         </text>
                       )}
                     >
@@ -218,6 +226,7 @@ export default function Home() {
                       ))}
                     </Pie>
                     <Tooltip formatter={(value: any) => formatCurrency(Number(value))} />
+                    <Legend layout="horizontal" verticalAlign="bottom" align="center" iconSize={8} iconType="circle" wrapperStyle={{ fontSize: '11px', marginTop: '10px' }} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
