@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model Account {
+  id           String        @id @default(cuid())
+  name         String
+  type         String        // 'checking', 'savings', 'credit', 'investment', etc.
+  balance        Float         @default(0)
+  currency       String        @default("CAD")
+  includeInTotal Boolean       @default(true)
+  isArchived     Boolean       @default(false)
+  transactions          Transaction[]
+  scheduledTransactions ScheduledTransaction[] @relation("ScheduledTransferFrom")
+  scheduledTransfersIn  ScheduledTransaction[] @relation("ScheduledTransferTo")
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+}
+
+model Category {
+  id                    String        @id @default(cuid())
+  name                  String
+  parentId              String?
+  parent                Category?     @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  subcategories         Category[]    @relation("CategoryHierarchy")
+  transactions          Transaction[]
+  scheduledTransactions ScheduledTransaction[]
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+}
+
+model Merchant {
+  id                    String        @id @default(cuid())
+  name                  String        @unique
+  transactions          Transaction[]
+  scheduledTransactions ScheduledTransaction[]
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+}
+
+model Transaction {
+  id            String    @id @default(cuid())
+  amount        Float
+  date          DateTime
+  merchant      String?   // e.g., Walmart, Amazon (Legacy or text fallback)
+  paymentMethod String?   // e.g., Credit Card, Cash, Debit
+  notes         String?
+  
+  accountId     String
+  account       Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  
+  categoryId    String?
+  category      Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  payeeId       String?
+  payee         Merchant? @relation(fields: [payeeId], references: [id], onDelete: SetNull)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model ScheduledTransaction {
+  id            String    @id @default(cuid())
+  amount        Float
+  merchant      String?   // Legacy or fallback text
+  paymentMethod String?
+  notes         String?
+  
+  frequency     String    // 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'
+  nextRunDate   DateTime
+  autoApprove   Boolean   @default(false)
+  isActive      Boolean   @default(true)
+  type          String    @default("expense") // 'expense', 'income', 'transfer'
+
+  accountId     String
+  account       Account   @relation("ScheduledTransferFrom", fields: [accountId], references: [id], onDelete: Cascade)
+  
+  toAccountId   String?
+  toAccount     Account?  @relation("ScheduledTransferTo", fields: [toAccountId], references: [id], onDelete: SetNull)
+  
+  categoryId    String?
+  category      Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  payeeId       String?
+  payee         Merchant? @relation(fields: [payeeId], references: [id], onDelete: SetNull)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}

@@ -1,0 +1,212 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const startDateParam = searchParams.get("startDate");
+    const endDateParam = searchParams.get("endDate");
+
+    // 1. Total Balance of Included Accounts
+    const accounts = await prisma.account.findMany({
+      where: { includeInTotal: true }
+    });
+    const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+
+    // 2. Transactions for calculations
+    const now = new Date();
+    let startDate = new Date(0); // default all time
+    let endDate = new Date();    // default now
+    
+    if (startDateParam) startDate = new Date(startDateParam);
+    if (endDateParam) {
+      endDate = new Date(endDateParam);
+      endDate.setHours(23, 59, 59, 999); // end of the selected day
+    }
+
+    const transactions = await prisma.transaction.findMany({
+      where: {
+        date: { 
+          gte: startDate,
+          lte: endDate
+        }
+      },
+      include: {
+        category: true,
+      },
+      orderBy: { date: "asc" }
+    });
+
+    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const offset = diffDays * 24 * 60 * 60 * 1000;
+
+    const prevStartDate = new Date(startDate.getTime() - offset);
+    const prevEndDate = new Date(endDate.getTime() - offset);
+
+    const prevTransactions = await prisma.transaction.findMany({
+      where: {
+        date: { 
+          gte: prevStartDate,
+          lte: prevEndDate
+        }
+      },
+      orderBy: { date: "asc" }
+    });
+
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    let monthlyIncome = 0;
+    let monthlyExpenses = 0;
+
+    const chartMap: Record<string, { income: number; expenses: number; prevIncome: number; prevExpenses: number }> = {};
+    const categoryExpenseMap: Record<string, number> = {};
+
+    for (const txn of transactions) {
+      const txnDate = new Date(txn.date);
+      const isCurrentMonth = txnDate.getMonth() === currentMonth && txnDate.getFullYear() === currentYear;
+      
+      let chartKey = "";
+      if (diffDays <= 35) {
+        chartKey = txnDate.toLocaleString('default', { month: 'short', day: 'numeric' });
+      } else {
+        chartKey = txnDate.toLocaleString('default', { month: 'short', year: 'numeric' });
+      }
+
+      if (!chartMap[chartKey]) {
+        chartMap[chartKey] = { income: 0, expenses: 0, prevIncome: 0, prevExpenses: 0 };
+      }
+
+      if (txn.amount > 0) {
+        chartMap[chartKey].income += txn.amount;
+        if (isCurrentMonth) monthlyIncome += txn.amount;
+      } else {
+        const absAmount = Math.abs(txn.amount);
+        chartMap[chartKey].expenses += absAmount;
+        if (isCurrentMonth) {
+          monthlyExpenses += absAmount;
+          
+          const catName = txn.category?.name || 'Uncategorized';
+          categoryExpenseMap[catName] = (categoryExpenseMap[catName] || 0) + absAmount;
+        }
+      }
+    }
+
+    for (const txn of prevTransactions) {
+      const mappedDate = new Date(txn.date.getTime() + offset);
+      let chartKey = "";
+      if (diffDays <= 35) {
+        chartKey = mappedDate.toLocaleString('default', { month: 'short', day: 'numeric' });
+      } else {
+        chartKey = mappedDate.toLocaleString('default', { month: 'short', year: 'numeric' });
+      }
+
+      if (!chartMap[chartKey]) {
+        chartMap[chartKey] = { income: 0, expenses: 0, prevIncome: 0, prevExpenses: 0 };
+      }
+
+      if (txn.amount > 0) {
+        chartMap[chartKey].prevIncome += txn.amount;
+      } else {
+        chartMap[chartKey].prevExpenses += Math.abs(txn.amount);
+      }
+    }
+
+    // Sort chart keys chronologically by assuming they were inserted roughly chronologically
+    // A more robust way is to sort by parsing the date, but for now we rely on the DB order
+    const sortedChartKeys = Object.keys(chartMap).sort((a, b) => {
+       const dateA = new Date(a + (diffDays > 35 ? "" : ` ${endDate.getFullYear()}`));
+       const dateB = new Date(b + (diffDays > 35 ? "" : ` ${endDate.getFullYear()}`));
+       return dateA.getTime() - dateB.getTime();
+    });
+
+    const chartData = sortedChartKeys.map(name => ({
+      name,
+      income: chartMap[name].income,
+      expenses: chartMap[name].expenses,
+      prevIncome: chartMap[name].prevIncome,
+      prevExpenses: chartMap[name].prevExpenses,
+    }));
+
+    const pieData = Object.keys(categoryExpenseMap).map(name => ({
+      name,
+      value: categoryExpenseMap[name]
+    })).sort((a, b) => b.value - a.value);
+
+    // 3. Balance Trend Calculation
+    const futureTransactions = await prisma.transaction.aggregate({
+      where: { date: { gt: endDate }, account: { includeInTotal: true } },
+      _sum: { amount: true }
+    });
+    const futureNet = futureTransactions._sum.amount || 0;
+    const rangeNet = transactions.filter(t => accounts.some(a => a.id === t.accountId)).reduce((sum, t) => sum + t.amount, 0);
+    
+    let runningBalance = totalBalance - futureNet - rangeNet;
+
+    const prevFutureTransactions = await prisma.transaction.aggregate({
+      where: { date: { gt: prevEndDate }, account: { includeInTotal: true } },
+      _sum: { amount: true }
+    });
+    const prevFutureNet = prevFutureTransactions._sum.amount || 0;
+    const prevRangeNet = prevTransactions.filter(t => accounts.some(a => a.id === t.accountId)).reduce((sum, t) => sum + t.amount, 0);
+    
+    let prevRunningBalance = totalBalance - prevFutureNet - prevRangeNet;
+
+    const balanceTrendMap: Record<string, number> = {};
+    for (const txn of transactions) {
+      if (accounts.some(a => a.id === txn.accountId)) {
+        const txnDate = new Date(txn.date);
+        let chartKey = "";
+        if (diffDays <= 35) {
+          chartKey = txnDate.toLocaleString('default', { month: 'short', day: 'numeric' });
+        } else {
+          chartKey = txnDate.toLocaleString('default', { month: 'short', year: 'numeric' });
+        }
+        balanceTrendMap[chartKey] = (balanceTrendMap[chartKey] || 0) + txn.amount;
+      }
+    }
+
+    const prevBalanceTrendMap: Record<string, number> = {};
+    for (const txn of prevTransactions) {
+      if (accounts.some(a => a.id === txn.accountId)) {
+        const mappedDate = new Date(txn.date.getTime() + offset);
+        let chartKey = "";
+        if (diffDays <= 35) {
+          chartKey = mappedDate.toLocaleString('default', { month: 'short', day: 'numeric' });
+        } else {
+          chartKey = mappedDate.toLocaleString('default', { month: 'short', year: 'numeric' });
+        }
+        prevBalanceTrendMap[chartKey] = (prevBalanceTrendMap[chartKey] || 0) + txn.amount;
+      }
+    }
+
+    const balanceTrendData = [];
+    for (const key of sortedChartKeys) {
+      const netChange = balanceTrendMap[key] || 0;
+      runningBalance += netChange;
+
+      const prevNetChange = prevBalanceTrendMap[key] || 0;
+      prevRunningBalance += prevNetChange;
+
+      balanceTrendData.push({
+        name: key,
+        balance: runningBalance,
+        prevBalance: prevRunningBalance
+      });
+    }
+
+    return NextResponse.json({
+      totalBalance,
+      monthlyIncome,
+      monthlyExpenses,
+      chartData,
+      pieData,
+      balanceTrendData
+    });
+
+  } catch (error) {
+    console.error("Dashboard API Error:", error);
+    return NextResponse.json({ error: "Failed to fetch dashboard data" }, { status: 500 });
+  }
+}

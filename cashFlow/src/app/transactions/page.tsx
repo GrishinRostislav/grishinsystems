@@ -1,0 +1,170 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import styles from "./page.module.css";
+import Papa from "papaparse";
+import GlobalDateFilter from "@/components/GlobalDateFilter";
+import TransactionModal from "@/components/TransactionModal";
+import { formatCurrency } from "@/utils/format";
+
+type Transaction = {
+  id: string;
+  amount: number;
+  date: string;
+  merchant: string | null;
+  paymentMethod: string | null;
+  notes: string | null;
+  account: { name: string } | null;
+  category: { name: string } | null;
+};
+
+export default function TransactionsPage() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const handleDatesChange = (start: string, end: string) => {
+    setStartDate(start);
+    setEndDate(end);
+  };
+  
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [accounts, setAccounts] = useState<any[]>([]);
+
+  const openCreateModal = () => {
+    setSelectedTransaction(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (txn: Transaction) => {
+    setSelectedTransaction(txn);
+    setIsModalOpen(true);
+  };
+
+  const fetchData = async () => {
+    try {
+      const [txRes] = await Promise.all([
+        fetch(startDate && endDate ? `/api/transactions?startDate=${startDate}&endDate=${endDate}` : "/api/transactions")
+      ]);
+      const txData = await txRes.json();
+      
+      setTransactions(txData);
+    } catch (err) {
+      console.error("Failed to fetch data", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      fetchData();
+    }
+  }, [startDate, endDate]);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        // Here we map the CSV headers to our API schema
+        const parsedData = results.data.map((row: any) => ({
+          date: new Date(row.date || new Date()).toISOString(),
+          amount: parseFloat(row.amount || 0),
+          merchant: row.merchant || "",
+          paymentMethod: row.paymentMethod || "",
+          notes: row.notes || "",
+          accountId: "TODO_ACCOUNT_ID" 
+        }));
+
+        console.log("Parsed CSV:", parsedData);
+        alert("CSV parsed! Ready to send to API once we add an Account selector.");
+      }
+    });
+  };
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <div>
+          <h1>Transactions</h1>
+          <p>Manage and import your financial records.</p>
+        </div>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <GlobalDateFilter onDatesChange={handleDatesChange} />
+          <div className={styles.actions}>
+            <label className={styles.btnSecondary}>
+              Upload CSV
+              <input 
+                type="file" 
+                accept=".csv" 
+                style={{ display: "none" }} 
+                onChange={handleFileUpload} 
+              />
+            </label>
+            <button className={styles.btnPrimary} onClick={openCreateModal}>
+              + Add Manual
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.tableContainer}>
+        {loading && !transactions.length ? (
+          <div className={styles.emptyState}>Loading transactions...</div>
+        ) : transactions.length === 0 ? (
+          <div className={styles.emptyState}>No transactions found. Add one or upload a CSV.</div>
+        ) : (
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Merchant</th>
+                <th>Category</th>
+                <th>Account</th>
+                <th>Payment Method</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {transactions.map((txn: any) => (
+                <tr key={txn.id} onClick={() => openEditModal(txn)} style={{ cursor: 'pointer' }} className={styles.tableRow}>
+                  <td>{new Date(txn.date).toLocaleDateString()}</td>
+                  <td>{txn.merchant || "-"}</td>
+                  <td>{txn.category?.name || "Uncategorized"}</td>
+                  <td>{txn.account?.name || "Unknown"}</td>
+                  <td>{txn.paymentMethod || "-"}</td>
+                  <td className={txn.amount >= 0 ? styles.amountIncome : styles.amountExpense}>
+                    {txn.amount >= 0 ? "+" : ""}{formatCurrency(txn.amount)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot style={{ background: 'var(--bg-secondary)', fontWeight: 600 }}>
+              <tr>
+                <td colSpan={5} style={{ textAlign: 'right', padding: '12px 16px', color: 'var(--text-muted)' }}>Total for Period:</td>
+                <td style={{ padding: '12px 16px', color: transactions.reduce((acc, txn) => acc + txn.amount, 0) >= 0 ? 'var(--sporty-teal)' : '#e11d48' }}>
+                  {transactions.reduce((acc, txn) => acc + txn.amount, 0) >= 0 ? "+" : ""}{formatCurrency(transactions.reduce((acc, txn) => acc + txn.amount, 0))}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        )}
+      </div>
+
+      <TransactionModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        transaction={selectedTransaction} 
+        onSave={fetchData} 
+      />
+    </div>
+  );
+}
