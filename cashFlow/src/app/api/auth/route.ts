@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
   try {
@@ -29,17 +28,15 @@ export async function POST(request: Request) {
         });
       }
 
-      // Set a simple auth cookie
-      const cookieStore = await cookies();
-      cookieStore.set('auth', 'authenticated', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 60 * 60 * 24 * 30, // 30 days
-        path: '/'
-      });
+      const response = NextResponse.json({ success: true });
+      
+      // Set the auth cookie manually using the HTTP header to bypass Next.js basePath auto-prefixing.
+      // This ensures the cookie path is exactly '/' and is sent for both '/cashFlow' and '/cashFlow/' requests.
+      const isProd = process.env.NODE_ENV === 'production';
+      const cookieValue = `auth=authenticated; Path=/; HttpOnly; ${isProd ? 'Secure;' : ''} Max-Age=2592000; SameSite=Lax`;
+      response.headers.append('Set-Cookie', cookieValue);
 
-      return NextResponse.json({ success: true });
+      return response;
     } else {
       // Increment failures
       const newAttempts = (attempt?.attempts || 0) + 1;
@@ -64,7 +61,6 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error("Auth error:", error);
     
-    // Safely mask the database URL to debug what Vercel is sending
     const rawUrl = process.env.POSTGRES_PRISMA_URL || "undefined";
     const maskedUrl = rawUrl.replace(/:[^:@]+@/, ':****@');
 
