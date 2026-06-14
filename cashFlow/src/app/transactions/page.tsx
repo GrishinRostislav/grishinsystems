@@ -5,6 +5,7 @@ import styles from "./page.module.css";
 import Papa from "papaparse";
 import GlobalDateFilter from "@/components/GlobalDateFilter";
 import TransactionModal from "@/components/TransactionModal";
+import ReceiptPreviewModal from "@/components/ReceiptPreviewModal";
 import { formatCurrency } from "@/utils/format";
 
 type Transaction = {
@@ -34,6 +35,11 @@ export default function TransactionsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [accounts, setAccounts] = useState<any[]>([]);
+
+  // Scan State
+  const [isScanModalOpen, setIsScanModalOpen] = useState(false);
+  const [scanData, setScanData] = useState<any | null>(null);
+  const [scanning, setScanning] = useState(false);
 
   const openCreateModal = () => {
     setSelectedTransaction(null);
@@ -90,6 +96,37 @@ export default function TransactionsPage() {
     });
   };
 
+  const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setScanning(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/cashFlow/api/transactions/scan", {
+        method: "POST",
+        body: formData
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setScanData(data);
+        setIsScanModalOpen(true);
+      } else {
+        const err = await res.json();
+        alert("Scan failed: " + err.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error scanning receipt");
+    } finally {
+      setScanning(false);
+      e.target.value = "";
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -100,6 +137,16 @@ export default function TransactionsPage() {
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           <GlobalDateFilter onDatesChange={handleDatesChange} />
           <div className={styles.actions}>
+            <label className={`${styles.btnSecondary} ${scanning ? styles.disabled : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: scanning ? 'not-allowed' : 'pointer' }}>
+              {scanning ? "🤖 Analyzing..." : "📸 Scan Receipt"}
+              <input 
+                type="file" 
+                accept="image/*" 
+                style={{ display: "none" }} 
+                onChange={handleReceiptUpload} 
+                disabled={scanning}
+              />
+            </label>
             <label className={styles.btnSecondary}>
               Upload CSV
               <input 
@@ -164,6 +211,13 @@ export default function TransactionsPage() {
         onClose={() => setIsModalOpen(false)} 
         transaction={selectedTransaction} 
         onSave={fetchData} 
+      />
+
+      <ReceiptPreviewModal
+        isOpen={isScanModalOpen}
+        onClose={() => setIsScanModalOpen(false)}
+        scanData={scanData}
+        onSave={fetchData}
       />
     </div>
   );
