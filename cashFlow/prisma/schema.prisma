@@ -34,6 +34,7 @@ model Category {
   subcategories         Category[]    @relation("CategoryHierarchy")
   transactions          Transaction[]
   scheduledTransactions ScheduledTransaction[]
+  productMappings       ProductMapping[]
   createdAt             DateTime      @default(now())
   updatedAt             DateTime      @updatedAt
 }
@@ -103,4 +104,15 @@ model LoginAttempt {
   attempts  Int      @default(0)
   lockoutAt DateTime?
   updatedAt DateTime @updatedAt
+}
+
+model ProductMapping {
+  id           String   @id @default(cuid())
+  code         String?  @unique
+  rawName      String   @unique
+  friendlyName String
+  categoryId   String?
+  category     Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

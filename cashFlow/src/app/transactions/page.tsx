@@ -22,9 +22,22 @@ type Transaction = {
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+
+  const filteredTransactions = transactions.filter(txn => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      (txn.merchant?.toLowerCase() || "").includes(query) ||
+      (txn.notes?.toLowerCase() || "").includes(query) ||
+      (txn.category?.name?.toLowerCase() || "").includes(query) ||
+      (txn.paymentMethod?.toLowerCase() || "").includes(query) ||
+      (txn.account?.name?.toLowerCase() || "").includes(query)
+    );
+  });
 
   const handleDatesChange = (start: string, end: string) => {
     setStartDate(start);
@@ -163,17 +176,30 @@ export default function TransactionsPage() {
         </div>
       </div>
 
+      <div className={styles.filterBar}>
+        <input 
+          type="text" 
+          placeholder="Search by merchant, description, category, account or payment method..." 
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          className={styles.searchInput}
+        />
+      </div>
+
       <div className={styles.tableContainer}>
         {loading && !transactions.length ? (
           <div className={styles.emptyState}>Loading transactions...</div>
         ) : transactions.length === 0 ? (
           <div className={styles.emptyState}>No transactions found. Add one or upload a CSV.</div>
+        ) : filteredTransactions.length === 0 ? (
+          <div className={styles.emptyState}>No transactions match your search query.</div>
         ) : (
           <table className={styles.table}>
             <thead>
               <tr>
                 <th>Date</th>
                 <th>Merchant</th>
+                <th>Description</th>
                 <th>Category</th>
                 <th>Account</th>
                 <th>Payment Method</th>
@@ -181,10 +207,11 @@ export default function TransactionsPage() {
               </tr>
             </thead>
             <tbody>
-              {transactions.map((txn: any) => (
+              {filteredTransactions.map((txn: any) => (
                 <tr key={txn.id} onClick={() => openEditModal(txn)} style={{ cursor: 'pointer' }} className={styles.tableRow}>
                   <td>{new Date(txn.date).toLocaleDateString()}</td>
                   <td>{txn.merchant || "-"}</td>
+                  <td>{txn.notes || "-"}</td>
                   <td>{txn.category?.name || "Uncategorized"}</td>
                   <td>{txn.account?.name || "Unknown"}</td>
                   <td>{txn.paymentMethod || "-"}</td>
@@ -196,9 +223,9 @@ export default function TransactionsPage() {
             </tbody>
             <tfoot style={{ background: 'var(--bg-secondary)', fontWeight: 600 }}>
               <tr>
-                <td colSpan={5} style={{ textAlign: 'right', padding: '12px 16px', color: 'var(--text-muted)' }}>Total for Period:</td>
-                <td style={{ padding: '12px 16px', color: transactions.reduce((acc, txn) => acc + txn.amount, 0) >= 0 ? 'var(--sporty-teal)' : '#e11d48' }}>
-                  {transactions.reduce((acc, txn) => acc + txn.amount, 0) >= 0 ? "+" : ""}{formatCurrency(transactions.reduce((acc, txn) => acc + txn.amount, 0))}
+                <td colSpan={6} style={{ textAlign: 'right', padding: '12px 16px', color: 'var(--text-muted)' }}>Total for Period:</td>
+                <td style={{ padding: '12px 16px', color: filteredTransactions.reduce((acc, txn) => acc + txn.amount, 0) >= 0 ? 'var(--sporty-teal)' : '#e11d48' }}>
+                  {filteredTransactions.reduce((acc, txn) => acc + txn.amount, 0) >= 0 ? "+" : ""}{formatCurrency(filteredTransactions.reduce((acc, txn) => acc + txn.amount, 0))}
                 </td>
               </tr>
             </tfoot>

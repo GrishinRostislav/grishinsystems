@@ -7,7 +7,13 @@ type ReceiptPreviewModalProps = {
   scanData: {
     date: string;
     merchant: string;
-    items: Array<{ description: string; amount: number; categoryId: string | null }>;
+    items: Array<{
+      code?: string | null;
+      rawName?: string;
+      description: string;
+      amount: number;
+      categoryId: string | null;
+    }>;
     gst: { amount: number; categoryId: string | null } | null;
     _warning?: string;
   } | null;
@@ -26,7 +32,13 @@ export default function ReceiptPreviewModal({ isOpen, onClose, scanData, onSave 
   const [notes, setNotes] = useState("");
   
   // Scanned items state
-  const [items, setItems] = useState<Array<{ description: string; amount: number; categoryId: string | null }>>([]);
+  const [items, setItems] = useState<Array<{
+    code?: string | null;
+    rawName?: string;
+    description: string;
+    amount: number;
+    categoryId: string | null;
+  }>>([]);
   const [gstAmount, setGstAmount] = useState<number>(0);
   const [gstCategoryId, setGstCategoryId] = useState<string>("");
 
@@ -115,7 +127,10 @@ export default function ReceiptPreviewModal({ isOpen, onClose, scanData, onSave 
           merchant,
           paymentMethod,
           notes: notes ? `${item.description} - ${notes}` : item.description,
-          categoryId: item.categoryId || null
+          categoryId: item.categoryId || null,
+          code: item.code || null,
+          rawName: item.rawName || null,
+          friendlyName: item.description,
         })),
         ...(gstAmount !== 0 ? [{
           date: new Date(date).toISOString(),

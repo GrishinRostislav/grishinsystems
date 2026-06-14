@@ -31,6 +31,50 @@ export async function POST(request: Request) {
         },
       });
       createdTransactions.push(newTxn);
+
+      // Save or update ProductMapping if rawName is provided (scanned receipt items)
+      if (txn.rawName) {
+        try {
+          const existingByRaw = await prisma.productMapping.findUnique({
+            where: { rawName: txn.rawName }
+          });
+
+          const existingByCode = txn.code ? await prisma.productMapping.findUnique({
+            where: { code: txn.code }
+          }) : null;
+
+          if (existingByRaw) {
+            await prisma.productMapping.update({
+              where: { id: existingByRaw.id },
+              data: {
+                friendlyName: txn.friendlyName || txn.notes || txn.rawName,
+                categoryId: txn.categoryId || null,
+                code: txn.code || existingByRaw.code || null,
+              }
+            });
+          } else if (existingByCode) {
+            await prisma.productMapping.update({
+              where: { id: existingByCode.id },
+              data: {
+                friendlyName: txn.friendlyName || txn.notes || txn.rawName,
+                categoryId: txn.categoryId || null,
+                rawName: txn.rawName,
+              }
+            });
+          } else {
+            await prisma.productMapping.create({
+              data: {
+                rawName: txn.rawName,
+                code: txn.code || null,
+                friendlyName: txn.friendlyName || txn.notes || txn.rawName,
+                categoryId: txn.categoryId || null,
+              }
+            });
+          }
+        } catch (mapErr) {
+          console.error("Failed to save product mapping:", mapErr);
+        }
+      }
     }
 
     if (totalAmount !== 0) {
