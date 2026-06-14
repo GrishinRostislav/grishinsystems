@@ -168,6 +168,16 @@ export default function Home() {
     return acc;
   }, []) : chartData;
 
+  // Group recent transactions by date for dashboard feed
+  const groupedRecentTransactions: { [dateStr: string]: any[] } = {};
+  recentTransactions.forEach((txn: any) => {
+    const formattedDate = formatDate(txn.date);
+    if (!groupedRecentTransactions[formattedDate]) {
+      groupedRecentTransactions[formattedDate] = [];
+    }
+    groupedRecentTransactions[formattedDate].push(txn);
+  });
+
   return (
     <div className={styles.dashboard}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -359,42 +369,53 @@ export default function Home() {
 
       <div className={styles.chartCard} style={{ marginTop: '24px' }}>
         <h3 style={{ marginBottom: '16px' }}>Last Records</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div>
           {recentTransactions && recentTransactions.length > 0 ? (
-            recentTransactions.map((txn: any) => {
-              const isIncome = txn.amount >= 0;
-              const catLetter = txn.category?.name ? txn.category.name.charAt(0).toUpperCase() : "?";
-              const catColor = getCategoryColor(txn.category?.name);
-              
-              return (
-                <div key={txn.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 8px', borderBottom: '1px solid var(--border-color)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div className={styles.categoryIconSmall} style={{ background: catColor }}>
-                      {catLetter}
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-main)' }}>
-                        {txn.notes || txn.category?.name || "Transaction"}
+            Object.keys(groupedRecentTransactions).map(dateStr => (
+              <div key={dateStr} className={styles.recentDateGroup}>
+                <div className={styles.recentDateHeader}>{dateStr}</div>
+                <div className={styles.recentGroupItems}>
+                  {groupedRecentTransactions[dateStr].map(txn => {
+                    const isIncome = txn.amount >= 0;
+                    const catLetter = txn.category?.name ? txn.category.name.charAt(0).toUpperCase() : "?";
+                    const catColor = getCategoryColor(txn.category?.name);
+                    
+                    return (
+                      <div key={txn.id} className={styles.recentTxnCard}>
+                        <div className={styles.recentTxnLeft}>
+                          <div className={styles.categoryIconSmall} style={{ background: catColor }}>
+                            {catLetter}
+                          </div>
+                          <div className={styles.recentTxnMeta}>
+                            <div className={styles.recentTxnTitle}>
+                              {txn.notes || txn.category?.name || "Transaction"}
+                            </div>
+                            <div className={styles.recentTxnSubtitle}>
+                              {txn.account?.name || "Unknown"}
+                            </div>
+                            {txn.merchant && (
+                              <div className={styles.merchantBadge}>
+                                {txn.merchant}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className={styles.recentTxnRight}>
+                          <div className={isIncome ? styles.recentAmountIncome : styles.recentAmountExpense}>
+                            {isIncome ? "+" : ""}{formatCurrency(txn.amount)}
+                          </div>
+                          {txn.paymentMethod && (
+                            <div className={styles.recentPaymentMethod}>
+                              {txn.paymentMethod}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                        {txn.account?.name || "Unknown"} • {formatDate(txn.date)}
-                        {txn.merchant && ` • ${txn.merchant}`}
-                      </div>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-                    <div style={{ fontWeight: 600, color: isIncome ? 'var(--sporty-teal)' : '#e11d48', fontSize: '14px' }}>
-                      {isIncome ? "+" : ""}{formatCurrency(txn.amount)}
-                    </div>
-                    {txn.paymentMethod && (
-                      <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                        {txn.paymentMethod}
-                      </div>
-                    )}
-                  </div>
+                    );
+                  })}
                 </div>
-              );
-            })
+              </div>
+            ))
           ) : (
             <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>No recent transactions found.</div>
           )}
