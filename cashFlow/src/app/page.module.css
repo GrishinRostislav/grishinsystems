@@ -101,3 +101,30 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 768px) {
+  .dashboard {
+    gap: 16px;
+  }
+  .grid {
+    gap: 12px;
+  }
+  .card {
+    padding: 16px;
+  }
+  .amount {
+    font-size: 26px;
+  }
+  .chartsRow {
+    gap: 16px;
+    margin-top: 8px;
+  }
+  .chartCard {
+    padding: 12px;
+    min-height: 250px;
+  }
+  .chartCard h3 {
+    font-size: 15px;
+    margin-bottom: 8px !important;
+  }
+}

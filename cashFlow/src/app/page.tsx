@@ -7,6 +7,18 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import GlobalDateFilter from "@/components/GlobalDateFilter";
 import { formatCurrency } from "@/utils/format";
 
+const formatYAxis = (val: number) => {
+  const absVal = Math.abs(val);
+  const sign = val < 0 ? '-' : '';
+  if (absVal >= 1000000) {
+    return `${sign}$${(absVal / 1000000).toFixed(1)}M`;
+  }
+  if (absVal >= 1000) {
+    return `${sign}$${(absVal / 1000).toFixed(0)}k`;
+  }
+  return `${sign}$${absVal}`;
+};
+
 export default function Home() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -53,6 +65,17 @@ export default function Home() {
     };
     fetchDashboardData();
   }, [startDate, endDate]);
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const { totalBalance = 0, monthlyIncome = 0, monthlyExpenses = 0, chartData = [], pieData = [], balanceTrendData = [] } = data || {};
 
@@ -123,11 +146,14 @@ export default function Home() {
       </div>
 
       <div className={styles.chartCard} style={{ marginTop: '24px' }}>
-        <h3 style={{ marginBottom: '16px' }}>Balance Trend</h3>
-        <div style={{ width: '100%', height: 300 }}>
+        <h3 style={{ marginBottom: isMobile ? '8px' : '16px' }}>Balance Trend</h3>
+        <div style={{ width: '100%', height: isMobile ? 220 : 300 }}>
           {balanceTrendData && balanceTrendData.length > 0 ? (
             <ResponsiveContainer>
-              <AreaChart data={balanceTrendData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <AreaChart 
+                data={balanceTrendData} 
+                margin={isMobile ? { top: 10, right: 10, left: -20, bottom: 0 } : { top: 10, right: 30, left: 0, bottom: 0 }}
+              >
                 <defs>
                   <linearGradient id="colorBalanceTrend" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#2D5D7B" stopOpacity={0.4}/>
@@ -135,13 +161,13 @@ export default function Home() {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `$${Number(val).toFixed(0)}`} />
+                <XAxis dataKey="name" stroke="#64748b" fontSize={isMobile ? 10 : 12} tickLine={false} axisLine={false} />
+                <YAxis stroke="#64748b" fontSize={isMobile ? 10 : 12} tickLine={false} axisLine={false} tickFormatter={formatYAxis} />
                 <Tooltip 
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} 
                   formatter={(val: any) => formatCurrency(Number(val))} 
                 />
-                <Legend verticalAlign="top" height={36}/>
+                <Legend verticalAlign="top" height={isMobile ? 24 : 36} wrapperStyle={{ fontSize: isMobile ? '10px' : '12px' }} />
                 <Area type="monotone" dataKey="prevBalance" name="Previous Balance" stroke="#cbd5e1" strokeDasharray="5 5" strokeWidth={2} fill="none" />
                 <Area type="monotone" dataKey="balance" name="Balance" stroke="#2D5D7B" strokeWidth={3} fillOpacity={1} fill="url(#colorBalanceTrend)" />
               </AreaChart>
@@ -156,30 +182,33 @@ export default function Home() {
 
       <div className={styles.chartsRow}>
         <div className={styles.chartCard}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? '8px' : '12px' }}>
             <h3 style={{ margin: 0 }}>Income vs Expenses</h3>
-            <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', color: 'var(--text-muted)', cursor: 'pointer' }}>
+            <label style={{ display: 'flex', alignItems: 'center', fontSize: isMobile ? '12px' : '14px', color: 'var(--text-muted)', cursor: 'pointer' }}>
               <input 
                 type="checkbox" 
                 checked={isCumulative} 
                 onChange={(e) => handleCumulativeChange(e.target.checked)} 
-                style={{ marginRight: '8px' }}
+                style={{ marginRight: '6px' }}
               />
               Cumulative
             </label>
           </div>
-          <div style={{ width: '100%', height: 300 }}>
+          <div style={{ width: '100%', height: isMobile ? 220 : 300 }}>
             {processedChartData && processedChartData.length > 0 ? (
               <ResponsiveContainer>
-                <AreaChart data={processedChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <AreaChart 
+                  data={processedChartData} 
+                  margin={isMobile ? { top: 10, right: 10, left: -20, bottom: 0 } : { top: 10, right: 30, left: 0, bottom: 0 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                  <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${Number(value).toFixed(0)}`} />
+                  <XAxis dataKey="name" stroke="#64748b" fontSize={isMobile ? 10 : 12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#64748b" fontSize={isMobile ? 10 : 12} tickLine={false} axisLine={false} tickFormatter={formatYAxis} />
                   <Tooltip 
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                     formatter={(value: any) => formatCurrency(Number(value))}
                   />
-                  <Legend verticalAlign="top" height={36}/>
+                  <Legend verticalAlign="top" height={isMobile ? 24 : 36} wrapperStyle={{ fontSize: isMobile ? '10px' : '12px' }} />
                   <Area type="monotone" name="Prev Income" dataKey="prevIncome" stroke="#99f6e4" strokeDasharray="4 4" strokeWidth={2} fill="none" />
                   <Area type="monotone" name="Prev Expenses" dataKey="prevExpenses" stroke="#fecdd3" strokeDasharray="4 4" strokeWidth={2} fill="none" />
                   <Area type="monotone" name="Income" dataKey="income" stroke="#008080" fill="#008080" fillOpacity={0.1} />
@@ -195,38 +224,53 @@ export default function Home() {
         </div>
         <Link href="/categories" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
           <div className={styles.chartCard} style={{ cursor: 'pointer', height: '100%' }}>
-            <h3>Expenses by Category (This Month)</h3>
-            <div style={{ width: '100%', height: 300, display: 'flex', justifyContent: 'center' }}>
+            <h3 style={{ marginBottom: isMobile ? '8px' : '16px' }}>Expenses by Category</h3>
+            <div style={{ width: '100%', height: isMobile ? 240 : 300, display: 'flex', justifyContent: 'center' }}>
               {pieData && pieData.length > 0 ? (
                 <ResponsiveContainer>
                   <PieChart>
                     <Pie
                       data={pieData}
-                      innerRadius={40}
-                      outerRadius={80}
+                      innerRadius={isMobile ? 30 : 40}
+                      outerRadius={isMobile ? 60 : 80}
                       paddingAngle={5}
                       dataKey="value"
                       labelLine={true}
-                      label={({ name, percent, x, y, cx }) => (
-                        <text 
-                          x={x} 
-                          y={y} 
-                          fill="#1A2B4C" 
-                          textAnchor={x > cx ? 'start' : 'end'} 
-                          dominantBaseline="central" 
-                          fontSize={11}
-                          fontWeight={500}
-                        >
-                          {`${name} (${((percent || 0) * 100).toFixed(0)}%)`}
-                        </text>
-                      )}
+                      label={isMobile 
+                        ? ({ percent, x, y, cx }) => (
+                            <text 
+                              x={x} 
+                              y={y} 
+                              fill="#1A2B4C" 
+                              textAnchor={x > cx ? 'start' : 'end'} 
+                              dominantBaseline="central" 
+                              fontSize={9}
+                              fontWeight={500}
+                            >
+                              {`${((percent || 0) * 100).toFixed(0)}%`}
+                            </text>
+                          )
+                        : ({ name, percent, x, y, cx }) => (
+                            <text 
+                              x={x} 
+                              y={y} 
+                              fill="#1A2B4C" 
+                              textAnchor={x > cx ? 'start' : 'end'} 
+                              dominantBaseline="central" 
+                              fontSize={11}
+                              fontWeight={500}
+                            >
+                              {`${name} (${((percent || 0) * 100).toFixed(0)}%)`}
+                            </text>
+                          )
+                      }
                     >
                       {pieData.map((entry: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip formatter={(value: any) => formatCurrency(Number(value))} />
-                    <Legend layout="horizontal" verticalAlign="bottom" align="center" iconSize={8} iconType="circle" wrapperStyle={{ fontSize: '11px', marginTop: '10px' }} />
+                    <Legend layout="horizontal" verticalAlign="bottom" align="center" iconSize={8} iconType="circle" wrapperStyle={{ fontSize: isMobile ? '10px' : '11px', marginTop: '10px' }} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
