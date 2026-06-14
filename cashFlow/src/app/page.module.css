@@ -147,7 +147,7 @@
 /* Floating Action Button (FAB) container */
 .fabContainer {
   position: fixed;
-  bottom: 24px;
+  bottom: 80px;
   right: 24px;
   z-index: 999;
   display: flex;
