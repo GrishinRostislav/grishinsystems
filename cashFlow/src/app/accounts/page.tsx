@@ -11,7 +11,6 @@ type Account = {
   type: string;
   balance: number;
   currency: string;
-  currency: string;
   includeInTotal: boolean;
   isArchived: boolean;
 };

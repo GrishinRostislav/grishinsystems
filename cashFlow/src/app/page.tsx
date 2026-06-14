@@ -207,7 +207,11 @@ export default function Home() {
                       paddingAngle={5}
                       dataKey="value"
                       labelLine={true}
-                      label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                      label={({ name, percent, x, y, cx }) => (
+                        <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" fontSize={12}>
+                          {`${((percent || 0) * 100).toFixed(0)}%`}
+                        </text>
+                      )}
                     >
                       {pieData.map((entry: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

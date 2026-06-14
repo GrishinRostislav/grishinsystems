@@ -14,6 +14,9 @@ interface ScheduledTransaction {
   nextRunDate: string;
   autoApprove: boolean;
   isActive: boolean;
+  paymentMethod: string;
+  type: string;
+  toAccountId: string;
 }
 
 interface ScheduledModalProps {
@@ -32,11 +35,13 @@ export default function ScheduledTransactionModal({ isOpen, onClose, onSave, tra
     notes: '',
     accountId: '',
     categoryId: '',
-    paymentMethod: 'Credit Card',
+    paymentMethod: '',
     frequency: 'MONTHLY',
     nextRunDate: new Date().toISOString().split('T')[0],
     autoApprove: false,
-    isActive: true
+    isActive: true,
+    type: 'expense',
+    toAccountId: '',
   });
   
   const [loading, setLoading] = useState(false);
@@ -56,14 +61,16 @@ export default function ScheduledTransactionModal({ isOpen, onClose, onSave, tra
     if (transaction) {
       setType(transaction.type || (transaction.toAccountId ? 'transfer' : (transaction.amount < 0 ? 'expense' : 'income')));
       setFormData({
-        autoApprove: false,
-        isActive: true,
-        frequency: 'MONTHLY',
-        notes: '',
         ...transaction,
         amount: Math.abs(transaction.amount),
         nextRunDate: transaction.nextRunDate ? new Date(transaction.nextRunDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-        paymentMethod: transaction.paymentMethod || ''
+        paymentMethod: transaction.paymentMethod || '',
+        type: transaction.type || 'expense',
+        toAccountId: transaction.toAccountId || '',
+        autoApprove: transaction.autoApprove ?? false,
+        isActive: transaction.isActive ?? true,
+        frequency: transaction.frequency || 'MONTHLY',
+        notes: transaction.notes || ''
       });
     } else {
       setType('expense');
@@ -77,7 +84,9 @@ export default function ScheduledTransactionModal({ isOpen, onClose, onSave, tra
         frequency: 'MONTHLY',
         nextRunDate: new Date().toISOString().split('T')[0],
         autoApprove: false,
-        isActive: true
+        isActive: true,
+        paymentMethod: '',
+        type: 'expense'
       });
     }
   }, [transaction, accounts, isOpen]);
