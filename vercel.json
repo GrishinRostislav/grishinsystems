@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/cashFlow",
+      "destination": "https://grishinsystems-l8lt.vercel.app/cashFlow"
+    },
+    {
+      "source": "/cashFlow/:match*",
+      "destination": "https://grishinsystems-l8lt.vercel.app/cashFlow/:match*"
+    }
+  ]
+}
