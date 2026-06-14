@@ -9,6 +9,7 @@ type ReceiptPreviewModalProps = {
     merchant: string;
     items: Array<{ description: string; amount: number; categoryId: string | null }>;
     gst: { amount: number; categoryId: string | null } | null;
+    _warning?: string;
   } | null;
   onSave: () => void;
 };
