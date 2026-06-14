@@ -69,9 +69,12 @@ export default function ReceiptPreviewModal({ isOpen, onClose, scanData, onSave 
         if (scanData) {
           setDate(scanData.date || new Date().toISOString().slice(0, 10));
           setMerchant(scanData.merchant || "");
-          setItems(scanData.items || []);
+          setItems((scanData.items || []).map(item => ({
+            ...item,
+            amount: parseFloat(Number(item.amount || 0).toFixed(2))
+          })));
           if (scanData.gst) {
-            setGstAmount(scanData.gst.amount || 0);
+            setGstAmount(parseFloat(Number(scanData.gst.amount || 0).toFixed(2)));
             setGstCategoryId(scanData.gst.categoryId || "");
           } else {
             setGstAmount(0);

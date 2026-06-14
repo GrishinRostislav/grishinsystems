@@ -42,7 +42,7 @@ export default function TransactionModal({ isOpen, onClose, transaction, onSave 
         
         if (transaction) {
           setTransactionType(transaction.amount < 0 ? "expense" : "income");
-          setAmount(Math.abs(transaction.amount).toString());
+          setAmount(Math.abs(transaction.amount).toFixed(2));
           setDate(new Date(transaction.date).toISOString().slice(0, 10));
           setMerchant(transaction.merchant || "");
           setAccountId(transaction.account?.id || transaction.accountId || (accData.length > 0 ? accData[0].id : ""));
