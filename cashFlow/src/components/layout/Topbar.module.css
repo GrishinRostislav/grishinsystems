@@ -35,3 +35,34 @@
   font-size: 14px;
   cursor: pointer;
 }
+
+.profileContainer {
+  position: relative;
+}
+
+.dropdown {
+  position: absolute;
+  right: 0;
+  top: 44px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  box-shadow: var(--shadow-md);
+  min-width: 145px;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.dropdownItem {
+  padding: 10px 16px;
+  font-size: 14px;
+  color: var(--text-main);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.dropdownItem:hover {
+  background-color: var(--bg-hover);
+  color: var(--tribal-green);
+}

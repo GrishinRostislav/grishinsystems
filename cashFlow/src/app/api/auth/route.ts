@@ -76,3 +76,19 @@ export async function POST(request: Request) {
     }, { status: 500 });
   }
 }
+
+export async function DELETE() {
+  try {
+    const response = NextResponse.json({ success: true });
+    
+    // Clear the auth cookie by setting it with Max-Age=0 and an expired value
+    response.headers.append(
+      'Set-Cookie',
+      'auth=; Path=/; HttpOnly; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax'
+    );
+    
+    return response;
+  } catch (error: any) {
+    return NextResponse.json({ error: `Logout failed: ${error.message || error}` }, { status: 500 });
+  }
+}
