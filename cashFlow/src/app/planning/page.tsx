@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import styles from './page.module.css';
 import ScheduledTransactionModal from '@/components/ScheduledTransactionModal';
-import { formatCurrency } from '@/utils/format';
+import { formatCurrency, formatDate } from '@/utils/format';
 import { Suspense } from 'react';
 
 function PlanningContent() {
@@ -143,7 +143,7 @@ function PlanningContent() {
                     </div>
                   </div>
                   <span className={styles.badge} style={{ background: '#fef3c7', color: '#b45309' }}>
-                    DUE: {new Date(s.nextRunDate).toLocaleDateString()}
+                    DUE: {formatDate(s.nextRunDate)}
                   </span>
                 </div>
                 <div className={styles.meta}>
@@ -182,7 +182,7 @@ function PlanningContent() {
                     </div>
                   </div>
                   <span className={styles.badge}>
-                    NEXT: {new Date(s.nextRunDate).toLocaleDateString()}
+                    NEXT: {formatDate(s.nextRunDate)}
                   </span>
                 </div>
                 <div className={styles.meta}>

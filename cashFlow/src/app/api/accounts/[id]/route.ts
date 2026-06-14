@@ -70,7 +70,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       else expenses += Math.abs(txn.amount);
 
       chartData.push({
-        date: new Date(txn.date).toLocaleDateString(),
+        date: new Date(txn.date).toLocaleDateString("en-US", { timeZone: "UTC" }),
         balance: runningBalance,
         amount: txn.amount,
         merchant: txn.merchant

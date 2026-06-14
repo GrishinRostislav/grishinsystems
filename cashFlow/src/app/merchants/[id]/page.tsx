@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { formatCurrency } from '@/utils/format';
+import { formatCurrency, formatDate } from '@/utils/format';
 import GlobalDateFilter from '@/components/GlobalDateFilter';
 
 export default function MerchantDetailsPage() {
@@ -77,7 +77,7 @@ export default function MerchantDetailsPage() {
             <tbody>
               {merchant.transactions.map((tx: any) => (
                 <tr key={tx.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '12px 8px' }}>{new Date(tx.date).toLocaleDateString()}</td>
+                  <td style={{ padding: '12px 8px' }}>{formatDate(tx.date)}</td>
                   <td style={{ padding: '12px 8px', color: tx.amount < 0 ? '#e11d48' : 'var(--sporty-teal)', fontWeight: 600 }}>
                     {tx.amount > 0 ? '+' : ''}{formatCurrency(tx.amount)}
                   </td>

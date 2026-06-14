@@ -5,7 +5,7 @@ import styles from "./page.module.css";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import GlobalDateFilter from "@/components/GlobalDateFilter";
 import TransactionModal from "@/components/TransactionModal";
-import { formatCurrency } from "@/utils/format";
+import { formatCurrency, formatDate } from "@/utils/format";
 
 export default function AccountDetail({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -240,7 +240,7 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
             {transactions.length > 0 ? (
               transactions.map((txn: any) => (
                 <tr key={txn.id} onClick={() => openTransactionModal(txn)} style={{ cursor: 'pointer' }}>
-                  <td>{new Date(txn.date).toLocaleDateString()}</td>
+                  <td>{formatDate(txn.date)}</td>
                   <td>{txn.merchant}</td>
                   <td>{txn.category?.name || "Uncategorized"}</td>
                   <td className={txn.amount >= 0 ? styles.amountIncome : styles.amountExpense}>

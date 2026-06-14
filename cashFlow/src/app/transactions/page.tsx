@@ -6,7 +6,7 @@ import Papa from "papaparse";
 import GlobalDateFilter from "@/components/GlobalDateFilter";
 import TransactionModal from "@/components/TransactionModal";
 import ReceiptPreviewModal from "@/components/ReceiptPreviewModal";
-import { formatCurrency } from "@/utils/format";
+import { formatCurrency, formatDate } from "@/utils/format";
 
 type Transaction = {
   id: string;
@@ -209,7 +209,7 @@ export default function TransactionsPage() {
             <tbody>
               {filteredTransactions.map((txn: any) => (
                 <tr key={txn.id} onClick={() => openEditModal(txn)} style={{ cursor: 'pointer' }} className={styles.tableRow}>
-                  <td>{new Date(txn.date).toLocaleDateString()}</td>
+                  <td>{formatDate(txn.date)}</td>
                   <td>{txn.merchant || "-"}</td>
                   <td>{txn.notes || "-"}</td>
                   <td>{txn.category?.name || "Uncategorized"}</td>

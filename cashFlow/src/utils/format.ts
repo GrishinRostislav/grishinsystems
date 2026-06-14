@@ -7,3 +7,9 @@ export function formatCurrency(value: number): string {
     maximumFractionDigits: 2,
   }).format(value);
 }
+
+export function formatDate(dateInput: string | Date): string {
+  if (!dateInput) return "-";
+  const date = new Date(dateInput);
+  return date.toLocaleDateString(undefined, { timeZone: 'UTC' });
+}
