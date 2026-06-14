@@ -196,13 +196,23 @@ export async function GET(request: Request) {
       });
     }
 
+    const recentTransactions = await prisma.transaction.findMany({
+      take: 5,
+      orderBy: { date: "desc" },
+      include: {
+        category: true,
+        account: true
+      }
+    });
+
     return NextResponse.json({
       totalBalance,
       monthlyIncome,
       monthlyExpenses,
       chartData,
       pieData,
-      balanceTrendData
+      balanceTrendData,
+      recentTransactions
     });
 
   } catch (error) {
