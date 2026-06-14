@@ -19,6 +19,27 @@ type Transaction = {
   category: { name: string } | null;
 };
 
+function getCategoryColor(categoryName: string | null | undefined) {
+  if (!categoryName) return "linear-gradient(135deg, #94a3b8, #64748b)"; // slate gray
+  let hash = 0;
+  for (let i = 0; i < categoryName.length; i++) {
+    hash = categoryName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const colors = [
+    "linear-gradient(135deg, #f87171, #ef4444)", // red
+    "linear-gradient(135deg, #fb923c, #f97316)", // orange
+    "linear-gradient(135deg, #fbbf24, #f59e0b)", // amber
+    "linear-gradient(135deg, #34d399, #10b981)", // emerald
+    "linear-gradient(135deg, #2dd4bf, #14b8a6)", // teal
+    "linear-gradient(135deg, #60a5fa, #3b82f6)", // blue
+    "linear-gradient(135deg, #818cf8, #6366f1)", // indigo
+    "linear-gradient(135deg, #a78bfa, #8b5cf6)", // violet
+    "linear-gradient(135deg, #f472b6, #ec4899)", // pink
+  ];
+  const index = Math.abs(hash) % colors.length;
+  return colors[index];
+}
+
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,6 +58,16 @@ export default function TransactionsPage() {
       (txn.paymentMethod?.toLowerCase() || "").includes(query) ||
       (txn.account?.name?.toLowerCase() || "").includes(query)
     );
+  });
+
+  // Group transactions by date string for mobile list view
+  const groupedTransactions: { [dateStr: string]: Transaction[] } = {};
+  filteredTransactions.forEach(txn => {
+    const formattedDate = formatDate(txn.date);
+    if (!groupedTransactions[formattedDate]) {
+      groupedTransactions[formattedDate] = [];
+    }
+    groupedTransactions[formattedDate].push(txn);
   });
 
   const handleDatesChange = (start: string, end: string) => {
@@ -147,7 +178,7 @@ export default function TransactionsPage() {
           <h1>Transactions</h1>
           <p>Manage and import your financial records.</p>
         </div>
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+        <div className={styles.headerRight}>
           <GlobalDateFilter onDatesChange={handleDatesChange} />
           <div className={styles.actions}>
             <label className={`${styles.btnSecondary} ${scanning ? styles.disabled : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: scanning ? 'not-allowed' : 'pointer' }}>
@@ -230,6 +261,72 @@ export default function TransactionsPage() {
               </tr>
             </tfoot>
           </table>
+        )}
+      </div>
+
+      <div className={styles.mobileListContainer}>
+        {loading && !transactions.length ? (
+          <div className={styles.emptyState}>Loading transactions...</div>
+        ) : transactions.length === 0 ? (
+          <div className={styles.emptyState}>No transactions found. Add one or upload a CSV.</div>
+        ) : filteredTransactions.length === 0 ? (
+          <div className={styles.emptyState}>No transactions match your search query.</div>
+        ) : (
+          Object.keys(groupedTransactions).map(dateStr => (
+            <div key={dateStr} className={styles.mobileDateGroup}>
+              <div className={styles.mobileDateHeader}>{dateStr}</div>
+              <div className={styles.mobileGroupItems}>
+                {groupedTransactions[dateStr].map(txn => {
+                  const isIncome = txn.amount >= 0;
+                  const catLetter = txn.category?.name ? txn.category.name.charAt(0).toUpperCase() : "?";
+                  const catColor = getCategoryColor(txn.category?.name);
+                  
+                  return (
+                    <div key={txn.id} className={styles.mobileTxnCard} onClick={() => openEditModal(txn)}>
+                      <div className={styles.mobileTxnLeft}>
+                        <div className={styles.categoryIcon} style={{ background: catColor }}>
+                          {catLetter}
+                        </div>
+                        <div className={styles.mobileTxnMeta}>
+                          <div className={styles.mobileTxnTitle}>
+                            {txn.notes || txn.category?.name || "Transaction"}
+                          </div>
+                          <div className={styles.mobileTxnSubtitle}>
+                            {txn.account?.name || "Unknown Account"}
+                          </div>
+                          {txn.merchant && (
+                            <div className={styles.merchantBadge}>
+                              {txn.merchant}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className={styles.mobileTxnRight}>
+                        <div className={isIncome ? styles.mobileAmountIncome : styles.mobileAmountExpense}>
+                          {isIncome ? "+" : ""}{formatCurrency(txn.amount)}
+                        </div>
+                        {txn.paymentMethod && (
+                          <div className={styles.mobilePaymentMethod}>
+                            {txn.paymentMethod}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))
+        )}
+        
+        {filteredTransactions.length > 0 && (
+          <div style={{ marginTop: '16px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 600 }}>
+            <span style={{ color: 'var(--text-muted)' }}>Total for Period:</span>
+            <span style={{ color: filteredTransactions.reduce((acc, txn) => acc + txn.amount, 0) >= 0 ? 'var(--sporty-teal)' : '#e11d48', fontSize: '16px' }}>
+              {filteredTransactions.reduce((acc, txn) => acc + txn.amount, 0) >= 0 ? "+" : ""}{formatCurrency(filteredTransactions.reduce((acc, txn) => acc + txn.amount, 0))}
+            </span>
+          </div>
         )}
       </div>
 
