@@ -19,7 +19,7 @@ export default function LoginPage() {
     setError("");
     
     try {
-      const res = await fetch("/api/auth", {
+      const res = await fetch("/cashFlow/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password })
@@ -76,4 +76,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
 

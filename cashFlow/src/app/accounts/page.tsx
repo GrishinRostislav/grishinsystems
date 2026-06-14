@@ -29,7 +29,7 @@ export default function AccountsPage() {
 
   const fetchAccounts = async () => {
     try {
-      const res = await fetch(`/api/accounts?includeArchived=${showArchived}`);
+      const res = await fetch(`/cashFlow/api/accounts?includeArchived=${showArchived}`);
       const data = await res.json();
       setAccounts(data);
     } catch (err) {
@@ -46,7 +46,7 @@ export default function AccountsPage() {
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("/api/accounts", {
+      const res = await fetch("/cashFlow/api/accounts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -179,3 +179,4 @@ export default function AccountsPage() {
     </div>
   );
 }
+

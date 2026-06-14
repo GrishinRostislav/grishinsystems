@@ -29,7 +29,7 @@ export default function TransactionModal({ isOpen, onClose, transaction, onSave 
     if (!isOpen) return;
     
     // Fetch accounts, categories, and merchants
-    Promise.all([fetch("/api/accounts"), fetch("/api/categories"), fetch("/api/merchants"), fetch("/api/payment-methods")])
+    Promise.all([fetch("/cashFlow/api/accounts"), fetch("/cashFlow/api/categories"), fetch("/cashFlow/api/merchants"), fetch("/cashFlow/api/payment-methods")])
       .then(async ([accRes, catRes, merchRes, pmRes]) => {
         const accData = await accRes.json();
         const catData = await catRes.json();
@@ -96,13 +96,13 @@ export default function TransactionModal({ isOpen, onClose, transaction, onSave 
       if (transaction) {
         // Pass toAccountId and type even if it's an update, so the backend can create the second leg
         const updatePayload = { ...payload };
-        res = await fetch(`/api/transactions/${transaction.id}`, {
+        res = await fetch(`/cashFlow/api/transactions/${transaction.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(updatePayload)
         });
       } else {
-        res = await fetch("/api/transactions", {
+        res = await fetch("/cashFlow/api/transactions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
@@ -124,7 +124,7 @@ export default function TransactionModal({ isOpen, onClose, transaction, onSave 
   const handleDelete = async () => {
     if (!transaction || !window.confirm("Are you sure you want to delete this transaction?")) return;
     try {
-      const res = await fetch(`/api/transactions/${transaction.id}`, { method: "DELETE" });
+      const res = await fetch(`/cashFlow/api/transactions/${transaction.id}`, { method: "DELETE" });
       if (res.ok) {
         onSave();
         onClose();
@@ -257,3 +257,4 @@ export default function TransactionModal({ isOpen, onClose, transaction, onSave 
     </div>
   );
 }
+

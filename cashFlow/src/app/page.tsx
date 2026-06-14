@@ -40,9 +40,9 @@ export default function Home() {
       try {
         setLoading(true);
         // Process any due scheduled transactions first so dashboard is accurate
-        await fetch('/api/scheduled/process', { method: 'POST' });
+        await fetch('/cashFlow/api/scheduled/process', { method: 'POST' });
 
-        const res = await fetch(`/api/dashboard?startDate=${startDate}&endDate=${endDate}`);
+        const res = await fetch(`/cashFlow/api/dashboard?startDate=${startDate}&endDate=${endDate}`);
         const dashboardData = await res.json();
         setData(dashboardData);
       } catch (err) {
@@ -234,3 +234,4 @@ export default function Home() {
     </div>
   );
 }
+

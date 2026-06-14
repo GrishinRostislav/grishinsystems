@@ -23,13 +23,13 @@ function PlanningContent() {
   const fetchData = async () => {
     setLoading(true);
     // Process autos first
-    await fetch('/api/scheduled/process', { method: 'POST' });
+    await fetch('/cashFlow/api/scheduled/process', { method: 'POST' });
     
     // Then fetch
     const [schedRes, accRes, catRes] = await Promise.all([
-      fetch('/api/scheduled'),
-      fetch('/api/accounts'),
-      fetch('/api/categories')
+      fetch('/cashFlow/api/scheduled'),
+      fetch('/cashFlow/api/accounts'),
+      fetch('/cashFlow/api/categories')
     ]);
     
     if (schedRes.ok) setScheduled(await schedRes.json());
@@ -78,14 +78,14 @@ function PlanningContent() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this scheduled transaction?")) return;
-    const res = await fetch(`/api/scheduled/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/cashFlow/api/scheduled/${id}`, { method: 'DELETE' });
     if (res.ok) {
       await fetchData();
     }
   };
 
   const handleApprove = async (id: string) => {
-    const res = await fetch(`/api/scheduled/${id}/approve`, { method: 'POST' });
+    const res = await fetch(`/cashFlow/api/scheduled/${id}/approve`, { method: 'POST' });
     if (res.ok) {
       await fetchData();
     } else {
@@ -94,7 +94,7 @@ function PlanningContent() {
   };
 
   const handleSkip = async (id: string) => {
-    const res = await fetch(`/api/scheduled/${id}/skip`, { method: 'POST' });
+    const res = await fetch(`/cashFlow/api/scheduled/${id}/skip`, { method: 'POST' });
     if (res.ok) {
       await fetchData();
     } else {
@@ -222,3 +222,4 @@ export default function PlanningPage() {
     </Suspense>
   );
 }
+

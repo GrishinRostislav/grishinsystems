@@ -24,7 +24,7 @@ export default function MerchantDetailsPage() {
   useEffect(() => {
     if (id && startDate && endDate) {
       setLoading(true);
-      fetch(`/api/merchants/${id}?startDate=${startDate}&endDate=${endDate}`)
+      fetch(`/cashFlow/api/merchants/${id}?startDate=${startDate}&endDate=${endDate}`)
         .then(res => {
           if (!res.ok) throw new Error('Not found');
           return res.json();

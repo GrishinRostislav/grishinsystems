@@ -48,7 +48,7 @@ export default function TransactionsPage() {
   const fetchData = async () => {
     try {
       const [txRes] = await Promise.all([
-        fetch(startDate && endDate ? `/api/transactions?startDate=${startDate}&endDate=${endDate}` : "/api/transactions")
+        fetch(startDate && endDate ? `/cashFlow/api/transactions?startDate=${startDate}&endDate=${endDate}` : "/cashFlow/api/transactions")
       ]);
       const txData = await txRes.json();
       

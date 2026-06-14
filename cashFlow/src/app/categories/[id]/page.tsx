@@ -21,8 +21,8 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
     try {
       setLoading(true);
       const [resDetail, resAll] = await Promise.all([
-        fetch(`/api/categories/${resolvedParams.id}`),
-        fetch("/api/categories")
+        fetch(`/cashFlow/api/categories/${resolvedParams.id}`),
+        fetch("/cashFlow/api/categories")
       ]);
       const result = await resDetail.json();
       const allResult = await resAll.json();
@@ -62,7 +62,7 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
 
   const handleDeleteCategory = async (id: string) => {
     try {
-      const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
+      const res = await fetch(`/cashFlow/api/categories/${id}`, { method: "DELETE" });
       if (res.ok) {
         setIsModalOpen(false);
         setEditingCategory(null);

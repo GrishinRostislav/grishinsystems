@@ -22,7 +22,7 @@ export function middleware(request: NextRequest) {
   const authCookie = request.cookies.get('auth');
   
   if (!authCookie || authCookie.value !== 'authenticated') {
-    return NextResponse.redirect(new URL('/login', request.url));
+    return NextResponse.redirect(new URL('/cashFlow/login', request.url));
   }
 
   return NextResponse.next();

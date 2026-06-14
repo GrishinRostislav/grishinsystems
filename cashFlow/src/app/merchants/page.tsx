@@ -8,7 +8,7 @@ export default function MerchantsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/merchants')
+    fetch('/cashFlow/api/merchants')
       .then(res => res.json())
       .then(data => {
         setMerchants(data);

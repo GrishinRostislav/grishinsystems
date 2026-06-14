@@ -40,7 +40,7 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
   const handleSaveAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch(`/api/accounts/${resolvedParams.id}`, {
+      const res = await fetch(`/cashFlow/api/accounts/${resolvedParams.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: editName, balance: parseFloat(editBalance) })
@@ -48,7 +48,7 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
       if (res.ok) {
         setIsEditModalOpen(false);
         // re-fetch to reflect changes
-        const res2 = await fetch(`/api/accounts/${resolvedParams.id}?startDate=${startDate}&endDate=${endDate}`);
+        const res2 = await fetch(`/cashFlow/api/accounts/${resolvedParams.id}?startDate=${startDate}&endDate=${endDate}`);
         setData(await res2.json());
       }
     } catch (error) {
@@ -59,7 +59,7 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
   const handleArchiveAccount = async () => {
     if (!confirm("Are you sure you want to archive this account? It will be hidden from new transactions but past history will be preserved.")) return;
     try {
-      const res = await fetch(`/api/accounts/${resolvedParams.id}`, { method: "DELETE" });
+      const res = await fetch(`/cashFlow/api/accounts/${resolvedParams.id}`, { method: "DELETE" });
       if (res.ok) {
         fetchAccountData();
       }
@@ -70,7 +70,7 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
 
   const handleRestoreAccount = async () => {
     try {
-      const res = await fetch(`/api/accounts/${resolvedParams.id}`, {
+      const res = await fetch(`/cashFlow/api/accounts/${resolvedParams.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "restore" })
@@ -86,7 +86,7 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
   const fetchAccountData = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/accounts/${resolvedParams.id}?startDate=${startDate}&endDate=${endDate}`);
+      const res = await fetch(`/cashFlow/api/accounts/${resolvedParams.id}?startDate=${startDate}&endDate=${endDate}`);
       const result = await res.json();
       setData(result);
     } catch (err) {

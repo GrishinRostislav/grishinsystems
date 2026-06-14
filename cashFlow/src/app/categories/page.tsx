@@ -21,7 +21,7 @@ export default function CategoriesPage() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch("/api/categories");
+      const res = await fetch("/cashFlow/api/categories");
       const data = await res.json();
       setCategories(data);
     } catch (err) {
@@ -58,7 +58,7 @@ export default function CategoriesPage() {
 
   const handleDeleteCategory = async (id: string) => {
     try {
-      const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
+      const res = await fetch(`/cashFlow/api/categories/${id}`, { method: "DELETE" });
       if (res.ok) {
         setIsModalOpen(false);
         setEditingCategory(null);
@@ -138,3 +138,4 @@ export default function CategoriesPage() {
     </div>
   );
 }
+
