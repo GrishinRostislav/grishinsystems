@@ -29,15 +29,15 @@ export default function LoginPage() {
       
       if (res.status === 429) {
         setFrozen(true);
-        setError("????????? ?????????? ???????. ?????? ???????????? ?? 10 ?????.");
+        setError("Превышено количество попыток. Доступ заблокирован на 10 минут.");
       } else if (!res.ok) {
-        setError(data.error || "???????? ??????");
+        setError(data.error === "Invalid password" ? "Неверный пароль" : (data.error || "Неверный пароль"));
       } else {
         router.push("/");
         router.refresh();
       }
     } catch (err) {
-      setError("?????? ??????????");
+      setError("Ошибка соединения");
     } finally {
       setLoading(false);
     }
@@ -47,19 +47,19 @@ export default function LoginPage() {
     <div className={styles.container}>
       <div className={styles.card}>
         <h1 className={styles.title}>CashFlow</h1>
-        <p className={styles.subtitle}>??????? ?????? ??? ??????? ? ????????</p>
+        <p className={styles.subtitle}>Введите пароль для доступа к финансам</p>
 
         {frozen ? (
           <div className={styles.frozen}>
-            ????????? ?????????? ??????? ????? (3).
+            Превышено количество попыток входа (3).
             <br/><br/>
-            ???? ?????? ? ????? ????????????. ????????? ??????? ????? 10 ?????.
+            Вход закрыт в целях безопасности. Повторите попытку через 10 минут.
           </div>
         ) : (
           <form onSubmit={handleLogin} className={styles.form}>
             <input
               type="password"
-              placeholder="??????"
+              placeholder="Пароль"
               className={styles.input}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -67,7 +67,7 @@ export default function LoginPage() {
               autoFocus
             />
             <button type="submit" className={styles.button} disabled={loading || !password}>
-              {loading ? "????????..." : "?????"}
+              {loading ? "Проверка..." : "Войти"}
             </button>
             {error && <div className={styles.error}>{error}</div>}
           </form>
@@ -76,5 +76,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-
