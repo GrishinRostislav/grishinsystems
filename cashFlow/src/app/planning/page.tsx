@@ -5,8 +5,9 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import styles from './page.module.css';
 import ScheduledTransactionModal from '@/components/ScheduledTransactionModal';
 import { formatCurrency } from '@/utils/format';
+import { Suspense } from 'react';
 
-export default function PlanningPage() {
+function PlanningContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
@@ -211,5 +212,13 @@ export default function PlanningPage() {
         categories={categories}
       />
     </div>
+  );
+}
+
+export default function PlanningPage() {
+  return (
+    <Suspense fallback={<div>Loading planning data...</div>}>
+      <PlanningContent />
+    </Suspense>
   );
 }
