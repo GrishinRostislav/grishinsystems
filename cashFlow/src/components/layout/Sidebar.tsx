@@ -9,6 +9,7 @@ const navItems = [
   { name: "Planning", path: "/planning", icon: "📅" },
   { name: "Accounts", path: "/accounts", icon: "🏦" },
   { name: "Transactions", path: "/transactions", icon: "💸" },
+  { name: "Budgets", path: "/budgets", icon: "👛" },
   { name: "Categories", path: "/categories", icon: "📁" },
   { name: "Merchants", path: "/merchants", icon: "🏪" },
   { name: "Simulator", path: "/simulator", icon: "🔮" },

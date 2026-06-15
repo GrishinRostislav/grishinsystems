@@ -2,6 +2,27 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import styles from './page.module.css';
+
+function getMerchantColor(name: string) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const colors = [
+    "linear-gradient(135deg, #f87171, #ef4444)", // red
+    "linear-gradient(135deg, #fb923c, #f97316)", // orange
+    "linear-gradient(135deg, #fbbf24, #f59e0b)", // amber
+    "linear-gradient(135deg, #34d399, #10b981)", // emerald
+    "linear-gradient(135deg, #2dd4bf, #14b8a6)", // teal
+    "linear-gradient(135deg, #60a5fa, #3b82f6)", // blue
+    "linear-gradient(135deg, #818cf8, #6366f1)", // indigo
+    "linear-gradient(135deg, #a78bfa, #8b5cf6)", // violet
+    "linear-gradient(135deg, #f472b6, #ec4899)", // pink
+  ];
+  const index = Math.abs(hash) % colors.length;
+  return colors[index];
+}
 
 export default function MerchantsPage() {
   const [merchants, setMerchants] = useState<any[]>([]);
@@ -20,34 +41,37 @@ export default function MerchantsPage() {
       });
   }, []);
 
-  if (loading) return <div style={{ padding: '24px' }}>Loading...</div>;
+  if (loading) return <div className={styles.container}>Loading...</div>;
 
   return (
-    <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '2rem', margin: 0, color: 'var(--text-primary)' }}>Merchants / Payees</h1>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h1 className={styles.title}>Merchants / Payees</h1>
       </div>
 
-      <div style={{ background: 'var(--bg-primary)', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
-        {merchants.length === 0 ? (
-          <p style={{ color: 'var(--text-muted)' }}>No merchants found. Create a transaction and enter a merchant name to automatically create one.</p>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-            {merchants.map(merchant => (
-              <Link key={merchant.id} href={`/merchants/${merchant.id}`} style={{ textDecoration: 'none' }}>
-                <div style={{ padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.2s ease', cursor: 'pointer', background: 'var(--bg-secondary)' }}
-                     onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                     onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
-                  <h3 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.1rem' }}>{merchant.name}</h3>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', background: '#e2e8f0', padding: '4px 8px', borderRadius: '12px' }}>
-                    {merchant._count?.transactions || 0} entries
+      {merchants.length === 0 ? (
+        <div className={styles.emptyState}>
+          No merchants found. Create a transaction and enter a merchant name to automatically create one.
+        </div>
+      ) : (
+        <div className={styles.merchantsGrid}>
+          {merchants.map(merchant => (
+            <Link key={merchant.id} href={`/merchants/${merchant.id}`} style={{ textDecoration: 'none' }}>
+              <div className={styles.merchantCard}>
+                <div className={styles.merchantLeft}>
+                  <div className={styles.merchantAvatar} style={{ background: getMerchantColor(merchant.name) }}>
+                    {merchant.name.charAt(0).toUpperCase()}
                   </div>
+                  <h3 className={styles.merchantName}>{merchant.name}</h3>
                 </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
+                <div className={styles.entriesBadge}>
+                  {merchant._count?.transactions || 0} entries
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

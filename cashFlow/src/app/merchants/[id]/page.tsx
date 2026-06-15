@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { formatCurrency, formatDate } from '@/utils/format';
 import GlobalDateFilter from '@/components/GlobalDateFilter';
+import styles from '../page.module.css';
 
 export default function MerchantDetailsPage() {
   const { id } = useParams();
@@ -45,64 +46,104 @@ export default function MerchantDetailsPage() {
     : 0;
 
   return (
-    <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
-      <Link href="/merchants" style={{ color: 'var(--unique-blue)', textDecoration: 'none', marginBottom: '16px', display: 'inline-block' }}>
+    <div className={styles.container}>
+      <Link href="/merchants" className={styles.backLink}>
         &larr; Back to Merchants
       </Link>
       
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '2rem', margin: 0, color: 'var(--text-primary)' }}>{merchant?.name || 'Merchant Details'}</h1>
+      <div className={styles.header}>
+        <h1 className={styles.title}>{merchant?.name || 'Merchant Details'}</h1>
         <GlobalDateFilter onDatesChange={handleDatesChange} />
       </div>
 
       {loading && !merchant ? (
-        <div style={{ padding: '24px' }}>Loading...</div>
+        <div className={styles.emptyState}>Loading...</div>
       ) : !merchant ? (
-        <div style={{ padding: '24px' }}>Merchant not found</div>
+        <div className={styles.emptyState}>Merchant not found</div>
       ) : (
-      <div style={{ background: 'var(--bg-primary)', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
-        <h2 style={{ fontSize: '1.2rem', marginBottom: '16px', color: 'var(--text-main)' }}>Transaction History</h2>
-        
-        {merchant.transactions && merchant.transactions.length > 0 ? (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '2px solid var(--border-color)', textAlign: 'left', color: 'var(--text-muted)' }}>
-                <th style={{ padding: '12px 8px' }}>Date</th>
-                <th style={{ padding: '12px 8px' }}>Amount</th>
-                <th style={{ padding: '12px 8px' }}>Category</th>
-                <th style={{ padding: '12px 8px' }}>Account</th>
-                <th style={{ padding: '12px 8px' }}>Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {merchant.transactions.map((tx: any) => (
-                <tr key={tx.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '12px 8px' }}>{formatDate(tx.date)}</td>
-                  <td style={{ padding: '12px 8px', color: tx.amount < 0 ? '#e11d48' : 'var(--sporty-teal)', fontWeight: 600 }}>
-                    {tx.amount > 0 ? '+' : ''}{formatCurrency(tx.amount)}
-                  </td>
-                  <td style={{ padding: '12px 8px' }}>
-                    {tx.category ? <span style={{ background: '#f1f5f9', padding: '4px 8px', borderRadius: '12px', fontSize: '0.85rem' }}>{tx.category.name}</span> : <span style={{ color: 'var(--text-muted)' }}>Uncategorized</span>}
-                  </td>
-                  <td style={{ padding: '12px 8px' }}>{tx.account?.name}</td>
-                  <td style={{ padding: '12px 8px', color: 'var(--text-muted)' }}>{tx.notes}</td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot style={{ background: 'var(--bg-secondary)', fontWeight: 600 }}>
-              <tr>
-                <td style={{ textAlign: 'right', padding: '12px 8px', color: 'var(--text-muted)' }}>Total for Period:</td>
-                <td style={{ padding: '12px 8px', color: totalAmount >= 0 ? 'var(--sporty-teal)' : '#e11d48', fontWeight: 600 }}>
-                  {totalAmount >= 0 ? "+" : ""}{formatCurrency(totalAmount)}
-                </td>
-                <td colSpan={3}></td>
-              </tr>
-            </tfoot>
-          </table>
-        ) : (
-          <p style={{ color: 'var(--text-muted)' }}>No transactions found for this merchant.</p>
-        )}
-      </div>
+        <>
+          <h2 style={{ fontSize: '1.2rem', color: 'var(--text-main)', margin: '8px 0 0 0' }}>Transaction History</h2>
+          
+          {merchant.transactions && merchant.transactions.length > 0 ? (
+            <>
+              {/* Desktop Table View */}
+              <div className={styles.tableContainer}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Amount</th>
+                      <th>Category</th>
+                      <th>Account</th>
+                      <th>Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {merchant.transactions.map((tx: any) => (
+                      <tr key={tx.id}>
+                        <td>{formatDate(tx.date)}</td>
+                        <td style={{ color: tx.amount < 0 ? '#e11d48' : 'var(--sporty-teal)', fontWeight: 600 }}>
+                          {tx.amount > 0 ? '+' : ''}{formatCurrency(tx.amount)}
+                        </td>
+                        <td>
+                          {tx.category ? <span style={{ background: 'var(--bg-hover)', border: '1px solid var(--border-color)', padding: '4px 8px', borderRadius: '12px', fontSize: '0.85rem' }}>{tx.category.name}</span> : <span style={{ color: 'var(--text-muted)' }}>Uncategorized</span>}
+                        </td>
+                        <td>{tx.account?.name}</td>
+                        <td>{tx.notes}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot style={{ background: 'var(--bg-secondary)', fontWeight: 600 }}>
+                    <tr>
+                      <td colSpan={4} style={{ textAlign: 'right', padding: '16px', color: 'var(--text-muted)' }}>Total for Period:</td>
+                      <td style={{ padding: '16px', color: totalAmount >= 0 ? 'var(--sporty-teal)' : '#e11d48', fontWeight: 600 }}>
+                        {totalAmount >= 0 ? "+" : ""}{formatCurrency(totalAmount)}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              {/* Mobile Card Feed View */}
+              <div className={styles.mobileListContainer}>
+                {merchant.transactions.map((tx: any) => {
+                  const isIncome = tx.amount >= 0;
+                  return (
+                    <div key={tx.id} className={styles.mobileCard}>
+                      <div className={styles.mobileLeft}>
+                        <div className={styles.mobileNotes}>{tx.notes || "Transaction"}</div>
+                        <div className={styles.mobileMeta}>{formatDate(tx.date)}</div>
+                        {tx.category ? (
+                          <div className={styles.mobileCategoryBadge}>{tx.category.name}</div>
+                        ) : (
+                          <div className={styles.mobileCategoryBadge}>Uncategorized</div>
+                        )}
+                      </div>
+                      <div className={styles.mobileRight}>
+                        <div className={isIncome ? styles.mobileAmountIncome : styles.mobileAmountExpense}>
+                          {isIncome ? "+" : ""}{formatCurrency(tx.amount)}
+                        </div>
+                        <div className={styles.mobileAccount}>
+                          {tx.account?.name || "Unknown"}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                
+                {/* Mobile Period Total */}
+                <div style={{ padding: '16px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 600, boxShadow: 'var(--shadow-sm)' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Total for Period:</span>
+                  <span style={{ color: totalAmount >= 0 ? 'var(--sporty-teal)' : '#e11d48', fontSize: '15px' }}>
+                    {totalAmount >= 0 ? "+" : ""}{formatCurrency(totalAmount)}
+                  </span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className={styles.emptyState}>No transactions found for this merchant.</div>
+          )}
+        </>
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import styles from "./page.module.css";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import budgetStyles from "./budgets/page.module.css";
 import GlobalDateFilter from "@/components/GlobalDateFilter";
 import TransactionModal from "@/components/TransactionModal";
 import ReceiptPreviewModal from "@/components/ReceiptPreviewModal";
@@ -128,7 +129,18 @@ export default function Home() {
 
       const res = await fetch(`/cashFlow/api/dashboard?startDate=${startDate}&endDate=${endDate}`);
       const dashboardData = await res.json();
-      setData(dashboardData);
+      
+      let budgetsData = [];
+      try {
+        const budgetsRes = await fetch('/cashFlow/api/budgets');
+        if (budgetsRes.ok) {
+          budgetsData = await budgetsRes.json();
+        }
+      } catch (err) {
+        console.error("Failed to fetch budgets data", err);
+      }
+
+      setData({ ...dashboardData, budgets: budgetsData });
     } catch (err) {
       console.error("Failed to fetch dashboard data", err);
     } finally {
@@ -151,7 +163,7 @@ export default function Home() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const { totalBalance = 0, monthlyIncome = 0, monthlyExpenses = 0, chartData = [], pieData = [], balanceTrendData = [], recentTransactions = [] } = data || {};
+  const { totalBalance = 0, monthlyIncome = 0, monthlyExpenses = 0, chartData = [], pieData = [], balanceTrendData = [], recentTransactions = [], budgets = [] } = data || {};
 
   const processedChartData = isCumulative ? chartData.reduce((acc: any[], curr: any, index: number) => {
     if (index === 0) {
@@ -177,6 +189,18 @@ export default function Home() {
     }
     groupedRecentTransactions[formattedDate].push(txn);
   });
+
+  const getProgressBarColor = (percentage: number) => {
+    if (percentage >= 100) return "linear-gradient(90deg, #ef4444, #b91c1c)"; // Red
+    if (percentage >= 80) return "linear-gradient(90deg, #f59e0b, #d97706)";  // Orange/Amber
+    return "linear-gradient(90deg, #008080, #14b8a6)";                       // Teal
+  };
+
+  const activeBudgets = (budgets || []).map((b: any) => ({
+    ...b,
+    percentage: b.amount > 0 ? (b.spent / b.amount) * 100 : 0,
+    remaining: b.amount - b.spent
+  })).sort((a: any, b: any) => b.percentage - a.percentage).slice(0, 3);
 
   return (
     <div className={styles.dashboard}>
@@ -366,6 +390,53 @@ export default function Home() {
           </div>
         </Link>
       </div>
+
+      {activeBudgets.length > 0 && (
+        <div className={styles.chartCard} style={{ marginTop: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h3 style={{ margin: 0 }}>Active Budgets</h3>
+            <Link href="/budgets" style={{ textDecoration: 'none', color: 'var(--unique-blue)', fontSize: '14px', fontWeight: 600 }}>
+              View All &rarr;
+            </Link>
+          </div>
+          <div className={budgetStyles.budgetsGrid} style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
+            {activeBudgets.map((budget: any) => {
+              const isOverBudget = budget.remaining < 0;
+              return (
+                <div key={budget.id} className={budgetStyles.budgetCard}>
+                  <div className={budgetStyles.cardTop}>
+                    <div>
+                      <h3 className={budgetStyles.budgetName}>{budget.name}</h3>
+                      <span className={budgetStyles.cardInterval}>
+                        {formatDate(budget.currentPeriodStart)} - {formatDate(budget.currentPeriodEnd)}
+                      </span>
+                    </div>
+                    <div className={budgetStyles.cardStats}>
+                      <span className={budgetStyles.spentAmount}>{formatCurrency(budget.spent)}</span>
+                      <span className={budgetStyles.limitAmount}>of {formatCurrency(budget.amount)}</span>
+                    </div>
+                  </div>
+                  <div className={budgetStyles.progressContainer}>
+                    <div
+                      className={budgetStyles.progressBar}
+                      style={{
+                        width: `${Math.min(budget.percentage, 100)}%`,
+                        background: getProgressBarColor(budget.percentage),
+                      }}
+                    />
+                  </div>
+                  <div className={budgetStyles.cardFooter}>
+                    <span className={budgetStyles.percentageText}>{Math.round(budget.percentage)}% used</span>
+                    <span className={isOverBudget ? budgetStyles.remainingOver : budgetStyles.remainingUnder}>
+                      {isOverBudget ? `${formatCurrency(Math.abs(budget.remaining))} over limit` : `${formatCurrency(budget.remaining)} remaining`}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className={styles.chartCard} style={{ marginTop: '24px' }}>
         <h3 style={{ marginBottom: '16px' }}>Last Records</h3>
