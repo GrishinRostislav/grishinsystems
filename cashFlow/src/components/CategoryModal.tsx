@@ -2,11 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 
-type Category = {
-  id: string;
-  name: string;
-  parentId: string | null;
-};
+import { buildCategoryTree, flattenCategoryTree, type Category } from "@/utils/categories";
 
 interface CategoryModalProps {
   isOpen: boolean;
@@ -53,8 +49,10 @@ export default function CategoryModal({ isOpen, onClose, onSave, onDelete, categ
     onClose();
   };
 
-  // Prevent selecting itself or its children as parent (simple check: just prevent selecting itself)
+  // Prevent selecting itself or its children as parent (simple check: just prevent selecting itself for now)
   const availableParents = categories.filter(c => c.id !== category?.id);
+  const parentTree = buildCategoryTree(availableParents);
+  const flatParents = flattenCategoryTree(parentTree);
 
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
@@ -85,8 +83,10 @@ export default function CategoryModal({ isOpen, onClose, onSave, onDelete, categ
               style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '1rem' }}
             >
               <option value="">-- None (Main Category) --</option>
-              {availableParents.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
+              {flatParents.map(c => (
+                <option key={c.id} value={c.id}>
+                  {'\u00A0\u00A0'.repeat(c.depth)}{c.depth > 0 ? '└ ' : ''}{c.name}
+                </option>
               ))}
             </select>
             <small style={{ display: 'block', marginTop: '8px', color: 'var(--text-muted)' }}>Select a parent to make this a subcategory.</small>

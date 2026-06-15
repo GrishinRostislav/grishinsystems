@@ -42,9 +42,41 @@ export async function GET() {
       orderBy: { createdAt: "desc" }
     });
 
+    const allCategories = await prisma.category.findMany({ select: { id: true, parentId: true } });
+    
+    // Build adjacency list for children
+    const childrenMap = new Map<string, string[]>();
+    for (const cat of allCategories) {
+      if (cat.parentId) {
+        if (!childrenMap.has(cat.parentId)) childrenMap.set(cat.parentId, []);
+        childrenMap.get(cat.parentId)!.push(cat.id);
+      }
+    }
+
+    // Helper to get all descendant IDs including self
+    const getDescendantIds = (rootIds: string[]) => {
+      const result = new Set<string>(rootIds);
+      const queue = [...rootIds];
+      while (queue.length > 0) {
+        const current = queue.shift()!;
+        const children = childrenMap.get(current) || [];
+        for (const child of children) {
+          if (!result.has(child)) {
+            result.add(child);
+            queue.push(child);
+          }
+        }
+      }
+      return Array.from(result);
+    };
+
     const budgetsWithSpent = await Promise.all(
       budgets.map(async (budget) => {
         const { start, end } = getCurrentPeriodDates(budget.period, budget.startDate, budget.endDate);
+
+        // Find all descendant categories to include in budget
+        const selectedCategoryIds = budget.categories.map(c => c.id);
+        const allTargetCategoryIds = budget.isGlobal ? [] : getDescendantIds(selectedCategoryIds);
 
         // Fetch sum of expense transactions (amount < 0) in the category set
         const aggregation = await prisma.transaction.aggregate({
@@ -58,7 +90,7 @@ export async function GET() {
             },
             ...(!budget.isGlobal ? {
               categoryId: {
-                in: budget.categories.map(c => c.id)
+                in: allTargetCategoryIds
               }
             } : {})
           },

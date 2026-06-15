@@ -5,13 +5,7 @@ import Link from "next/link";
 import styles from "./page.module.css";
 
 import CategoryModal from "@/components/CategoryModal";
-
-type Category = {
-  id: string;
-  name: string;
-  parentId: string | null;
-  subcategories?: Category[];
-};
+import { buildCategoryTree, type Category } from "@/utils/categories";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -69,8 +63,33 @@ export default function CategoriesPage() {
     }
   };
 
-  // Only top level categories
-  const topLevelCategories = categories.filter(c => !c.parentId);
+  const topLevelCategories = buildCategoryTree(categories);
+
+  const CategoryNode = ({ cat, level = 0 }: { cat: Category, level?: number }) => (
+    <div style={{ marginLeft: level > 0 ? '24px' : '0', marginBottom: level > 0 ? '8px' : '16px' }}>
+      <div className={level === 0 ? styles.categoryName : styles.subcategoryItem} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Link href={`/categories/${cat.id}`} style={{ textDecoration: 'none', color: 'inherit', flex: 1 }}>
+          <span style={{ cursor: 'pointer', margin: 0, fontWeight: level === 0 ? 600 : 400 }}>
+            {level === 0 && '📁 '}
+            {cat.name}
+          </span>
+        </Link>
+        <button 
+          onClick={() => { setEditingCategory(cat); setIsModalOpen(true); }}
+          style={{ background: 'none', border: 'none', color: 'var(--unique-blue)', cursor: 'pointer', fontSize: level === 0 ? '0.875rem' : '0.75rem', padding: '4px 8px' }}
+        >
+          Edit
+        </button>
+      </div>
+      {cat.subcategories && cat.subcategories.length > 0 && (
+        <div className={level === 0 ? styles.subcategories : ''} style={{ borderLeft: level > 0 ? '1px dashed var(--border-color)' : 'none', paddingLeft: level > 0 ? '12px' : '0', marginTop: '8px' }}>
+          {cat.subcategories.map(sub => (
+            <CategoryNode key={sub.id} cat={sub} level={level + 1} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className={styles.container}>
@@ -92,36 +111,7 @@ export default function CategoriesPage() {
         ) : (
           topLevelCategories.map(cat => (
             <div key={cat.id} className={styles.categoryItem}>
-              <div className={styles.categoryName} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Link href={`/categories/${cat.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                  📁 <span style={{ cursor: 'pointer' }}>{cat.name}</span>
-                </Link>
-                <button 
-                  onClick={() => { setEditingCategory(cat); setIsModalOpen(true); }}
-                  style={{ background: 'none', border: 'none', color: 'var(--unique-blue)', cursor: 'pointer', fontSize: '0.875rem' }}
-                >
-                  Edit
-                </button>
-              </div>
-              {cat.subcategories && cat.subcategories.length > 0 && (
-                <div className={styles.subcategories}>
-                  {cat.subcategories.map(sub => (
-                    <div key={sub.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <Link href={`/categories/${sub.id}`} style={{ textDecoration: 'none', color: 'inherit', flex: 1 }}>
-                        <div className={styles.subcategoryItem} style={{ cursor: 'pointer', margin: 0 }}>
-                          {sub.name}
-                        </div>
-                      </Link>
-                      <button 
-                        onClick={() => { setEditingCategory(sub); setIsModalOpen(true); }}
-                        style={{ background: 'none', border: 'none', color: 'var(--unique-blue)', cursor: 'pointer', fontSize: '0.75rem', padding: '4px 8px' }}
-                      >
-                        Edit
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <CategoryNode cat={cat} />
             </div>
           ))
         )}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { formatCurrency } from "@/utils/format";
+import { buildCategoryTree, flattenCategoryTree } from "@/utils/categories";
 
 type TransactionModalProps = {
   isOpen: boolean;
@@ -138,6 +139,9 @@ export default function TransactionModal({ isOpen, onClose, transaction, onSave 
 
   if (!isOpen) return null;
 
+  const categoryTree = buildCategoryTree(categories);
+  const flatCategories = flattenCategoryTree(categoryTree);
+
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', zIndex: 1000, overflowY: 'auto', padding: '40px 20px' }} onClick={onClose}>
       <div style={{ background: 'white', padding: '32px', borderRadius: '16px', width: '500px', maxWidth: '100%', margin: 'auto' }} onClick={e => e.stopPropagation()}>
@@ -200,13 +204,10 @@ export default function TransactionModal({ isOpen, onClose, transaction, onSave 
               <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)' }}>Category</label>
               <select value={categoryId} onChange={e => setCategoryId(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                 <option value="">Uncategorized</option>
-                {categories.map(cat => (
-                  <optgroup key={cat.id} label={cat.name}>
-                    <option value={cat.id}>{cat.name}</option>
-                    {cat.subcategories?.map((sub: any) => (
-                      <option key={sub.id} value={sub.id}>- {sub.name}</option>
-                    ))}
-                  </optgroup>
+                {flatCategories.map((cat: any) => (
+                  <option key={cat.id} value={cat.id} style={{ fontWeight: cat.depth === 0 ? 600 : 400 }}>
+                    {'\u00A0\u00A0'.repeat(cat.depth)}{cat.depth > 0 ? '└ ' : ''}{cat.name}
+                  </option>
                 ))}
               </select>
             </div>

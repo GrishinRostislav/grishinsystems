@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import styles from "./page.module.css";
 import { formatCurrency, formatDate } from "@/utils/format";
+import { buildCategoryTree, flattenCategoryTree, type Category as CatType } from "@/utils/categories";
 
 type Category = {
   id: string;
@@ -361,28 +362,32 @@ export default function BudgetsPage() {
                 </label>
               </div>
 
-              {!isGlobal && (
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Include Categories</label>
-                  <div className={styles.categorySelectionList}>
-                    {categories.map((c) => (
-                      <label key={c.id} className={styles.categorySelectionItem}>
-                        <input
-                          type="checkbox"
-                          checked={selectedCategoryIds.includes(c.id)}
-                          onChange={() => handleCategoryToggle(c.id)}
-                        />
-                        <span>{c.name}</span>
-                      </label>
-                    ))}
+              {!isGlobal && (() => {
+                const categoryTree = buildCategoryTree(categories as CatType[]);
+                const flatCategories = flattenCategoryTree(categoryTree);
+                return (
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Include Categories</label>
+                    <div className={styles.categorySelectionList}>
+                      {flatCategories.map((c) => (
+                        <label key={c.id} className={styles.categorySelectionItem} style={{ paddingLeft: `${c.depth * 16}px` }}>
+                          <input
+                            type="checkbox"
+                            checked={selectedCategoryIds.includes(c.id)}
+                            onChange={() => handleCategoryToggle(c.id)}
+                          />
+                          <span style={{ fontWeight: c.depth === 0 ? 600 : 400 }}>{c.name}</span>
+                        </label>
+                      ))}
+                    </div>
+                    {!isGlobal && selectedCategoryIds.length === 0 && (
+                      <p className={styles.warningText}>
+                        ⚠️ Please select at least one category to track.
+                      </p>
+                    )}
                   </div>
-                  {!isGlobal && selectedCategoryIds.length === 0 && (
-                    <p className={styles.warningText}>
-                      ⚠️ Please select at least one category to track.
-                    </p>
-                  )}
-                </div>
-              )}
+                );
+              })()}
 
               <div className={styles.modalActions}>
                 {editingBudget && (
