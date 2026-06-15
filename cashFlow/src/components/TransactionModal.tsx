@@ -82,7 +82,7 @@ export default function TransactionModal({ isOpen, onClose, transaction, onSave 
     
     const payload = {
       amount: parsedAmount,
-      date: new Date(date).toISOString(),
+      date: new Date(`${date}T12:00:00`).toISOString(),
       merchant,
       accountId,
       categoryId: categoryId || null,

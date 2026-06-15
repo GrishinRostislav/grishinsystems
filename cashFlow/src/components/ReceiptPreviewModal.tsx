@@ -129,7 +129,7 @@ export default function ReceiptPreviewModal({ isOpen, onClose, scanData, onSave 
       // Build transactions array
       const transactionsToSave = [
         ...items.map(item => ({
-          date: new Date(date).toISOString(),
+          date: new Date(`${date}T12:00:00`).toISOString(),
           amount: parseFloat(item.amount as any) || 0,
           merchant,
           paymentMethod,
@@ -140,7 +140,7 @@ export default function ReceiptPreviewModal({ isOpen, onClose, scanData, onSave 
           friendlyName: item.description,
         })),
         ...(gstAmount !== 0 ? [{
-          date: new Date(date).toISOString(),
+          date: new Date(`${date}T12:00:00`).toISOString(),
           amount: gstAmount,
           merchant,
           paymentMethod,
