@@ -79,10 +79,10 @@ export async function POST(request: Request) {
       
       Categorization:
       - Map each item to the most appropriate category ID from this list: [${categoriesList}].
-      - If no category matches reasonably, use null for categoryId.
+      - STRICT RULE: For "categoryId", you MUST return the exact ID string (e.g., "cuid1234..."), NEVER the category name. If no category matches reasonably, use null.
       - For the GST/Tax item, assign it to the "Taxes & Fees" category ID: "${taxCat.id}".
 
-      Return the data strictly in the following JSON format. Do not return any markdown code blocks, explanation or formatting:
+      Return the data strictly in the following JSON format. Ensure "rawName" is ALWAYS included and exactly matches the receipt text. Do not return any markdown code blocks, explanation or formatting:
       {
         "date": "YYYY-MM-DD",
         "merchant": "Merchant Name",
@@ -112,6 +112,20 @@ export async function POST(request: Request) {
       .trim();
 
     const parsedData = JSON.parse(cleanJsonText);
+
+    // Fix hallucinated category IDs (if Gemini returned a name instead of an ID)
+    if (parsedData.items) {
+      for (const item of parsedData.items) {
+        if (item.categoryId && !categories.find(c => c.id === item.categoryId)) {
+          const match = categories.find(c => c.name.toLowerCase() === String(item.categoryId).toLowerCase());
+          if (match) {
+            item.categoryId = match.id;
+          } else {
+            item.categoryId = null;
+          }
+        }
+      }
+    }
 
     // 3. Apply stored Product Mappings (Product translation dictionary)
     const mappings = await prisma.productMapping.findMany();

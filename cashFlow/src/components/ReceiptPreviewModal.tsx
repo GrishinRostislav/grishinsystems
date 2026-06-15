@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { formatCurrency } from "@/utils/format";
+import { buildCategoryTree, flattenCategoryTree, type Category } from "@/utils/categories";
 
 type ReceiptPreviewModalProps = {
   isOpen: boolean;
@@ -97,6 +98,9 @@ export default function ReceiptPreviewModal({ isOpen, onClose, scanData, onSave 
   }, [categories, gstCategoryId]);
 
   if (!isOpen || !scanData) return null;
+
+  const categoryTree = buildCategoryTree(categories as Category[]);
+  const flatCategories = flattenCategoryTree(categoryTree);
 
   const handleItemChange = (index: number, field: string, value: any) => {
     const updated = [...items];
@@ -252,13 +256,10 @@ export default function ReceiptPreviewModal({ isOpen, onClose, scanData, onSave 
                         style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'white' }}
                       >
                         <option value="">Uncategorized</option>
-                        {categories.map(cat => (
-                          <optgroup key={cat.id} label={cat.name}>
-                            <option value={cat.id}>{cat.name}</option>
-                            {cat.subcategories?.map((sub: any) => (
-                              <option key={sub.id} value={sub.id}>- {sub.name}</option>
-                            ))}
-                          </optgroup>
+                        {flatCategories.map(cat => (
+                          <option key={cat.id} value={cat.id} style={{ fontWeight: cat.depth === 0 ? 600 : 400 }}>
+                            {'\u00A0\u00A0'.repeat(cat.depth)}{cat.depth > 0 ? '└ ' : ''}{cat.name}
+                          </option>
                         ))}
                       </select>
                     </td>
@@ -295,13 +296,10 @@ export default function ReceiptPreviewModal({ isOpen, onClose, scanData, onSave 
                         style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'white' }}
                       >
                         <option value="">Uncategorized</option>
-                        {categories.map(cat => (
-                          <optgroup key={cat.id} label={cat.name}>
-                            <option value={cat.id}>{cat.name}</option>
-                            {cat.subcategories?.map((sub: any) => (
-                              <option key={sub.id} value={sub.id}>- {sub.name}</option>
-                            ))}
-                          </optgroup>
+                        {flatCategories.map(cat => (
+                          <option key={cat.id} value={cat.id} style={{ fontWeight: cat.depth === 0 ? 600 : 400 }}>
+                            {'\u00A0\u00A0'.repeat(cat.depth)}{cat.depth > 0 ? '└ ' : ''}{cat.name}
+                          </option>
                         ))}
                       </select>
                     </td>
