@@ -163,7 +163,7 @@ export default function Home() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const { totalBalance = 0, monthlyIncome = 0, monthlyExpenses = 0, chartData = [], pieData = [], balanceTrendData = [], recentTransactions = [], budgets = [] } = data || {};
+  const { totalBalance = 0, monthlyIncome = 0, monthlyExpenses = 0, chartData = [], pieData = [], balanceTrendData = [], recentTransactions = [], budgets = [], homeCurrency = "CAD" } = data || {};
 
   const processedChartData = isCumulative ? chartData.reduce((acc: any[], curr: any, index: number) => {
     if (index === 0) {
@@ -222,7 +222,7 @@ export default function Home() {
               <span className={styles.icon}>💰</span>
             </div>
             <div className={styles.amount}>
-              {formatCurrency(totalBalance)}
+              {formatCurrency(totalBalance, homeCurrency)}
             </div>
             <div className={styles.subtitle}>Included accounts only</div>
           </div>
@@ -235,7 +235,7 @@ export default function Home() {
               <h3>Period Income</h3>
               <span className={styles.icon}>📈</span>
             </div>
-            <div className={styles.amount} style={{ color: 'var(--sporty-teal)' }}>+{formatCurrency(monthlyIncome)}</div>
+            <div className={styles.amount} style={{ color: 'var(--sporty-teal)' }}>+{formatCurrency(monthlyIncome, homeCurrency)}</div>
             <div className={styles.subtitle}>Selected Period</div>
           </div>
         </Link>
@@ -247,7 +247,7 @@ export default function Home() {
               <h3>Period Expenses</h3>
               <span className={styles.icon}>📉</span>
             </div>
-            <div className={styles.amount} style={{ color: '#e11d48' }}>-{formatCurrency(monthlyExpenses)}</div>
+            <div className={styles.amount} style={{ color: '#e11d48' }}>-{formatCurrency(monthlyExpenses, homeCurrency)}</div>
             <div className={styles.subtitle}>Selected Period</div>
           </div>
         </Link>
@@ -273,7 +273,7 @@ export default function Home() {
                 <YAxis stroke="#64748b" fontSize={isMobile ? 10 : 12} tickLine={false} axisLine={false} tickFormatter={formatYAxis} />
                 <Tooltip 
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} 
-                  formatter={(val: any) => formatCurrency(Number(val))} 
+                  formatter={(val: any) => formatCurrency(Number(val), homeCurrency)} 
                 />
                 <Legend verticalAlign="top" height={isMobile ? 24 : 36} wrapperStyle={{ fontSize: isMobile ? '10px' : '12px' }} />
                 <Area type="monotone" dataKey="prevBalance" name="Previous Balance" stroke="#cbd5e1" strokeDasharray="5 5" strokeWidth={2} fill="none" />
@@ -314,7 +314,7 @@ export default function Home() {
                   <YAxis stroke="#64748b" fontSize={isMobile ? 10 : 12} tickLine={false} axisLine={false} tickFormatter={formatYAxis} />
                   <Tooltip 
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                    formatter={(value: any) => formatCurrency(Number(value))}
+                    formatter={(value: any) => formatCurrency(Number(value), homeCurrency)}
                   />
                   <Legend verticalAlign="top" height={isMobile ? 24 : 36} wrapperStyle={{ fontSize: isMobile ? '10px' : '12px' }} />
                   <Area type="monotone" name="Prev Income" dataKey="prevIncome" stroke="#99f6e4" strokeDasharray="4 4" strokeWidth={2} fill="none" />
@@ -377,7 +377,7 @@ export default function Home() {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: any) => formatCurrency(Number(value))} />
+                    <Tooltip formatter={(value: any) => formatCurrency(Number(value), homeCurrency)} />
                     <Legend layout="horizontal" verticalAlign="bottom" align="center" iconSize={8} iconType="circle" wrapperStyle={{ fontSize: isMobile ? '10px' : '11px', marginTop: '10px' }} />
                   </PieChart>
                 </ResponsiveContainer>
@@ -412,8 +412,8 @@ export default function Home() {
                       </span>
                     </div>
                     <div className={budgetStyles.cardStats}>
-                      <span className={budgetStyles.spentAmount}>{formatCurrency(budget.spent)}</span>
-                      <span className={budgetStyles.limitAmount}>of {formatCurrency(budget.amount)}</span>
+                      <span className={budgetStyles.spentAmount}>{formatCurrency(budget.spent, homeCurrency)}</span>
+                      <span className={budgetStyles.limitAmount}>of {formatCurrency(budget.amount, homeCurrency)}</span>
                     </div>
                   </div>
                   <div className={budgetStyles.progressContainer}>
@@ -428,7 +428,7 @@ export default function Home() {
                   <div className={budgetStyles.cardFooter}>
                     <span className={budgetStyles.percentageText}>{Math.round(budget.percentage)}% used</span>
                     <span className={isOverBudget ? budgetStyles.remainingOver : budgetStyles.remainingUnder}>
-                      {isOverBudget ? `${formatCurrency(Math.abs(budget.remaining))} over limit` : `${formatCurrency(budget.remaining)} remaining`}
+                      {isOverBudget ? `${formatCurrency(Math.abs(budget.remaining), homeCurrency)} over limit` : `${formatCurrency(budget.remaining, homeCurrency)} remaining`}
                     </span>
                   </div>
                 </div>
@@ -473,7 +473,7 @@ export default function Home() {
                         </div>
                         <div className={styles.recentTxnRight}>
                           <div className={isIncome ? styles.recentAmountIncome : styles.recentAmountExpense}>
-                            {isIncome ? "+" : ""}{formatCurrency(txn.amount)}
+                            {isIncome ? "+" : ""}{formatCurrency(txn.amount, txn.account?.currency)}
                           </div>
                           {txn.paymentMethod && (
                             <div className={styles.recentPaymentMethod}>

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getExchangeRates, convertAmount } from "@/lib/currency";
 
 function getCurrentPeriodDates(period: string, budgetStartDate: Date, budgetEndDate: Date | null) {
   const now = new Date();
@@ -33,6 +34,13 @@ function getCurrentPeriodDates(period: string, budgetStartDate: Date, budgetEndD
 
 export async function GET() {
   try {
+    let settings = await prisma.settings.findUnique({ where: { id: "global" } });
+    if (!settings) {
+      settings = await prisma.settings.create({ data: { id: "global", homeCurrency: "CAD" } });
+    }
+    const homeCurrency = settings.homeCurrency;
+    const rates = await getExchangeRates(homeCurrency);
+
     const budgets = await prisma.budget.findMany({
       include: {
         categories: {
@@ -78,8 +86,8 @@ export async function GET() {
         const selectedCategoryIds = budget.categories.map(c => c.id);
         const allTargetCategoryIds = budget.isGlobal ? [] : getDescendantIds(selectedCategoryIds);
 
-        // Fetch sum of expense transactions (amount < 0) in the category set
-        const aggregation = await prisma.transaction.aggregate({
+        // Fetch expense transactions (amount < 0) in the category set
+        const txns = await prisma.transaction.findMany({
           where: {
             date: {
               gte: start,
@@ -94,12 +102,13 @@ export async function GET() {
               }
             } : {})
           },
-          _sum: {
-            amount: true
-          }
+          include: { account: true }
         });
 
-        const spent = Math.abs(aggregation._sum.amount || 0);
+        let spent = 0;
+        for (const t of txns) {
+          spent += Math.abs(convertAmount(t.amount, t.account.currency, homeCurrency, rates));
+        }
 
         return {
           ...budget,
@@ -110,7 +119,7 @@ export async function GET() {
       })
     );
 
-    return NextResponse.json(budgetsWithSpent);
+    return NextResponse.json({ budgets: budgetsWithSpent, homeCurrency });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Failed to fetch budgets" }, { status: 500 });

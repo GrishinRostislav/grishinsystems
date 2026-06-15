@@ -17,6 +17,8 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editName, setEditName] = useState("");
   const [editBalance, setEditBalance] = useState("");
+  const [editCurrency, setEditCurrency] = useState("CAD");
+  const [editInclude, setEditInclude] = useState(true);
   
   const [isTxnModalOpen, setIsTxnModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
@@ -34,6 +36,8 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
   const openEditModal = () => {
     setEditName(data.account.name);
     setEditBalance(data.account.balance.toString());
+    setEditCurrency(data.account.currency);
+    setEditInclude(data.account.includeInTotal);
     setIsEditModalOpen(true);
   };
 
@@ -43,7 +47,12 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
       const res = await fetch(`/cashFlow/api/accounts/${resolvedParams.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: editName, balance: parseFloat(editBalance) })
+        body: JSON.stringify({ 
+          name: editName, 
+          balance: parseFloat(editBalance),
+          currency: editCurrency,
+          includeInTotal: editInclude
+        })
       });
       if (res.ok) {
         setIsEditModalOpen(false);
@@ -154,7 +163,7 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
                   style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}
                 />
               </div>
-              <div style={{ marginBottom: '24px' }}>
+              <div style={{ marginBottom: '16px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)' }}>Current Balance (Any change adds a correction transaction)</label>
                 <input 
                   type="number" 
@@ -164,6 +173,31 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
                   required 
                   style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}
                 />
+              </div>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)' }}>Currency</label>
+                <select 
+                  value={editCurrency} 
+                  onChange={e => setEditCurrency(e.target.value)}
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'white' }}
+                >
+                  <option value="CAD">CAD - Canadian Dollar</option>
+                  <option value="USD">USD - US Dollar</option>
+                  <option value="EUR">EUR - Euro</option>
+                  <option value="RUB">RUB - Russian Ruble</option>
+                  <option value="KZT">KZT - Kazakhstani Tenge</option>
+                  <option value="GBP">GBP - British Pound</option>
+                  <option value="AUD">AUD - Australian Dollar</option>
+                </select>
+              </div>
+              <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input 
+                  type="checkbox" 
+                  id="editInclude"
+                  checked={editInclude} 
+                  onChange={e => setEditInclude(e.target.checked)} 
+                />
+                <label htmlFor="editInclude" style={{ color: 'var(--text-main)', cursor: 'pointer' }}>Include in total balance</label>
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                 <button type="button" onClick={() => setIsEditModalOpen(false)} style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'transparent', cursor: 'pointer' }}>Cancel</button>
@@ -180,7 +214,7 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
             <h3>Current Balance</h3>
           </div>
           <div className={styles.amount}>
-            {formatCurrency(account.balance)}
+            {formatCurrency(account.balance, account.currency)}
           </div>
         </div>
         <div className={styles.card}>
@@ -188,7 +222,7 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
             <h3>Period Income</h3>
           </div>
           <div className={styles.amount} style={{ color: 'var(--sporty-teal)' }}>
-            +{formatCurrency(periodIncome)}
+            +{formatCurrency(periodIncome, account.currency)}
           </div>
         </div>
         <div className={styles.card}>
@@ -196,7 +230,7 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
             <h3>Period Expenses</h3>
           </div>
           <div className={styles.amount} style={{ color: '#e11d48' }}>
-            -{formatCurrency(periodExpenses)}
+            -{formatCurrency(periodExpenses, account.currency)}
           </div>
         </div>
       </div>
@@ -216,7 +250,7 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                 <XAxis dataKey="date" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `$${Number(val).toFixed(0)}`} />
-                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(val: any) => formatCurrency(Number(val))} />
+                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(val: any) => formatCurrency(Number(val), account.currency)} />
                 <Area type="monotone" dataKey="balance" stroke="#2D5D7B" strokeWidth={3} fillOpacity={1} fill="url(#colorBalance)" />
               </AreaChart>
             </ResponsiveContainer>
@@ -244,7 +278,7 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
                   <td>{txn.merchant}</td>
                   <td>{txn.category?.name || "Uncategorized"}</td>
                   <td className={txn.amount >= 0 ? styles.amountIncome : styles.amountExpense}>
-                    {txn.amount >= 0 ? "+" : ""}{formatCurrency(txn.amount)}
+                    {txn.amount >= 0 ? "+" : ""}{formatCurrency(txn.amount, account.currency)}
                   </td>
                 </tr>
               ))
@@ -260,7 +294,7 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
             <tr>
               <td colSpan={3} style={{ textAlign: 'right', padding: '12px 16px', color: 'var(--text-muted)' }}>Total for Period:</td>
               <td style={{ padding: '12px 16px', color: (periodIncome - periodExpenses) >= 0 ? 'var(--sporty-teal)' : '#e11d48' }}>
-                {(periodIncome - periodExpenses) >= 0 ? "+" : ""}{formatCurrency(periodIncome - periodExpenses)}
+                {(periodIncome - periodExpenses) >= 0 ? "+" : ""}{formatCurrency(periodIncome - periodExpenses, account.currency)}
               </td>
             </tr>
           </tfoot>

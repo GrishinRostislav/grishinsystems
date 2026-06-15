@@ -25,7 +25,23 @@ export default function AccountsPage() {
   const [name, setName] = useState("");
   const [type, setType] = useState("checking");
   const [balance, setBalance] = useState("");
+  const [currency, setCurrency] = useState("CAD");
   const [includeInTotal, setIncludeInTotal] = useState(true);
+
+  // Global settings
+  const [homeCurrency, setHomeCurrency] = useState("CAD");
+
+  useEffect(() => {
+    fetch("/cashFlow/api/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data.homeCurrency) {
+          setHomeCurrency(data.homeCurrency);
+          setCurrency(data.homeCurrency);
+        }
+      })
+      .catch(err => console.error(err));
+  }, []);
 
   const fetchAccounts = async () => {
     try {
@@ -53,6 +69,7 @@ export default function AccountsPage() {
           name, 
           type, 
           balance: parseFloat(balance) || 0,
+          currency,
           includeInTotal 
         }),
       });
@@ -61,6 +78,7 @@ export default function AccountsPage() {
         setName("");
         setType("checking");
         setBalance("");
+        setCurrency(homeCurrency);
         setIncludeInTotal(true);
         fetchAccounts();
       }
@@ -95,7 +113,7 @@ export default function AccountsPage() {
                   <span className={styles.typeBadge}>{account.type}</span>
                 </div>
                 <div className={styles.balance}>
-                  {formatCurrency(account.balance)}
+                  {formatCurrency(account.balance, account.currency)}
                 </div>
                 <div className={styles.footer}>
                   <span>{account.currency}</span>
@@ -143,6 +161,18 @@ export default function AccountsPage() {
                   <option value="credit">Credit Card</option>
                   <option value="cash">Cash</option>
                   <option value="investment">Investment</option>
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Currency</label>
+                <select value={currency} onChange={e => setCurrency(e.target.value)}>
+                  <option value="CAD">CAD - Canadian Dollar</option>
+                  <option value="USD">USD - US Dollar</option>
+                  <option value="EUR">EUR - Euro</option>
+                  <option value="RUB">RUB - Russian Ruble</option>
+                  <option value="KZT">KZT - Kazakhstani Tenge</option>
+                  <option value="GBP">GBP - British Pound</option>
+                  <option value="AUD">AUD - Australian Dollar</option>
                 </select>
               </div>
               <div className={styles.formGroup}>

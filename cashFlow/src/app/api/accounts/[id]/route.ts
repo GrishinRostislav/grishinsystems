@@ -99,13 +99,15 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const resolvedParams = await params;
     const { id } = resolvedParams;
     const body = await request.json();
-    const { name, balance } = body;
+    const { name, balance, currency, includeInTotal } = body;
 
     const account = await prisma.account.findUnique({ where: { id } });
     if (!account) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const updates: any = {};
     if (name) updates.name = name;
+    if (currency) updates.currency = currency;
+    if (includeInTotal !== undefined) updates.includeInTotal = includeInTotal;
 
     const newBalance = parseFloat(balance);
     const delta = newBalance - account.balance;

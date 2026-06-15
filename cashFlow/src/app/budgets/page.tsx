@@ -27,6 +27,7 @@ type Budget = {
 export default function BudgetsPage() {
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [homeCurrency, setHomeCurrency] = useState("CAD");
   const [loading, setLoading] = useState(true);
 
   // Modal State
@@ -52,10 +53,11 @@ export default function BudgetsPage() {
         fetch("/cashFlow/api/budgets"),
         fetch("/cashFlow/api/categories"),
       ]);
-      const budgetsData = await budgetsRes.json();
+      const data = await budgetsRes.json();
       const categoriesData = await categoriesRes.json();
 
-      setBudgets(budgetsData);
+      setBudgets(data.budgets || []);
+      if (data.homeCurrency) setHomeCurrency(data.homeCurrency);
       setCategories(categoriesData);
     } catch (err) {
       console.error("Failed to fetch budgets data", err);
@@ -215,10 +217,10 @@ export default function BudgetsPage() {
                           </div>
                           <div className={styles.cardStats}>
                             <span className={styles.spentAmount}>
-                              {formatCurrency(budget.spent)}
+                              {formatCurrency(budget.spent, homeCurrency)}
                             </span>
                             <span className={styles.limitAmount}>
-                              of {formatCurrency(budget.amount)}
+                              of {formatCurrency(budget.amount, homeCurrency)}
                             </span>
                           </div>
                         </div>
@@ -243,8 +245,8 @@ export default function BudgetsPage() {
                             }
                           >
                             {isOverBudget
-                              ? `${formatCurrency(Math.abs(remaining))} over limit`
-                              : `${formatCurrency(remaining)} remaining`}
+                              ? `${formatCurrency(Math.abs(remaining), homeCurrency)} over limit`
+                              : `${formatCurrency(remaining, homeCurrency)} remaining`}
                           </span>
                         </div>
 

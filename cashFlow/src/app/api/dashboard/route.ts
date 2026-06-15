@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getExchangeRates, convertAmount } from "@/lib/currency";
 
 export async function GET(request: Request) {
   try {
@@ -7,11 +8,22 @@ export async function GET(request: Request) {
     const startDateParam = searchParams.get("startDate");
     const endDateParam = searchParams.get("endDate");
 
+    let settings = await prisma.settings.findUnique({ where: { id: "global" } });
+    if (!settings) {
+      settings = await prisma.settings.create({ data: { id: "global", homeCurrency: "CAD" } });
+    }
+    const homeCurrency = settings.homeCurrency;
+    const rates = await getExchangeRates(homeCurrency);
+
     // 1. Total Balance of Included Accounts
     const accounts = await prisma.account.findMany({
       where: { includeInTotal: true }
     });
-    const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+    
+    let totalBalance = 0;
+    for (const acc of accounts) {
+      totalBalance += convertAmount(acc.balance, acc.currency, homeCurrency, rates);
+    }
 
     // 2. Transactions for calculations
     const now = new Date();
@@ -33,6 +45,7 @@ export async function GET(request: Request) {
       },
       include: {
         category: true,
+        account: true
       },
       orderBy: { date: "asc" }
     });
@@ -51,6 +64,7 @@ export async function GET(request: Request) {
           lte: prevEndDate
         }
       },
+      include: { account: true },
       orderBy: { date: "asc" }
     });
 
@@ -78,11 +92,13 @@ export async function GET(request: Request) {
         chartMap[chartKey] = { income: 0, expenses: 0, prevIncome: 0, prevExpenses: 0 };
       }
 
-      if (txn.amount > 0) {
-        chartMap[chartKey].income += txn.amount;
-        if (isCurrentMonth) monthlyIncome += txn.amount;
+      const txnAmount = convertAmount(txn.amount, txn.account.currency, homeCurrency, rates);
+
+      if (txnAmount > 0) {
+        chartMap[chartKey].income += txnAmount;
+        if (isCurrentMonth) monthlyIncome += txnAmount;
       } else {
-        const absAmount = Math.abs(txn.amount);
+        const absAmount = Math.abs(txnAmount);
         chartMap[chartKey].expenses += absAmount;
         if (isCurrentMonth) {
           monthlyExpenses += absAmount;
@@ -106,10 +122,12 @@ export async function GET(request: Request) {
         chartMap[chartKey] = { income: 0, expenses: 0, prevIncome: 0, prevExpenses: 0 };
       }
 
-      if (txn.amount > 0) {
-        chartMap[chartKey].prevIncome += txn.amount;
+      const txnAmount = convertAmount(txn.amount, txn.account.currency, homeCurrency, rates);
+
+      if (txnAmount > 0) {
+        chartMap[chartKey].prevIncome += txnAmount;
       } else {
-        chartMap[chartKey].prevExpenses += Math.abs(txn.amount);
+        chartMap[chartKey].prevExpenses += Math.abs(txnAmount);
       }
     }
 
@@ -135,21 +153,23 @@ export async function GET(request: Request) {
     })).sort((a, b) => b.value - a.value);
 
     // 3. Balance Trend Calculation
-    const futureTransactions = await prisma.transaction.aggregate({
+    // We can't do aggregate directly in the DB anymore because amounts need currency conversion.
+    // We must fetch them and convert in memory.
+    const futureTransactionsData = await prisma.transaction.findMany({
       where: { date: { gt: endDate }, account: { includeInTotal: true } },
-      _sum: { amount: true }
+      include: { account: true }
     });
-    const futureNet = futureTransactions._sum.amount || 0;
-    const rangeNet = transactions.filter(t => accounts.some(a => a.id === t.accountId)).reduce((sum, t) => sum + t.amount, 0);
+    const futureNet = futureTransactionsData.reduce((sum, t) => sum + convertAmount(t.amount, t.account.currency, homeCurrency, rates), 0);
+    const rangeNet = transactions.filter(t => accounts.some(a => a.id === t.accountId)).reduce((sum, t) => sum + convertAmount(t.amount, t.account.currency, homeCurrency, rates), 0);
     
     let runningBalance = totalBalance - futureNet - rangeNet;
 
-    const prevFutureTransactions = await prisma.transaction.aggregate({
+    const prevFutureTransactionsData = await prisma.transaction.findMany({
       where: { date: { gt: prevEndDate }, account: { includeInTotal: true } },
-      _sum: { amount: true }
+      include: { account: true }
     });
-    const prevFutureNet = prevFutureTransactions._sum.amount || 0;
-    const prevRangeNet = prevTransactions.filter(t => accounts.some(a => a.id === t.accountId)).reduce((sum, t) => sum + t.amount, 0);
+    const prevFutureNet = prevFutureTransactionsData.reduce((sum, t) => sum + convertAmount(t.amount, t.account.currency, homeCurrency, rates), 0);
+    const prevRangeNet = prevTransactions.filter(t => accounts.some(a => a.id === t.accountId)).reduce((sum, t) => sum + convertAmount(t.amount, t.account.currency, homeCurrency, rates), 0);
     
     let prevRunningBalance = totalBalance - prevFutureNet - prevRangeNet;
 
@@ -163,7 +183,7 @@ export async function GET(request: Request) {
         } else {
           chartKey = txnDate.toLocaleString('default', { month: 'short', year: 'numeric' });
         }
-        balanceTrendMap[chartKey] = (balanceTrendMap[chartKey] || 0) + txn.amount;
+        balanceTrendMap[chartKey] = (balanceTrendMap[chartKey] || 0) + convertAmount(txn.amount, txn.account.currency, homeCurrency, rates);
       }
     }
 
@@ -177,7 +197,7 @@ export async function GET(request: Request) {
         } else {
           chartKey = mappedDate.toLocaleString('default', { month: 'short', year: 'numeric' });
         }
-        prevBalanceTrendMap[chartKey] = (prevBalanceTrendMap[chartKey] || 0) + txn.amount;
+        prevBalanceTrendMap[chartKey] = (prevBalanceTrendMap[chartKey] || 0) + convertAmount(txn.amount, txn.account.currency, homeCurrency, rates);
       }
     }
 
@@ -212,7 +232,8 @@ export async function GET(request: Request) {
       chartData,
       pieData,
       balanceTrendData,
-      recentTransactions
+      recentTransactions,
+      homeCurrency
     });
 
   } catch (error) {

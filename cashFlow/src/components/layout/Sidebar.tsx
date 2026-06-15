@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styles from "./Sidebar.module.css";
+import SettingsModal from "../SettingsModal";
 
 const navItems = [
   { name: "Dashboard", path: "/", icon: "📊" },
@@ -17,6 +19,7 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   return (
     <aside className={styles.sidebar}>
@@ -38,6 +41,19 @@ export default function Sidebar() {
           );
         })}
       </nav>
+      
+      <div style={{ marginTop: 'auto', padding: '16px' }}>
+        <button 
+          onClick={() => setIsSettingsOpen(true)}
+          className={styles.navItem}
+          style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', opacity: 0.8 }}
+        >
+          <span className={styles.icon}>⚙️</span>
+          Settings
+        </button>
+      </div>
+
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </aside>
   );
 }
