@@ -75,7 +75,7 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
   };
 
   return (
-    <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+    <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
       {interval === 'custom' && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'white', padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

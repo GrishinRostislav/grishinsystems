@@ -118,20 +118,20 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
             <h1 className={styles.title}>{account?.name || "Loading..."}</h1>
             {account && (
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button onClick={openEditModal} style={{ background: 'transparent', border: '1px solid var(--border-color)', padding: '4px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', color: 'var(--text-main)' }}>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button onClick={openEditModal} style={{ background: 'transparent', border: '1px solid var(--border-color)', padding: '4px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', color: 'var(--text-main)', whiteSpace: 'nowrap' }}>
                   Edit
                 </button>
                 {account.isArchived ? (
-                  <button onClick={handleRestoreAccount} style={{ background: '#ecfdf5', border: '1px solid #10b981', padding: '4px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', color: '#047857' }}>
+                  <button onClick={handleRestoreAccount} style={{ background: '#ecfdf5', border: '1px solid #10b981', padding: '4px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', color: '#047857', whiteSpace: 'nowrap' }}>
                     Restore Account
                   </button>
                 ) : (
-                  <button onClick={handleArchiveAccount} style={{ background: '#fff1f2', border: '1px solid #f43f5e', padding: '4px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', color: '#be123c' }}>
+                  <button onClick={handleArchiveAccount} style={{ background: '#fff1f2', border: '1px solid #f43f5e', padding: '4px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', color: '#be123c', whiteSpace: 'nowrap' }}>
                     Delete Account
                   </button>
                 )}
@@ -237,7 +237,7 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
 
       <div className={styles.chartCard}>
         <h3 style={{ marginBottom: '16px' }}>Balance History</h3>
-        <div style={{ width: '100%', height: 300 }}>
+        <div className={styles.chartWrapper}>
           {chartData.length > 0 ? (
             <ResponsiveContainer>
               <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>

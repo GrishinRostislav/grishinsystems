@@ -1,21 +1,19 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-
 async function main() {
-  const categories = await prisma.category.findMany({ select: { id: true, name: true } });
-  const categoriesList = categories.map(c => `"${c.name}" (ID: "${c.id}")`).join(', ');
-  console.log("=== CATEGORIES LIST ===");
-  console.log(categoriesList);
-  
-  const taxCat = categories.find(c => 
-    c.name.toLowerCase().includes("tax") || 
-    c.name.toLowerCase().includes("gst") || 
-    c.name.toLowerCase().includes("fees")
-  );
-  console.log("=== TAX CAT ===");
-  console.log(taxCat);
-
-  console.log("=== PRODUCT MAPPINGS ===");
-  console.log(await prisma.productMapping.findMany());
+  const t = await prisma.scheduledTransaction.findFirst();
+  if(!t) { console.log('No scheduled transactions'); return; }
+  const a = await prisma.account.findFirst({ where: { id: { not: t.accountId } } });
+  if(!a) { console.log('No other account'); return; }
+  console.log('Trying to update', t.id, 'to account', a.id);
+  try {
+    await prisma.scheduledTransaction.update({
+      where: { id: t.id },
+      data: { accountId: a.id }
+    });
+    console.log('Success!');
+  } catch(e) {
+    console.error('Error:', e);
+  }
 }
-main().finally(() => prisma.$disconnect());
+main().finally(()=>prisma.$disconnect());
