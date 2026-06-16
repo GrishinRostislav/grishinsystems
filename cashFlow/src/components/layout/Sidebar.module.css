@@ -67,53 +67,149 @@
   white-space: nowrap;
 }
 
-/* ===== Mobile: Bottom Tab Bar ===== */
+/* Hide FAB on desktop */
+.fabContainer {
+  display: none;
+}
+
+/* ===== Mobile: FAB Navigation ===== */
 @media (max-width: 768px) {
   .sidebar {
-    width: 100%;
-    height: 64px;
-    flex-direction: row;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    border-right: none;
-    border-top: 1px solid var(--border-color);
-    box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
-  }
-
-  .logo {
     display: none;
   }
 
-  .nav {
-    flex-direction: row;
-    padding: 4px 0;
-    gap: 0;
-    overflow-x: auto;
-    justify-content: space-around;
-    align-items: stretch;
+  .fabContainer {
+    display: block;
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
   }
 
-  .navItem {
-    flex-direction: column;
-    padding: 6px 4px;
-    font-size: 10px;
-    justify-content: center;
+  .fabBackdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 990;
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .fab {
+    position: relative;
+    z-index: 1000;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-color: var(--unique-blue);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(109, 40, 217, 0.4);
+    display: flex;
     align-items: center;
-    border-radius: 0;
-    min-width: 0;
-    flex: 1;
-    gap: 2px;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s;
   }
 
-  .icon {
-    margin-right: 0;
-    margin-bottom: 0;
-    font-size: 20px;
+  .fabActive {
+    background-color: #8b5cf6; /* A slightly more vibrant purple when open */
+    transform: scale(1.05);
+    box-shadow: 0 8px 24px rgba(139, 92, 246, 0.5);
   }
 
-  .label {
-    font-size: 10px;
-    line-height: 1.2;
+  .fabIconMenu, .fabIconClose {
+    position: absolute;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
+
+  .fabIconClose {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.5);
+  }
+
+  .fabActive .fabIconMenu {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.5);
+  }
+
+  .fabActive .fabIconClose {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+
+  .fabMenu {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    z-index: 995;
+    pointer-events: none; /* Let clicks pass through when closed */
+  }
+
+  .fabMenuOpen {
+    pointer-events: auto;
+  }
+
+  .fabItem {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    /* The variables --fab-x and --fab-y are set in React */
+  }
+
+  .fabMenuOpen .fabItem {
+    opacity: 1;
+    transform: translate(calc(-50% + var(--fab-x)), calc(-50% + var(--fab-y))) scale(1);
+    transition-delay: var(--fab-delay);
+  }
+
+  .fabItemIcon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background-color: var(--fab-color, var(--sporty-teal));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    margin-bottom: 8px;
+    transition: transform 0.2s;
+  }
+
+  .fabItem:active .fabItemIcon {
+    transform: scale(0.9);
+  }
+
+  .fabItemLabel {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2px 8px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  /* Just a subtle active state for the label text if needed */
+  .fabItemActive .fabItemLabel {
+    color: var(--fab-color);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
