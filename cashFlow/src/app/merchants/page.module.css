@@ -82,6 +82,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 
 .merchantAvatar {
@@ -102,6 +103,9 @@
   margin: 0;
   color: var(--text-main);
   font-size: 1.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .entriesBadge {

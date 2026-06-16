@@ -156,6 +156,12 @@
   gap: 12px;
 }
 
+@media (max-width: 768px) {
+  .fabContainer {
+    bottom: 100px;
+  }
+}
+
 .fabButton {
   width: 56px;
   height: 56px;
