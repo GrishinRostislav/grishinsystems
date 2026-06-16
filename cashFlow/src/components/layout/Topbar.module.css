@@ -59,10 +59,18 @@
   color: var(--text-main);
   cursor: pointer;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
   transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
 .dropdownItem:hover {
   background-color: var(--bg-hover);
   color: var(--tribal-green);
+}
+
+.dropdownDivider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 2px 0;
 }
