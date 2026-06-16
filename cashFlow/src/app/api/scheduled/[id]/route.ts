@@ -33,9 +33,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         paymentMethod: paymentMethod !== undefined ? paymentMethod : undefined,
         payeeId: finalPayeeId,
         notes,
-        accountId,
-        toAccountId: type === 'transfer' ? toAccountId : null,
-        categoryId: type === 'transfer' ? null : (categoryId || null),
+        accountId: accountId === '' ? undefined : accountId,
+        toAccountId: type === 'transfer' ? (toAccountId === '' ? null : toAccountId) : null,
+        categoryId: type === 'transfer' ? null : (categoryId === '' ? null : categoryId),
         nextRunDate: nextRunDate ? new Date(nextRunDate) : undefined,
         frequency,
         autoApprove: autoApprove !== undefined ? Boolean(autoApprove) : undefined,
@@ -49,8 +49,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     });
 
     return NextResponse.json(scheduled);
-  } catch (error) {
-    console.error("Failed to update scheduled transaction:", error);
+  } catch (error: any) {
+    console.error("Failed to update scheduled transaction. Body:", body);
+    console.error("Prisma Error:", error.message || error);
     return NextResponse.json({ error: "Failed to update scheduled transaction" }, { status: 500 });
   }
 }
