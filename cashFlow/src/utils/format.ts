@@ -24,3 +24,11 @@ export function formatDate(dateInput: string | Date): string {
   const date = new Date(dateInput);
   return date.toLocaleDateString(undefined, { timeZone: 'UTC' });
 }
+
+export function toTitleCase(str: string): string {
+  if (!str) return '';
+  return str.toLowerCase().split(/\s+/).map(word => {
+    if (word.length === 0) return '';
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }).join(' ');
+}

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { toTitleCase } from "@/utils/format";
 
 export async function GET() {
   try {
@@ -38,9 +39,17 @@ export async function POST(request: Request) {
     let finalMerchantName = merchant || '';
 
     if (merchant && merchant.trim() !== '') {
-      let payee = await prisma.merchant.findUnique({ where: { name: merchant.trim() } });
+      const formattedMerchant = toTitleCase(merchant.trim());
+      let payee = await prisma.merchant.findFirst({ 
+        where: { name: { equals: formattedMerchant, mode: 'insensitive' } } 
+      });
       if (!payee) {
-        payee = await prisma.merchant.create({ data: { name: merchant.trim() } });
+        payee = await prisma.merchant.create({ data: { name: formattedMerchant } });
+      } else if (payee.name !== formattedMerchant) {
+        payee = await prisma.merchant.update({
+          where: { id: payee.id },
+          data: { name: formattedMerchant }
+        });
       }
       finalPayeeId = payee.id;
       finalMerchantName = payee.name;

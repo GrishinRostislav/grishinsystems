@@ -99,7 +99,7 @@
 }
 
 .modal {
-  background-color: var(--bg-main);
+  background-color: var(--bg-secondary);
   border-radius: 12px;
   padding: 32px;
   width: 100%;
