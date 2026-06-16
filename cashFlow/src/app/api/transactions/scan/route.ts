@@ -65,6 +65,16 @@ export async function POST(request: Request) {
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
+    // 3. Fetch recent product mappings to teach the AI
+    const recentMappings = await prisma.productMapping.findMany({
+      take: 100,
+      orderBy: { updatedAt: "desc" },
+    });
+    const mappingExamples = recentMappings
+      .filter(m => m.categoryId)
+      .map(m => `"${m.rawName}" -> Category ID "${m.categoryId}"`)
+      .join('\n      ');
+
     const prompt = `
       You are an expert financial scanner. Analyze this store receipt image carefully.
       
@@ -75,12 +85,15 @@ export async function POST(request: Request) {
          - "code": The barcode number, SKU, or product code printed next to the item description if visible (e.g. "62773527971"), otherwise null.
          - "rawName": The exact text description of the product as printed on the receipt (e.g. "GV LG WHT 30").
          - "amount": The final price of the item represented as a negative float (e.g. -5.42). Ignore intermediate discounts.
-      4. GST (Tax): Goods and services tax amount, represented as a negative float (e.g., -0.28).
+      4. GST (Tax): Goods and services tax amount (also known as VAT, НДС, Tax, etc), represented as a negative float (e.g., -0.28).
       
       Categorization:
       - Map each item to the most appropriate category ID from this list: [${categoriesList}].
       - STRICT RULE: For "categoryId", you MUST return the exact ID string (e.g., "cuid1234..."), NEVER the category name. If no category matches reasonably, use null.
-      - For the GST/Tax item, assign it to the "Taxes & Fees" category ID: "${taxCat.id}".
+      - For the GST/Tax/НДС item, assign it to the "Taxes & Fees" category ID: "${taxCat.id}".
+
+      Here are some examples of how the user previously categorized items. Learn from these patterns for similar items:
+      ${mappingExamples || "No previous examples."}
 
       Return the data strictly in the following JSON format. Ensure "rawName" is ALWAYS included and exactly matches the receipt text. Do not return any markdown code blocks, explanation or formatting:
       {
