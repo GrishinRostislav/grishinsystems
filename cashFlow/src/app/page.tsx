@@ -134,7 +134,8 @@ export default function Home() {
       try {
         const budgetsRes = await fetch('/cashFlow/api/budgets');
         if (budgetsRes.ok) {
-          budgetsData = await budgetsRes.json();
+          const parsed = await budgetsRes.json();
+          budgetsData = parsed.budgets || [];
         }
       } catch (err) {
         console.error("Failed to fetch budgets data", err);
