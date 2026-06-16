@@ -131,7 +131,6 @@ export default function Sidebar() {
                 onClick={() => setFabOpen(false)}
               >
                 <div className={styles.fabItemIcon}>{item.icon}</div>
-                <span className={styles.fabItemLabel}>{item.name}</span>
               </Link>
             );
           })}
