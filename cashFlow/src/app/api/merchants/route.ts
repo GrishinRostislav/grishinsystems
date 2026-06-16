@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { toTitleCase } from "@/utils/format";
 
 export async function GET() {
   try {
@@ -23,12 +24,14 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { name } = body;
 
-    if (!name) {
+    if (!name || name.trim() === '') {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
+    const formattedName = toTitleCase(name.trim());
+
     const merchant = await prisma.merchant.create({
-      data: { name }
+      data: { name: formattedName }
     });
 
     return NextResponse.json(merchant, { status: 201 });

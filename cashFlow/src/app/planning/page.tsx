@@ -60,7 +60,7 @@ function PlanningContent() {
   }, [searchParams, router]);
 
   const handleSave = async (data: any) => {
-    const url = data.id ? `/api/scheduled/${data.id}` : '/api/scheduled';
+    const url = data.id ? `/cashFlow/api/scheduled/${data.id}` : '/cashFlow/api/scheduled';
     const method = data.id ? 'PUT' : 'POST';
     
     const res = await fetch(url, {
