@@ -113,7 +113,7 @@ export default function Sidebar() {
             const startAngle = (180 + (180 - angleSpread) / 2); // center the arc
             const angleStep = angleSpread / (totalItems - 1);
             const angle = (startAngle + angleStep * index) * (Math.PI / 180);
-            const radius = 130;
+            const radius = 165;
             const x = Math.cos(angle) * radius;
             const y = Math.sin(angle) * radius;
 
@@ -136,6 +136,9 @@ export default function Sidebar() {
             );
           })}
         </div>
+
+        {/* Glassmorphic Dock Background */}
+        <div className={styles.fabDock} />
 
         {/* FAB Button */}
         <button
