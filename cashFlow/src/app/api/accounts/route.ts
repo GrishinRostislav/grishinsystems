@@ -8,7 +8,10 @@ export async function GET(request: Request) {
 
     const accounts = await prisma.account.findMany({
       where: includeArchived ? {} : { isArchived: false },
-      orderBy: { createdAt: "desc" },
+      orderBy: [
+        { order: "asc" },
+        { createdAt: "desc" }
+      ],
     });
     return NextResponse.json(accounts);
   } catch (error) {
@@ -21,6 +24,11 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { name, type, balance, currency, includeInTotal } = body;
 
+    const maxOrderAccount = await prisma.account.findFirst({
+      orderBy: { order: 'desc' },
+    });
+    const nextOrder = maxOrderAccount ? maxOrderAccount.order + 1 : 0;
+
     const account = await prisma.account.create({
       data: {
         name,
@@ -28,6 +36,7 @@ export async function POST(request: Request) {
         balance: balance ? parseFloat(balance) : 0,
         currency: currency || "CAD",
         includeInTotal: includeInTotal !== undefined ? includeInTotal : true,
+        order: nextOrder,
       },
     });
 

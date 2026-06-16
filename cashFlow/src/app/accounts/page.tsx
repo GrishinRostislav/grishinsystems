@@ -4,6 +4,23 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import styles from "./page.module.css";
 import { formatCurrency } from "@/utils/format";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+  useSortable
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type Account = {
   id: string;
@@ -13,13 +30,81 @@ type Account = {
   currency: string;
   includeInTotal: boolean;
   isArchived: boolean;
+  order: number;
 };
+
+function SortableAccountCard({ account, isReordering }: { account: Account, isReordering: boolean }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: account.id, disabled: !isReordering });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: account.isArchived ? 0.6 : 1,
+    zIndex: isDragging ? 10 : 1,
+    position: 'relative' as const,
+  };
+
+  const cardContent = (
+    <div className={styles.card} style={{ cursor: isReordering ? 'grab' : 'pointer', boxShadow: isDragging ? 'var(--shadow-lg)' : undefined }}>
+      <div className={styles.cardHeader}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {isReordering && (
+            <div {...attributes} {...listeners} style={{ cursor: 'grab', display: 'flex', alignItems: 'center', color: 'var(--text-muted)' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              </svg>
+            </div>
+          )}
+          <h2>{account.name} {account.isArchived && <span style={{fontSize: '0.8rem', backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', marginLeft: '8px'}}>Archived</span>}</h2>
+        </div>
+        <span className={styles.typeBadge}>{account.type}</span>
+      </div>
+      <div className={styles.balance}>
+        {formatCurrency(account.balance, account.currency)}
+      </div>
+      <div className={styles.footer}>
+        <span>{account.currency}</span>
+        {account.includeInTotal ? (
+          <span className={styles.included}>Included in total</span>
+        ) : (
+          <span className={styles.excluded}>Excluded from total</span>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      {isReordering ? (
+        cardContent
+      ) : (
+        <Link href={`/accounts/${account.id}`} className={styles.cardLink}>
+          {cardContent}
+        </Link>
+      )}
+    </div>
+  );
+}
 
 export default function AccountsPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
+  const [isReordering, setIsReordering] = useState(false);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
 
   // Form state
   const [name, setName] = useState("");
@@ -30,6 +115,17 @@ export default function AccountsPage() {
 
   // Global settings
   const [homeCurrency, setHomeCurrency] = useState("CAD");
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     fetch("/cashFlow/api/settings")
@@ -87,6 +183,34 @@ export default function AccountsPage() {
     }
   };
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setAccounts((items) => {
+        const oldIndex = items.findIndex(item => item.id === active.id);
+        const newIndex = items.findIndex(item => item.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
+  const saveOrder = async () => {
+    setIsSavingOrder(true);
+    try {
+      const orderedIds = accounts.map(a => a.id);
+      await fetch("/cashFlow/api/accounts/reorder", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderedIds })
+      });
+    } catch (err) {
+      console.error("Failed to save order", err);
+    } finally {
+      setIsSavingOrder(false);
+      setIsReordering(false);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -94,40 +218,37 @@ export default function AccountsPage() {
           <h1>Accounts</h1>
           <p>Manage your bank accounts, credit cards, and cash.</p>
         </div>
-        <button className={styles.btnPrimary} onClick={() => setIsModalOpen(true)}>
-          + Add Account
-        </button>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          {isReordering ? (
+            <button className={styles.btnPrimary} onClick={saveOrder} disabled={isSavingOrder}>
+              {isSavingOrder ? 'Saving...' : 'Save Order'}
+            </button>
+          ) : (
+            <button className={styles.btnSecondary} onClick={() => setIsReordering(true)} disabled={accounts.length === 0}>
+              Reorder
+            </button>
+          )}
+          <button className={styles.btnPrimary} onClick={() => setIsModalOpen(true)}>
+            + Add Account
+          </button>
+        </div>
       </div>
 
-      <div className={styles.grid}>
-        {loading ? (
-          <div>Loading accounts...</div>
-        ) : accounts.length === 0 ? (
-          <div>No accounts found. Create one to get started!</div>
-        ) : (
-          accounts.map((account) => (
-            <Link href={`/accounts/${account.id}`} key={account.id} className={styles.cardLink} style={{ opacity: account.isArchived ? 0.6 : 1 }}>
-              <div className={styles.card}>
-                <div className={styles.cardHeader}>
-                  <h2>{account.name} {account.isArchived && <span style={{fontSize: '0.8rem', backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', marginLeft: '8px'}}>Archived</span>}</h2>
-                  <span className={styles.typeBadge}>{account.type}</span>
-                </div>
-                <div className={styles.balance}>
-                  {formatCurrency(account.balance, account.currency)}
-                </div>
-                <div className={styles.footer}>
-                  <span>{account.currency}</span>
-                  {account.includeInTotal ? (
-                    <span className={styles.included}>Included in total</span>
-                  ) : (
-                    <span className={styles.excluded}>Excluded from total</span>
-                  )}
-                </div>
-              </div>
-            </Link>
-          ))
-        )}
-      </div>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <div className={styles.grid}>
+          {loading ? (
+            <div>Loading accounts...</div>
+          ) : accounts.length === 0 ? (
+            <div>No accounts found. Create one to get started!</div>
+          ) : (
+            <SortableContext items={accounts.map(a => a.id)} strategy={rectSortingStrategy}>
+              {accounts.map((account) => (
+                <SortableAccountCard key={account.id} account={account} isReordering={isReordering} />
+              ))}
+            </SortableContext>
+          )}
+        </div>
+      </DndContext>
 
       <div style={{ marginTop: '24px', textAlign: 'center' }}>
         <button 
