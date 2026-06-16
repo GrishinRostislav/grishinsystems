@@ -50,8 +50,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     return NextResponse.json(scheduled);
   } catch (error: any) {
-    console.error("Failed to update scheduled transaction. Body:", body);
-    console.error("Prisma Error:", error.message || error);
+    console.error("Failed to update scheduled transaction:", error.message || error);
     return NextResponse.json({ error: "Failed to update scheduled transaction" }, { status: 500 });
   }
 }
