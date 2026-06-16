@@ -12,8 +12,11 @@ export function proxy(request: NextRequest) {
   // Exclude static files, login page, and auth api
   if (
     pathname.startsWith('/_next') ||
+    pathname.startsWith('/cashFlow/_next') ||
     pathname.startsWith('/api/auth') ||
+    pathname.startsWith('/cashFlow/api/auth') ||
     pathname === '/login' ||
+    pathname === '/cashFlow/login' ||
     pathname.includes('.')
   ) {
     return NextResponse.next();
