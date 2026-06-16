@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { amount, merchant, paymentMethod, notes, accountId, toAccountId, categoryId, nextRunDate, frequency, autoApprove, type } = body;
 
-    if (!amount || !accountId || !nextRunDate || !frequency) {
+    if (amount === undefined || amount === null || !accountId || !nextRunDate || !frequency) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     }
 
     let finalPayeeId = null;
-    let finalMerchantName = merchant;
+    let finalMerchantName = merchant || '';
 
     if (merchant && merchant.trim() !== '') {
       let payee = await prisma.merchant.findUnique({ where: { name: merchant.trim() } });
@@ -51,10 +51,10 @@ export async function POST(request: Request) {
         amount: finalAmount,
         merchant: finalMerchantName,
         paymentMethod: paymentMethod || null,
-        payeeId: finalPayeeId,
-        notes,
-        accountId,
-        toAccountId: type === 'transfer' ? toAccountId : null,
+        payeeId: finalPayeeId || null,
+        notes: notes || '',
+        accountId: accountId || undefined,
+        toAccountId: type === 'transfer' ? (toAccountId || null) : null,
         categoryId: type === 'transfer' ? null : (categoryId || null),
         nextRunDate: new Date(nextRunDate),
         frequency,
