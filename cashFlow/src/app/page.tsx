@@ -141,7 +141,17 @@ export default function Home() {
         console.error("Failed to fetch budgets data", err);
       }
 
-      setData({ ...dashboardData, budgets: budgetsData });
+      let forecastData = null;
+      try {
+        const forecastRes = await fetch('/cashFlow/api/forecast?months=1');
+        if (forecastRes.ok) {
+          forecastData = await forecastRes.json();
+        }
+      } catch(err) {
+        console.error("Failed to fetch forecast data", err);
+      }
+
+      setData({ ...dashboardData, budgets: budgetsData, forecast: forecastData });
     } catch (err) {
       console.error("Failed to fetch dashboard data", err);
     } finally {
@@ -164,7 +174,7 @@ export default function Home() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const { totalBalance = 0, monthlyIncome = 0, monthlyExpenses = 0, chartData = [], pieData = [], balanceTrendData = [], recentTransactions = [], budgets = [], homeCurrency = "CAD" } = data || {};
+  const { totalBalance = 0, monthlyIncome = 0, monthlyExpenses = 0, chartData = [], pieData = [], balanceTrendData = [], recentTransactions = [], budgets = [], forecast = null, homeCurrency = "CAD" } = data || {};
 
   const processedChartData = isCumulative ? chartData.reduce((acc: any[], curr: any, index: number) => {
     if (index === 0) {
@@ -252,6 +262,28 @@ export default function Home() {
             <div className={styles.subtitle}>Selected Period</div>
           </div>
         </Link>
+
+        {/* Planned Cash Flow Card */}
+        {forecast && (
+        <Link href="/forecast" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <div className={styles.card} style={{ cursor: 'pointer' }}>
+            <div className={styles.cardHeader}>
+              <h3>Planned (30 days)</h3>
+              <span className={styles.icon}>🔮</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Income</span>
+                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--sporty-teal)' }}>+{formatCurrency(forecast.avgMonthlyIncome, homeCurrency)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Expenses</span>
+                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#e11d48' }}>-{formatCurrency(forecast.avgMonthlyExpense, homeCurrency)}</span>
+              </div>
+            </div>
+          </div>
+        </Link>
+        )}
       </div>
 
       <div className={styles.chartCard} style={{ marginTop: '24px' }}>
