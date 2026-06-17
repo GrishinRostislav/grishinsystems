@@ -42,7 +42,7 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
   const handleSaveCategory = async (catData: any) => {
     try {
       const isEdit = !!catData.id;
-      const url = isEdit ? `/api/categories/${catData.id}` : "/api/categories";
+      const url = isEdit ? `/cashFlow/api/categories/${catData.id}` : "/cashFlow/api/categories";
       const method = isEdit ? "PUT" : "POST";
       
       const res = await fetch(url, {
