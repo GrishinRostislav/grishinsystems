@@ -32,7 +32,7 @@ export default function CategoriesPage() {
   const handleSaveCategory = async (data: any) => {
     try {
       const isEdit = !!data.id;
-      const url = isEdit ? `/api/categories/${data.id}` : "/api/categories";
+      const url = isEdit ? `/cashFlow/api/categories/${data.id}` : "/cashFlow/api/categories";
       const method = isEdit ? "PUT" : "POST";
       
       const res = await fetch(url, {
