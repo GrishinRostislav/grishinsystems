@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getExchangeRates, convertAmount } from "@/lib/currency";
 
 function addFrequency(date: Date, frequency: string): Date {
   const next = new Date(date);
@@ -24,6 +25,13 @@ function addFrequency(date: Date, frequency: string): Date {
 
 export async function GET(request: Request) {
   try {
+    let settings = await prisma.settings.findUnique({ where: { id: "global" } });
+    if (!settings) {
+      settings = await prisma.settings.create({ data: { id: "global", homeCurrency: "CAD" } });
+    }
+    const homeCurrency = settings.homeCurrency;
+    const rates = await getExchangeRates(homeCurrency);
+
     const { searchParams } = new URL(request.url);
     const monthsParam = searchParams.get('months') || '60'; // Default 5 years
     const futureMonths = parseInt(monthsParam, 10);
@@ -33,7 +41,7 @@ export async function GET(request: Request) {
     const accounts = await prisma.account.findMany({
       where: { includeInTotal: true, isArchived: false }
     });
-    const currentBalance = accounts.reduce((acc, account) => acc + account.balance, 0);
+    const currentBalance = accounts.reduce((acc, account) => acc + convertAmount(account.balance, account.currency, homeCurrency, rates), 0);
 
     // 2. Get historical transactions (last 12 months)
     const now = new Date();
@@ -46,7 +54,7 @@ export async function GET(request: Request) {
       where: {
         account: { includeInTotal: true }
       },
-      select: { amount: true, date: true }
+      select: { amount: true, date: true, account: { select: { currency: true } } }
     });
 
     // Calculate historical monthly net flow
@@ -55,7 +63,8 @@ export async function GET(request: Request) {
       const year = tx.date.getFullYear();
       const month = String(tx.date.getMonth() + 1).padStart(2, '0');
       const key = `${year}-${month}`;
-      historyMap.set(key, (historyMap.get(key) || 0) + tx.amount);
+      const convertedAmt = convertAmount(tx.amount, tx.account.currency, homeCurrency, rates);
+      historyMap.set(key, (historyMap.get(key) || 0) + convertedAmt);
     }
 
     // Build historical balance points (backward calculation)
@@ -132,9 +141,10 @@ export async function GET(request: Request) {
         }
 
         const stats = futureMap.get(key)!;
-        stats.net += st.amount;
-        if (st.amount > 0) stats.income += st.amount;
-        else stats.expense += Math.abs(st.amount);
+        const convertedStAmt = st.account ? convertAmount(st.amount, st.account.currency, homeCurrency, rates) : st.amount;
+        stats.net += convertedStAmt;
+        if (convertedStAmt > 0) stats.income += convertedStAmt;
+        else stats.expense += Math.abs(convertedStAmt);
 
         simDate = addFrequency(simDate, st.frequency);
       }
@@ -182,6 +192,7 @@ export async function GET(request: Request) {
     const chartData = [...historicalPoints, ...projectedPoints];
 
     return NextResponse.json({
+      homeCurrency,
       currentBalance,
       avgMonthlyIncome: projectionMonthCount ? (totalProjectedIncome / projectionMonthCount) : 0,
       avgMonthlyExpense: projectionMonthCount ? (totalProjectedExpense / projectionMonthCount) : 0,

@@ -43,7 +43,7 @@ export default function ForecastPage() {
         <div style={{ background: 'var(--bg-primary)', padding: '16px', border: '1px solid var(--border-color)', borderRadius: '12px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}>
           <p style={{ margin: '0 0 8px 0', fontWeight: 600, color: 'var(--text-secondary)' }}>{dataPoint.displayDate}</p>
           <p style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: dataPoint.isHistory ? 'var(--text-main)' : 'var(--unique-blue)' }}>
-            {formatCurrency(dataPoint.balance)}
+            {formatCurrency(dataPoint.balance, data?.homeCurrency)}
           </p>
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
             {dataPoint.isHistory ? "Historical" : "Projected"}
@@ -84,28 +84,28 @@ export default function ForecastPage() {
             <div className={styles.card}>
               <div className={styles.cardTitle}>Current Total Balance</div>
               <div className={styles.cardValue}>
-                {formatCurrency(data?.currentBalance || 0)}
+                {formatCurrency(data?.currentBalance || 0, data?.homeCurrency)}
               </div>
             </div>
             
             <div className={styles.card}>
               <div className={styles.cardTitle}>Avg. Projected Monthly Income</div>
               <div className={`${styles.cardValue} ${styles.cardValueIncome}`}>
-                +{formatCurrency(data?.avgMonthlyIncome || 0)}
+                +{formatCurrency(data?.avgMonthlyIncome || 0, data?.homeCurrency)}
               </div>
             </div>
 
             <div className={styles.card}>
               <div className={styles.cardTitle}>Avg. Projected Monthly Expenses</div>
               <div className={`${styles.cardValue} ${styles.cardValueExpense}`}>
-                -{formatCurrency(data?.avgMonthlyExpense || 0)}
+                -{formatCurrency(data?.avgMonthlyExpense || 0, data?.homeCurrency)}
               </div>
             </div>
 
             <div className={styles.card}>
               <div className={styles.cardTitle}>Projected Balance in {months >= 12 ? `${months/12} Years` : `${months} Months`}</div>
               <div className={styles.cardValue} style={{ color: 'var(--unique-blue)' }}>
-                {formatCurrency(data?.futureBalance || 0)}
+                {formatCurrency(data?.futureBalance || 0, data?.homeCurrency)}
               </div>
             </div>
           </div>
@@ -133,7 +133,10 @@ export default function ForecastPage() {
                     tick={{ fill: 'var(--text-muted)', fontSize: 12 }} 
                     axisLine={false} 
                     tickLine={false}
-                    tickFormatter={(val) => `$${(val / 1000).toFixed(0)}k`}
+                    tickFormatter={(val) => {
+                      const prefix = data?.homeCurrency === 'EUR' ? '€' : (data?.homeCurrency === 'GBP' ? '£' : '$');
+                      return `${prefix}${(val / 1000).toFixed(0)}k`;
+                    }}
                   />
                   <Tooltip content={<CustomTooltip />} />
                   
