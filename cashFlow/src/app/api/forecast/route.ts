@@ -39,7 +39,7 @@ export async function GET(request: Request) {
 
     // 1. Get current balance
     const accounts = await prisma.account.findMany({
-      where: { includeInTotal: true, isArchived: false }
+      where: { includeInTotal: true }
     });
     const currentBalance = accounts.reduce((acc, account) => acc + convertAmount(account.balance, account.currency, homeCurrency, rates), 0);
 
@@ -118,7 +118,7 @@ export async function GET(request: Request) {
     // We need to simulate instances of scheduled transactions
     const futureMap = new Map<string, { income: number, expense: number, net: number }>();
     
-    const endDate = new Date(now.getFullYear(), now.getMonth() + futureMonths, 1);
+    const endDate = new Date(now.getFullYear(), now.getMonth() + futureMonths + 1, 1);
 
     for (const st of scheduledTxs) {
       if (st.account && !st.account.includeInTotal) continue;
