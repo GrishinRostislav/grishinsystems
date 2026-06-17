@@ -434,6 +434,8 @@ export default function Home() {
           </div>
           <div className={budgetStyles.budgetsGrid} style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
             {activeBudgets.map((budget: any) => {
+              const spentPercent = budget.amount > 0 ? (budget.spent / budget.amount) * 100 : 0;
+              const projectedPercent = budget.amount > 0 ? ((budget.projected || 0) / budget.amount) * 100 : 0;
               const isOverBudget = budget.remaining < 0;
               return (
                 <div key={budget.id} className={budgetStyles.budgetCard}>
@@ -453,13 +455,23 @@ export default function Home() {
                     <div
                       className={budgetStyles.progressBar}
                       style={{
-                        width: `${Math.min(budget.percentage, 100)}%`,
-                        background: getProgressBarColor(budget.percentage),
+                        width: `${Math.min(spentPercent, 100)}%`,
+                        background: getProgressBarColor(spentPercent),
                       }}
                     />
+                    {(projectedPercent > 0 && spentPercent < 100) && (
+                      <div 
+                        className={budgetStyles.progressBarProjected} 
+                        style={{ 
+                          width: `${Math.min(projectedPercent, 100 - spentPercent)}%`, 
+                          left: `${Math.min(spentPercent, 100)}%`,
+                          background: 'repeating-linear-gradient(45deg, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0.3) 10px, rgba(16, 185, 129, 0.5) 10px, rgba(16, 185, 129, 0.5) 20px)'
+                        }} 
+                      />
+                    )}
                   </div>
                   <div className={budgetStyles.cardFooter}>
-                    <span className={budgetStyles.percentageText}>{Math.round(budget.percentage)}% used</span>
+                    <span className={budgetStyles.percentageText}>{Math.round(spentPercent)}% used {projectedPercent > 0 && `(+${Math.round(projectedPercent)}% planned)`}</span>
                     <span className={isOverBudget ? budgetStyles.remainingOver : budgetStyles.remainingUnder}>
                       {isOverBudget ? `${formatCurrency(Math.abs(budget.remaining), homeCurrency)} over limit` : `${formatCurrency(budget.remaining, homeCurrency)} remaining`}
                     </span>

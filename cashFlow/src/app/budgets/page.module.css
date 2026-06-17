@@ -186,12 +186,24 @@
   background-color: var(--bg-hover);
   border-radius: 5px;
   overflow: hidden;
+  position: relative;
 }
 
 .progressBar {
   height: 100%;
   border-radius: 5px;
   transition: width var(--transition-normal);
+  position: relative;
+  z-index: 2;
+}
+
+.progressBarProjected {
+  height: 100%;
+  border-radius: 5px;
+  transition: width var(--transition-normal);
+  position: absolute;
+  top: 0;
+  z-index: 1;
 }
 
 .cardFooter {

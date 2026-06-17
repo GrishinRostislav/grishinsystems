@@ -32,6 +32,18 @@ function getCurrentPeriodDates(period: string, budgetStartDate: Date, budgetEndD
   return { start, end };
 }
 
+function addFrequency(date: Date, freq: string): Date {
+  const next = new Date(date);
+  switch (freq) {
+    case 'DAILY': next.setDate(next.getDate() + 1); break;
+    case 'WEEKLY': next.setDate(next.getDate() + 7); break;
+    case 'BIWEEKLY': next.setDate(next.getDate() + 14); break;
+    case 'MONTHLY': next.setMonth(next.getMonth() + 1); break;
+    case 'YEARLY': next.setFullYear(next.getFullYear() + 1); break;
+  }
+  return next;
+}
+
 export async function GET() {
   try {
     let settings = await prisma.settings.findUnique({ where: { id: "global" } });
@@ -110,9 +122,42 @@ export async function GET() {
           spent += Math.abs(convertAmount(t.amount, t.account.currency, homeCurrency, rates));
         }
 
+        // Calculate projected from ScheduledTransactions
+        let projected = 0;
+        const now = new Date();
+        if (end > now) {
+          const simStart = start > now ? start : now;
+          
+          const scheduledTxs = await prisma.scheduledTransaction.findMany({
+            where: {
+              isActive: true,
+              type: 'expense',
+              account: { includeInTotal: true, isArchived: false },
+              ...(!budget.isGlobal ? {
+                categoryId: {
+                  in: allTargetCategoryIds
+                }
+              } : {})
+            },
+            include: { account: true }
+          });
+
+          for (const st of scheduledTxs) {
+            let simDate = new Date(st.nextRunDate);
+            while (simDate <= end) {
+              if (simDate >= simStart) {
+                const convertedAmt = convertAmount(st.amount, st.account?.currency || homeCurrency, homeCurrency, rates);
+                projected += Math.abs(convertedAmt);
+              }
+              simDate = addFrequency(simDate, st.frequency);
+            }
+          }
+        }
+
         return {
           ...budget,
           spent,
+          projected,
           currentPeriodStart: start.toISOString(),
           currentPeriodEnd: end.toISOString()
         };
