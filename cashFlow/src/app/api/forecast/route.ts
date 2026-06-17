@@ -39,7 +39,7 @@ export async function GET(request: Request) {
 
     // 1. Get current balance
     const accounts = await prisma.account.findMany({
-      where: { includeInTotal: true }
+      where: { includeInTotal: true, isArchived: false }
     });
     const currentBalance = accounts.reduce((acc, account) => acc + convertAmount(account.balance, account.currency, homeCurrency, rates), 0);
 
@@ -52,7 +52,7 @@ export async function GET(request: Request) {
     // To make it simple, let's group all transactions by month/year.
     const allTransactions = await prisma.transaction.findMany({
       where: {
-        account: { includeInTotal: true }
+        account: { includeInTotal: true, isArchived: false }
       },
       select: { amount: true, date: true, account: { select: { currency: true } } }
     });

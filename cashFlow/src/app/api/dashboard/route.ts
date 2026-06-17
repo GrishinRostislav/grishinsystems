@@ -17,7 +17,7 @@ export async function GET(request: Request) {
 
     // 1. Total Balance of Included Accounts
     const accounts = await prisma.account.findMany({
-      where: { includeInTotal: true }
+      where: { includeInTotal: true, isArchived: false }
     });
     
     let totalBalance = 0;
@@ -156,7 +156,7 @@ export async function GET(request: Request) {
     // We can't do aggregate directly in the DB anymore because amounts need currency conversion.
     // We must fetch them and convert in memory.
     const futureTransactionsData = await prisma.transaction.findMany({
-      where: { date: { gt: endDate }, account: { includeInTotal: true } },
+      where: { date: { gt: endDate }, account: { includeInTotal: true, isArchived: false } },
       include: { account: true }
     });
     const futureNet = futureTransactionsData.reduce((sum, t) => sum + convertAmount(t.amount, t.account.currency, homeCurrency, rates), 0);
@@ -165,7 +165,7 @@ export async function GET(request: Request) {
     let runningBalance = totalBalance - futureNet - rangeNet;
 
     const prevFutureTransactionsData = await prisma.transaction.findMany({
-      where: { date: { gt: prevEndDate }, account: { includeInTotal: true } },
+      where: { date: { gt: prevEndDate }, account: { includeInTotal: true, isArchived: false } },
       include: { account: true }
     });
     const prevFutureNet = prevFutureTransactionsData.reduce((sum, t) => sum + convertAmount(t.amount, t.account.currency, homeCurrency, rates), 0);
