@@ -154,6 +154,16 @@ function PlanningContent() {
                     </span>
                   )}
                   <br/>
+                  Category: {s.category ? (
+                    <span style={{ background: 'var(--bg-hover)', border: '1px solid var(--border-color)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.85rem', display: 'inline-block', marginTop: '4px' }}>
+                      {s.category.name}
+                    </span>
+                  ) : (
+                    <span style={{ color: 'var(--text-muted)' }}>
+                      {s.type === 'transfer' ? 'Transfer' : 'Uncategorized'}
+                    </span>
+                  )}
+                  <br/>
                   Frequency: {s.frequency}
                 </div>
                 <div className={styles.actions}>
@@ -190,6 +200,16 @@ function PlanningContent() {
                   {(s.account?.isArchived || s.toAccount?.isArchived) && (
                     <span title="The linked account has been deleted. Please edit to select a new active account." style={{ cursor: 'help', marginLeft: '8px', color: '#dc2626', fontWeight: 'bold' }}>
                       ⚠️
+                    </span>
+                  )}
+                  <br/>
+                  Category: {s.category ? (
+                    <span style={{ background: 'var(--bg-hover)', border: '1px solid var(--border-color)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.85rem', display: 'inline-block', marginTop: '4px' }}>
+                      {s.category.name}
+                    </span>
+                  ) : (
+                    <span style={{ color: 'var(--text-muted)' }}>
+                      {s.type === 'transfer' ? 'Transfer' : 'Uncategorized'}
                     </span>
                   )}
                   <br/>
