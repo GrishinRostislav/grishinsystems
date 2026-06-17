@@ -82,7 +82,7 @@ export default function ForecastPage() {
         <>
           <div className={styles.summaryCards}>
             <div className={styles.card}>
-              <div className={styles.cardTitle}>Current Available Budget</div>
+              <div className={styles.cardTitle}>Current Total Balance</div>
               <div className={styles.cardValue}>
                 {formatCurrency(data?.currentBalance || 0)}
               </div>

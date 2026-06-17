@@ -87,27 +87,40 @@ export async function GET(request: Request) {
       include: { account: true }
     });
 
+    // Calculate baseline variable expenses from Budgets
+    const budgets = await prisma.budget.findMany();
+    let totalSpecificBudget = 0;
+    let globalBudgetLimit = 0;
+
+    for (const b of budgets) {
+      let monthly = b.amount;
+      if (b.period === 'weekly') monthly = b.amount * (52 / 12);
+      if (b.period === 'yearly') monthly = b.amount / 12;
+      
+      if (b.isGlobal) {
+        globalBudgetLimit = Math.max(globalBudgetLimit, monthly);
+      } else {
+        totalSpecificBudget += monthly;
+      }
+    }
+    // We assume the user spends the maximum of their specific budgets or their global limit
+    const finalBudgetExpense = Math.max(totalSpecificBudget, globalBudgetLimit);
+
     // We need to simulate instances of scheduled transactions
     const futureMap = new Map<string, { income: number, expense: number, net: number }>();
     
     const endDate = new Date(now.getFullYear(), now.getMonth() + futureMonths, 1);
 
     for (const st of scheduledTxs) {
-      // Only include if the account is included in total (or if there's no specific account, assume it affects net worth)
       if (st.account && !st.account.includeInTotal) continue;
 
       let simDate = new Date(st.nextRunDate);
-      
-      // If it's a transfer between two included accounts, net worth doesn't change
-      // But if it's an expense or income, it does.
       if (st.type === 'transfer') continue; 
 
       while (simDate < endDate) {
-        // Only count if it's in the future (this month or later)
-        // If simDate is in the past, but nextRunDate is in the past, it means it's pending. We'll count pending as "this month".
         let effectDate = new Date(simDate);
         if (effectDate < now) {
-          effectDate = new Date(now); // apply pending to current month
+          effectDate = new Date(now);
         }
 
         const year = effectDate.getFullYear();
@@ -142,10 +155,19 @@ export async function GET(request: Request) {
       const key = `${year}-${monthStr}`;
 
       const flow = futureMap.get(key) || { income: 0, expense: 0, net: 0 };
-      runningBalanceForward += flow.net;
+      
+      // Calculate how much "unplanned" variable expense to add based on the budget
+      // The budget specifies the MAXIMUM or EXPECTED total monthly expense.
+      // If the scheduled expenses are less than the budget, we add the difference.
+      const unplannedExpense = Math.max(0, finalBudgetExpense - flow.expense);
+      
+      const totalMonthExpense = flow.expense + unplannedExpense;
+      const totalMonthNet = flow.income - totalMonthExpense;
+
+      runningBalanceForward += totalMonthNet;
       
       totalProjectedIncome += flow.income;
-      totalProjectedExpense += flow.expense;
+      totalProjectedExpense += totalMonthExpense;
       projectionMonthCount++;
 
       projectedPoints.push({
