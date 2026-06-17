@@ -3,19 +3,25 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const pms = await prisma.transaction.groupBy({
-      by: ['paymentMethod'],
-      where: { 
-        paymentMethod: { 
-          not: null
-        } 
-      }
-    });
+    const [txPms, schedPms] = await Promise.all([
+      prisma.transaction.groupBy({
+        by: ['paymentMethod'],
+        where: { paymentMethod: { not: null } }
+      }),
+      prisma.scheduledTransaction.groupBy({
+        by: ['paymentMethod'],
+        where: { paymentMethod: { not: null } }
+      })
+    ]);
     
-    // Filter out empty strings in memory and sort
-    const result = pms
-      .map(p => p.paymentMethod)
-      .filter(pm => pm && pm.trim() !== "")
+    // Combine, remove duplicates, filter out empty strings, and sort
+    const allPms = new Set([
+      ...txPms.map(p => p.paymentMethod),
+      ...schedPms.map(p => p.paymentMethod)
+    ]);
+
+    const result = Array.from(allPms)
+      .filter(pm => pm && typeof pm === 'string' && pm.trim() !== "")
       .sort((a, b) => (a as string).localeCompare(b as string));
 
     return NextResponse.json(result);
