@@ -150,6 +150,45 @@ export async function GET(request: Request) {
       }
     }
 
+    // Include Active Simulated Scenarios
+    const activeScenarios = await prisma.forecastScenario.findMany({
+      where: { isActive: true },
+      include: { items: true }
+    });
+
+    for (const scenario of activeScenarios) {
+      for (const item of scenario.items) {
+        let simDate = new Date(item.date);
+        const itemEndDate = item.endDate ? new Date(item.endDate) : endDate;
+
+        while (simDate < endDate && simDate <= itemEndDate) {
+          let effectDate = new Date(simDate);
+          if (effectDate < now) {
+            effectDate = new Date(now);
+          }
+
+          const year = effectDate.getFullYear();
+          const monthStr = String(effectDate.getMonth() + 1).padStart(2, '0');
+          const key = `${year}-${monthStr}`;
+
+          if (!futureMap.has(key)) {
+            futureMap.set(key, { income: 0, expense: 0, net: 0 });
+          }
+
+          const stats = futureMap.get(key)!;
+          // All scenario amounts are assumed to be in homeCurrency as agreed
+          const amt = item.type === 'expense' ? -Math.abs(item.amount) : Math.abs(item.amount);
+          
+          stats.net += amt;
+          if (amt > 0) stats.income += amt;
+          else stats.expense += Math.abs(amt);
+
+          if (item.frequency === 'ONCE') break;
+          simDate = addFrequency(simDate, item.frequency);
+        }
+      }
+    }
+
     const projectedPoints = [];
     let runningBalanceForward = currentBalance;
     

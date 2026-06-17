@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import styles from "./page.module.css";
 import { formatCurrency } from "@/utils/format";
+import ScenarioModal from "@/components/ScenarioModal";
 import {
   AreaChart,
   Area,
@@ -19,6 +20,11 @@ export default function ForecastPage() {
   const [loading, setLoading] = useState(true);
   const [months, setMonths] = useState(60); // Default 5 years
 
+  // Scenarios state
+  const [scenarios, setScenarios] = useState<any[]>([]);
+  const [isScenarioModalOpen, setScenarioModalOpen] = useState(false);
+  const [editingScenario, setEditingScenario] = useState<any>(null);
+
   const fetchForecast = async (m: number) => {
     setLoading(true);
     try {
@@ -32,9 +38,41 @@ export default function ForecastPage() {
     }
   };
 
+  const fetchScenarios = async () => {
+    try {
+      const res = await fetch("/cashFlow/api/scenarios");
+      const json = await res.json();
+      setScenarios(json.scenarios || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchForecast(months);
+    fetchScenarios();
   }, [months]);
+
+  const handleToggleScenario = async (id: string, currentActive: boolean) => {
+    try {
+      // optimistic UI update
+      setScenarios(scenarios.map(s => s.id === id ? { ...s, isActive: !currentActive } : s));
+      await fetch(`/cashFlow/api/scenarios/${id}`, {
+        method: 'PUT',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: !currentActive })
+      });
+      fetchForecast(months); // refetch forecast
+    } catch (err) {
+      console.error(err);
+      fetchScenarios(); // revert on fail
+    }
+  };
+
+  const handleSaveScenario = () => {
+    fetchScenarios();
+    fetchForecast(months);
+  };
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -163,8 +201,75 @@ export default function ForecastPage() {
               </ResponsiveContainer>
             </div>
           </div>
+
+          <div className={styles.chartContainer} style={{ marginTop: '32px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <div>
+                <h2 className={styles.chartTitle} style={{ marginBottom: '8px' }}>Simulation Scenarios</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: 0 }}>
+                  Toggle potential future plans (like buying a car) to see how they impact your forecast.
+                </p>
+              </div>
+              <button 
+                onClick={() => { setEditingScenario(null); setScenarioModalOpen(true); }}
+                className={styles.btnPrimary}
+                style={{ background: 'var(--sporty-teal)', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}
+              >
+                + New Scenario
+              </button>
+            </div>
+
+            {scenarios.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '32px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                <p style={{ color: 'var(--text-muted)' }}>You haven't created any scenarios yet.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+                {scenarios.map((scenario) => (
+                  <div key={scenario.id} style={{ 
+                    padding: '16px', 
+                    borderRadius: '12px', 
+                    border: `1px solid ${scenario.isActive ? 'var(--sporty-teal)' : 'var(--border-color)'}`,
+                    background: scenario.isActive ? 'rgba(16, 185, 129, 0.05)' : 'var(--bg-secondary)',
+                    transition: 'all 0.2s ease',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--silent-dark-blue)' }}>{scenario.name}</h3>
+                      <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={scenario.isActive}
+                          onChange={() => handleToggleScenario(scenario.id, scenario.isActive)}
+                          style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--sporty-teal)' }}
+                        />
+                      </label>
+                    </div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                      {scenario.items.length} impact item{scenario.items.length !== 1 ? 's' : ''}
+                    </div>
+                    <button 
+                      onClick={() => { setEditingScenario(scenario); setScenarioModalOpen(true); }}
+                      style={{ marginTop: 'auto', alignSelf: 'flex-start', background: 'none', border: '1px solid var(--border-color)', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' }}
+                    >
+                      Edit Details
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </>
       )}
+
+      <ScenarioModal 
+        isOpen={isScenarioModalOpen}
+        onClose={() => setScenarioModalOpen(false)}
+        scenario={editingScenario}
+        onSave={handleSaveScenario}
+      />
     </div>
   );
 }

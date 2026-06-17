@@ -137,3 +137,25 @@ model Settings {
   homeCurrency String   @default("CAD")
   updatedAt    DateTime @updatedAt
 }
+
+model ForecastScenario {
+  id          String   @id @default(cuid())
+  name        String
+  isActive    Boolean  @default(false)
+  items       ScenarioItem[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ScenarioItem {
+  id          String   @id @default(cuid())
+  name        String   // e.g., "Downpayment" or "Monthly Loan"
+  amount      Float
+  type        String   @default("expense") // 'expense' or 'income'
+  date        DateTime // Date of the one-time cost or start date of the recurring cost
+  frequency   String   @default("ONCE") // 'ONCE', 'MONTHLY', 'YEARLY'
+  endDate     DateTime? // Optional end date for recurring costs
+  
+  scenarioId  String
+  scenario    ForecastScenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+}
