@@ -156,7 +156,7 @@ export default function ScenarioModal({
                 </button>
 
                 <div className={styles.formRow} style={{ marginBottom: '12px' }}>
-                  <div className={styles.formGroup} style={{ flex: 1 }}>
+                  <div className={styles.formGroup} style={{ flex: 2 }}>
                     <label className={styles.label}>Item Name</label>
                     <input 
                       type="text" 
@@ -167,7 +167,7 @@ export default function ScenarioModal({
                       required 
                     />
                   </div>
-                  <div className={styles.formGroup} style={{ width: '120px' }}>
+                  <div className={styles.formGroup} style={{ flex: 1 }}>
                     <label className={styles.label}>Type</label>
                     <select className={styles.select} value={item.type} onChange={e => handleItemChange(index, 'type', e.target.value)}>
                       <option value="expense">Expense</option>

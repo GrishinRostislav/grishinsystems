@@ -203,7 +203,7 @@ export default function ForecastPage() {
           </div>
 
           <div className={styles.chartContainer} style={{ marginTop: '32px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <div className={styles.scenariosHeader}>
               <div>
                 <h2 className={styles.chartTitle} style={{ marginBottom: '8px' }}>Simulation Scenarios</h2>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: 0 }}>
@@ -212,8 +212,7 @@ export default function ForecastPage() {
               </div>
               <button 
                 onClick={() => { setEditingScenario(null); setScenarioModalOpen(true); }}
-                className={styles.btnPrimary}
-                style={{ background: 'var(--sporty-teal)', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}
+                className={styles.btnScenario}
               >
                 + New Scenario
               </button>
@@ -224,35 +223,29 @@ export default function ForecastPage() {
                 <p style={{ color: 'var(--text-muted)' }}>You haven't created any scenarios yet.</p>
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+              <div className={styles.scenariosGrid}>
                 {scenarios.map((scenario) => (
-                  <div key={scenario.id} style={{ 
-                    padding: '16px', 
-                    borderRadius: '12px', 
-                    border: `1px solid ${scenario.isActive ? 'var(--sporty-teal)' : 'var(--border-color)'}`,
-                    background: scenario.isActive ? 'rgba(16, 185, 129, 0.05)' : 'var(--bg-secondary)',
-                    transition: 'all 0.2s ease',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px'
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--silent-dark-blue)' }}>{scenario.name}</h3>
-                      <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <div 
+                    key={scenario.id} 
+                    className={`${styles.scenarioCard} ${scenario.isActive ? styles.scenarioCardActive : ''}`}
+                  >
+                    <div className={styles.scenarioHeader}>
+                      <h3 className={styles.scenarioTitle}>{scenario.name}</h3>
+                      <label className={styles.switch}>
                         <input 
                           type="checkbox" 
                           checked={scenario.isActive}
                           onChange={() => handleToggleScenario(scenario.id, scenario.isActive)}
-                          style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--sporty-teal)' }}
                         />
+                        <span className={styles.slider}></span>
                       </label>
                     </div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                    <div className={styles.scenarioItemsCount}>
                       {scenario.items.length} impact item{scenario.items.length !== 1 ? 's' : ''}
                     </div>
                     <button 
                       onClick={() => { setEditingScenario(scenario); setScenarioModalOpen(true); }}
-                      style={{ marginTop: 'auto', alignSelf: 'flex-start', background: 'none', border: '1px solid var(--border-color)', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' }}
+                      className={styles.btnOutline}
                     >
                       Edit Details
                     </button>
