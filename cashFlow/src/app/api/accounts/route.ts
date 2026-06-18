@@ -5,9 +5,18 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const includeArchived = searchParams.get('includeArchived') === 'true';
+    const startDateParam = searchParams.get('startDate');
+    const endDateParam = searchParams.get('endDate');
 
     const now = new Date();
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    let startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    let endDate = now;
+
+    if (startDateParam) startDate = new Date(startDateParam);
+    if (endDateParam) {
+      endDate = new Date(endDateParam);
+      endDate.setHours(23, 59, 59, 999);
+    }
 
     const accounts = await prisma.account.findMany({
       where: includeArchived ? {} : { isArchived: false },
@@ -20,7 +29,7 @@ export async function GET(request: Request) {
     const flows = await prisma.transaction.groupBy({
       by: ['accountId'],
       where: {
-        date: { gte: thirtyDaysAgo, lte: now }
+        date: { gte: startDate, lte: endDate }
       },
       _sum: {
         amount: true
@@ -38,8 +47,8 @@ export async function GET(request: Request) {
       const changePercent = prevBalance !== 0 ? (netFlow / prevBalance) * 100 : 0;
       return {
         ...acc,
-        flow30d: netFlow,
-        flow30dPercent: changePercent
+        periodFlow: netFlow,
+        periodFlowPercent: changePercent
       };
     });
 

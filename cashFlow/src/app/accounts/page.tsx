@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import styles from "./page.module.css";
 import { formatCurrency } from "@/utils/format";
+import GlobalDateFilter from "@/components/GlobalDateFilter";
 import {
   DndContext,
   closestCenter,
@@ -31,8 +32,8 @@ type Account = {
   includeInTotal: boolean;
   isArchived: boolean;
   order: number;
-  flow30d?: number;
-  flow30dPercent?: number;
+  periodFlow?: number;
+  periodFlowPercent?: number;
 };
 
 function SortableAccountCard({ account, isReordering }: { account: Account, isReordering: boolean }) {
@@ -75,21 +76,21 @@ function SortableAccountCard({ account, isReordering }: { account: Account, isRe
       </div>
       <div className={styles.balance} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <span>{formatCurrency(account.balance, account.currency)}</span>
-        {account.flow30d !== undefined && account.flow30dPercent !== undefined && (
+        {account.periodFlow !== undefined && account.periodFlowPercent !== undefined && (
           <span style={{ 
             fontSize: '0.8rem', 
             fontWeight: 600, 
-            color: account.flow30d > 0 ? 'var(--sporty-teal)' : account.flow30d < 0 ? '#e11d48' : 'var(--text-muted)',
-            background: account.flow30d > 0 ? 'rgba(20, 184, 166, 0.1)' : account.flow30d < 0 ? 'rgba(225, 29, 72, 0.1)' : 'rgba(100, 116, 139, 0.1)',
+            color: account.periodFlow > 0 ? 'var(--sporty-teal)' : account.periodFlow < 0 ? '#e11d48' : 'var(--text-muted)',
+            background: account.periodFlow > 0 ? 'rgba(20, 184, 166, 0.1)' : account.periodFlow < 0 ? 'rgba(225, 29, 72, 0.1)' : 'rgba(100, 116, 139, 0.1)',
             padding: '2px 8px',
             borderRadius: '12px',
             display: 'flex',
             alignItems: 'center',
             gap: '2px'
           }}>
-            {account.flow30d > 0 ? '↑' : account.flow30d < 0 ? '↓' : '—'}
-            {account.flow30d !== 0
-              ? `${formatCurrency(Math.abs(account.flow30d), account.currency)} (${account.flow30d > 0 ? '+' : ''}${account.flow30dPercent.toFixed(1)}%)`
+            {account.periodFlow > 0 ? '↑' : account.periodFlow < 0 ? '↓' : '—'}
+            {account.periodFlow !== 0
+              ? `${formatCurrency(Math.abs(account.periodFlow), account.currency)} (${account.periodFlow > 0 ? '+' : ''}${account.periodFlowPercent.toFixed(1)}%)`
               : '0%'}
           </span>
         )}
@@ -125,6 +126,13 @@ export default function AccountsPage() {
   const [showArchived, setShowArchived] = useState(false);
   const [isReordering, setIsReordering] = useState(false);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const handleDatesChange = (start: string, end: string) => {
+    setStartDate(start);
+    setEndDate(end);
+  };
 
   // Form state
   const [name, setName] = useState("");
@@ -163,12 +171,10 @@ export default function AccountsPage() {
 
   const fetchAccounts = async () => {
     try {
-      const now = new Date();
-      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      
+      setLoading(true);
       const [accRes, dashRes] = await Promise.all([
-        fetch(`/cashFlow/api/accounts?includeArchived=${showArchived}`),
-        fetch(`/cashFlow/api/dashboard?startDate=${thirtyDaysAgo.toISOString()}&endDate=${now.toISOString()}`)
+        fetch(`/cashFlow/api/accounts?includeArchived=${showArchived}&startDate=${startDate}&endDate=${endDate}`),
+        fetch(`/cashFlow/api/dashboard?startDate=${startDate}&endDate=${endDate}`)
       ]);
       const accData = await accRes.json();
       const dashData = await dashRes.json();
@@ -189,8 +195,10 @@ export default function AccountsPage() {
   };
 
   useEffect(() => {
-    fetchAccounts();
-  }, [showArchived]);
+    if (startDate && endDate) {
+      fetchAccounts();
+    }
+  }, [showArchived, startDate, endDate]);
 
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -275,14 +283,16 @@ export default function AccountsPage() {
                     {balanceChange.amount >= 0 ? '↑' : '↓'}
                     {formatCurrency(Math.abs(balanceChange.amount), homeCurrency)} 
                     ({balanceChange.amount >= 0 ? '+' : ''}{balanceChange.percentage.toFixed(1)}%)
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginLeft: '4px', fontWeight: 500 }}>(30d)</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginLeft: '4px', fontWeight: 500 }}>(Period)</span>
                   </span>
                 )}
               </div>
             </div>
           )}
         </div>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '8px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px' }}>
+          <GlobalDateFilter onDatesChange={handleDatesChange} />
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
           {isReordering ? (
             <button className={styles.btnPrimary} onClick={saveOrder} disabled={isSavingOrder}>
               {isSavingOrder ? 'Saving...' : 'Save Order'}
@@ -297,6 +307,7 @@ export default function AccountsPage() {
           </button>
         </div>
       </div>
+    </div>
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <div className={styles.grid}>
