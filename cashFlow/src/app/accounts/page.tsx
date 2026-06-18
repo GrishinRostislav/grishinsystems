@@ -75,21 +75,22 @@ function SortableAccountCard({ account, isReordering }: { account: Account, isRe
       </div>
       <div className={styles.balance} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <span>{formatCurrency(account.balance, account.currency)}</span>
-        {account.flow30d !== undefined && account.flow30dPercent !== undefined && account.flow30d !== 0 && (
+        {account.flow30d !== undefined && account.flow30dPercent !== undefined && (
           <span style={{ 
             fontSize: '0.8rem', 
             fontWeight: 600, 
-            color: account.flow30d > 0 ? 'var(--sporty-teal)' : '#e11d48',
-            background: account.flow30d > 0 ? 'rgba(20, 184, 166, 0.1)' : 'rgba(225, 29, 72, 0.1)',
+            color: account.flow30d > 0 ? 'var(--sporty-teal)' : account.flow30d < 0 ? '#e11d48' : 'var(--text-muted)',
+            background: account.flow30d > 0 ? 'rgba(20, 184, 166, 0.1)' : account.flow30d < 0 ? 'rgba(225, 29, 72, 0.1)' : 'rgba(100, 116, 139, 0.1)',
             padding: '2px 8px',
             borderRadius: '12px',
             display: 'flex',
             alignItems: 'center',
             gap: '2px'
           }}>
-            {account.flow30d > 0 ? '↑' : '↓'}
-            {formatCurrency(Math.abs(account.flow30d), account.currency)} 
-            ({account.flow30d > 0 ? '+' : ''}{account.flow30dPercent.toFixed(1)}%)
+            {account.flow30d > 0 ? '↑' : account.flow30d < 0 ? '↓' : '—'}
+            {account.flow30d !== 0
+              ? `${formatCurrency(Math.abs(account.flow30d), account.currency)} (${account.flow30d > 0 ? '+' : ''}${account.flow30dPercent.toFixed(1)}%)`
+              : '0%'}
           </span>
         )}
       </div>
