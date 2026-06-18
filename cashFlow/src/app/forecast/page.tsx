@@ -31,6 +31,12 @@ export default function ForecastPage() {
     let investmentMonthly = 0;
     let investmentOneTime = 0;
 
+    let exactTotalNet = 0;
+    let exactTotalInvestment = 0;
+    const now = new Date();
+    // Use the currently selected 'months' horizon
+    const endDate = new Date(now.getFullYear(), now.getMonth() + months + 1, 1);
+
     scenario.items.forEach((item: any) => {
       const amt = Number(item.amount);
       const sign = item.type === 'expense' ? -1 : 1;
@@ -44,6 +50,25 @@ export default function ForecastPage() {
         if (item.frequency === 'ONCE') oneTimeNet += value;
         else if (item.frequency === 'MONTHLY') monthlyNet += value;
         else if (item.frequency === 'YEARLY') monthlyNet += value / 12;
+      }
+
+      // Calculate exact total over the projection interval
+      let simDate = new Date(item.date);
+      if (simDate < now) simDate = new Date(now);
+      const itemEndDate = item.endDate ? new Date(item.endDate) : endDate;
+      
+      let occurrences = 0;
+      while(simDate < endDate && simDate <= itemEndDate) {
+        occurrences++;
+        if (item.frequency === 'ONCE') break;
+        if (item.frequency === 'MONTHLY') simDate = new Date(simDate.setMonth(simDate.getMonth() + 1));
+        if (item.frequency === 'YEARLY') simDate = new Date(simDate.setFullYear(simDate.getFullYear() + 1));
+      }
+
+      if (item.type === 'investment') {
+        exactTotalInvestment += amt * occurrences;
+      } else {
+        exactTotalNet += amt * sign * occurrences;
       }
     });
 
@@ -61,13 +86,32 @@ export default function ForecastPage() {
     if (parts.length === 0) return <span style={{ color: 'var(--text-muted)' }}>No financial impact</span>;
     
     return (
-      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', fontSize: '0.9rem', marginTop: '4px' }}>
-        {parts.map((part, i) => (
-          <span key={i}>
-            {i > 0 && <span style={{ color: 'var(--border-color)', margin: '0 4px' }}>|</span>}
-            {part}
-          </span>
-        ))}
+      <div style={{ marginTop: '4px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', fontSize: '0.9rem' }}>
+          {parts.map((part, i) => (
+            <span key={i}>
+              {i > 0 && <span style={{ color: 'var(--border-color)', margin: '0 4px' }}>|</span>}
+              {part}
+            </span>
+          ))}
+        </div>
+        
+        {(exactTotalNet !== 0 || exactTotalInvestment !== 0) && (
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border-color)' }}>
+            <span style={{ display: 'block', marginBottom: '2px' }}>Total impact over {months >= 12 ? `${months/12} yrs` : `${months} mo`}:</span>
+            {exactTotalNet !== 0 && (
+              <span style={{ color: exactTotalNet > 0 ? 'var(--sporty-teal)' : '#b91c1c', fontWeight: 600 }}>
+                {exactTotalNet > 0 ? 'Earned: +' : 'Spent: -'}{formatCurrency(Math.abs(exactTotalNet), data?.homeCurrency)}
+              </span>
+            )}
+            {exactTotalNet !== 0 && exactTotalInvestment !== 0 && <span style={{ margin: '0 6px', color: 'var(--border-color)' }}>|</span>}
+            {exactTotalInvestment !== 0 && (
+              <span style={{ color: 'var(--unique-blue)', fontWeight: 600 }}>
+                Invested: {formatCurrency(exactTotalInvestment, data?.homeCurrency)}
+              </span>
+            )}
+          </div>
+        )}
       </div>
     );
   };
