@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import styles from "./page.module.css";
 import { formatCurrency, formatDate } from "@/utils/format";
 import { buildCategoryTree, flattenCategoryTree, type Category as CatType } from "@/utils/categories";
