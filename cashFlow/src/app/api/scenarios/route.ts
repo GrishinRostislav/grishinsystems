@@ -31,6 +31,7 @@ export async function POST(request: Request) {
             date: new Date(item.date),
             frequency: item.frequency || 'ONCE',
             endDate: item.endDate ? new Date(item.endDate) : null,
+            annualRate: item.annualRate ? parseFloat(item.annualRate) : null,
           }))
         }
       },

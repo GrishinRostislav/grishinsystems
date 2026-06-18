@@ -151,10 +151,11 @@ model ScenarioItem {
   id          String   @id @default(cuid())
   name        String   // e.g., "Downpayment" or "Monthly Loan"
   amount      Float
-  type        String   @default("expense") // 'expense' or 'income'
+  type        String   @default("expense") // 'expense', 'income', or 'investment'
   date        DateTime // Date of the one-time cost or start date of the recurring cost
   frequency   String   @default("ONCE") // 'ONCE', 'MONTHLY', 'YEARLY'
   endDate     DateTime? // Optional end date for recurring costs
+  annualRate  Float?   // Optional expected yearly return percentage (e.g. 13 for 13%)
   
   scenarioId  String
   scenario    ForecastScenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)

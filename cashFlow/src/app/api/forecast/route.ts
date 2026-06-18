@@ -160,33 +160,88 @@ export async function GET(request: Request) {
 
     for (const scenario of activeScenarios) {
       for (const item of scenario.items) {
-        let simDate = new Date(item.date);
-        const itemEndDate = item.endDate ? new Date(item.endDate) : endDate;
+        if (item.type === 'investment') {
+          const monthlyRate = (item.annualRate || 0) / 100 / 12;
+          let balance = 0;
+          let simDate = new Date(item.date);
+          const itemEndDate = item.endDate ? new Date(item.endDate) : endDate;
 
-        while (simDate < endDate && simDate <= itemEndDate) {
-          let effectDate = new Date(simDate);
-          if (effectDate < now) {
-            effectDate = new Date(now);
+          // If the start date is in the past, we start calculating from 'now' 
+          // but we shouldn't retroactively compound past years for a *forecast* scenario.
+          // We will only compound future months.
+          if (simDate < now) {
+            simDate = new Date(now);
           }
 
-          const year = effectDate.getFullYear();
-          const monthStr = String(effectDate.getMonth() + 1).padStart(2, '0');
-          const key = `${year}-${monthStr}`;
+          let monthIter = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+          while (monthIter <= endDate) {
+            const year = monthIter.getFullYear();
+            const monthStr = String(monthIter.getMonth() + 1).padStart(2, '0');
+            const key = `${year}-${monthStr}`;
+            
+            if (!futureMap.has(key)) {
+              futureMap.set(key, { income: 0, expense: 0, net: 0, scenarioIncome: 0, scenarioExpense: 0, scenarioNet: 0 });
+            }
+            const stats = futureMap.get(key)!;
 
-          if (!futureMap.has(key)) {
-            futureMap.set(key, { income: 0, expense: 0, net: 0, scenarioIncome: 0, scenarioExpense: 0, scenarioNet: 0 });
+            // 1. Accumulate deposits that happen in this specific month
+            let depositsThisMonth = 0;
+            const currentMonthStart = new Date(monthIter.getFullYear(), monthIter.getMonth() - 1, 1);
+            
+            while (simDate < monthIter && simDate <= itemEndDate) {
+              if (simDate >= currentMonthStart) {
+                depositsThisMonth += Math.abs(item.amount);
+              }
+              if (item.frequency === 'ONCE') {
+                simDate = new Date(8640000000000000); // push far into future to break
+              } else {
+                simDate = addFrequency(simDate, item.frequency);
+              }
+            }
+
+            balance += depositsThisMonth;
+
+            // 2. Calculate interest on the new balance for this month
+            const interest = balance * monthlyRate;
+            balance += interest;
+
+            // 3. Add ONLY the earned interest to the wealth trajectory
+            // (Deposits themselves are just cash moving to investments, net wealth unchanged)
+            stats.scenarioNet += interest;
+            stats.scenarioIncome += interest;
+
+            // Advance to next month
+            monthIter = new Date(monthIter.getFullYear(), monthIter.getMonth() + 1, 1);
           }
+        } else {
+          let simDate = new Date(item.date);
+          const itemEndDate = item.endDate ? new Date(item.endDate) : endDate;
 
-          const stats = futureMap.get(key)!;
-          // All scenario amounts are assumed to be in homeCurrency as agreed
-          const amt = item.type === 'expense' ? -Math.abs(item.amount) : Math.abs(item.amount);
-          
-          stats.scenarioNet += amt;
-          if (amt > 0) stats.scenarioIncome += amt;
-          else stats.scenarioExpense += Math.abs(amt);
+          while (simDate < endDate && simDate <= itemEndDate) {
+            let effectDate = new Date(simDate);
+            if (effectDate < now) {
+              effectDate = new Date(now);
+            }
 
-          if (item.frequency === 'ONCE') break;
-          simDate = addFrequency(simDate, item.frequency);
+            const year = effectDate.getFullYear();
+            const monthStr = String(effectDate.getMonth() + 1).padStart(2, '0');
+            const key = `${year}-${monthStr}`;
+
+            if (!futureMap.has(key)) {
+              futureMap.set(key, { income: 0, expense: 0, net: 0, scenarioIncome: 0, scenarioExpense: 0, scenarioNet: 0 });
+            }
+
+            const stats = futureMap.get(key)!;
+            // All scenario amounts are assumed to be in homeCurrency as agreed
+            const amt = item.type === 'expense' ? -Math.abs(item.amount) : Math.abs(item.amount);
+            
+            stats.scenarioNet += amt;
+            if (amt > 0) stats.scenarioIncome += amt;
+            else stats.scenarioExpense += Math.abs(amt);
+
+            if (item.frequency === 'ONCE') break;
+            simDate = addFrequency(simDate, item.frequency);
+          }
         }
       }
     }

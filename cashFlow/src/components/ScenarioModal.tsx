@@ -5,10 +5,11 @@ interface ScenarioItem {
   id?: string;
   name: string;
   amount: number | string;
-  type: 'expense' | 'income';
+  type: 'expense' | 'income' | 'investment';
   date: string;
   frequency: string;
   endDate?: string | null;
+  annualRate?: number | string | null;
 }
 
 interface Scenario {
@@ -172,6 +173,7 @@ export default function ScenarioModal({
                     <select className={styles.select} value={item.type} onChange={e => handleItemChange(index, 'type', e.target.value)}>
                       <option value="expense">Expense</option>
                       <option value="income">Income</option>
+                      <option value="investment">Investment</option>
                     </select>
                   </div>
                   <div className={styles.formGroup} style={{ flex: 1 }}>
@@ -186,6 +188,19 @@ export default function ScenarioModal({
                       required 
                     />
                   </div>
+                  {item.type === 'investment' && (
+                    <div className={styles.formGroup} style={{ flex: 1 }}>
+                      <label className={styles.label}>Annual Rate (%)</label>
+                      <input 
+                        type="number" 
+                        step="0.1" 
+                        className={styles.input} 
+                        value={item.annualRate || ''} 
+                        onChange={e => handleItemChange(index, 'annualRate', e.target.value)} 
+                        placeholder="e.g. 13"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className={styles.formRow}>
