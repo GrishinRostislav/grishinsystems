@@ -173,7 +173,7 @@ export default function BudgetDetail({ params }: { params: Promise<{ id: string 
           isOpen={isTxnModalOpen}
           onClose={() => { setIsTxnModalOpen(false); setSelectedTxn(null); }}
           onSave={handleTransactionSave}
-          initialData={selectedTxn}
+          transaction={selectedTxn}
         />
       )}
     </div>
