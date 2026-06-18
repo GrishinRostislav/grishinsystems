@@ -90,6 +90,11 @@ export default function Home() {
     setIsMenuOpen(false);
   };
 
+  const openEditModal = (txn: any) => {
+    setSelectedTransaction(txn);
+    setIsModalOpen(true);
+  };
+
   const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -533,7 +538,7 @@ export default function Home() {
                     const catColor = getCategoryColor(txn.category?.name);
                     
                     return (
-                      <div key={txn.id} className={styles.recentTxnCard}>
+                      <div key={txn.id} className={styles.recentTxnCard} onClick={() => openEditModal(txn)} style={{ cursor: 'pointer' }}>
                         <div className={styles.recentTxnLeft}>
                           <div className={styles.categoryIconSmall} style={{ background: catColor }}>
                             {catLetter}

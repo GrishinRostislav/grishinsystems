@@ -4,6 +4,7 @@ import { useEffect, useState, use } from "react";
 import styles from "./page.module.css";
 import Link from "next/link";
 import CategoryModal from "@/components/CategoryModal";
+import TransactionModal from "@/components/TransactionModal";
 import { useRouter } from "next/navigation";
 import { formatCurrency, formatDate } from "@/utils/format";
 
@@ -17,6 +18,9 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
+
+  const [isTxnModalOpen, setIsTxnModalOpen] = useState(false);
+  const [selectedTxn, setSelectedTxn] = useState<any>(null);
 
   const fetchCategoryData = async () => {
     try {
@@ -151,7 +155,7 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
                   </thead>
                   <tbody>
                     {transactions.map((txn: any) => (
-                      <tr key={txn.id}>
+                      <tr key={txn.id} onClick={() => { setSelectedTxn(txn); setIsTxnModalOpen(true); }} style={{ cursor: 'pointer' }} className={styles.tableRow}>
                         <td>{formatDate(txn.date)}</td>
                         <td>{txn.notes || txn.merchant || "-"}</td>
                         <td>{txn.account?.name || "Unknown"}</td>
@@ -188,6 +192,13 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
         category={editingCategory}
         categories={allCategories}
         defaultParentId={resolvedParams.id}
+      />
+
+      <TransactionModal 
+        isOpen={isTxnModalOpen} 
+        onClose={() => setIsTxnModalOpen(false)} 
+        transaction={selectedTxn} 
+        onSave={fetchCategoryData} 
       />
     </div>
   );
