@@ -2,6 +2,13 @@ import React, { useState, useEffect } from "react";
 import { formatCurrency } from "@/utils/format";
 import { buildCategoryTree, flattenCategoryTree, type Category } from "@/utils/categories";
 
+function getLocalYMD(d: Date) {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 type ReceiptPreviewModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -68,7 +75,7 @@ export default function ReceiptPreviewModal({ isOpen, onClose, scanData, onSave 
 
         // Populate scan data
         if (scanData) {
-          setDate(scanData.date || new Date().toISOString().slice(0, 10));
+          setDate(scanData.date || getLocalYMD(new Date()));
           setMerchant(scanData.merchant || "");
           setItems((scanData.items || []).map(item => ({
             ...item,

@@ -2,6 +2,13 @@ import React, { useState, useEffect } from "react";
 import { formatCurrency } from "@/utils/format";
 import { buildCategoryTree, flattenCategoryTree } from "@/utils/categories";
 
+function getLocalYMD(d: Date) {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 type TransactionModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -17,7 +24,7 @@ export default function TransactionModal({ isOpen, onClose, transaction, onSave 
   
   const [amount, setAmount] = useState("");
   const router = require('next/navigation').useRouter();
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(getLocalYMD(new Date()));
   const [merchant, setMerchant] = useState("");
   const [accountId, setAccountId] = useState("");
   const [categoryId, setCategoryId] = useState("");
@@ -44,7 +51,7 @@ export default function TransactionModal({ isOpen, onClose, transaction, onSave 
         if (transaction) {
           setTransactionType(transaction.amount < 0 ? "expense" : "income");
           setAmount(Math.abs(transaction.amount).toFixed(2));
-          setDate(new Date(transaction.date).toISOString().slice(0, 10));
+          setDate(getLocalYMD(new Date(transaction.date)));
           setMerchant(transaction.merchant || "");
           setAccountId(transaction.account?.id || transaction.accountId || (accData.length > 0 ? accData[0].id : ""));
           setCategoryId(transaction.category?.id || transaction.categoryId || "");
@@ -53,7 +60,7 @@ export default function TransactionModal({ isOpen, onClose, transaction, onSave 
         } else {
           setTransactionType("expense");
           setAmount("");
-          setDate(new Date().toISOString().slice(0, 10));
+          setDate(getLocalYMD(new Date()));
           setMerchant("");
           setAccountId(accData.length > 0 ? accData[0].id : "");
           setToAccountId(accData.length > 1 ? accData[1].id : (accData.length > 0 ? accData[0].id : ""));
