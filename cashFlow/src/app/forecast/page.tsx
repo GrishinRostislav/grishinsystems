@@ -91,16 +91,21 @@ export default function ForecastPage() {
               </span>
             </div>
 
-            {dataPoint.simulatedBalance !== null && dataPoint.simulatedBalance !== undefined && (
-              <div style={{ marginTop: '4px', paddingTop: '8px', borderTop: '1px solid var(--border-color)' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--sporty-teal)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '2px', fontWeight: 600 }}>
-                  Simulated Balance
-                </span>
-                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--sporty-teal)' }}>
-                  {formatCurrency(dataPoint.simulatedBalance, data?.homeCurrency)}
-                </span>
-              </div>
-            )}
+            {dataPoint.simulatedBalance !== null && dataPoint.simulatedBalance !== undefined && (() => {
+              const isPositive = data?.futureBalance >= data?.baselineFutureBalance;
+              const simColor = isPositive ? "var(--sporty-teal)" : "#b91c1c";
+              
+              return (
+                <div style={{ marginTop: '4px', paddingTop: '8px', borderTop: '1px solid var(--border-color)' }}>
+                  <span style={{ fontSize: '0.8rem', color: simColor, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '2px', fontWeight: 600 }}>
+                    Simulated Balance
+                  </span>
+                  <span style={{ fontSize: '1.2rem', fontWeight: 800, color: simColor }}>
+                    {formatCurrency(dataPoint.simulatedBalance, data?.homeCurrency)}
+                  </span>
+                </div>
+              );
+            })()}
           </div>
         </div>
       );
@@ -158,7 +163,11 @@ export default function ForecastPage() {
 
             <div className={styles.card}>
               <div className={styles.cardTitle}>Projected Balance in {months >= 12 ? `${months/12} Years` : `${months} Months`}</div>
-              <div className={styles.cardValue} style={{ color: data?.hasActiveScenarios ? 'var(--sporty-teal)' : 'var(--unique-blue)' }}>
+              <div className={styles.cardValue} style={{ 
+                color: data?.hasActiveScenarios 
+                  ? (data?.futureBalance >= data?.baselineFutureBalance ? 'var(--sporty-teal)' : '#b91c1c') 
+                  : 'var(--unique-blue)' 
+              }}>
                 {formatCurrency(data?.futureBalance || 0, data?.homeCurrency)}
               </div>
               {data?.hasActiveScenarios && (
@@ -213,28 +222,35 @@ export default function ForecastPage() {
                     />
                   )}
                   
+                  {/* BASELINE: Always Unique Blue */}
                   <Area 
                     type="monotone" 
                     dataKey="balance" 
-                    stroke={data?.hasActiveScenarios ? "var(--text-muted)" : "var(--unique-blue)"} 
+                    stroke="var(--unique-blue)" 
                     strokeWidth={data?.hasActiveScenarios ? 2 : 3}
                     strokeDasharray={data?.hasActiveScenarios ? "5 5" : undefined}
                     fillOpacity={data?.hasActiveScenarios ? 0 : 1} 
                     fill={data?.hasActiveScenarios ? "transparent" : "url(#colorBalance)"} 
-                    activeDot={{ r: data?.hasActiveScenarios ? 4 : 8, strokeWidth: 0, fill: data?.hasActiveScenarios ? 'var(--text-muted)' : 'var(--unique-blue)' }}
+                    activeDot={{ r: data?.hasActiveScenarios ? 4 : 8, strokeWidth: 0, fill: 'var(--unique-blue)' }}
                   />
                   
-                  {data?.hasActiveScenarios && (
-                    <Area 
-                      type="monotone" 
-                      dataKey="simulatedBalance" 
-                      stroke="var(--sporty-teal)" 
-                      strokeWidth={3}
-                      fillOpacity={1} 
-                      fill="url(#colorSimulated)" 
-                      activeDot={{ r: 8, strokeWidth: 0, fill: 'var(--sporty-teal)' }}
-                    />
-                  )}
+                  {/* SIMULATION: Red if negative impact, Green if positive impact */}
+                  {data?.hasActiveScenarios && (() => {
+                    const isPositive = data.futureBalance >= data.baselineFutureBalance;
+                    const simColor = isPositive ? "var(--sporty-teal)" : "#b91c1c"; // Darkish red
+                    
+                    return (
+                      <Area 
+                        type="monotone" 
+                        dataKey="simulatedBalance" 
+                        stroke={simColor} 
+                        strokeWidth={3}
+                        fillOpacity={0.15} 
+                        fill={simColor} 
+                        activeDot={{ r: 8, strokeWidth: 0, fill: simColor }}
+                      />
+                    );
+                  })()}
                 </AreaChart>
               </ResponsiveContainer>
             </div>
