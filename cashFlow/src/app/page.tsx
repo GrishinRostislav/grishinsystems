@@ -334,7 +334,7 @@ export default function Home() {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                 <XAxis dataKey="name" stroke="#64748b" fontSize={isMobile ? 10 : 12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#64748b" fontSize={isMobile ? 10 : 12} tickLine={false} axisLine={false} tickFormatter={formatYAxis} domain={[(dataMin: number) => getChartDomain(dataMin, 0)[0], (dataMax: number) => getChartDomain(0, dataMax)[1]]} />
+                <YAxis stroke="#64748b" fontSize={isMobile ? 10 : 12} tickLine={false} axisLine={false} tickFormatter={formatYAxis} domain={getChartDomain} />
                 <Tooltip 
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} 
                   formatter={(val: any) => formatCurrency(Number(val), homeCurrency)} 
@@ -375,7 +375,7 @@ export default function Home() {
                 >
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                   <XAxis dataKey="name" stroke="#64748b" fontSize={isMobile ? 10 : 12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#64748b" fontSize={isMobile ? 10 : 12} tickLine={false} axisLine={false} tickFormatter={formatYAxis} domain={[(dataMin: number) => getChartDomain(dataMin, 0)[0], (dataMax: number) => getChartDomain(0, dataMax)[1]]} />
+                  <YAxis stroke="#64748b" fontSize={isMobile ? 10 : 12} tickLine={false} axisLine={false} tickFormatter={formatYAxis} domain={getChartDomain} />
                   <Tooltip 
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                     formatter={(value: any) => formatCurrency(Number(value), homeCurrency)}

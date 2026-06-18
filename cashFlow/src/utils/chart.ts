@@ -1,11 +1,13 @@
-export function getChartDomain(dataMin: number, dataMax: number) {
-  if (dataMin === Infinity || dataMax === -Infinity) return [0, 'auto'];
+export function getChartDomain([dataMin, dataMax]: [number, number]) {
+  if (dataMin === Infinity || dataMax === -Infinity || dataMin == null || dataMax == null) return [0, 'auto'];
   
   const diff = dataMax - dataMin;
   const magnitude = Math.max(Math.abs(dataMax), Math.abs(dataMin));
   
-  const padding = diff < magnitude * 0.05 ? magnitude * 0.1 : diff * 0.5;
+  // Padding is 5% of magnitude, or 10% of diff, whichever is larger, but not too crazy
+  let padding = Math.max(magnitude * 0.05, diff * 0.1);
   
+  // Ensure we don't go below 0 if all data is positive
   const minVal = dataMin >= 0 ? Math.max(0, dataMin - padding) : dataMin - padding;
   
   return [minVal, dataMax + padding];
