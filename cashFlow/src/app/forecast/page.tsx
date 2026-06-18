@@ -33,6 +33,7 @@ export default function ForecastPage() {
 
     let exactTotalNet = 0;
     let exactTotalInvestment = 0;
+    let exactInterestEarned = 0;
     const now = new Date();
     // Use the currently selected 'months' horizon
     const endDate = new Date(now.getFullYear(), now.getMonth() + months + 1, 1);
@@ -53,21 +54,50 @@ export default function ForecastPage() {
       }
 
       // Calculate exact total over the projection interval
-      let simDate = new Date(item.date);
-      if (simDate < now) simDate = new Date(now);
-      const itemEndDate = item.endDate ? new Date(item.endDate) : endDate;
-      
-      let occurrences = 0;
-      while(simDate < endDate && simDate <= itemEndDate) {
-        occurrences++;
-        if (item.frequency === 'ONCE') break;
-        if (item.frequency === 'MONTHLY') simDate = new Date(simDate.setMonth(simDate.getMonth() + 1));
-        if (item.frequency === 'YEARLY') simDate = new Date(simDate.setFullYear(simDate.getFullYear() + 1));
-      }
-
       if (item.type === 'investment') {
-        exactTotalInvestment += amt * occurrences;
+        const monthlyRate = (item.annualRate || 0) / 100 / 12;
+        let balance = 0;
+        let simDate = new Date(item.date);
+        if (simDate < now) simDate = new Date(now);
+        const itemEndDate = item.endDate ? new Date(item.endDate) : endDate;
+        
+        let monthIter = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        while (monthIter <= endDate) {
+          let depositsThisMonth = 0;
+          const currentMonthStart = new Date(monthIter.getFullYear(), monthIter.getMonth() - 1, 1);
+          
+          while (simDate < monthIter && simDate <= itemEndDate) {
+            if (simDate >= currentMonthStart) {
+              depositsThisMonth += amt;
+            }
+            if (item.frequency === 'ONCE') {
+              simDate = new Date(8640000000000000);
+            } else {
+              if (item.frequency === 'MONTHLY') simDate = new Date(simDate.setMonth(simDate.getMonth() + 1));
+              if (item.frequency === 'YEARLY') simDate = new Date(simDate.setFullYear(simDate.getFullYear() + 1));
+            }
+          }
+          
+          balance += depositsThisMonth;
+          const interest = balance * monthlyRate;
+          balance += interest;
+          
+          exactInterestEarned += interest;
+          exactTotalInvestment += depositsThisMonth;
+          monthIter = new Date(monthIter.getFullYear(), monthIter.getMonth() + 1, 1);
+        }
       } else {
+        let simDate = new Date(item.date);
+        if (simDate < now) simDate = new Date(now);
+        const itemEndDate = item.endDate ? new Date(item.endDate) : endDate;
+        
+        let occurrences = 0;
+        while(simDate < endDate && simDate <= itemEndDate) {
+          occurrences++;
+          if (item.frequency === 'ONCE') break;
+          if (item.frequency === 'MONTHLY') simDate = new Date(simDate.setMonth(simDate.getMonth() + 1));
+          if (item.frequency === 'YEARLY') simDate = new Date(simDate.setFullYear(simDate.getFullYear() + 1));
+        }
         exactTotalNet += amt * sign * occurrences;
       }
     });
@@ -99,17 +129,23 @@ export default function ForecastPage() {
         {(exactTotalNet !== 0 || exactTotalInvestment !== 0) && (
           <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border-color)' }}>
             <span style={{ display: 'block', marginBottom: '2px' }}>Total impact over {months >= 12 ? `${months/12} yrs` : `${months} mo`}:</span>
-            {exactTotalNet !== 0 && (
-              <span style={{ color: exactTotalNet > 0 ? 'var(--sporty-teal)' : '#b91c1c', fontWeight: 600 }}>
-                {exactTotalNet > 0 ? 'Earned: +' : 'Spent: -'}{formatCurrency(Math.abs(exactTotalNet), data?.homeCurrency)}
-              </span>
-            )}
-            {exactTotalNet !== 0 && exactTotalInvestment !== 0 && <span style={{ margin: '0 6px', color: 'var(--border-color)' }}>|</span>}
-            {exactTotalInvestment !== 0 && (
-              <span style={{ color: 'var(--unique-blue)', fontWeight: 600 }}>
-                Invested: {formatCurrency(exactTotalInvestment, data?.homeCurrency)}
-              </span>
-            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              {exactTotalNet !== 0 && (
+                <span style={{ color: exactTotalNet > 0 ? 'var(--sporty-teal)' : '#b91c1c', fontWeight: 600 }}>
+                  {exactTotalNet > 0 ? 'Earned: +' : 'Spent: -'}{formatCurrency(Math.abs(exactTotalNet), data?.homeCurrency)}
+                </span>
+              )}
+              {exactTotalInvestment !== 0 && (
+                <span style={{ color: 'var(--unique-blue)', fontWeight: 600 }}>
+                  Invested: {formatCurrency(exactTotalInvestment, data?.homeCurrency)}
+                  {exactInterestEarned > 0 && (
+                    <span style={{ color: 'var(--sporty-teal)', marginLeft: '6px' }}>
+                      (+{formatCurrency(exactInterestEarned, data?.homeCurrency)} interest)
+                    </span>
+                  )}
+                </span>
+              )}
+            </div>
           </div>
         )}
       </div>
