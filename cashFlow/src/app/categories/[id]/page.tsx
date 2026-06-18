@@ -161,6 +161,14 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
                       </tr>
                     ))}
                   </tbody>
+                  <tfoot style={{ background: 'var(--bg-secondary)', fontWeight: 600 }}>
+                    <tr>
+                      <td colSpan={3} style={{ textAlign: 'right', padding: '12px 16px', color: 'var(--text-muted)' }}>Total for Category:</td>
+                      <td style={{ padding: '12px 16px', color: transactions.reduce((acc: any, txn: any) => acc + txn.amount, 0) >= 0 ? 'var(--sporty-teal)' : '#e11d48' }}>
+                        {transactions.reduce((acc: any, txn: any) => acc + txn.amount, 0) >= 0 ? "+" : ""}{formatCurrency(transactions.reduce((acc: any, txn: any) => acc + txn.amount, 0))}
+                      </td>
+                    </tr>
+                  </tfoot>
                 </table>
               </div>
             ) : (
