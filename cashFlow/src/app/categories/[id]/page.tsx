@@ -5,6 +5,7 @@ import styles from "./page.module.css";
 import Link from "next/link";
 import CategoryModal from "@/components/CategoryModal";
 import { useRouter } from "next/navigation";
+import { formatCurrency, formatDate } from "@/utils/format";
 
 export default function CategoryDetail({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -79,7 +80,7 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
 
   if (!loading && (!data || data.error)) return <div className={styles.container}><h1>Category Not Found</h1></div>;
 
-  const { category } = data || {};
+  const { category, transactions } = data || {};
 
   return (
     <div className={styles.container}>
@@ -114,8 +115,8 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
         <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Loading Category Structure...</div>
       ) : (
         <>
-          {category?.subcategories && category.subcategories.length > 0 ? (
-            <div>
+          {category?.subcategories && category.subcategories.length > 0 && (
+            <div style={{ marginBottom: '32px' }}>
               <h2 style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>Subcategories</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px' }}>
                 {category.subcategories.map((sub: any) => (
@@ -133,11 +134,41 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
                 ))}
               </div>
             </div>
-          ) : (
-            <div className={styles.emptyState}>
-              <p>This category does not contain any subcategories.</p>
-            </div>
           )}
+
+          <div>
+            <h2 style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>Recent Transactions</h2>
+            {transactions && transactions.length > 0 ? (
+              <div className={styles.tableContainer}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Description</th>
+                      <th>Account</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {transactions.map((txn: any) => (
+                      <tr key={txn.id}>
+                        <td>{formatDate(txn.date)}</td>
+                        <td>{txn.notes || txn.merchant || "-"}</td>
+                        <td>{txn.account?.name || "Unknown"}</td>
+                        <td className={txn.amount >= 0 ? styles.amountIncome : styles.amountExpense}>
+                          {txn.amount >= 0 ? "+" : ""}{formatCurrency(txn.amount)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className={styles.emptyState}>
+                <p>No transactions found for this category.</p>
+              </div>
+            )}
+          </div>
         </>
       )}
 
