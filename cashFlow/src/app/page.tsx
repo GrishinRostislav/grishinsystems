@@ -363,65 +363,76 @@ export default function Home() {
             )}
           </div>
         </div>
-        <Link href="/categories" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-          <div className={styles.chartCard} style={{ cursor: 'pointer', height: '100%' }}>
-            <h3 style={{ marginBottom: isMobile ? '8px' : '16px' }}>Expenses by Category</h3>
-            <div style={{ width: '100%', height: isMobile ? 240 : 300, display: 'flex', justifyContent: 'center' }}>
-              {pieData && pieData.length > 0 ? (
-                <ResponsiveContainer>
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      innerRadius={isMobile ? 30 : 40}
-                      outerRadius={isMobile ? 60 : 80}
-                      paddingAngle={5}
-                      dataKey="value"
-                      labelLine={true}
-                      label={isMobile 
-                        ? ({ percent, x, y, cx }) => (
-                            <text 
-                              x={x} 
-                              y={y} 
-                              fill="#1A2B4C" 
-                              textAnchor={x > cx ? 'start' : 'end'} 
-                              dominantBaseline="central" 
-                              fontSize={9}
-                              fontWeight={500}
-                            >
-                              {`${((percent || 0) * 100).toFixed(0)}%`}
-                            </text>
-                          )
-                        : ({ name, percent, x, y, cx }) => (
-                            <text 
-                              x={x} 
-                              y={y} 
-                              fill="#1A2B4C" 
-                              textAnchor={x > cx ? 'start' : 'end'} 
-                              dominantBaseline="central" 
-                              fontSize={11}
-                              fontWeight={500}
-                            >
-                              {`${name} (${((percent || 0) * 100).toFixed(0)}%)`}
-                            </text>
-                          )
-                      }
-                    >
-                      {pieData.map((entry: any, index: number) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value: any) => formatCurrency(Number(value), homeCurrency)} />
-                    <Legend layout="horizontal" verticalAlign="bottom" align="center" iconSize={8} iconType="circle" wrapperStyle={{ fontSize: isMobile ? '10px' : '11px', marginTop: '10px' }} />
-                  </PieChart>
-                </ResponsiveContainer>
-              ) : (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#64748b' }}>
-                  No expenses this month.
-                </div>
-              )}
-            </div>
+        <div className={styles.chartCard} style={{ height: '100%' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? '8px' : '16px' }}>
+            <h3 style={{ margin: 0 }}>Expenses by Category</h3>
+            <Link href="/categories" style={{ textDecoration: 'none', color: 'var(--unique-blue)', fontSize: '14px', fontWeight: 600 }}>
+              View All &rarr;
+            </Link>
           </div>
-        </Link>
+          <div style={{ width: '100%', height: isMobile ? 240 : 300, display: 'flex', justifyContent: 'center' }}>
+            {pieData && pieData.length > 0 ? (
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    innerRadius={isMobile ? 30 : 40}
+                    outerRadius={isMobile ? 60 : 80}
+                    paddingAngle={5}
+                    dataKey="value"
+                    labelLine={true}
+                    onClick={(data) => {
+                      if (data.payload && data.payload.id) {
+                        window.location.href = `/categories/${data.payload.id}`;
+                      } else {
+                        window.location.href = `/categories`;
+                      }
+                    }}
+                    style={{ cursor: 'pointer' }}
+                    label={isMobile 
+                      ? ({ percent, x, y, cx }) => (
+                          <text 
+                            x={x} 
+                            y={y} 
+                            fill="#1A2B4C" 
+                            textAnchor={x > cx ? 'start' : 'end'} 
+                            dominantBaseline="central" 
+                            fontSize={9}
+                            fontWeight={500}
+                          >
+                            {`${((percent || 0) * 100).toFixed(0)}%`}
+                          </text>
+                        )
+                      : ({ name, percent, x, y, cx }) => (
+                          <text 
+                            x={x} 
+                            y={y} 
+                            fill="#1A2B4C" 
+                            textAnchor={x > cx ? 'start' : 'end'} 
+                            dominantBaseline="central" 
+                            fontSize={11}
+                            fontWeight={500}
+                          >
+                            {`${name} (${((percent || 0) * 100).toFixed(0)}%)`}
+                          </text>
+                        )
+                    }
+                  >
+                    {pieData.map((entry: any, index: number) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: any) => formatCurrency(Number(value), homeCurrency)} />
+                  <Legend layout="horizontal" verticalAlign="bottom" align="center" iconSize={8} iconType="circle" wrapperStyle={{ fontSize: isMobile ? '10px' : '11px', marginTop: '10px' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#64748b' }}>
+                No expenses this month.
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {activeBudgets.length > 0 && (

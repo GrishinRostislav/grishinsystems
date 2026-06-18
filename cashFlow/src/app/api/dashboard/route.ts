@@ -75,7 +75,7 @@ export async function GET(request: Request) {
     let monthlyExpenses = 0;
 
     const chartMap: Record<string, { income: number; expenses: number; prevIncome: number; prevExpenses: number }> = {};
-    const categoryExpenseMap: Record<string, number> = {};
+    const categoryExpenseMap: Record<string, { value: number; id: string | null }> = {};
 
     for (const txn of transactions) {
       const txnDate = new Date(txn.date);
@@ -104,7 +104,11 @@ export async function GET(request: Request) {
           monthlyExpenses += absAmount;
           
           const catName = txn.category?.name || 'Uncategorized';
-          categoryExpenseMap[catName] = (categoryExpenseMap[catName] || 0) + absAmount;
+          const catId = txn.category?.id || null;
+          if (!categoryExpenseMap[catName]) {
+            categoryExpenseMap[catName] = { value: 0, id: catId };
+          }
+          categoryExpenseMap[catName].value += absAmount;
         }
       }
     }
@@ -149,7 +153,8 @@ export async function GET(request: Request) {
 
     const pieData = Object.keys(categoryExpenseMap).map(name => ({
       name,
-      value: categoryExpenseMap[name]
+      value: categoryExpenseMap[name].value,
+      id: categoryExpenseMap[name].id
     })).sort((a, b) => b.value - a.value);
 
     // 3. Balance Trend Calculation
