@@ -230,7 +230,13 @@ export default function Home() {
           <div className={styles.card} style={{ cursor: 'pointer' }}>
             <div className={styles.cardHeader}>
               <h3>Total Balance</h3>
-              <span className={styles.icon}>💰</span>
+              <span className={styles.icon} style={{ background: 'rgba(37, 99, 235, 0.1)', padding: '8px', borderRadius: '12px', display: 'flex' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--unique-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+                  <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+                  <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
+                </svg>
+              </span>
             </div>
             <div className={styles.amount}>
               {formatCurrency(totalBalance, homeCurrency)}
@@ -244,7 +250,12 @@ export default function Home() {
           <div className={styles.card} style={{ cursor: 'pointer' }}>
             <div className={styles.cardHeader}>
               <h3>Period Income</h3>
-              <span className={styles.icon}>📈</span>
+              <span className={styles.icon} style={{ background: 'rgba(20, 184, 166, 0.1)', padding: '8px', borderRadius: '12px', display: 'flex' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--sporty-teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                  <polyline points="16 7 22 7 22 13" />
+                </svg>
+              </span>
             </div>
             <div className={styles.amount} style={{ color: 'var(--sporty-teal)' }}>+{formatCurrency(monthlyIncome, homeCurrency)}</div>
             <div className={styles.subtitle}>Selected Period</div>
@@ -256,7 +267,12 @@ export default function Home() {
           <div className={styles.card} style={{ cursor: 'pointer' }}>
             <div className={styles.cardHeader}>
               <h3>Period Expenses</h3>
-              <span className={styles.icon}>📉</span>
+              <span className={styles.icon} style={{ background: 'rgba(225, 29, 72, 0.1)', padding: '8px', borderRadius: '12px', display: 'flex' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e11d48" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="22 17 13.5 8.5 8.5 13.5 2 7" />
+                  <polyline points="16 17 22 17 22 11" />
+                </svg>
+              </span>
             </div>
             <div className={styles.amount} style={{ color: '#e11d48' }}>-{formatCurrency(monthlyExpenses, homeCurrency)}</div>
             <div className={styles.subtitle}>Selected Period</div>
@@ -269,7 +285,14 @@ export default function Home() {
           <div className={styles.card} style={{ cursor: 'pointer' }}>
             <div className={styles.cardHeader}>
               <h3>Planned (30 days)</h3>
-              <span className={styles.icon}>🔮</span>
+              <span className={styles.icon} style={{ background: 'rgba(139, 92, 246, 0.1)', padding: '8px', borderRadius: '12px', display: 'flex' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+              </span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
