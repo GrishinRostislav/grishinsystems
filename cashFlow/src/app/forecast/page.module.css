@@ -272,7 +272,7 @@ input:checked + .slider:before {
 
 @media (max-width: 768px) {
   .container {
-    padding: 16px;
+    padding: 10px;
   }
 
   .header {
@@ -325,7 +325,7 @@ input:checked + .slider:before {
   }
 
   .chartContainer {
-    padding: 16px;
+    padding: 12px;
     border-radius: 16px;
     margin-bottom: 24px;
     min-height: unset;
