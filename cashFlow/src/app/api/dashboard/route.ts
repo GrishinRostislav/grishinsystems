@@ -77,6 +77,28 @@ export async function GET(request: Request) {
     const chartMap: Record<string, { income: number; expenses: number; prevIncome: number; prevExpenses: number }> = {};
     const categoryExpenseMap: Record<string, { value: number; id: string | null }> = {};
 
+    const paddingDays = diffDays <= 35 ? 2 : 0;
+    const finalEndDate = new Date(endDate);
+    finalEndDate.setDate(finalEndDate.getDate() + paddingDays);
+
+    let currDate = new Date(startDate);
+    currDate.setHours(12, 0, 0, 0);
+    const endBound = new Date(finalEndDate);
+    endBound.setHours(12, 0, 0, 0);
+
+    while (currDate <= endBound) {
+      let chartKey = "";
+      if (diffDays <= 35) {
+        chartKey = currDate.toLocaleString('default', { month: 'short', day: 'numeric' });
+      } else {
+        chartKey = currDate.toLocaleString('default', { month: 'short', year: 'numeric' });
+      }
+      if (!chartMap[chartKey]) {
+        chartMap[chartKey] = { income: 0, expenses: 0, prevIncome: 0, prevExpenses: 0 };
+      }
+      currDate.setDate(currDate.getDate() + 1);
+    }
+
     for (const txn of transactions) {
       const txnDate = new Date(txn.date);
       

@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
 
+function getLocalYMD(d: Date) {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 type GlobalDateFilterProps = {
   onDatesChange: (startDate: string, endDate: string) => void;
 };
@@ -19,7 +26,7 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
     }
     const d = new Date();
     d.setDate(d.getDate() - 365);
-    return d.toISOString().slice(0, 10);
+    return getLocalYMD(d);
   });
 
   const [endDate, setEndDate] = useState(() => {
@@ -27,7 +34,7 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
       const stored = localStorage.getItem("global_end_date");
       if (stored) return stored;
     }
-    return new Date().toISOString().slice(0, 10);
+    return getLocalYMD(new Date());
   });
 
   useEffect(() => {
@@ -40,22 +47,22 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
     if (typeof window !== "undefined") localStorage.setItem("global_date_interval", val);
     
     const now = new Date();
-    const endStr = now.toISOString().slice(0, 10);
+    const endStr = getLocalYMD(now);
     setEndDate(endStr);
     if (typeof window !== "undefined") localStorage.setItem("global_end_date", endStr);
     
     let startStr = startDate;
     if (val === "week") {
       now.setDate(now.getDate() - 7);
-      startStr = now.toISOString().slice(0, 10);
+      startStr = getLocalYMD(now);
     } else if (val === "month") {
       now.setDate(now.getDate() - 30);
-      startStr = now.toISOString().slice(0, 10);
+      startStr = getLocalYMD(now);
     } else if (val === "year") {
       now.setDate(now.getDate() - 365);
-      startStr = now.toISOString().slice(0, 10);
+      startStr = getLocalYMD(now);
     } else if (val === "all") {
-      startStr = new Date(0).toISOString().slice(0, 10);
+      startStr = getLocalYMD(new Date(0));
     }
 
     if (val !== "custom") {
