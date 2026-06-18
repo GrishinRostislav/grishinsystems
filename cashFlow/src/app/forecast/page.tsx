@@ -25,6 +25,53 @@ export default function ForecastPage() {
   const [isScenarioModalOpen, setScenarioModalOpen] = useState(false);
   const [editingScenario, setEditingScenario] = useState<any>(null);
 
+  const getScenarioSummary = (scenario: any) => {
+    let monthlyNet = 0;
+    let oneTimeNet = 0;
+    let investmentMonthly = 0;
+    let investmentOneTime = 0;
+
+    scenario.items.forEach((item: any) => {
+      const amt = Number(item.amount);
+      const sign = item.type === 'expense' ? -1 : 1;
+      const value = amt * sign;
+
+      if (item.type === 'investment') {
+        if (item.frequency === 'ONCE') investmentOneTime += amt;
+        else if (item.frequency === 'MONTHLY') investmentMonthly += amt;
+        else if (item.frequency === 'YEARLY') investmentMonthly += amt / 12;
+      } else {
+        if (item.frequency === 'ONCE') oneTimeNet += value;
+        else if (item.frequency === 'MONTHLY') monthlyNet += value;
+        else if (item.frequency === 'YEARLY') monthlyNet += value / 12;
+      }
+    });
+
+    const parts = [];
+    if (monthlyNet !== 0) {
+      parts.push(<span key="m" style={{ color: monthlyNet > 0 ? 'var(--sporty-teal)' : '#b91c1c', fontWeight: 600 }}>{monthlyNet > 0 ? '+' : ''}{formatCurrency(Math.abs(monthlyNet), data?.homeCurrency)}/mo</span>);
+    }
+    if (oneTimeNet !== 0) {
+      parts.push(<span key="o" style={{ color: oneTimeNet > 0 ? 'var(--sporty-teal)' : '#b91c1c', fontWeight: 600 }}>{oneTimeNet > 0 ? '+' : ''}{formatCurrency(Math.abs(oneTimeNet), data?.homeCurrency)} (once)</span>);
+    }
+    if (investmentMonthly !== 0 || investmentOneTime !== 0) {
+      parts.push(<span key="i" style={{ color: 'var(--unique-blue)', fontWeight: 600 }}>Inv: {investmentMonthly > 0 ? `${formatCurrency(investmentMonthly, data?.homeCurrency)}/mo` : `${formatCurrency(investmentOneTime, data?.homeCurrency)} (once)`}</span>);
+    }
+
+    if (parts.length === 0) return <span style={{ color: 'var(--text-muted)' }}>No financial impact</span>;
+    
+    return (
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', fontSize: '0.9rem', marginTop: '4px' }}>
+        {parts.map((part, i) => (
+          <span key={i}>
+            {i > 0 && <span style={{ color: 'var(--border-color)', margin: '0 4px' }}>|</span>}
+            {part}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
   const fetchForecast = async (m: number) => {
     setLoading(true);
     try {
@@ -294,12 +341,14 @@ export default function ForecastPage() {
                         <span className={styles.slider}></span>
                       </label>
                     </div>
-                    <div className={styles.scenarioItemsCount}>
+                    <div className={styles.scenarioItemsCount} style={{ marginBottom: '0' }}>
                       {scenario.items.length} impact item{scenario.items.length !== 1 ? 's' : ''}
                     </div>
+                    {getScenarioSummary(scenario)}
                     <button 
                       onClick={() => { setEditingScenario(scenario); setScenarioModalOpen(true); }}
                       className={styles.btnOutline}
+                      style={{ marginTop: '16px' }}
                     >
                       Edit Details
                     </button>
