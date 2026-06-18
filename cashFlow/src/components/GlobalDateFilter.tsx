@@ -25,7 +25,7 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
       if (stored) return stored;
     }
     const d = new Date();
-    d.setDate(d.getDate() - 365);
+    d.setMonth(0, 1);
     return getLocalYMD(d);
   });
 
@@ -47,25 +47,43 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
     if (typeof window !== "undefined") localStorage.setItem("global_date_interval", val);
     
     const now = new Date();
-    const endStr = getLocalYMD(now);
-    setEndDate(endStr);
-    if (typeof window !== "undefined") localStorage.setItem("global_end_date", endStr);
-    
+    let endStr = getLocalYMD(now);
     let startStr = startDate;
-    if (val === "week") {
+
+    if (val === "this_week") {
       now.setDate(now.getDate() - 7);
       startStr = getLocalYMD(now);
-    } else if (val === "month") {
+    } else if (val === "this_month") {
       now.setDate(now.getDate() - 30);
       startStr = getLocalYMD(now);
-    } else if (val === "year") {
+    } else if (val === "this_year") {
       now.setDate(now.getDate() - 365);
       startStr = getLocalYMD(now);
+    } else if (val === "week") {
+      const day = now.getDay() || 7; 
+      const start = new Date(now);
+      start.setDate(now.getDate() - day + 1);
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      startStr = getLocalYMD(start);
+      endStr = getLocalYMD(end);
+    } else if (val === "month") {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      startStr = getLocalYMD(start);
+      endStr = getLocalYMD(end);
+    } else if (val === "year") {
+      const start = new Date(now.getFullYear(), 0, 1);
+      const end = new Date(now.getFullYear(), 11, 31);
+      startStr = getLocalYMD(start);
+      endStr = getLocalYMD(end);
     } else if (val === "all") {
       startStr = getLocalYMD(new Date(0));
     }
 
     if (val !== "custom") {
+      setEndDate(endStr);
+      if (typeof window !== "undefined") localStorage.setItem("global_end_date", endStr);
       setStartDate(startStr);
       if (typeof window !== "undefined") localStorage.setItem("global_start_date", startStr);
     }
@@ -112,9 +130,12 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
         onChange={(e) => handleIntervalChange(e.target.value)}
         style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white' }}
       >
-        <option value="week">Past Week</option>
-        <option value="month">Past Month</option>
-        <option value="year">Past Year</option>
+        <option value="month">This Month</option>
+        <option value="week">This Week</option>
+        <option value="year">This Year</option>
+        <option value="this_month">Past 30 Days</option>
+        <option value="this_week">Past 7 Days</option>
+        <option value="this_year">Past 365 Days</option>
         <option value="all">All Time</option>
         <option value="custom">Custom Dates</option>
       </select>
