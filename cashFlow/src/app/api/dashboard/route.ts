@@ -36,37 +36,44 @@ export async function GET(request: Request) {
       endDate.setHours(23, 59, 59, 999); // end of the selected day
     }
 
-    const transactions = await prisma.transaction.findMany({
-      where: {
-        date: { 
-          gte: startDate,
-          lte: endDate
-        }
-      },
-      include: {
-        category: true,
-        account: true
-      },
-      orderBy: { date: "asc" }
-    });
-
     const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     const offset = diffDays * 24 * 60 * 60 * 1000;
 
-    const prevStartDate = new Date(startDate.getTime() - offset);
-    const prevEndDate = new Date(endDate.getTime() - offset);
+    const metricsStart = new Date(startDate);
+    const metricsEnd = new Date(endDate);
+    const prevMetricsStart = new Date(metricsStart.getTime() - offset);
+    const prevMetricsEnd = new Date(metricsEnd.getTime() - offset);
 
-    const prevTransactions = await prisma.transaction.findMany({
+    // Chart Timeframe anchored to today
+    const paddingDays = diffDays <= 35 ? 2 : 0;
+    const chartEnd = new Date();
+    chartEnd.setHours(23, 59, 59, 999);
+    chartEnd.setDate(chartEnd.getDate() + paddingDays);
+    
+    const chartStart = new Date(chartEnd);
+    chartStart.setDate(chartStart.getDate() - diffDays - paddingDays);
+    chartStart.setHours(0, 0, 0, 0);
+
+    const prevChartStart = new Date(chartStart.getTime() - offset);
+    const prevChartEnd = new Date(chartEnd.getTime() - offset);
+
+    const queryStart = new Date(Math.min(metricsStart.getTime(), chartStart.getTime(), prevMetricsStart.getTime(), prevChartStart.getTime()));
+    const queryEnd = new Date(Math.max(metricsEnd.getTime(), chartEnd.getTime(), prevMetricsEnd.getTime(), prevChartEnd.getTime()));
+
+    const allTransactions = await prisma.transaction.findMany({
       where: {
-        date: { 
-          gte: prevStartDate,
-          lte: prevEndDate
-        }
+        date: { gte: queryStart, lte: queryEnd }
       },
-      include: { account: true },
+      include: { category: true, account: true },
       orderBy: { date: "asc" }
     });
+
+    const transactionsForMetrics = allTransactions.filter(t => t.date >= metricsStart && t.date <= metricsEnd);
+    const prevTransactionsForMetrics = allTransactions.filter(t => t.date >= prevMetricsStart && t.date <= prevMetricsEnd);
+    
+    const transactionsForChart = allTransactions.filter(t => t.date >= chartStart && t.date <= chartEnd);
+    const prevTransactionsForChart = allTransactions.filter(t => t.date >= prevChartStart && t.date <= prevChartEnd);
 
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
@@ -77,13 +84,10 @@ export async function GET(request: Request) {
     const chartMap: Record<string, { income: number; expenses: number; prevIncome: number; prevExpenses: number; isFuture: boolean }> = {};
     const categoryExpenseMap: Record<string, { value: number; id: string | null }> = {};
 
-    const paddingDays = diffDays <= 35 ? 2 : 0;
-    const finalEndDate = new Date(endDate);
-    finalEndDate.setDate(finalEndDate.getDate() + paddingDays);
-
-    let currDate = new Date(startDate);
+    // chartEnd already includes paddingDays
+    let currDate = new Date(chartStart);
     currDate.setHours(12, 0, 0, 0);
-    const endBound = new Date(finalEndDate);
+    const endBound = new Date(chartEnd);
     endBound.setHours(12, 0, 0, 0);
     
     // We want to know what "today" is, to mark future days as empty
@@ -111,30 +115,15 @@ export async function GET(request: Request) {
       currDate.setDate(currDate.getDate() + 1);
     }
 
-    for (const txn of transactions) {
-      const txnDate = new Date(txn.date);
-      
-      let chartKey = "";
-      if (diffDays <= 35) {
-        chartKey = txnDate.toLocaleString('default', { month: 'short', day: 'numeric' });
-      } else {
-        chartKey = txnDate.toLocaleString('default', { month: 'short', year: 'numeric' });
-      }
-
-      if (!chartMap[chartKey]) {
-        chartMap[chartKey] = { income: 0, expenses: 0, prevIncome: 0, prevExpenses: 0, isFuture: false };
-      }
-
+    // Metrics calculations
+    for (const txn of transactionsForMetrics) {
       if ((txn as any).isTransfer) continue;
-
       const txnAmount = convertAmount(txn.amount, txn.account.currency, homeCurrency, rates);
 
       if (txnAmount > 0) {
-        chartMap[chartKey].income += txnAmount;
         monthlyIncome += txnAmount;
       } else {
         const absAmount = Math.abs(txnAmount);
-        chartMap[chartKey].expenses += absAmount;
         monthlyExpenses += absAmount;
         
         const catName = txn.category?.name || 'Uncategorized';
@@ -146,7 +135,29 @@ export async function GET(request: Request) {
       }
     }
 
-    for (const txn of prevTransactions) {
+    // Chart calculations
+    for (const txn of transactionsForChart) {
+      const txnDate = new Date(txn.date);
+      let chartKey = "";
+      if (diffDays <= 35) {
+        chartKey = txnDate.toLocaleString('default', { month: 'short', day: 'numeric' });
+      } else {
+        chartKey = txnDate.toLocaleString('default', { month: 'short', year: 'numeric' });
+      }
+      if (!chartMap[chartKey]) {
+        chartMap[chartKey] = { income: 0, expenses: 0, prevIncome: 0, prevExpenses: 0, isFuture: false };
+      }
+      if ((txn as any).isTransfer) continue;
+
+      const txnAmount = convertAmount(txn.amount, txn.account.currency, homeCurrency, rates);
+      if (txnAmount > 0) {
+        chartMap[chartKey].income += txnAmount;
+      } else {
+        chartMap[chartKey].expenses += Math.abs(txnAmount);
+      }
+    }
+
+    for (const txn of prevTransactionsForChart) {
       const mappedDate = new Date(txn.date.getTime() + offset);
       let chartKey = "";
       if (diffDays <= 35) {
@@ -154,15 +165,12 @@ export async function GET(request: Request) {
       } else {
         chartKey = mappedDate.toLocaleString('default', { month: 'short', year: 'numeric' });
       }
-
       if (!chartMap[chartKey]) {
         chartMap[chartKey] = { income: 0, expenses: 0, prevIncome: 0, prevExpenses: 0, isFuture: false };
       }
-
       if ((txn as any).isTransfer) continue;
 
       const txnAmount = convertAmount(txn.amount, txn.account.currency, homeCurrency, rates);
-
       if (txnAmount > 0) {
         chartMap[chartKey].prevIncome += txnAmount;
       } else {
@@ -196,25 +204,25 @@ export async function GET(request: Request) {
     // We can't do aggregate directly in the DB anymore because amounts need currency conversion.
     // We must fetch them and convert in memory.
     const futureTransactionsData = await prisma.transaction.findMany({
-      where: { date: { gt: endDate }, account: { includeInTotal: true, isArchived: false } },
+      where: { date: { gt: chartEnd }, account: { includeInTotal: true, isArchived: false } },
       include: { account: true }
     });
     const futureNet = futureTransactionsData.reduce((sum, t) => sum + convertAmount(t.amount, t.account.currency, homeCurrency, rates), 0);
-    const rangeNet = transactions.filter(t => accounts.some(a => a.id === t.accountId)).reduce((sum, t) => sum + convertAmount(t.amount, t.account.currency, homeCurrency, rates), 0);
+    const rangeNet = transactionsForChart.filter(t => accounts.some(a => a.id === t.accountId)).reduce((sum, t) => sum + convertAmount(t.amount, t.account.currency, homeCurrency, rates), 0);
     
     let runningBalance = totalBalance - futureNet - rangeNet;
 
     const prevFutureTransactionsData = await prisma.transaction.findMany({
-      where: { date: { gt: prevEndDate }, account: { includeInTotal: true, isArchived: false } },
+      where: { date: { gt: prevChartEnd }, account: { includeInTotal: true, isArchived: false } },
       include: { account: true }
     });
     const prevFutureNet = prevFutureTransactionsData.reduce((sum, t) => sum + convertAmount(t.amount, t.account.currency, homeCurrency, rates), 0);
-    const prevRangeNet = prevTransactions.filter(t => accounts.some(a => a.id === t.accountId)).reduce((sum, t) => sum + convertAmount(t.amount, t.account.currency, homeCurrency, rates), 0);
+    const prevRangeNet = prevTransactionsForChart.filter(t => accounts.some(a => a.id === t.accountId)).reduce((sum, t) => sum + convertAmount(t.amount, t.account.currency, homeCurrency, rates), 0);
     
     let prevRunningBalance = totalBalance - prevFutureNet - prevRangeNet;
 
     const balanceTrendMap: Record<string, number> = {};
-    for (const txn of transactions) {
+    for (const txn of transactionsForChart) {
       if (accounts.some(a => a.id === txn.accountId)) {
         const txnDate = new Date(txn.date);
         let chartKey = "";
@@ -228,7 +236,7 @@ export async function GET(request: Request) {
     }
 
     const prevBalanceTrendMap: Record<string, number> = {};
-    for (const txn of prevTransactions) {
+    for (const txn of prevTransactionsForChart) {
       if (accounts.some(a => a.id === txn.accountId)) {
         const mappedDate = new Date(txn.date.getTime() + offset);
         let chartKey = "";
