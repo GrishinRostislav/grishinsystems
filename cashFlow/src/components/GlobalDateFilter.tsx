@@ -11,6 +11,45 @@ type GlobalDateFilterProps = {
   onDatesChange: (startDate: string, endDate: string) => void;
 };
 
+function computeDates(val: string): { startStr: string, endStr: string } {
+  const now = new Date();
+  let endStr = getLocalYMD(now);
+  let startStr = getLocalYMD(now);
+
+  if (val === "week") {
+    now.setDate(now.getDate() - 7);
+    startStr = getLocalYMD(now);
+  } else if (val === "month") {
+    now.setDate(now.getDate() - 30);
+    startStr = getLocalYMD(now);
+  } else if (val === "year") {
+    now.setDate(now.getDate() - 365);
+    startStr = getLocalYMD(now);
+  } else if (val === "this_week") {
+    const day = now.getDay() || 7; 
+    const start = new Date(now);
+    start.setDate(now.getDate() - day + 1);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    startStr = getLocalYMD(start);
+    endStr = getLocalYMD(end);
+  } else if (val === "this_month") {
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    startStr = getLocalYMD(start);
+    endStr = getLocalYMD(end);
+  } else if (val === "this_year") {
+    const start = new Date(now.getFullYear(), 0, 1);
+    const end = new Date(now.getFullYear(), 11, 31);
+    startStr = getLocalYMD(start);
+    endStr = getLocalYMD(end);
+  } else if (val === "all") {
+    startStr = getLocalYMD(new Date(0));
+  }
+  
+  return { startStr, endStr };
+}
+
 export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProps) {
   const [interval, setIntervalState] = useState(() => {
     if (typeof window !== "undefined") {
@@ -20,21 +59,21 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
   });
 
   const [startDate, setStartDate] = useState(() => {
-    if (typeof window !== "undefined") {
+    const intv = typeof window !== "undefined" ? (localStorage.getItem("global_date_interval") || "month") : "month";
+    if (intv === "custom" && typeof window !== "undefined") {
       const stored = localStorage.getItem("global_start_date");
       if (stored) return stored;
     }
-    const d = new Date();
-    d.setDate(d.getDate() - 30);
-    return getLocalYMD(d);
+    return computeDates(intv).startStr;
   });
 
   const [endDate, setEndDate] = useState(() => {
-    if (typeof window !== "undefined") {
+    const intv = typeof window !== "undefined" ? (localStorage.getItem("global_date_interval") || "month") : "month";
+    if (intv === "custom" && typeof window !== "undefined") {
       const stored = localStorage.getItem("global_end_date");
       if (stored) return stored;
     }
-    return getLocalYMD(new Date());
+    return computeDates(intv).endStr;
   });
 
   useEffect(() => {
@@ -45,43 +84,8 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
   const handleIntervalChange = (val: string) => {
     setIntervalState(val);
     if (typeof window !== "undefined") localStorage.setItem("global_date_interval", val);
-    
-    const now = new Date();
-    let endStr = getLocalYMD(now);
-    let startStr = startDate;
-
-    if (val === "week") {
-      now.setDate(now.getDate() - 7);
-      startStr = getLocalYMD(now);
-    } else if (val === "month") {
-      now.setDate(now.getDate() - 30);
-      startStr = getLocalYMD(now);
-    } else if (val === "year") {
-      now.setDate(now.getDate() - 365);
-      startStr = getLocalYMD(now);
-    } else if (val === "this_week") {
-      const day = now.getDay() || 7; 
-      const start = new Date(now);
-      start.setDate(now.getDate() - day + 1);
-      const end = new Date(start);
-      end.setDate(start.getDate() + 6);
-      startStr = getLocalYMD(start);
-      endStr = getLocalYMD(end);
-    } else if (val === "this_month") {
-      const start = new Date(now.getFullYear(), now.getMonth(), 1);
-      const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      startStr = getLocalYMD(start);
-      endStr = getLocalYMD(end);
-    } else if (val === "this_year") {
-      const start = new Date(now.getFullYear(), 0, 1);
-      const end = new Date(now.getFullYear(), 11, 31);
-      startStr = getLocalYMD(start);
-      endStr = getLocalYMD(end);
-    } else if (val === "all") {
-      startStr = getLocalYMD(new Date(0));
-    }
-
     if (val !== "custom") {
+      const { startStr, endStr } = computeDates(val);
       setEndDate(endStr);
       if (typeof window !== "undefined") localStorage.setItem("global_end_date", endStr);
       setStartDate(startStr);

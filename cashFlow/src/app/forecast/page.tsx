@@ -337,7 +337,7 @@ export default function ForecastPage() {
                       const prefix = data?.homeCurrency === 'EUR' ? '€' : (data?.homeCurrency === 'GBP' ? '£' : '$');
                       return `${prefix}${(val / 1000).toFixed(0)}k`;
                     }}
-                    domain={[(dataMin: number) => getChartDomain(dataMin, 0)[0], (dataMax: number) => getChartDomain(0, dataMax)[1]]}
+                    domain={getChartDomain}
                   />
                   <Tooltip content={<CustomTooltip />} />
                   

@@ -1,5 +1,5 @@
-export function getChartDomain([dataMin, dataMax]: [number, number]) {
-  if (dataMin === Infinity || dataMax === -Infinity || dataMin == null || dataMax == null) return [0, 'auto'];
+export function getChartDomain([dataMin, dataMax]: readonly [number, number]): [number, number] {
+  if (dataMin === Infinity || dataMax === -Infinity || dataMin == null || dataMax == null) return [0, 0];
   
   const diff = dataMax - dataMin;
   const magnitude = Math.max(Math.abs(dataMax), Math.abs(dataMin));
