@@ -253,7 +253,7 @@ export default function Home() {
         </Link>
 
         {/* Monthly Income Card */}
-        <Link href="/transactions" style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Link href="/transactions?type=income" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className={styles.card} style={{ cursor: 'pointer' }}>
             <div className={styles.cardHeader}>
               <h3>Period Income</h3>
@@ -270,7 +270,7 @@ export default function Home() {
         </Link>
 
         {/* Monthly Expenses Card */}
-        <Link href="/transactions" style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Link href="/transactions?type=expense" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className={styles.card} style={{ cursor: 'pointer' }}>
             <div className={styles.cardHeader}>
               <h3>Period Expenses</h3>
@@ -479,7 +479,8 @@ export default function Home() {
               const projectedPercent = budget.amount > 0 ? ((budget.projected || 0) / budget.amount) * 100 : 0;
               const isOverBudget = budget.remaining < 0;
               return (
-                <div key={budget.id} className={budgetStyles.budgetCard}>
+                <Link href={`/budgets/${budget.id}`} key={budget.id} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <div className={budgetStyles.budgetCard}>
                   <div className={budgetStyles.cardTop}>
                     <div>
                       <h3 className={budgetStyles.budgetName}>{budget.name}</h3>
@@ -517,7 +518,7 @@ export default function Home() {
                       {isOverBudget ? `${formatCurrency(Math.abs(budget.remaining), homeCurrency)} over limit` : `${formatCurrency(budget.remaining, homeCurrency)} remaining`}
                     </span>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>

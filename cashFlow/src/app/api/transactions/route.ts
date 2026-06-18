@@ -17,13 +17,24 @@ export async function GET(request: Request) {
       endDate.setHours(23, 59, 59, 999);
     }
 
+    const typeParam = searchParams.get("type");
+    let whereClause: any = {
+      date: {
+        gte: startDate,
+        lte: endDate
+      }
+    };
+
+    if (typeParam === 'income') {
+      whereClause.amount = { gt: 0 };
+      whereClause.isTransfer = false;
+    } else if (typeParam === 'expense') {
+      whereClause.amount = { lt: 0 };
+      whereClause.isTransfer = false;
+    }
+
     const transactions = await prisma.transaction.findMany({
-      where: {
-        date: {
-          gte: startDate,
-          lte: endDate
-        }
-      },
+      where: whereClause,
       include: {
         account: true,
         category: true,
@@ -75,6 +86,7 @@ export async function POST(request: Request) {
           notes,
           accountId,
           categoryId: null, // transfers typically don't have categories or use a specific transfer category
+          isTransfer: true,
         },
       });
 
@@ -94,6 +106,7 @@ export async function POST(request: Request) {
           notes,
           accountId: toAccountId,
           categoryId: null,
+          isTransfer: true,
         },
       });
 

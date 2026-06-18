@@ -97,8 +97,20 @@ export default function TransactionsPage() {
 
   const fetchData = async () => {
     try {
+      const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+      const typeParam = searchParams.get("type");
+      
+      const queryParams = new URLSearchParams();
+      if (startDate && endDate) {
+        queryParams.set("startDate", startDate);
+        queryParams.set("endDate", endDate);
+      }
+      if (typeParam) queryParams.set("type", typeParam);
+      
+      const url = `/cashFlow/api/transactions${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+
       const [txRes] = await Promise.all([
-        fetch(startDate && endDate ? `/cashFlow/api/transactions?startDate=${startDate}&endDate=${endDate}` : "/cashFlow/api/transactions")
+        fetch(url)
       ]);
       const txData = await txRes.json();
       

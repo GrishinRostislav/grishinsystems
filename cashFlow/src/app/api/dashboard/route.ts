@@ -92,6 +92,8 @@ export async function GET(request: Request) {
         chartMap[chartKey] = { income: 0, expenses: 0, prevIncome: 0, prevExpenses: 0 };
       }
 
+      if ((txn as any).isTransfer) continue;
+
       const txnAmount = convertAmount(txn.amount, txn.account.currency, homeCurrency, rates);
 
       if (txnAmount > 0) {
@@ -125,6 +127,8 @@ export async function GET(request: Request) {
       if (!chartMap[chartKey]) {
         chartMap[chartKey] = { income: 0, expenses: 0, prevIncome: 0, prevExpenses: 0 };
       }
+
+      if ((txn as any).isTransfer) continue;
 
       const txnAmount = convertAmount(txn.amount, txn.account.currency, homeCurrency, rates);
 

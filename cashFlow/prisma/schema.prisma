@@ -57,6 +57,7 @@ model Transaction {
   merchant      String?   // e.g., Walmart, Amazon (Legacy or text fallback)
   paymentMethod String?   // e.g., Credit Card, Cash, Debit
   notes         String?
+  isTransfer    Boolean   @default(false)
   
   accountId     String
   account       Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)

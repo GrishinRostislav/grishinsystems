@@ -1,48 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getExchangeRates, convertAmount } from "@/lib/currency";
-
-function getCurrentPeriodDates(period: string, budgetStartDate: Date, budgetEndDate: Date | null) {
-  const now = new Date();
-  let start = new Date(now);
-  let end = new Date(now);
-
-  if (period === 'weekly') {
-    const day = now.getDay();
-    const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-    start = new Date(now.setDate(diff));
-    start.setHours(0, 0, 0, 0);
-    
-    end = new Date(start);
-    end.setDate(start.getDate() + 6);
-    end.setHours(23, 59, 59, 999);
-  } else if (period === 'monthly') {
-    start = new Date(now.getFullYear(), now.getMonth(), 1);
-    end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-  } else if (period === 'yearly') {
-    start = new Date(now.getFullYear(), 0, 1);
-    end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
-  } else {
-    start = new Date(budgetStartDate);
-    end = budgetEndDate ? new Date(budgetEndDate) : new Date(now);
-    start.setHours(0, 0, 0, 0);
-    end.setHours(23, 59, 59, 999);
-  }
-
-  return { start, end };
-}
-
-function addFrequency(date: Date, freq: string): Date {
-  const next = new Date(date);
-  switch (freq) {
-    case 'DAILY': next.setDate(next.getDate() + 1); break;
-    case 'WEEKLY': next.setDate(next.getDate() + 7); break;
-    case 'BIWEEKLY': next.setDate(next.getDate() + 14); break;
-    case 'MONTHLY': next.setMonth(next.getMonth() + 1); break;
-    case 'YEARLY': next.setFullYear(next.getFullYear() + 1); break;
-  }
-  return next;
-}
+import { getCurrentPeriodDates, addFrequency, getCategoryDescendantIds } from "@/lib/budgetUtils";
 
 export async function GET() {
   try {
@@ -62,33 +21,7 @@ export async function GET() {
       orderBy: { createdAt: "desc" }
     });
 
-    const allCategories = await prisma.category.findMany({ select: { id: true, parentId: true } });
-    
-    // Build adjacency list for children
-    const childrenMap = new Map<string, string[]>();
-    for (const cat of allCategories) {
-      if (cat.parentId) {
-        if (!childrenMap.has(cat.parentId)) childrenMap.set(cat.parentId, []);
-        childrenMap.get(cat.parentId)!.push(cat.id);
-      }
-    }
-
-    // Helper to get all descendant IDs including self
-    const getDescendantIds = (rootIds: string[]) => {
-      const result = new Set<string>(rootIds);
-      const queue = [...rootIds];
-      while (queue.length > 0) {
-        const current = queue.shift()!;
-        const children = childrenMap.get(current) || [];
-        for (const child of children) {
-          if (!result.has(child)) {
-            result.add(child);
-            queue.push(child);
-          }
-        }
-      }
-      return Array.from(result);
-    };
+    const allTargetCategoryIdsByBudget = new Map();
 
     const budgetsWithSpent = await Promise.all(
       budgets.map(async (budget) => {
@@ -96,11 +29,12 @@ export async function GET() {
 
         // Find all descendant categories to include in budget
         const selectedCategoryIds = budget.categories.map(c => c.id);
-        const allTargetCategoryIds = budget.isGlobal ? [] : getDescendantIds(selectedCategoryIds);
+        const allTargetCategoryIds = budget.isGlobal ? [] : await getCategoryDescendantIds(selectedCategoryIds);
 
-        // Fetch expense transactions (amount < 0) in the category set
+        // Fetch expense transactions (amount < 0) in the category set, excluding transfers
         const txns = await prisma.transaction.findMany({
           where: {
+            isTransfer: false,
             date: {
               gte: start,
               lte: end

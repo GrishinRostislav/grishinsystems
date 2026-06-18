@@ -52,6 +52,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         notes,
         accountId,
         categoryId: type === 'transfer' ? null : (categoryId || null),
+        isTransfer: type === 'transfer',
       },
     });
 

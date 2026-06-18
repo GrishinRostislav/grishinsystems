@@ -208,7 +208,8 @@ export default function BudgetsPage() {
                     const isOverBudget = budget.remaining < 0;
 
                     return (
-                      <div key={budget.id} className={styles.budgetCard} onClick={() => openEditModal(budget)}>
+                      <Link href={`/budgets/${budget.id}`} key={budget.id} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <div className={styles.budgetCard}>
                         <div className={styles.cardTop}>
                           <div>
                             <h3 className={styles.budgetName}>{budget.name}</h3>
@@ -262,7 +263,7 @@ export default function BudgetsPage() {
                             {isOverBudget ? `${formatCurrency(Math.abs(budget.remaining), homeCurrency)} over limit` : `${formatCurrency(budget.remaining, homeCurrency)} remaining`}
                           </span>
                         </div>
-                      </div>
+                      </Link>
                     );
                   })}
                 </div>
