@@ -74,6 +74,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
           notes,
           accountId: toAccountId,
           categoryId: null,
+          isTransfer: true,
         },
       });
 

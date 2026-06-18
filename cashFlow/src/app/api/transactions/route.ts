@@ -50,7 +50,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { amount, date, merchant, paymentMethod, notes, accountId, categoryId, transactionType, toAccountId } = body;
+    const { amount, date, merchant, paymentMethod, notes, accountId, categoryId, type, toAccountId } = body;
 
     let finalPayeeId = null;
     let finalMerchantName = merchant;
@@ -72,7 +72,7 @@ export async function POST(request: Request) {
       finalMerchantName = payee.name;
     }
 
-    if (transactionType === "transfer") {
+    if (type === "transfer") {
       const parsedAmount = Math.abs(parseFloat(amount));
       
       // 1. Create OUT transaction (Expense from source)
