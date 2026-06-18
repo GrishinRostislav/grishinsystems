@@ -10,9 +10,10 @@ export async function GET() {
         toAccount: true,
         category: true,
       },
-      orderBy: {
-        nextRunDate: 'asc'
-      }
+      orderBy: [
+        { nextRunDate: 'asc' },
+        { id: 'asc' }
+      ]
     });
     return NextResponse.json(scheduled);
   } catch (error) {

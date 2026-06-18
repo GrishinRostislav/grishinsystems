@@ -144,6 +144,14 @@ function PlanningContent() {
                   </div>
                   <span className={styles.badge} style={{ background: '#fef3c7', color: '#b45309' }}>
                     DUE: {formatDate(s.nextRunDate)}
+                    {(() => {
+                      const diffTime = new Date(s.nextRunDate).getTime() - now.getTime();
+                      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                      if (diffDays === 0) return ' (Today)';
+                      if (diffDays === -1) return ' (1 day ago)';
+                      if (diffDays < -1) return ` (${Math.abs(diffDays)} days ago)`;
+                      return '';
+                    })()}
                   </span>
                 </div>
                 <div className={styles.meta}>
@@ -193,6 +201,14 @@ function PlanningContent() {
                   </div>
                   <span className={styles.badge}>
                     NEXT: {formatDate(s.nextRunDate)}
+                    {(() => {
+                      const diffTime = new Date(s.nextRunDate).getTime() - now.getTime();
+                      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                      if (diffDays === 0) return ' (Today)';
+                      if (diffDays === 1) return ' (Tomorrow)';
+                      if (diffDays > 1) return ` (in ${diffDays} days)`;
+                      return '';
+                    })()}
                   </span>
                 </div>
                 <div className={styles.meta}>
