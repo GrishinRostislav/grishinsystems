@@ -6,6 +6,9 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const includeArchived = searchParams.get('includeArchived') === 'true';
 
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
     const accounts = await prisma.account.findMany({
       where: includeArchived ? {} : { isArchived: false },
       orderBy: [
@@ -13,7 +16,34 @@ export async function GET(request: Request) {
         { createdAt: "desc" }
       ],
     });
-    return NextResponse.json(accounts);
+
+    const flows = await prisma.transaction.groupBy({
+      by: ['accountId'],
+      where: {
+        date: { gte: thirtyDaysAgo, lte: now }
+      },
+      _sum: {
+        amount: true
+      }
+    });
+
+    const flowMap = new Map();
+    for (const f of flows) {
+      flowMap.set(f.accountId, f._sum.amount || 0);
+    }
+
+    const enrichedAccounts = accounts.map(acc => {
+      const netFlow = flowMap.get(acc.id) || 0;
+      const prevBalance = acc.balance - netFlow;
+      const changePercent = prevBalance !== 0 ? (netFlow / prevBalance) * 100 : 0;
+      return {
+        ...acc,
+        flow30d: netFlow,
+        flow30dPercent: changePercent
+      };
+    });
+
+    return NextResponse.json(enrichedAccounts);
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch accounts" }, { status: 500 });
   }

@@ -31,6 +31,8 @@ type Account = {
   includeInTotal: boolean;
   isArchived: boolean;
   order: number;
+  flow30d?: number;
+  flow30dPercent?: number;
 };
 
 function SortableAccountCard({ account, isReordering }: { account: Account, isReordering: boolean }) {
@@ -71,8 +73,25 @@ function SortableAccountCard({ account, isReordering }: { account: Account, isRe
         </div>
         <span className={styles.typeBadge}>{account.type}</span>
       </div>
-      <div className={styles.balance}>
-        {formatCurrency(account.balance, account.currency)}
+      <div className={styles.balance} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <span>{formatCurrency(account.balance, account.currency)}</span>
+        {account.flow30d !== undefined && account.flow30dPercent !== undefined && account.flow30d !== 0 && (
+          <span style={{ 
+            fontSize: '0.8rem', 
+            fontWeight: 600, 
+            color: account.flow30d > 0 ? 'var(--sporty-teal)' : '#e11d48',
+            background: account.flow30d > 0 ? 'rgba(20, 184, 166, 0.1)' : 'rgba(225, 29, 72, 0.1)',
+            padding: '2px 8px',
+            borderRadius: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '2px'
+          }}>
+            {account.flow30d > 0 ? '↑' : '↓'}
+            {formatCurrency(Math.abs(account.flow30d), account.currency)} 
+            ({account.flow30d > 0 ? '+' : ''}{account.flow30dPercent.toFixed(1)}%)
+          </span>
+        )}
       </div>
       <div className={styles.footer}>
         <span>{account.currency}</span>
