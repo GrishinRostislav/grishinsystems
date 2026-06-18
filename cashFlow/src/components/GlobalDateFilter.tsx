@@ -18,7 +18,7 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
       if (stored) return stored;
     }
     const d = new Date();
-    d.setFullYear(d.getFullYear() - 1);
+    d.setDate(d.getDate() - 365);
     return d.toISOString().slice(0, 10);
   });
 
@@ -49,10 +49,10 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
       now.setDate(now.getDate() - 7);
       startStr = now.toISOString().slice(0, 10);
     } else if (val === "month") {
-      now.setMonth(now.getMonth() - 1);
+      now.setDate(now.getDate() - 30);
       startStr = now.toISOString().slice(0, 10);
     } else if (val === "year") {
-      now.setFullYear(now.getFullYear() - 1);
+      now.setDate(now.getDate() - 365);
       startStr = now.toISOString().slice(0, 10);
     } else if (val === "all") {
       startStr = new Date(0).toISOString().slice(0, 10);

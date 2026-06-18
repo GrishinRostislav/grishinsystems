@@ -79,7 +79,6 @@ export async function GET(request: Request) {
 
     for (const txn of transactions) {
       const txnDate = new Date(txn.date);
-      const isCurrentMonth = txnDate.getMonth() === currentMonth && txnDate.getFullYear() === currentYear;
       
       let chartKey = "";
       if (diffDays <= 35) {
@@ -98,20 +97,18 @@ export async function GET(request: Request) {
 
       if (txnAmount > 0) {
         chartMap[chartKey].income += txnAmount;
-        if (isCurrentMonth) monthlyIncome += txnAmount;
+        monthlyIncome += txnAmount;
       } else {
         const absAmount = Math.abs(txnAmount);
         chartMap[chartKey].expenses += absAmount;
-        if (isCurrentMonth) {
-          monthlyExpenses += absAmount;
-          
-          const catName = txn.category?.name || 'Uncategorized';
-          const catId = txn.category?.id || null;
-          if (!categoryExpenseMap[catName]) {
-            categoryExpenseMap[catName] = { value: 0, id: catId };
-          }
-          categoryExpenseMap[catName].value += absAmount;
+        monthlyExpenses += absAmount;
+        
+        const catName = txn.category?.name || 'Uncategorized';
+        const catId = txn.category?.id || null;
+        if (!categoryExpenseMap[catName]) {
+          categoryExpenseMap[catName] = { value: 0, id: catId };
         }
+        categoryExpenseMap[catName].value += absAmount;
       }
     }
 

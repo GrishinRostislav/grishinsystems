@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getHistoricalExchangeRates, getExchangeRates } from "@/lib/currency";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -60,21 +61,85 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     const futureDelta = futureTransactions.reduce((acc, txn) => acc + txn.amount, 0);
     let runningBalance = account.balance - futureDelta;
 
+    let settings = await prisma.settings.findUnique({ where: { id: "global" } });
+    if (!settings) {
+      settings = await prisma.settings.create({ data: { id: "global", homeCurrency: "CAD" } });
+    }
+    const homeCurrency = settings.homeCurrency;
+
+    let loopStart = new Date(startDate);
+    if (loopStart.getFullYear() < 2000) {
+      if (transactions.length > 0) {
+        loopStart = new Date(transactions[0].date);
+        loopStart.setHours(0, 0, 0, 0);
+      } else {
+        loopStart = new Date();
+        loopStart.setDate(loopStart.getDate() - 365);
+      }
+    }
+    
+    // Cap end date to today to avoid plotting future empty days unless explicitly requested
+    const today = new Date();
+    const loopEnd = endDate > today ? today : endDate;
+
+    let historicalRates: Record<string, number> = {};
+    if (account.currency !== homeCurrency) {
+      historicalRates = await getHistoricalExchangeRates(account.currency, homeCurrency, loopStart, loopEnd);
+    } else {
+      // Rates are 1:1
+      const curr = new Date(loopStart);
+      while (curr <= loopEnd) {
+        historicalRates[curr.toISOString().slice(0, 10)] = 1;
+        curr.setDate(curr.getDate() + 1);
+      }
+    }
+
     const chartData = [];
     let income = 0;
     let expenses = 0;
-
+    
+    // Calculate total income and expenses across all transactions in range
     for (const txn of transactions) {
-      runningBalance += txn.amount;
       if (txn.amount > 0) income += txn.amount;
       else expenses += Math.abs(txn.amount);
+    }
 
+    let txnIndex = 0;
+    const currDate = new Date(loopStart);
+    
+    while (currDate <= loopEnd) {
+      const dStr = currDate.toISOString().slice(0, 10);
+      
+      // Process transactions for this day
+      let dayTransactions = [];
+      while (txnIndex < transactions.length) {
+        const txnDate = new Date(transactions[txnIndex].date);
+        const tStr = txnDate.toISOString().slice(0, 10);
+        
+        if (tStr === dStr) {
+          runningBalance += transactions[txnIndex].amount;
+          dayTransactions.push(transactions[txnIndex]);
+          txnIndex++;
+        } else if (txnDate < currDate) {
+          // Catch-up if any transactions slipped through
+          runningBalance += transactions[txnIndex].amount;
+          txnIndex++;
+        } else {
+          break; // Next transaction is in the future
+        }
+      }
+
+      const rate = historicalRates[dStr] || 1;
+      
       chartData.push({
-        date: new Date(txn.date).toLocaleDateString("en-US", { timeZone: "UTC" }),
-        balance: runningBalance,
-        amount: txn.amount,
-        merchant: txn.merchant
+        date: currDate.toLocaleDateString("en-US", { timeZone: "UTC" }),
+        balance: runningBalance * rate,
+        originalBalance: runningBalance,
+        rate: rate,
+        transactions: dayTransactions.map(t => ({ amount: t.amount, merchant: t.merchant }))
       });
+
+      currDate.setDate(currDate.getDate() + 1);
     }
 
     // reverse for the table view
