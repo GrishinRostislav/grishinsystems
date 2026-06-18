@@ -116,6 +116,7 @@ export default function AccountsPage() {
   // Global settings
   const [homeCurrency, setHomeCurrency] = useState("CAD");
   const [totalBalance, setTotalBalance] = useState<number | null>(null);
+  const [balanceChange, setBalanceChange] = useState<{ amount: number, percentage: number } | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -142,15 +143,23 @@ export default function AccountsPage() {
 
   const fetchAccounts = async () => {
     try {
+      const now = new Date();
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      
       const [accRes, dashRes] = await Promise.all([
         fetch(`/cashFlow/api/accounts?includeArchived=${showArchived}`),
-        fetch("/cashFlow/api/dashboard")
+        fetch(`/cashFlow/api/dashboard?startDate=${thirtyDaysAgo.toISOString()}&endDate=${now.toISOString()}`)
       ]);
       const accData = await accRes.json();
       const dashData = await dashRes.json();
       setAccounts(accData);
       if (dashData && dashData.totalBalance !== undefined) {
         setTotalBalance(dashData.totalBalance);
+        
+        const netFlow = (dashData.monthlyIncome || 0) - (dashData.monthlyExpenses || 0);
+        const prevBalance = dashData.totalBalance - netFlow;
+        const percentage = prevBalance !== 0 ? (netFlow / prevBalance) * 100 : 0;
+        setBalanceChange({ amount: netFlow, percentage });
       }
     } catch (err) {
       console.error("Failed to fetch accounts", err);
@@ -228,7 +237,28 @@ export default function AccountsPage() {
           {totalBalance !== null && (
             <div style={{ marginTop: '16px', padding: '16px 20px', background: 'var(--bg-secondary)', borderRadius: '12px', display: 'inline-block', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
               <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Total Balance</span>
-              <span style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--unique-blue)' }}>{formatCurrency(totalBalance, homeCurrency)}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--unique-blue)', lineHeight: 1 }}>{formatCurrency(totalBalance, homeCurrency)}</span>
+                {balanceChange && (
+                  <span style={{ 
+                    fontSize: '0.875rem', 
+                    fontWeight: 600, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '4px',
+                    color: balanceChange.amount >= 0 ? 'var(--sporty-teal)' : '#e11d48',
+                    background: balanceChange.amount >= 0 ? 'rgba(20, 184, 166, 0.1)' : 'rgba(225, 29, 72, 0.1)',
+                    padding: '4px 10px',
+                    borderRadius: '16px',
+                    lineHeight: 1
+                  }}>
+                    {balanceChange.amount >= 0 ? '↑' : '↓'}
+                    {formatCurrency(Math.abs(balanceChange.amount), homeCurrency)} 
+                    ({balanceChange.amount >= 0 ? '+' : ''}{balanceChange.percentage.toFixed(1)}%)
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginLeft: '4px', fontWeight: 500 }}>(30d)</span>
+                  </span>
+                )}
+              </div>
             </div>
           )}
         </div>
