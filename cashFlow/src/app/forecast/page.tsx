@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import styles from "./page.module.css";
 import { formatCurrency } from "@/utils/format";
+import { getChartDomain } from "@/utils/chart";
 import ScenarioModal from "@/components/ScenarioModal";
 import {
   AreaChart,
@@ -336,6 +337,7 @@ export default function ForecastPage() {
                       const prefix = data?.homeCurrency === 'EUR' ? '€' : (data?.homeCurrency === 'GBP' ? '£' : '$');
                       return `${prefix}${(val / 1000).toFixed(0)}k`;
                     }}
+                    domain={[(dataMin: number) => getChartDomain(dataMin, 0)[0], (dataMax: number) => getChartDomain(0, dataMax)[1]]}
                   />
                   <Tooltip content={<CustomTooltip />} />
                   

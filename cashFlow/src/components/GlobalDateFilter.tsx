@@ -14,9 +14,9 @@ type GlobalDateFilterProps = {
 export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProps) {
   const [interval, setIntervalState] = useState(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("global_date_interval") || "year";
+      return localStorage.getItem("global_date_interval") || "month";
     }
-    return "year";
+    return "month";
   });
 
   const [startDate, setStartDate] = useState(() => {
@@ -25,7 +25,7 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
       if (stored) return stored;
     }
     const d = new Date();
-    d.setMonth(0, 1);
+    d.setDate(d.getDate() - 30);
     return getLocalYMD(d);
   });
 
@@ -50,16 +50,16 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
     let endStr = getLocalYMD(now);
     let startStr = startDate;
 
-    if (val === "this_week") {
+    if (val === "week") {
       now.setDate(now.getDate() - 7);
       startStr = getLocalYMD(now);
-    } else if (val === "this_month") {
+    } else if (val === "month") {
       now.setDate(now.getDate() - 30);
       startStr = getLocalYMD(now);
-    } else if (val === "this_year") {
+    } else if (val === "year") {
       now.setDate(now.getDate() - 365);
       startStr = getLocalYMD(now);
-    } else if (val === "week") {
+    } else if (val === "this_week") {
       const day = now.getDay() || 7; 
       const start = new Date(now);
       start.setDate(now.getDate() - day + 1);
@@ -67,12 +67,12 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
       end.setDate(start.getDate() + 6);
       startStr = getLocalYMD(start);
       endStr = getLocalYMD(end);
-    } else if (val === "month") {
+    } else if (val === "this_month") {
       const start = new Date(now.getFullYear(), now.getMonth(), 1);
       const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
       startStr = getLocalYMD(start);
       endStr = getLocalYMD(end);
-    } else if (val === "year") {
+    } else if (val === "this_year") {
       const start = new Date(now.getFullYear(), 0, 1);
       const end = new Date(now.getFullYear(), 11, 31);
       startStr = getLocalYMD(start);
@@ -130,12 +130,12 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
         onChange={(e) => handleIntervalChange(e.target.value)}
         style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white' }}
       >
-        <option value="month">This Month</option>
-        <option value="week">This Week</option>
-        <option value="year">This Year</option>
-        <option value="this_month">Past 30 Days</option>
-        <option value="this_week">Past 7 Days</option>
-        <option value="this_year">Past 365 Days</option>
+        <option value="month">Past 30 Days</option>
+        <option value="week">Past 7 Days</option>
+        <option value="year">Past 365 Days</option>
+        <option value="this_month">This Month</option>
+        <option value="this_week">This Week</option>
+        <option value="this_year">This Year</option>
         <option value="all">All Time</option>
         <option value="custom">Custom Dates</option>
       </select>

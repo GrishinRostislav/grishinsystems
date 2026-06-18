@@ -10,6 +10,7 @@ import GlobalDateFilter from "@/components/GlobalDateFilter";
 import TransactionModal from "@/components/TransactionModal";
 import ReceiptPreviewModal from "@/components/ReceiptPreviewModal";
 import { formatCurrency, formatDate } from "@/utils/format";
+import { getChartDomain } from "@/utils/chart";
 
 function getCategoryColor(categoryName: string | null | undefined) {
   if (!categoryName) return "linear-gradient(135deg, #94a3b8, #64748b)"; // slate gray
@@ -333,7 +334,7 @@ export default function Home() {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                 <XAxis dataKey="name" stroke="#64748b" fontSize={isMobile ? 10 : 12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#64748b" fontSize={isMobile ? 10 : 12} tickLine={false} axisLine={false} tickFormatter={formatYAxis} />
+                <YAxis stroke="#64748b" fontSize={isMobile ? 10 : 12} tickLine={false} axisLine={false} tickFormatter={formatYAxis} domain={[(dataMin: number) => getChartDomain(dataMin, 0)[0], (dataMax: number) => getChartDomain(0, dataMax)[1]]} />
                 <Tooltip 
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} 
                   formatter={(val: any) => formatCurrency(Number(val), homeCurrency)} 
@@ -374,7 +375,7 @@ export default function Home() {
                 >
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                   <XAxis dataKey="name" stroke="#64748b" fontSize={isMobile ? 10 : 12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#64748b" fontSize={isMobile ? 10 : 12} tickLine={false} axisLine={false} tickFormatter={formatYAxis} />
+                  <YAxis stroke="#64748b" fontSize={isMobile ? 10 : 12} tickLine={false} axisLine={false} tickFormatter={formatYAxis} domain={[(dataMin: number) => getChartDomain(dataMin, 0)[0], (dataMax: number) => getChartDomain(0, dataMax)[1]]} />
                   <Tooltip 
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                     formatter={(value: any) => formatCurrency(Number(value), homeCurrency)}

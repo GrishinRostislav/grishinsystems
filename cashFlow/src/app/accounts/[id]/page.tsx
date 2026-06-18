@@ -6,6 +6,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import GlobalDateFilter from "@/components/GlobalDateFilter";
 import TransactionModal from "@/components/TransactionModal";
 import { formatCurrency, formatDate } from "@/utils/format";
+import { getChartDomain } from "@/utils/chart";
 
 export default function AccountDetail({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -249,7 +250,7 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                 <XAxis dataKey="date" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `$${Number(val).toFixed(0)}`} domain={['auto', 'auto']} />
+                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `$${Number(val).toFixed(0)}`} domain={[(dataMin: number) => getChartDomain(dataMin, 0)[0], (dataMax: number) => getChartDomain(0, dataMax)[1]]} />
                 <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(val: any) => formatCurrency(Number(val), account.currency)} />
                 <Area type="monotone" dataKey="balance" stroke="#2D5D7B" strokeWidth={3} fillOpacity={1} fill="url(#colorBalance)" />
               </AreaChart>
