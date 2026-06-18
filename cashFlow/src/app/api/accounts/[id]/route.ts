@@ -100,6 +100,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     
     // Calculate total income and expenses across all transactions in range
     for (const txn of transactions) {
+      if ((txn as any).isTransfer) continue;
       if (txn.amount > 0) income += txn.amount;
       else expenses += Math.abs(txn.amount);
     }
