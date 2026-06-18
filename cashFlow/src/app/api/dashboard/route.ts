@@ -74,7 +74,7 @@ export async function GET(request: Request) {
     let monthlyIncome = 0;
     let monthlyExpenses = 0;
 
-    const chartMap: Record<string, { income: number; expenses: number; prevIncome: number; prevExpenses: number }> = {};
+    const chartMap: Record<string, { income: number; expenses: number; prevIncome: number; prevExpenses: number; isFuture: boolean }> = {};
     const categoryExpenseMap: Record<string, { value: number; id: string | null }> = {};
 
     const paddingDays = diffDays <= 35 ? 2 : 0;
@@ -85,6 +85,10 @@ export async function GET(request: Request) {
     currDate.setHours(12, 0, 0, 0);
     const endBound = new Date(finalEndDate);
     endBound.setHours(12, 0, 0, 0);
+    
+    // We want to know what "today" is, to mark future days as empty
+    const realToday = new Date();
+    realToday.setHours(23, 59, 59, 999);
 
     while (currDate <= endBound) {
       let chartKey = "";
@@ -94,7 +98,15 @@ export async function GET(request: Request) {
         chartKey = currDate.toLocaleString('default', { month: 'short', year: 'numeric' });
       }
       if (!chartMap[chartKey]) {
-        chartMap[chartKey] = { income: 0, expenses: 0, prevIncome: 0, prevExpenses: 0 };
+        chartMap[chartKey] = { 
+          income: 0, 
+          expenses: 0, 
+          prevIncome: 0, 
+          prevExpenses: 0,
+          isFuture: currDate > realToday
+        };
+      } else {
+        chartMap[chartKey].isFuture = currDate > realToday;
       }
       currDate.setDate(currDate.getDate() + 1);
     }
@@ -110,7 +122,7 @@ export async function GET(request: Request) {
       }
 
       if (!chartMap[chartKey]) {
-        chartMap[chartKey] = { income: 0, expenses: 0, prevIncome: 0, prevExpenses: 0 };
+        chartMap[chartKey] = { income: 0, expenses: 0, prevIncome: 0, prevExpenses: 0, isFuture: false };
       }
 
       if ((txn as any).isTransfer) continue;
@@ -144,7 +156,7 @@ export async function GET(request: Request) {
       }
 
       if (!chartMap[chartKey]) {
-        chartMap[chartKey] = { income: 0, expenses: 0, prevIncome: 0, prevExpenses: 0 };
+        chartMap[chartKey] = { income: 0, expenses: 0, prevIncome: 0, prevExpenses: 0, isFuture: false };
       }
 
       if ((txn as any).isTransfer) continue;
@@ -168,8 +180,8 @@ export async function GET(request: Request) {
 
     const chartData = sortedChartKeys.map(name => ({
       name,
-      income: chartMap[name].income,
-      expenses: chartMap[name].expenses,
+      income: chartMap[name].isFuture ? null : chartMap[name].income,
+      expenses: chartMap[name].isFuture ? null : chartMap[name].expenses,
       prevIncome: chartMap[name].prevIncome,
       prevExpenses: chartMap[name].prevExpenses,
     }));
@@ -232,14 +244,19 @@ export async function GET(request: Request) {
     const balanceTrendData = [];
     for (const key of sortedChartKeys) {
       const netChange = balanceTrendMap[key] || 0;
-      runningBalance += netChange;
+      const isFuture = chartMap[key]?.isFuture;
+      
+      // Only carry over running balance if it's not in the future
+      if (!isFuture) {
+        runningBalance += netChange;
+      }
 
       const prevNetChange = prevBalanceTrendMap[key] || 0;
       prevRunningBalance += prevNetChange;
 
       balanceTrendData.push({
         name: key,
-        balance: runningBalance,
+        balance: isFuture ? null : runningBalance,
         prevBalance: prevRunningBalance
       });
     }
