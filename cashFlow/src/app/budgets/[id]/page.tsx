@@ -3,7 +3,6 @@
 import { useEffect, useState, use } from "react";
 import styles from "./page.module.css";
 import Link from "next/link";
-import BudgetModal from "@/components/BudgetModal";
 import TransactionModal from "@/components/TransactionModal";
 import { useRouter } from "next/navigation";
 import { formatCurrency, formatDate } from "@/utils/format";
@@ -21,8 +20,7 @@ export default function BudgetDetail({ params }: { params: Promise<{ id: string 
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingBudget, setEditingBudget] = useState<any>(null);
+
 
   const [isTxnModalOpen, setIsTxnModalOpen] = useState(false);
   const [selectedTxn, setSelectedTxn] = useState<any>(null);
@@ -72,14 +70,6 @@ export default function BudgetDetail({ params }: { params: Promise<{ id: string 
             <Link href="/budgets" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '1.5rem' }}>&larr;</Link>
             <h1 className={styles.title} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '16px' }}>
               {budget?.name || "Loading..."}
-              {budget && (
-                <button 
-                  onClick={() => { setEditingBudget(budget); setIsModalOpen(true); }}
-                  style={{ background: 'none', border: 'none', color: 'var(--unique-blue)', cursor: 'pointer', fontSize: '1rem', padding: '4px 8px' }}
-                >
-                  Edit Budget
-                </button>
-              )}
             </h1>
           </div>
           {budget && (
@@ -176,17 +166,7 @@ export default function BudgetDetail({ params }: { params: Promise<{ id: string 
         </>
       )}
 
-      {isModalOpen && editingBudget && (
-        <BudgetModal
-          isOpen={isModalOpen}
-          onClose={() => { setIsModalOpen(false); setEditingBudget(null); }}
-          onSave={() => { setIsModalOpen(false); fetchBudgetData(); }}
-          initialData={{
-            ...editingBudget,
-            categoryIds: editingBudget.categories.map((c: any) => c.id)
-          }}
-        />
-      )}
+
 
       {isTxnModalOpen && selectedTxn && (
         <TransactionModal

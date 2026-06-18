@@ -263,6 +263,7 @@ export default function BudgetsPage() {
                             {isOverBudget ? `${formatCurrency(Math.abs(budget.remaining), homeCurrency)} over limit` : `${formatCurrency(budget.remaining, homeCurrency)} remaining`}
                           </span>
                         </div>
+                        </div>
                       </Link>
                     );
                   })}
