@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import budgetStyles from "./budgets/page.module.css";
@@ -44,6 +45,7 @@ const formatYAxis = (val: number) => {
 };
 
 export default function Home() {
+  const router = useRouter();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   
@@ -406,9 +408,9 @@ export default function Home() {
                     labelLine={true}
                     onClick={(data) => {
                       if (data.payload && data.payload.id) {
-                        window.location.href = `/categories/${data.payload.id}`;
+                        router.push(`/categories/${data.payload.id}`);
                       } else {
-                        window.location.href = `/categories`;
+                        router.push(`/categories`);
                       }
                     }}
                     style={{ cursor: 'pointer' }}
