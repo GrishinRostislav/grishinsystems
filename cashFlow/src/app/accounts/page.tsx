@@ -115,6 +115,7 @@ export default function AccountsPage() {
 
   // Global settings
   const [homeCurrency, setHomeCurrency] = useState("CAD");
+  const [totalBalance, setTotalBalance] = useState<number | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -141,9 +142,16 @@ export default function AccountsPage() {
 
   const fetchAccounts = async () => {
     try {
-      const res = await fetch(`/cashFlow/api/accounts?includeArchived=${showArchived}`);
-      const data = await res.json();
-      setAccounts(data);
+      const [accRes, dashRes] = await Promise.all([
+        fetch(`/cashFlow/api/accounts?includeArchived=${showArchived}`),
+        fetch("/cashFlow/api/dashboard")
+      ]);
+      const accData = await accRes.json();
+      const dashData = await dashRes.json();
+      setAccounts(accData);
+      if (dashData && dashData.totalBalance !== undefined) {
+        setTotalBalance(dashData.totalBalance);
+      }
     } catch (err) {
       console.error("Failed to fetch accounts", err);
     } finally {
@@ -213,12 +221,18 @@ export default function AccountsPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
+      <div className={styles.header} style={{ alignItems: 'flex-start' }}>
         <div>
           <h1>Accounts</h1>
           <p>Manage your bank accounts, credit cards, and cash.</p>
+          {totalBalance !== null && (
+            <div style={{ marginTop: '16px', padding: '16px 20px', background: 'var(--bg-secondary)', borderRadius: '12px', display: 'inline-block', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
+              <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Total Balance</span>
+              <span style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--unique-blue)' }}>{formatCurrency(totalBalance, homeCurrency)}</span>
+            </div>
+          )}
         </div>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '8px' }}>
           {isReordering ? (
             <button className={styles.btnPrimary} onClick={saveOrder} disabled={isSavingOrder}>
               {isSavingOrder ? 'Saving...' : 'Save Order'}
