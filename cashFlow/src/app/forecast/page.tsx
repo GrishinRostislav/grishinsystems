@@ -80,12 +80,28 @@ export default function ForecastPage() {
       return (
         <div style={{ background: 'var(--bg-primary)', padding: '16px', border: '1px solid var(--border-color)', borderRadius: '12px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}>
           <p style={{ margin: '0 0 8px 0', fontWeight: 600, color: 'var(--text-secondary)' }}>{dataPoint.displayDate}</p>
-          <p style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: dataPoint.isHistory ? 'var(--text-main)' : 'var(--unique-blue)' }}>
-            {formatCurrency(dataPoint.balance, data?.homeCurrency)}
-          </p>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            {dataPoint.isHistory ? "Historical" : "Projected"}
-          </span>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '2px' }}>
+                {dataPoint.isHistory ? "Historical Balance" : "Baseline Forecast"}
+              </span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 700, color: dataPoint.isHistory ? 'var(--text-main)' : 'var(--unique-blue)' }}>
+                {formatCurrency(dataPoint.balance, data?.homeCurrency)}
+              </span>
+            </div>
+
+            {dataPoint.simulatedBalance !== null && dataPoint.simulatedBalance !== undefined && (
+              <div style={{ marginTop: '4px', paddingTop: '8px', borderTop: '1px solid var(--border-color)' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--sporty-teal)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '2px', fontWeight: 600 }}>
+                  Simulated Balance
+                </span>
+                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--sporty-teal)' }}>
+                  {formatCurrency(dataPoint.simulatedBalance, data?.homeCurrency)}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       );
     }
@@ -142,9 +158,14 @@ export default function ForecastPage() {
 
             <div className={styles.card}>
               <div className={styles.cardTitle}>Projected Balance in {months >= 12 ? `${months/12} Years` : `${months} Months`}</div>
-              <div className={styles.cardValue} style={{ color: 'var(--unique-blue)' }}>
+              <div className={styles.cardValue} style={{ color: data?.hasActiveScenarios ? 'var(--sporty-teal)' : 'var(--unique-blue)' }}>
                 {formatCurrency(data?.futureBalance || 0, data?.homeCurrency)}
               </div>
+              {data?.hasActiveScenarios && (
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  Baseline: {formatCurrency(data?.baselineFutureBalance || 0, data?.homeCurrency)}
+                </div>
+              )}
             </div>
           </div>
 
@@ -157,6 +178,10 @@ export default function ForecastPage() {
                     <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="var(--unique-blue)" stopOpacity={0.3}/>
                       <stop offset="95%" stopColor="var(--unique-blue)" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorSimulated" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--sporty-teal)" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="var(--sporty-teal)" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" />
@@ -191,12 +216,25 @@ export default function ForecastPage() {
                   <Area 
                     type="monotone" 
                     dataKey="balance" 
-                    stroke="var(--unique-blue)" 
-                    strokeWidth={3}
-                    fillOpacity={1} 
-                    fill="url(#colorBalance)" 
-                    activeDot={{ r: 8, strokeWidth: 0, fill: 'var(--unique-blue)' }}
+                    stroke={data?.hasActiveScenarios ? "var(--text-muted)" : "var(--unique-blue)"} 
+                    strokeWidth={data?.hasActiveScenarios ? 2 : 3}
+                    strokeDasharray={data?.hasActiveScenarios ? "5 5" : undefined}
+                    fillOpacity={data?.hasActiveScenarios ? 0 : 1} 
+                    fill={data?.hasActiveScenarios ? "transparent" : "url(#colorBalance)"} 
+                    activeDot={{ r: data?.hasActiveScenarios ? 4 : 8, strokeWidth: 0, fill: data?.hasActiveScenarios ? 'var(--text-muted)' : 'var(--unique-blue)' }}
                   />
+                  
+                  {data?.hasActiveScenarios && (
+                    <Area 
+                      type="monotone" 
+                      dataKey="simulatedBalance" 
+                      stroke="var(--sporty-teal)" 
+                      strokeWidth={3}
+                      fillOpacity={1} 
+                      fill="url(#colorSimulated)" 
+                      activeDot={{ r: 8, strokeWidth: 0, fill: 'var(--sporty-teal)' }}
+                    />
+                  )}
                 </AreaChart>
               </ResponsiveContainer>
             </div>

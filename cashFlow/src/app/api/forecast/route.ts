@@ -116,7 +116,7 @@ export async function GET(request: Request) {
     const finalBudgetExpense = Math.max(totalSpecificBudget, globalBudgetLimit);
 
     // We need to simulate instances of scheduled transactions
-    const futureMap = new Map<string, { income: number, expense: number, net: number }>();
+    const futureMap = new Map<string, { income: number, expense: number, net: number, scenarioIncome: number, scenarioExpense: number, scenarioNet: number }>();
     
     const endDate = new Date(now.getFullYear(), now.getMonth() + futureMonths + 1, 1);
 
@@ -137,7 +137,7 @@ export async function GET(request: Request) {
         const key = `${year}-${monthStr}`;
 
         if (!futureMap.has(key)) {
-          futureMap.set(key, { income: 0, expense: 0, net: 0 });
+          futureMap.set(key, { income: 0, expense: 0, net: 0, scenarioIncome: 0, scenarioExpense: 0, scenarioNet: 0 });
         }
 
         const stats = futureMap.get(key)!;
@@ -155,6 +155,8 @@ export async function GET(request: Request) {
       where: { isActive: true },
       include: { items: true }
     });
+    
+    const hasActiveScenarios = activeScenarios.length > 0;
 
     for (const scenario of activeScenarios) {
       for (const item of scenario.items) {
@@ -172,16 +174,16 @@ export async function GET(request: Request) {
           const key = `${year}-${monthStr}`;
 
           if (!futureMap.has(key)) {
-            futureMap.set(key, { income: 0, expense: 0, net: 0 });
+            futureMap.set(key, { income: 0, expense: 0, net: 0, scenarioIncome: 0, scenarioExpense: 0, scenarioNet: 0 });
           }
 
           const stats = futureMap.get(key)!;
           // All scenario amounts are assumed to be in homeCurrency as agreed
           const amt = item.type === 'expense' ? -Math.abs(item.amount) : Math.abs(item.amount);
           
-          stats.net += amt;
-          if (amt > 0) stats.income += amt;
-          else stats.expense += Math.abs(amt);
+          stats.scenarioNet += amt;
+          if (amt > 0) stats.scenarioIncome += amt;
+          else stats.scenarioExpense += Math.abs(amt);
 
           if (item.frequency === 'ONCE') break;
           simDate = addFrequency(simDate, item.frequency);
@@ -191,6 +193,7 @@ export async function GET(request: Request) {
 
     const projectedPoints = [];
     let runningBalanceForward = currentBalance;
+    let runningSimulatedBalance = currentBalance;
     
     // Average metrics
     let totalProjectedIncome = 0;
@@ -203,7 +206,7 @@ export async function GET(request: Request) {
       const monthStr = String(d.getMonth() + 1).padStart(2, '0');
       const key = `${year}-${monthStr}`;
 
-      const flow = futureMap.get(key) || { income: 0, expense: 0, net: 0 };
+      const flow = futureMap.get(key) || { income: 0, expense: 0, net: 0, scenarioIncome: 0, scenarioExpense: 0, scenarioNet: 0 };
       
       // Calculate how much "unplanned" variable expense to add based on the budget
       // The budget specifies the MAXIMUM or EXPECTED total monthly expense.
@@ -213,29 +216,37 @@ export async function GET(request: Request) {
       const totalMonthExpense = flow.expense + unplannedExpense;
       const totalMonthNet = flow.income - totalMonthExpense;
 
+      // Baseline running balance
       runningBalanceForward += totalMonthNet;
       
-      totalProjectedIncome += flow.income;
-      totalProjectedExpense += totalMonthExpense;
+      // Simulated running balance
+      runningSimulatedBalance += totalMonthNet + (flow.scenarioNet || 0);
+      
+      // We will report the scenario-affected averages if scenarios are active
+      totalProjectedIncome += flow.income + (hasActiveScenarios ? (flow.scenarioIncome || 0) : 0);
+      totalProjectedExpense += totalMonthExpense + (hasActiveScenarios ? (flow.scenarioExpense || 0) : 0);
       projectionMonthCount++;
 
       projectedPoints.push({
         date: key,
         displayDate: d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
         balance: runningBalanceForward,
+        simulatedBalance: hasActiveScenarios ? runningSimulatedBalance : null,
         isHistory: false,
       });
     }
 
     // 4. Combine data
-    const chartData = [...historicalPoints, ...projectedPoints];
+    const chartData = [...historicalPoints.map(p => ({ ...p, simulatedBalance: null })), ...projectedPoints];
 
     return NextResponse.json({
       homeCurrency,
       currentBalance,
       avgMonthlyIncome: projectionMonthCount ? (totalProjectedIncome / projectionMonthCount) : 0,
       avgMonthlyExpense: projectionMonthCount ? (totalProjectedExpense / projectionMonthCount) : 0,
-      futureBalance: runningBalanceForward,
+      futureBalance: hasActiveScenarios ? runningSimulatedBalance : runningBalanceForward,
+      baselineFutureBalance: runningBalanceForward,
+      hasActiveScenarios,
       chartData
     });
 
