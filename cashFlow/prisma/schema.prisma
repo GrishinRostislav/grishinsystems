@@ -83,6 +83,7 @@ model ScheduledTransaction {
   autoApprove   Boolean   @default(false)
   isActive      Boolean   @default(true)
   type          String    @default("expense") // 'expense', 'income', 'transfer'
+  inflationRate Float?    // Optional annual growth/inflation percentage
 
   accountId     String
   account       Account   @relation("ScheduledTransferFrom", fields: [accountId], references: [id], onDelete: Cascade)
@@ -127,6 +128,7 @@ model Budget {
   startDate   DateTime   // Start date of the current tracking interval
   endDate     DateTime?  // End date (required for 'custom' period)
   isGlobal    Boolean    @default(false)
+  inflationRate Float?   // Optional annual growth/inflation percentage
   categories  Category[] @relation("BudgetCategories")
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt

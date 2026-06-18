@@ -174,7 +174,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, amount, period, startDate, endDate, isGlobal, categoryIds } = body;
+    const { name, amount, period, startDate, endDate, isGlobal, categoryIds, inflationRate } = body;
 
     const budget = await prisma.budget.create({
       data: {
@@ -184,6 +184,7 @@ export async function POST(request: Request) {
         startDate: new Date(startDate || new Date()),
         endDate: endDate ? new Date(endDate) : null,
         isGlobal: !!isGlobal,
+        inflationRate: inflationRate ? parseFloat(inflationRate) : null,
         categories: {
           connect: (categoryIds || []).map((id: string) => ({ id }))
         }

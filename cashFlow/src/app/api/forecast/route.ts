@@ -98,22 +98,7 @@ export async function GET(request: Request) {
 
     // Calculate baseline variable expenses from Budgets
     const budgets = await prisma.budget.findMany();
-    let totalSpecificBudget = 0;
-    let globalBudgetLimit = 0;
-
-    for (const b of budgets) {
-      let monthly = b.amount;
-      if (b.period === 'weekly') monthly = b.amount * (52 / 12);
-      if (b.period === 'yearly') monthly = b.amount / 12;
-      
-      if (b.isGlobal) {
-        globalBudgetLimit = Math.max(globalBudgetLimit, monthly);
-      } else {
-        totalSpecificBudget += monthly;
-      }
-    }
-    // We assume the user spends the maximum of their specific budgets or their global limit
-    const finalBudgetExpense = Math.max(totalSpecificBudget, globalBudgetLimit);
+    // Baseline variable expenses from Budgets are now calculated dynamically per month to account for inflation
 
     // We need to simulate instances of scheduled transactions
     const futureMap = new Map<string, { income: number, expense: number, net: number, scenarioIncome: number, scenarioExpense: number, scenarioNet: number }>();
@@ -141,7 +126,15 @@ export async function GET(request: Request) {
         }
 
         const stats = futureMap.get(key)!;
-        const convertedStAmt = st.account ? convertAmount(st.amount, st.account.currency, homeCurrency, rates) : st.amount;
+        let convertedStAmt = st.account ? convertAmount(st.amount, st.account.currency, homeCurrency, rates) : st.amount;
+        
+        if (st.inflationRate) {
+          const yearsDiff = (effectDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+          if (yearsDiff > 0) {
+            convertedStAmt = convertedStAmt * Math.pow(1 + (st.inflationRate / 100), yearsDiff);
+          }
+        }
+
         stats.net += convertedStAmt;
         if (convertedStAmt > 0) stats.income += convertedStAmt;
         else stats.expense += Math.abs(convertedStAmt);
@@ -233,7 +226,14 @@ export async function GET(request: Request) {
 
             const stats = futureMap.get(key)!;
             // All scenario amounts are assumed to be in homeCurrency as agreed
-            const amt = item.type === 'expense' ? -Math.abs(item.amount) : Math.abs(item.amount);
+            let rawAmt = item.amount;
+            if (item.annualRate) {
+              const yearsDiff = (effectDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+              if (yearsDiff > 0) {
+                rawAmt = rawAmt * Math.pow(1 + (item.annualRate / 100), yearsDiff);
+              }
+            }
+            const amt = item.type === 'expense' ? -Math.abs(rawAmt) : Math.abs(rawAmt);
             
             stats.scenarioNet += amt;
             if (amt > 0) stats.scenarioIncome += amt;
@@ -263,9 +263,22 @@ export async function GET(request: Request) {
 
       const flow = futureMap.get(key) || { income: 0, expense: 0, net: 0, scenarioIncome: 0, scenarioExpense: 0, scenarioNet: 0 };
       
-      // Calculate how much "unplanned" variable expense to add based on the budget
-      // The budget specifies the MAXIMUM or EXPECTED total monthly expense.
-      // If the scheduled expenses are less than the budget, we add the difference.
+      const yearsDiff = i / 12;
+      let monthSpecificBudget = 0;
+      let monthGlobalBudget = 0;
+      for (const b of budgets) {
+        let monthly = b.amount;
+        if (b.period === 'weekly') monthly = b.amount * (52 / 12);
+        if (b.period === 'yearly') monthly = b.amount / 12;
+        
+        if (b.inflationRate) {
+          monthly = monthly * Math.pow(1 + (b.inflationRate / 100), yearsDiff);
+        }
+        
+        if (b.isGlobal) monthGlobalBudget = Math.max(monthGlobalBudget, monthly);
+        else monthSpecificBudget += monthly;
+      }
+      const finalBudgetExpense = Math.max(monthSpecificBudget, monthGlobalBudget);
       const unplannedExpense = Math.max(0, finalBudgetExpense - flow.expense);
       
       const totalMonthExpense = flow.expense + unplannedExpense;

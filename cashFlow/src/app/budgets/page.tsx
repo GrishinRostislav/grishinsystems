@@ -21,6 +21,7 @@ type Budget = {
   isGlobal: boolean;
   currentPeriodStart: string;
   currentPeriodEnd: string;
+  inflationRate?: number | null;
   categories: Category[];
 };
 
@@ -41,6 +42,7 @@ export default function BudgetsPage() {
   const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0]);
   const [endDate, setEndDate] = useState("");
   const [isGlobal, setIsGlobal] = useState(false);
+  const [inflationRate, setInflationRate] = useState("");
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -74,6 +76,7 @@ export default function BudgetsPage() {
     setStartDate(new Date().toISOString().split("T")[0]);
     setEndDate("");
     setIsGlobal(false);
+    setInflationRate("");
     setSelectedCategoryIds([]);
     setIsModalOpen(true);
   };
@@ -86,6 +89,7 @@ export default function BudgetsPage() {
     setStartDate(budget.startDate.split("T")[0]);
     setEndDate(budget.endDate ? budget.endDate.split("T")[0] : "");
     setIsGlobal(budget.isGlobal);
+    setInflationRate(budget.inflationRate ? budget.inflationRate.toString() : "");
     setSelectedCategoryIds(budget.categories.map((c) => c.id));
     setIsModalOpen(true);
   };
@@ -101,6 +105,7 @@ export default function BudgetsPage() {
       startDate: new Date(startDate).toISOString(),
       endDate: endDate ? new Date(endDate).toISOString() : null,
       isGlobal,
+      inflationRate: inflationRate ? parseFloat(inflationRate) : null,
       categoryIds: isGlobal ? [] : selectedCategoryIds,
     };
 
@@ -340,7 +345,7 @@ export default function BudgetsPage() {
                 </div>
               )}
 
-              <div className={styles.checkboxGroup}>
+              <div className={styles.checkboxGroup} style={{ marginBottom: '12px' }}>
                 <input
                   type="checkbox"
                   id="isGlobal"
@@ -350,6 +355,24 @@ export default function BudgetsPage() {
                 <label htmlFor="isGlobal" className={styles.checkboxLabel}>
                   Global Budget (Track all transactions/expenses)
                 </label>
+              </div>
+
+              <div className={styles.formGroup} style={{ marginBottom: '16px' }}>
+                <label className={styles.label}>
+                  Annual Growth/Inflation (%)
+                  <span style={{ fontSize: '0.8rem', marginLeft: '8px', color: '#64748b', fontWeight: 'normal' }}>(Optional)</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  className={styles.input}
+                  value={inflationRate}
+                  onChange={(e) => setInflationRate(e.target.value)}
+                  placeholder="e.g. 5 for 5% per year"
+                />
+                <small style={{ display: 'block', marginTop: '4px', color: '#64748b' }}>
+                  Used in forecasting to automatically increase this budget over time.
+                </small>
               </div>
 
               {!isGlobal && (() => {

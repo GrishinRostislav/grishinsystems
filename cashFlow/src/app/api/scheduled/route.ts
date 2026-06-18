@@ -24,7 +24,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { amount, merchant, paymentMethod, notes, accountId, toAccountId, categoryId, nextRunDate, frequency, autoApprove, type } = body;
+    const { amount, merchant, paymentMethod, notes, accountId, toAccountId, categoryId, nextRunDate, frequency, autoApprove, type, inflationRate } = body;
 
     if (amount === undefined || amount === null || !accountId || !nextRunDate || !frequency) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -70,6 +70,7 @@ export async function POST(request: Request) {
         autoApprove: Boolean(autoApprove),
         isActive: true,
         type: type || 'expense',
+        inflationRate: inflationRate ? parseFloat(inflationRate) : null,
       },
       include: {
         account: true,

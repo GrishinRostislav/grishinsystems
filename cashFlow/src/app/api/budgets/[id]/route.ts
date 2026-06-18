@@ -8,7 +8,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { name, amount, period, startDate, endDate, isGlobal, categoryIds } = body;
+    const { name, amount, period, startDate, endDate, isGlobal, categoryIds, inflationRate } = body;
 
     const budget = await prisma.budget.update({
       where: { id },
@@ -19,6 +19,7 @@ export async function PUT(
         startDate: new Date(startDate || new Date()),
         endDate: endDate ? new Date(endDate) : null,
         isGlobal: !!isGlobal,
+        inflationRate: inflationRate !== undefined ? (inflationRate === '' ? null : parseFloat(inflationRate)) : undefined,
         categories: {
           set: (categoryIds || []).map((cid: string) => ({ id: cid }))
         }

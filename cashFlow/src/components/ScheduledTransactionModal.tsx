@@ -17,6 +17,7 @@ interface ScheduledTransaction {
   paymentMethod: string;
   type: string;
   toAccountId: string;
+  inflationRate?: number | null;
 }
 
 interface ScheduledModalProps {
@@ -70,7 +71,8 @@ export default function ScheduledTransactionModal({ isOpen, onClose, onSave, tra
         autoApprove: transaction.autoApprove ?? false,
         isActive: transaction.isActive ?? true,
         frequency: transaction.frequency || 'MONTHLY',
-        notes: transaction.notes || ''
+        notes: transaction.notes || '',
+        inflationRate: transaction.inflationRate || null
       });
     } else {
       setType('expense');
@@ -86,7 +88,8 @@ export default function ScheduledTransactionModal({ isOpen, onClose, onSave, tra
         autoApprove: false,
         isActive: true,
         paymentMethod: '',
-        type: 'expense'
+        type: 'expense',
+        inflationRate: null
       });
     }
   }, [transaction, accounts, isOpen]);
@@ -229,6 +232,24 @@ export default function ScheduledTransactionModal({ isOpen, onClose, onSave, tra
                   style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}
                 />
               </div>
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)' }}>
+                Annual Growth/Inflation (%)
+                <span style={{ fontSize: '0.8rem', marginLeft: '8px', color: '#64748b' }}>(Optional)</span>
+              </label>
+              <input 
+                type="number" 
+                step="0.01" 
+                value={formData.inflationRate === null || formData.inflationRate === undefined ? '' : formData.inflationRate} 
+                onChange={e => setFormData({...formData, inflationRate: e.target.value === '' ? null : parseFloat(e.target.value)})} 
+                placeholder="e.g. 3.5 for 3.5% per year"
+                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}
+              />
+              <small style={{ display: 'block', marginTop: '4px', color: '#64748b' }}>
+                Used in forecasting to automatically grow this transaction over time.
+              </small>
             </div>
 
             <div style={{ marginBottom: '16px' }}>
