@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const monthsParam = searchParams.get('months') || '60'; // Default 5 years
     const futureMonths = parseInt(monthsParam, 10);
-    const pastMonths = 12; // Always show 1 year of history
+    const pastMonths = 1; // Only show 1 month of history so 'Today' sits on the far left
     
     // Parse accountIds if provided
     const accountIdsParam = searchParams.get('accountIds');
