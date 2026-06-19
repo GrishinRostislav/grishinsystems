@@ -45,14 +45,25 @@ export default function ForecastPage() {
       const sign = item.type === 'expense' ? -1 : 1;
       const value = amt * sign;
 
+      const interval = item.interval || 1;
       if (item.type === 'investment') {
         if (item.frequency === 'ONCE') investmentOneTime += amt;
-        else if (item.frequency === 'MONTHLY') investmentMonthly += amt;
-        else if (item.frequency === 'YEARLY') investmentMonthly += amt / 12;
+        else if (item.frequency === 'MONTHLY') investmentMonthly += amt / interval;
+        else if (item.frequency === 'YEARLY') investmentMonthly += amt / 12 / interval;
+        else if (item.frequency === 'WEEKLY') {
+          const days = item.daysOfWeek?.length || 1;
+          investmentMonthly += (amt * days * 4.33) / interval;
+        }
+        else if (item.frequency === 'DAILY') investmentMonthly += (amt * 30.44) / interval;
       } else {
         if (item.frequency === 'ONCE') oneTimeNet += value;
-        else if (item.frequency === 'MONTHLY') monthlyNet += value;
-        else if (item.frequency === 'YEARLY') monthlyNet += value / 12;
+        else if (item.frequency === 'MONTHLY') monthlyNet += value / interval;
+        else if (item.frequency === 'YEARLY') monthlyNet += value / 12 / interval;
+        else if (item.frequency === 'WEEKLY') {
+          const days = item.daysOfWeek?.length || 1;
+          monthlyNet += (value * days * 4.33) / interval;
+        }
+        else if (item.frequency === 'DAILY') monthlyNet += (value * 30.44) / interval;
       }
 
       // Calculate exact total over the projection interval
