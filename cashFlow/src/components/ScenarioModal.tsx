@@ -26,7 +26,8 @@ export default function ScenarioModal({
   isOpen,
   onClose,
   scenario,
-  onSave
+  onSave,
+  onDelete
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -331,7 +332,7 @@ export default function ScenarioModal({
           </div>
 
           <div className={styles.modalActions}>
-            {scenario && onDelete && (
+            {!!scenario && !!onDelete && (
               <button 
                 type="button" 
                 onClick={onDelete} 
