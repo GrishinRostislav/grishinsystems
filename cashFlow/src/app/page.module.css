@@ -449,6 +449,23 @@
   background-color: var(--bg-hover);
 }
 
+.btnDanger {
+  background-color: transparent;
+  color: #ef4444; /* bright red */
+  border: 1px solid #ef4444;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btnDanger:hover {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border-color: #dc2626;
+}
+
 .modalActions {
   display: flex;
   justify-content: flex-end;

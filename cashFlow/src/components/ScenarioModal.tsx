@@ -336,8 +336,8 @@ export default function ScenarioModal({
               <button 
                 type="button" 
                 onClick={onDelete} 
-                className={styles.btnOutline} 
-                style={{ color: '#b91c1c', borderColor: '#b91c1c', marginRight: 'auto' }}
+                className={styles.btnDanger} 
+                style={{ marginRight: 'auto' }}
                 disabled={loading}
               >
                 Delete
