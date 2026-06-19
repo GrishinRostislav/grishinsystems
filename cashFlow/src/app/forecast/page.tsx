@@ -5,6 +5,7 @@ import styles from "./page.module.css";
 import { formatCurrency } from "@/utils/format";
 import { getChartDomain } from "@/utils/chart";
 import ScenarioModal from "@/components/ScenarioModal";
+import { addFrequency } from "@/utils/recurrence";
 import {
   AreaChart,
   Area,
@@ -74,8 +75,7 @@ export default function ForecastPage() {
             if (item.frequency === 'ONCE') {
               simDate = new Date(8640000000000000);
             } else {
-              if (item.frequency === 'MONTHLY') simDate = new Date(simDate.setMonth(simDate.getMonth() + 1));
-              if (item.frequency === 'YEARLY') simDate = new Date(simDate.setFullYear(simDate.getFullYear() + 1));
+              simDate = addFrequency(simDate, item.frequency, item.interval || 1, item.daysOfWeek, item.monthsOfYear);
             }
           }
           
@@ -96,8 +96,7 @@ export default function ForecastPage() {
         while(simDate < endDate && simDate <= itemEndDate) {
           occurrences++;
           if (item.frequency === 'ONCE') break;
-          if (item.frequency === 'MONTHLY') simDate = new Date(simDate.setMonth(simDate.getMonth() + 1));
-          if (item.frequency === 'YEARLY') simDate = new Date(simDate.setFullYear(simDate.getFullYear() + 1));
+          simDate = addFrequency(simDate, item.frequency, item.interval || 1, item.daysOfWeek, item.monthsOfYear);
         }
         exactTotalNet += amt * sign * occurrences;
       }
