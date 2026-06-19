@@ -81,6 +81,8 @@ model ScheduledTransaction {
   
   frequency     String    // 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'
   interval      Int       @default(1) // e.g. every 2 weeks, every 10 months
+  daysOfWeek    Int[]     // Optional array of integers (0-6) where 0 is Sunday
+  monthsOfYear  Int[]     // Optional array of integers (1-12) where 1 is January
   nextRunDate   DateTime
   endDate       DateTime? // Optional end date for the recurrence
   autoApprove   Boolean   @default(false)

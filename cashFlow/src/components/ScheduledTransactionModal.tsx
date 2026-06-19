@@ -14,6 +14,8 @@ interface ScheduledTransaction {
   interval: number;
   nextRunDate: string;
   endDate: string | null;
+  daysOfWeek: number[];
+  monthsOfYear: number[];
   autoApprove: boolean;
   isActive: boolean;
   paymentMethod: string;
@@ -43,6 +45,8 @@ export default function ScheduledTransactionModal({ isOpen, onClose, onSave, tra
     interval: 1,
     nextRunDate: new Date().toISOString().split('T')[0],
     endDate: null,
+    daysOfWeek: [],
+    monthsOfYear: [],
     autoApprove: false,
     isActive: true,
     type: 'expense',
@@ -76,6 +80,8 @@ export default function ScheduledTransactionModal({ isOpen, onClose, onSave, tra
         isActive: transaction.isActive ?? true,
         frequency: transaction.frequency || 'MONTHLY',
         interval: transaction.interval || 1,
+        daysOfWeek: transaction.daysOfWeek || [],
+        monthsOfYear: transaction.monthsOfYear || [],
         endDate: transaction.endDate ? new Date(transaction.endDate).toISOString().split('T')[0] : null,
         notes: transaction.notes || '',
         inflationRate: transaction.inflationRate || null
@@ -93,6 +99,8 @@ export default function ScheduledTransactionModal({ isOpen, onClose, onSave, tra
         interval: 1,
         nextRunDate: new Date().toISOString().split('T')[0],
         endDate: null,
+        daysOfWeek: [],
+        monthsOfYear: [],
         autoApprove: false,
         isActive: true,
         paymentMethod: '',
@@ -251,6 +259,57 @@ export default function ScheduledTransactionModal({ isOpen, onClose, onSave, tra
                 />
               </div>
             </div>
+
+            {formData.frequency === 'WEEKLY' && (
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)' }}>On Days</label>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, idx) => (
+                    <label key={day} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: formData.daysOfWeek.includes(idx) ? 'var(--unique-blue)' : '#f1f5f9', color: formData.daysOfWeek.includes(idx) ? 'white' : 'var(--text-main)', padding: '6px 12px', borderRadius: '16px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500 }}>
+                      <input 
+                        type="checkbox" 
+                        style={{ display: 'none' }}
+                        checked={formData.daysOfWeek.includes(idx)}
+                        onChange={(e) => {
+                          const newDays = e.target.checked 
+                            ? [...formData.daysOfWeek, idx]
+                            : formData.daysOfWeek.filter(d => d !== idx);
+                          setFormData({ ...formData, daysOfWeek: newDays });
+                        }}
+                      />
+                      {day}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(formData.frequency === 'MONTHLY' || formData.frequency === 'YEARLY') && (
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)' }}>In Months <span style={{ fontSize: '0.8rem', marginLeft: '8px', color: '#64748b' }}>(Optional)</span></label>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month, i) => {
+                    const monthVal = i + 1;
+                    return (
+                      <label key={month} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: formData.monthsOfYear.includes(monthVal) ? 'var(--unique-blue)' : '#f1f5f9', color: formData.monthsOfYear.includes(monthVal) ? 'white' : 'var(--text-main)', padding: '6px 12px', borderRadius: '16px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500 }}>
+                        <input 
+                          type="checkbox" 
+                          style={{ display: 'none' }}
+                          checked={formData.monthsOfYear.includes(monthVal)}
+                          onChange={(e) => {
+                            const newMonths = e.target.checked 
+                              ? [...formData.monthsOfYear, monthVal]
+                              : formData.monthsOfYear.filter(m => m !== monthVal);
+                            setFormData({ ...formData, monthsOfYear: newMonths });
+                          }}
+                        />
+                        {month}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)' }}>
