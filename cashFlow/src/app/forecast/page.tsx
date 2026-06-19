@@ -22,6 +22,10 @@ export default function ForecastPage() {
   const [loading, setLoading] = useState(true);
   const [months, setMonths] = useState(60); // Default 5 years
 
+  const [availableAccounts, setAvailableAccounts] = useState<any[]>([]);
+  const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
+  const [isAccountsDropdownOpen, setIsAccountsDropdownOpen] = useState(false);
+
   // Scenarios state
   const [scenarios, setScenarios] = useState<any[]>([]);
   const [isScenarioModalOpen, setScenarioModalOpen] = useState(false);
@@ -163,10 +167,14 @@ export default function ForecastPage() {
     );
   };
 
-  const fetchForecast = async (m: number) => {
+  const fetchForecast = async (m: number, accountsFilter: string[]) => {
     setLoading(true);
     try {
-      const res = await fetch(`/cashFlow/api/forecast?months=${m}`);
+      let url = `/cashFlow/api/forecast?months=${m}`;
+      if (accountsFilter.length > 0) {
+        url += `&accountIds=${accountsFilter.join(',')}`;
+      }
+      const res = await fetch(url);
       const json = await res.json();
       setData(json);
     } catch (err) {
@@ -186,10 +194,24 @@ export default function ForecastPage() {
     }
   };
 
+  const fetchAccounts = async () => {
+    try {
+      const res = await fetch("/cashFlow/api/accounts");
+      const json = await res.json();
+      setAvailableAccounts(json);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
-    fetchForecast(months);
+    fetchAccounts();
     fetchScenarios();
-  }, [months]);
+  }, []);
+
+  useEffect(() => {
+    fetchForecast(months, selectedAccounts);
+  }, [months, selectedAccounts]);
 
   const handleToggleScenario = async (id: string, currentActive: boolean) => {
     try {
@@ -200,7 +222,7 @@ export default function ForecastPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive: !currentActive })
       });
-      fetchForecast(months); // refetch forecast
+      fetchForecast(months, selectedAccounts); // refetch forecast
     } catch (err) {
       console.error(err);
       fetchScenarios(); // revert on fail
@@ -209,7 +231,7 @@ export default function ForecastPage() {
 
   const handleSaveScenario = () => {
     fetchScenarios();
-    fetchForecast(months);
+    fetchForecast(months, selectedAccounts);
   };
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -258,19 +280,81 @@ export default function ForecastPage() {
         <p>See your projected wealth based on past trends and future plans.</p>
       </div>
 
-      <div className={styles.controls}>
-        <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Projection Horizon:</span>
-        <select 
-          className={styles.select} 
-          value={months} 
-          onChange={(e) => setMonths(Number(e.target.value))}
-        >
-          <option value={6}>6 Months</option>
-          <option value={12}>1 Year</option>
-          <option value={36}>3 Years</option>
-          <option value={60}>5 Years</option>
-          <option value={120}>10 Years</option>
-        </select>
+      <div className={styles.controls} style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Projection Horizon:</span>
+          <select 
+            className={styles.select} 
+            value={months} 
+            onChange={(e) => setMonths(Number(e.target.value))}
+          >
+            <option value={6}>6 Months</option>
+            <option value={12}>1 Year</option>
+            <option value={36}>3 Years</option>
+            <option value={60}>5 Years</option>
+            <option value={120}>10 Years</option>
+          </select>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative' }}>
+          <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Accounts:</span>
+          <div 
+            className={styles.select}
+            style={{ cursor: 'pointer', minWidth: '200px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+            onClick={() => setIsAccountsDropdownOpen(!isAccountsDropdownOpen)}
+          >
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {selectedAccounts.length === 0 
+                ? 'All Included Accounts' 
+                : `${selectedAccounts.length} Account(s) Selected`}
+            </span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+          
+          {isAccountsDropdownOpen && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: '80px',
+              marginTop: '4px',
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px',
+              padding: '8px',
+              boxShadow: 'var(--shadow-md)',
+              zIndex: 100,
+              minWidth: '220px',
+              maxHeight: '300px',
+              overflowY: 'auto'
+            }}>
+              <div 
+                style={{ padding: '8px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', borderBottom: '1px solid var(--border-color)' }}
+                onClick={() => setSelectedAccounts([])}
+              >
+                <input type="radio" checked={selectedAccounts.length === 0} readOnly />
+                <span style={{ fontWeight: selectedAccounts.length === 0 ? 600 : 400 }}>All Included Accounts</span>
+              </div>
+              {availableAccounts.filter(a => !a.isArchived).map(acc => (
+                <div 
+                  key={acc.id}
+                  style={{ padding: '8px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+                  onClick={() => {
+                    setSelectedAccounts(prev => 
+                      prev.includes(acc.id) 
+                        ? prev.filter(id => id !== acc.id) 
+                        : [...prev, acc.id]
+                    );
+                  }}
+                >
+                  <input type="checkbox" checked={selectedAccounts.includes(acc.id)} readOnly />
+                  <span>{acc.name}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {loading && !data ? (

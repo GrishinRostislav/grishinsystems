@@ -16,10 +16,14 @@ export async function GET(request: Request) {
     const monthsParam = searchParams.get('months') || '60'; // Default 5 years
     const futureMonths = parseInt(monthsParam, 10);
     const pastMonths = 12; // Always show 1 year of history
+    
+    // Parse accountIds if provided
+    const accountIdsParam = searchParams.get('accountIds');
+    const selectedAccountIds = accountIdsParam ? accountIdsParam.split(',').filter(id => id.trim() !== '') : null;
 
     // 1. Get current balance
     const accounts = await prisma.account.findMany({
-      where: { includeInTotal: true, isArchived: false }
+      where: selectedAccountIds ? { id: { in: selectedAccountIds }, isArchived: false } : { includeInTotal: true, isArchived: false }
     });
     const currentBalance = accounts.reduce((acc, account) => acc + convertAmount(account.balance, account.currency, homeCurrency, rates), 0);
 
@@ -31,9 +35,9 @@ export async function GET(request: Request) {
     // Since currentBalance is NOW, balance at the end of last month = currentBalance - (net flow this month so far)
     // To make it simple, let's group all transactions by month/year.
     const allTransactions = await prisma.transaction.findMany({
-      where: {
-        account: { includeInTotal: true, isArchived: false }
-      },
+      where: selectedAccountIds 
+        ? { accountId: { in: selectedAccountIds } } 
+        : { account: { includeInTotal: true, isArchived: false } },
       select: { amount: true, date: true, account: { select: { currency: true } } }
     });
 
@@ -86,7 +90,11 @@ export async function GET(request: Request) {
     const endDate = new Date(now.getFullYear(), now.getMonth() + futureMonths + 1, 1);
 
     for (const st of scheduledTxs) {
-      if (st.account && !st.account.includeInTotal) continue;
+      if (selectedAccountIds) {
+        if (!st.accountId || !selectedAccountIds.includes(st.accountId)) continue;
+      } else {
+        if (st.account && !st.account.includeInTotal) continue;
+      }
 
       let simDate = new Date(st.nextRunDate);
       if (st.type === 'transfer') continue; 
