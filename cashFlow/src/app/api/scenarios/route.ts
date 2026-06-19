@@ -30,6 +30,9 @@ export async function POST(request: Request) {
             type: item.type || 'expense',
             date: new Date(item.date),
             frequency: item.frequency || 'ONCE',
+            interval: item.interval ? parseInt(item.interval) : 1,
+            daysOfWeek: Array.isArray(item.daysOfWeek) ? item.daysOfWeek : [],
+            monthsOfYear: Array.isArray(item.monthsOfYear) ? item.monthsOfYear : [],
             endDate: item.endDate ? new Date(item.endDate) : null,
             annualRate: item.annualRate ? parseFloat(item.annualRate) : null,
           }))

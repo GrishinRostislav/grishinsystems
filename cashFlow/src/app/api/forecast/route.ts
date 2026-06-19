@@ -225,7 +225,7 @@ export async function GET(request: Request) {
               if (item.frequency === 'ONCE') {
                 simDate = new Date(8640000000000000); // push far into future to break
               } else {
-                simDate = addFrequency(simDate, item.frequency, 1);
+                simDate = addFrequency(simDate, item.frequency, item.interval || 1, item.daysOfWeek, item.monthsOfYear);
               }
             }
 
@@ -277,7 +277,7 @@ export async function GET(request: Request) {
             else stats.scenarioExpense += Math.abs(amt);
 
             if (item.frequency === 'ONCE') break;
-            simDate = addFrequency(simDate, item.frequency, 1);
+            simDate = addFrequency(simDate, item.frequency, item.interval || 1, item.daysOfWeek, item.monthsOfYear);
           }
         }
       }

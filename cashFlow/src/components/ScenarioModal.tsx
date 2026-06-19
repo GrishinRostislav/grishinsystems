@@ -8,6 +8,9 @@ interface ScenarioItem {
   type: 'expense' | 'income' | 'investment';
   date: string;
   frequency: string;
+  interval: number;
+  daysOfWeek: number[];
+  monthsOfYear: number[];
   endDate?: string | null;
   annualRate?: number | string | null;
 }
@@ -41,6 +44,9 @@ export default function ScenarioModal({
         setItems(
           scenario.items.map(item => ({
             ...item,
+            interval: item.interval || 1,
+            daysOfWeek: item.daysOfWeek || [],
+            monthsOfYear: item.monthsOfYear || [],
             date: item.date ? new Date(item.date).toISOString().split('T')[0] : '',
             endDate: item.endDate ? new Date(item.endDate).toISOString().split('T')[0] : ''
           }))
@@ -53,6 +59,9 @@ export default function ScenarioModal({
           type: "expense",
           date: new Date().toISOString().split('T')[0],
           frequency: "ONCE",
+          interval: 1,
+          daysOfWeek: [],
+          monthsOfYear: [],
           endDate: ""
         }]);
       }
@@ -70,6 +79,9 @@ export default function ScenarioModal({
         type: "expense",
         date: new Date().toISOString().split('T')[0],
         frequency: "ONCE",
+        interval: 1,
+        daysOfWeek: [],
+        monthsOfYear: [],
         endDate: ""
       }
     ]);
@@ -215,12 +227,26 @@ export default function ScenarioModal({
                     />
                   </div>
                   <div className={styles.formGroup} style={{ flex: 1 }}>
-                    <label className={styles.label}>Frequency</label>
-                    <select className={styles.select} value={item.frequency} onChange={e => handleItemChange(index, 'frequency', e.target.value)}>
-                      <option value="ONCE">Once</option>
-                      <option value="MONTHLY">Monthly</option>
-                      <option value="YEARLY">Yearly</option>
-                    </select>
+                    <label className={styles.label}>Repeat Every</label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      {item.frequency !== 'ONCE' && (
+                        <input 
+                          type="number" 
+                          min="1"
+                          value={item.interval} 
+                          onChange={e => handleItemChange(index, 'interval', parseInt(e.target.value) || 1)} 
+                          className={styles.input}
+                          style={{ width: '60px' }}
+                        />
+                      )}
+                      <select className={styles.select} value={item.frequency} onChange={e => handleItemChange(index, 'frequency', e.target.value)} style={{ flex: 1 }}>
+                        <option value="ONCE">Once</option>
+                        <option value="DAILY">Days</option>
+                        <option value="WEEKLY">Weeks</option>
+                        <option value="MONTHLY">Months</option>
+                        <option value="YEARLY">Years</option>
+                      </select>
+                    </div>
                   </div>
                   {item.frequency !== 'ONCE' && (
                     <div className={styles.formGroup} style={{ flex: 1 }}>
@@ -234,6 +260,57 @@ export default function ScenarioModal({
                     </div>
                   )}
                 </div>
+
+                {item.frequency === 'WEEKLY' && (
+                  <div style={{ marginTop: '12px' }}>
+                    <label className={styles.label}>On Days</label>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, idx) => (
+                        <label key={day} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: item.daysOfWeek.includes(idx) ? 'var(--unique-blue)' : '#f1f5f9', color: item.daysOfWeek.includes(idx) ? 'white' : 'var(--text-main)', padding: '6px 10px', borderRadius: '16px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500 }}>
+                          <input 
+                            type="checkbox" 
+                            style={{ display: 'none' }}
+                            checked={item.daysOfWeek.includes(idx)}
+                            onChange={(e) => {
+                              const newDays = e.target.checked 
+                                ? [...item.daysOfWeek, idx]
+                                : item.daysOfWeek.filter(d => d !== idx);
+                              handleItemChange(index, 'daysOfWeek', newDays);
+                            }}
+                          />
+                          {day}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {(item.frequency === 'MONTHLY' || item.frequency === 'YEARLY') && (
+                  <div style={{ marginTop: '12px' }}>
+                    <label className={styles.label}>In Months <span style={{ fontSize: '0.75rem', color: '#64748b' }}>(Optional)</span></label>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month, i) => {
+                        const monthVal = i + 1;
+                        return (
+                          <label key={month} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: item.monthsOfYear.includes(monthVal) ? 'var(--unique-blue)' : '#f1f5f9', color: item.monthsOfYear.includes(monthVal) ? 'white' : 'var(--text-main)', padding: '6px 10px', borderRadius: '16px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500 }}>
+                            <input 
+                              type="checkbox" 
+                              style={{ display: 'none' }}
+                              checked={item.monthsOfYear.includes(monthVal)}
+                              onChange={(e) => {
+                                const newMonths = e.target.checked 
+                                  ? [...item.monthsOfYear, monthVal]
+                                  : item.monthsOfYear.filter(m => m !== monthVal);
+                                handleItemChange(index, 'monthsOfYear', newMonths);
+                              }}
+                            />
+                            {month}
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
 
