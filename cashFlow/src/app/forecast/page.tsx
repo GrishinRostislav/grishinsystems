@@ -249,6 +249,20 @@ export default function ForecastPage() {
     }
   };
 
+  const handleDeleteScenario = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this scenario?")) return;
+    try {
+      await fetch(`/cashFlow/api/scenarios/${id}`, {
+        method: 'DELETE'
+      });
+      setScenarioModalOpen(false);
+      fetchScenarios();
+      fetchForecast(months, selectedAccounts);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleSaveScenario = () => {
     fetchScenarios();
     fetchForecast(months, selectedAccounts);
@@ -561,6 +575,7 @@ export default function ForecastPage() {
         onClose={() => setScenarioModalOpen(false)}
         scenario={editingScenario}
         onSave={handleSaveScenario}
+        onDelete={editingScenario ? () => handleDeleteScenario(editingScenario.id) : undefined}
       />
     </div>
   );

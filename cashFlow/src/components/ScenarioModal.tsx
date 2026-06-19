@@ -32,6 +32,7 @@ export default function ScenarioModal({
   onClose: () => void;
   scenario?: Scenario | null;
   onSave: () => void;
+  onDelete?: () => void;
 }) {
   const [name, setName] = useState("");
   const [items, setItems] = useState<ScenarioItem[]>([]);
@@ -330,6 +331,17 @@ export default function ScenarioModal({
           </div>
 
           <div className={styles.modalActions}>
+            {scenario && onDelete && (
+              <button 
+                type="button" 
+                onClick={onDelete} 
+                className={styles.btnOutline} 
+                style={{ color: '#b91c1c', borderColor: '#b91c1c', marginRight: 'auto' }}
+                disabled={loading}
+              >
+                Delete
+              </button>
+            )}
             <button type="button" onClick={onClose} className={styles.btnSecondary} disabled={loading}>
               Cancel
             </button>
