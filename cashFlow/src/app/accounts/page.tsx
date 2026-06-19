@@ -258,14 +258,14 @@ export default function AccountsPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header} style={{ alignItems: 'flex-start' }}>
-        <div>
+      <div className={styles.headerContainer}>
+        <div className={styles.headerLeft}>
           <h1>Accounts</h1>
           <p>Manage your bank accounts, credit cards, and cash.</p>
           {totalBalance !== null && (
-            <div style={{ marginTop: '16px', padding: '16px 20px', background: 'var(--bg-secondary)', borderRadius: '12px', display: 'inline-block', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
+            <div className={styles.totalBalanceCard}>
               <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Total Balance</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--unique-blue)', lineHeight: 1 }}>{formatCurrency(totalBalance, homeCurrency)}</span>
                 {balanceChange && (
                   <span style={{ 
@@ -290,9 +290,9 @@ export default function AccountsPage() {
             </div>
           )}
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px' }}>
+        <div className={styles.headerRight}>
           <GlobalDateFilter onDatesChange={handleDatesChange} />
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', width: '100%' }}>
           {isReordering ? (
             <button className={styles.btnPrimary} onClick={saveOrder} disabled={isSavingOrder}>
               {isSavingOrder ? 'Saving...' : 'Save Order'}

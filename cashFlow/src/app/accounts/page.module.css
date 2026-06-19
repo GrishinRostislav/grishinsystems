@@ -4,18 +4,41 @@
   gap: 24px;
 }
 
-.header {
+.headerContainer {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 24px;
 }
 
-.header h1 {
+.headerLeft {
+  flex: 1;
+}
+
+.headerRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.totalBalanceCard {
+  margin-top: 16px;
+  padding: 16px 20px;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  display: inline-block;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  max-width: 100%;
+}
+
+.headerLeft h1 {
   color: var(--silent-dark-blue);
   margin-bottom: 8px;
 }
 
-.header p {
+.headerLeft p {
   color: var(--text-muted);
 }
 
@@ -164,19 +187,28 @@
     gap: 16px;
   }
 
-  .header {
+  .headerContainer {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: stretch;
+    gap: 16px;
   }
 
-  .header h1 {
+  .headerRight {
+    align-items: stretch;
+  }
+
+  .headerLeft h1 {
     font-size: 1.4rem;
     margin-bottom: 4px;
   }
 
-  .header p {
+  .headerLeft p {
     font-size: 0.85rem;
+  }
+
+  .totalBalanceCard {
+    display: block;
+    width: 100%;
   }
 
   .btnPrimary {
