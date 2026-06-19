@@ -11,7 +11,9 @@ interface ScheduledTransaction {
   accountId: string;
   categoryId: string;
   frequency: string;
+  interval: number;
   nextRunDate: string;
+  endDate: string | null;
   autoApprove: boolean;
   isActive: boolean;
   paymentMethod: string;
@@ -38,7 +40,9 @@ export default function ScheduledTransactionModal({ isOpen, onClose, onSave, tra
     categoryId: '',
     paymentMethod: '',
     frequency: 'MONTHLY',
+    interval: 1,
     nextRunDate: new Date().toISOString().split('T')[0],
+    endDate: null,
     autoApprove: false,
     isActive: true,
     type: 'expense',
@@ -71,6 +75,8 @@ export default function ScheduledTransactionModal({ isOpen, onClose, onSave, tra
         autoApprove: transaction.autoApprove ?? false,
         isActive: transaction.isActive ?? true,
         frequency: transaction.frequency || 'MONTHLY',
+        interval: transaction.interval || 1,
+        endDate: transaction.endDate ? new Date(transaction.endDate).toISOString().split('T')[0] : null,
         notes: transaction.notes || '',
         inflationRate: transaction.inflationRate || null
       });
@@ -84,7 +90,9 @@ export default function ScheduledTransactionModal({ isOpen, onClose, onSave, tra
         toAccountId: '',
         categoryId: '',
         frequency: 'MONTHLY',
+        interval: 1,
         nextRunDate: new Date().toISOString().split('T')[0],
+        endDate: null,
         autoApprove: false,
         isActive: true,
         paymentMethod: '',
@@ -208,19 +216,29 @@ export default function ScheduledTransactionModal({ isOpen, onClose, onSave, tra
               </datalist>
             </div>
 
-            <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', gap: '16px', marginBottom: '16px', alignItems: 'flex-start' }}>
               <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)' }}>Frequency</label>
-                <select 
-                  value={formData.frequency} 
-                  onChange={e => setFormData({...formData, frequency: e.target.value})}
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}
-                >
-                  <option value="DAILY">Daily</option>
-                  <option value="WEEKLY">Weekly</option>
-                  <option value="MONTHLY">Monthly</option>
-                  <option value="YEARLY">Yearly</option>
-                </select>
+                <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)' }}>Repeat Every</label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input 
+                    type="number" 
+                    min="1"
+                    value={formData.interval} 
+                    onChange={e => setFormData({...formData, interval: parseInt(e.target.value) || 1})} 
+                    required 
+                    style={{ width: '80px', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}
+                  />
+                  <select 
+                    value={formData.frequency} 
+                    onChange={e => setFormData({...formData, frequency: e.target.value})}
+                    style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}
+                  >
+                    <option value="DAILY">Days</option>
+                    <option value="WEEKLY">Weeks</option>
+                    <option value="MONTHLY">Months</option>
+                    <option value="YEARLY">Years</option>
+                  </select>
+                </div>
               </div>
               <div style={{ flex: 1 }}>
                 <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)' }}>Next Run Date</label>
@@ -232,6 +250,21 @@ export default function ScheduledTransactionModal({ isOpen, onClose, onSave, tra
                   style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}
                 />
               </div>
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)' }}>
+                End Date <span style={{ fontSize: '0.8rem', marginLeft: '8px', color: '#64748b' }}>(Optional)</span>
+              </label>
+              <input 
+                type="date" 
+                value={formData.endDate || ''} 
+                onChange={e => setFormData({...formData, endDate: e.target.value || null})} 
+                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}
+              />
+              <small style={{ display: 'block', marginTop: '4px', color: '#64748b' }}>
+                Leave blank to repeat forever. The scenario will stop generating after this date.
+              </small>
             </div>
 
             <div style={{ marginBottom: '16px' }}>

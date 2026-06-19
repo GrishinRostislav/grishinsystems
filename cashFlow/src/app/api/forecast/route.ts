@@ -2,23 +2,23 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getExchangeRates, convertAmount } from "@/lib/currency";
 
-function addFrequency(date: Date, frequency: string): Date {
+function addFrequency(date: Date, frequency: string, interval: number): Date {
   const next = new Date(date);
   switch (frequency) {
     case 'DAILY':
-      next.setDate(next.getDate() + 1);
+      next.setDate(next.getDate() + interval);
       break;
     case 'WEEKLY':
-      next.setDate(next.getDate() + 7);
+      next.setDate(next.getDate() + 7 * interval);
       break;
     case 'MONTHLY':
-      next.setMonth(next.getMonth() + 1);
+      next.setMonth(next.getMonth() + interval);
       break;
     case 'YEARLY':
-      next.setFullYear(next.getFullYear() + 1);
+      next.setFullYear(next.getFullYear() + interval);
       break;
     default:
-      next.setMonth(next.getMonth() + 1);
+      next.setMonth(next.getMonth() + interval);
   }
   return next;
 }
@@ -112,6 +112,10 @@ export async function GET(request: Request) {
       if (st.type === 'transfer') continue; 
 
       while (simDate < endDate) {
+        if (st.endDate && simDate > new Date(st.endDate)) {
+          break;
+        }
+
         let effectDate = new Date(simDate);
         if (effectDate < now) {
           effectDate = new Date(now);
@@ -139,7 +143,7 @@ export async function GET(request: Request) {
         if (convertedStAmt > 0) stats.income += convertedStAmt;
         else stats.expense += Math.abs(convertedStAmt);
 
-        simDate = addFrequency(simDate, st.frequency);
+        simDate = addFrequency(simDate, st.frequency, st.interval || 1);
       }
     }
 
@@ -188,7 +192,7 @@ export async function GET(request: Request) {
               if (item.frequency === 'ONCE') {
                 simDate = new Date(8640000000000000); // push far into future to break
               } else {
-                simDate = addFrequency(simDate, item.frequency);
+                simDate = addFrequency(simDate, item.frequency, 1);
               }
             }
 
@@ -240,7 +244,7 @@ export async function GET(request: Request) {
             else stats.scenarioExpense += Math.abs(amt);
 
             if (item.frequency === 'ONCE') break;
-            simDate = addFrequency(simDate, item.frequency);
+            simDate = addFrequency(simDate, item.frequency, 1);
           }
         }
       }

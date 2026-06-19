@@ -80,7 +80,9 @@ model ScheduledTransaction {
   notes         String?
   
   frequency     String    // 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'
+  interval      Int       @default(1) // e.g. every 2 weeks, every 10 months
   nextRunDate   DateTime
+  endDate       DateTime? // Optional end date for the recurrence
   autoApprove   Boolean   @default(false)
   isActive      Boolean   @default(true)
   type          String    @default("expense") // 'expense', 'income', 'transfer'

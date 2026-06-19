@@ -7,7 +7,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const resolvedParams = await params;
     const { id } = resolvedParams;
     const body = await request.json();
-    const { amount, merchant, paymentMethod, notes, accountId, toAccountId, categoryId, nextRunDate, frequency, autoApprove, isActive, type, inflationRate } = body;
+    const { amount, merchant, paymentMethod, notes, accountId, toAccountId, categoryId, nextRunDate, frequency, interval, endDate, autoApprove, isActive, type, inflationRate } = body;
 
     let finalAmount = amount !== undefined ? Math.abs(parseFloat(amount)) : undefined;
     if (finalAmount !== undefined && type === 'expense') {
@@ -47,6 +47,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         categoryId: type === 'transfer' ? null : (categoryId === '' ? null : categoryId),
         nextRunDate: nextRunDate ? new Date(nextRunDate) : undefined,
         frequency,
+        interval: interval !== undefined ? parseInt(interval) : undefined,
+        endDate: endDate !== undefined ? (endDate ? new Date(endDate) : null) : undefined,
         autoApprove: autoApprove !== undefined ? Boolean(autoApprove) : undefined,
         isActive: isActive !== undefined ? Boolean(isActive) : undefined,
         type: type !== undefined ? type : undefined,

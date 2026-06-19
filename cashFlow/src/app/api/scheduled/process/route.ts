@@ -1,24 +1,24 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-function getNextDate(date: Date, frequency: string): Date {
+function getNextDate(date: Date, frequency: string, interval: number): Date {
   const next = new Date(date);
   switch (frequency) {
     case 'DAILY':
-      next.setDate(next.getDate() + 1);
+      next.setDate(next.getDate() + interval);
       break;
     case 'WEEKLY':
-      next.setDate(next.getDate() + 7);
+      next.setDate(next.getDate() + 7 * interval);
       break;
     case 'MONTHLY':
-      next.setMonth(next.getMonth() + 1);
+      next.setMonth(next.getMonth() + interval);
       break;
     case 'YEARLY':
-      next.setFullYear(next.getFullYear() + 1);
+      next.setFullYear(next.getFullYear() + interval);
       break;
     default:
       // If unknown, just add a month to avoid infinite loops
-      next.setMonth(next.getMonth() + 1);
+      next.setMonth(next.getMonth() + interval);
   }
   return next;
 }
@@ -46,9 +46,15 @@ export async function POST() {
     for (const sched of dueTransactions) {
       let runDate = new Date(sched.nextRunDate);
       let newBalance = sched.account.balance;
+      let shouldDeactivate = false;
 
       // In case it's been a long time, loop until the next run date is in the future
       while (runDate <= now) {
+        if (sched.endDate && runDate > new Date(sched.endDate)) {
+          shouldDeactivate = true;
+          break;
+        }
+
         if (sched.type === 'transfer' && sched.toAccountId) {
           // OUT transaction
           await prisma.transaction.create({
@@ -106,13 +112,21 @@ export async function POST() {
         processedCount++;
 
         // Advance to next date
-        runDate = getNextDate(runDate, sched.frequency);
+        runDate = getNextDate(runDate, sched.frequency, sched.interval || 1);
       }
 
-      // Update the scheduled transaction's next run date
+      // If the next run date exceeds the end date, deactivate it
+      if (sched.endDate && runDate > new Date(sched.endDate)) {
+        shouldDeactivate = true;
+      }
+
+      // Update the scheduled transaction's next run date and active status
       await prisma.scheduledTransaction.update({
         where: { id: sched.id },
-        data: { nextRunDate: runDate }
+        data: { 
+          nextRunDate: runDate,
+          isActive: !shouldDeactivate
+        }
       });
 
       // Update the main account balance
