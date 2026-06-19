@@ -25,6 +25,7 @@ export default function ForecastPage() {
   const [availableAccounts, setAvailableAccounts] = useState<any[]>([]);
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
   const [isAccountsDropdownOpen, setIsAccountsDropdownOpen] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Scenarios state
   const [scenarios, setScenarios] = useState<any[]>([]);
@@ -207,11 +208,30 @@ export default function ForecastPage() {
   useEffect(() => {
     fetchAccounts();
     fetchScenarios();
+
+    // Load saved preferences
+    const savedMonths = localStorage.getItem("forecast_months");
+    if (savedMonths) setMonths(Number(savedMonths));
+
+    const savedAccounts = localStorage.getItem("forecast_accounts");
+    if (savedAccounts) {
+      try {
+        setSelectedAccounts(JSON.parse(savedAccounts));
+      } catch (e) {
+        console.error("Failed to parse saved accounts", e);
+      }
+    }
+    
+    setIsInitialized(true);
   }, []);
 
   useEffect(() => {
-    fetchForecast(months, selectedAccounts);
-  }, [months, selectedAccounts]);
+    if (isInitialized) {
+      localStorage.setItem("forecast_months", months.toString());
+      localStorage.setItem("forecast_accounts", JSON.stringify(selectedAccounts));
+      fetchForecast(months, selectedAccounts);
+    }
+  }, [months, selectedAccounts, isInitialized]);
 
   const handleToggleScenario = async (id: string, currentActive: boolean) => {
     try {
