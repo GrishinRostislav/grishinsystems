@@ -242,6 +242,14 @@ export async function GET(request: Request) {
     let runningBalanceForward = currentBalance;
     let runningSimulatedBalance = currentBalance;
     
+    // Apply any future scheduled/scenario flows that occur in the current month but haven't been captured by the loop
+    const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const currentMonthFlow = futureMap.get(currentMonthKey);
+    if (currentMonthFlow) {
+      runningBalanceForward += currentMonthFlow.net;
+      runningSimulatedBalance += currentMonthFlow.net + (currentMonthFlow.scenarioNet || 0);
+    }
+
     // Average metrics
     let totalProjectedIncome = 0;
     let totalProjectedExpense = 0;
