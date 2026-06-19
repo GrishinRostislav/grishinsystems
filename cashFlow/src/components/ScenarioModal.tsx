@@ -265,22 +265,25 @@ export default function ScenarioModal({
                   <div style={{ marginTop: '12px' }}>
                     <label className={styles.label}>On Days</label>
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                      {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, idx) => (
-                        <label key={day} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: item.daysOfWeek.includes(idx) ? 'var(--unique-blue)' : '#f1f5f9', color: item.daysOfWeek.includes(idx) ? 'white' : 'var(--text-main)', padding: '6px 10px', borderRadius: '16px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500 }}>
+                      {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, idx) => {
+                        const isChecked = (item.daysOfWeek || []).includes(idx);
+                        return (
+                        <label key={day} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: isChecked ? 'var(--unique-blue)' : '#f1f5f9', color: isChecked ? 'white' : 'var(--text-main)', padding: '6px 10px', borderRadius: '16px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500 }}>
                           <input 
                             type="checkbox" 
                             style={{ display: 'none' }}
-                            checked={item.daysOfWeek.includes(idx)}
+                            checked={isChecked}
                             onChange={(e) => {
+                              const currentDays = item.daysOfWeek || [];
                               const newDays = e.target.checked 
-                                ? [...item.daysOfWeek, idx]
-                                : item.daysOfWeek.filter(d => d !== idx);
+                                ? [...currentDays, idx]
+                                : currentDays.filter(d => d !== idx);
                               handleItemChange(index, 'daysOfWeek', newDays);
                             }}
                           />
                           {day}
                         </label>
-                      ))}
+                      )})}
                     </div>
                   </div>
                 )}
@@ -291,16 +294,18 @@ export default function ScenarioModal({
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                       {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month, i) => {
                         const monthVal = i + 1;
+                        const isChecked = (item.monthsOfYear || []).includes(monthVal);
                         return (
-                          <label key={month} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: item.monthsOfYear.includes(monthVal) ? 'var(--unique-blue)' : '#f1f5f9', color: item.monthsOfYear.includes(monthVal) ? 'white' : 'var(--text-main)', padding: '6px 10px', borderRadius: '16px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500 }}>
+                          <label key={month} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: isChecked ? 'var(--unique-blue)' : '#f1f5f9', color: isChecked ? 'white' : 'var(--text-main)', padding: '6px 10px', borderRadius: '16px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500 }}>
                             <input 
                               type="checkbox" 
                               style={{ display: 'none' }}
-                              checked={item.monthsOfYear.includes(monthVal)}
+                              checked={isChecked}
                               onChange={(e) => {
+                                const currentMonths = item.monthsOfYear || [];
                                 const newMonths = e.target.checked 
-                                  ? [...item.monthsOfYear, monthVal]
-                                  : item.monthsOfYear.filter(m => m !== monthVal);
+                                  ? [...currentMonths, monthVal]
+                                  : currentMonths.filter(m => m !== monthVal);
                                 handleItemChange(index, 'monthsOfYear', newMonths);
                               }}
                             />
