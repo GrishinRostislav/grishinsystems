@@ -19,6 +19,21 @@
   color: var(--text-muted);
 }
 
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+.backLink:hover {
+  color: var(--unique-blue);
+}
+
 .card {
   background: var(--bg-secondary);
   border-radius: 12px;

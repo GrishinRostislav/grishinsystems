@@ -64,16 +64,19 @@ export default function BudgetDetail({ params }: { params: Promise<{ id: string 
 
   return (
     <div className={styles.container}>
+      <Link href="/budgets" className={styles.backLink}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Back to Budgets
+      </Link>
       <div className={styles.header}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <Link href="/budgets" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '1.5rem' }}>&larr;</Link>
-            <h1 className={styles.title} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '16px' }}>
-              {budget?.name || "Loading..."}
-            </h1>
-          </div>
+          <h1 className={styles.title} style={{ margin: 0 }}>
+            {budget?.name || "Loading..."}
+          </h1>
           {budget && (
-            <p className={styles.subtitle} style={{ marginTop: '8px', marginLeft: '38px' }}>
+            <p className={styles.subtitle} style={{ marginTop: '8px' }}>
               {formatDate(budget.currentPeriodStart)} - {formatDate(budget.currentPeriodEnd)} ({budget.period})
             </p>
           )}

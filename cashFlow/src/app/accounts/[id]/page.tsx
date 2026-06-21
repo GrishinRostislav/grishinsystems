@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import styles from "./page.module.css";
+import Link from "next/link";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import GlobalDateFilter from "@/components/GlobalDateFilter";
 import TransactionModal from "@/components/TransactionModal";
@@ -118,6 +119,12 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
 
   return (
     <div className={styles.container}>
+      <Link href="/accounts" className={styles.backLink}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Back to Accounts
+      </Link>
       <div className={styles.header}>
         <div style={{ minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
