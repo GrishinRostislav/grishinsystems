@@ -8,6 +8,8 @@ export default function Topbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
+  const [isSyncing, setIsSyncing] = useState(false);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     if (!dropdownOpen) return;
@@ -19,6 +21,27 @@ export default function Topbar() {
   const toggleDropdown = (e: React.MouseEvent) => {
     e.stopPropagation();
     setDropdownOpen(!dropdownOpen);
+  };
+
+  const handleSyncMerchants = async () => {
+    setIsSyncing(true);
+    try {
+      const res = await fetch("/cashFlow/api/merchants/sync", {
+        method: "POST"
+      });
+      if (res.ok) {
+        const data = await res.json();
+        alert(`Successfully synced ${data.updatedCount} transactions!`);
+      } else {
+        alert("Failed to sync merchants");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error syncing merchants");
+    } finally {
+      setIsSyncing(false);
+      setDropdownOpen(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -52,6 +75,17 @@ export default function Topbar() {
           </div>
           {dropdownOpen && (
             <div className={styles.dropdown} onClick={(e) => e.stopPropagation()}>
+              <div 
+                className={styles.dropdownItem} 
+                onClick={handleSyncMerchants}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px', verticalAlign: 'middle' }}>
+                  <polyline points="23 4 23 10 17 10"></polyline>
+                  <polyline points="1 20 1 14 7 14"></polyline>
+                  <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"></path>
+                </svg>
+                {isSyncing ? "Syncing..." : "Sync Merchants"}
+              </div>
               <div 
                 className={styles.dropdownItem} 
                 onClick={() => { setIsSettingsOpen(true); setDropdownOpen(false); }}
