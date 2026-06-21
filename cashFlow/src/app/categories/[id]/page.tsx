@@ -86,6 +86,23 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
 
   const { category, transactions } = data || {};
 
+  const groupedTransactions = transactions?.reduce((acc: any, txn: any) => {
+    const dateStr = formatDate(txn.date);
+    if (!acc[dateStr]) acc[dateStr] = [];
+    acc[dateStr].push(txn);
+    return acc;
+  }, {}) || {};
+
+  const getCategoryColor = (name: string) => {
+    if (!name) return '#94a3b8'; // default gray
+    const colors = ['#f43f5e', '#8b5cf6', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899', '#6366f1'];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -143,44 +160,102 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
           <div>
             <h2 style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>Recent Transactions</h2>
             {transactions && transactions.length > 0 ? (
-              <div className={styles.tableContainer}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Merchant</th>
-                      <th>Description</th>
-                      <th>Category</th>
-                      <th>Account</th>
-                      <th>Payment Method</th>
-                      <th>Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {transactions.map((txn: any) => (
-                      <tr key={txn.id} onClick={() => { setSelectedTxn(txn); setIsTxnModalOpen(true); }} style={{ cursor: 'pointer' }} className={styles.tableRow}>
-                        <td>{formatDate(txn.date)}</td>
-                        <td>{txn.merchant || "-"}</td>
-                        <td>{txn.notes || "-"}</td>
-                        <td>{txn.category?.name || "Uncategorized"}</td>
-                        <td>{txn.account?.name || "Unknown"}</td>
-                        <td>{txn.paymentMethod || "-"}</td>
-                        <td className={txn.amount >= 0 ? styles.amountIncome : styles.amountExpense}>
-                          {txn.amount >= 0 ? "+" : ""}{formatCurrency(txn.amount)}
+              <>
+                <div className={styles.tableContainer}>
+                  <table className={styles.table}>
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Merchant</th>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Account</th>
+                        <th>Payment Method</th>
+                        <th>Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {transactions.map((txn: any) => (
+                        <tr key={txn.id} onClick={() => { setSelectedTxn(txn); setIsTxnModalOpen(true); }} style={{ cursor: 'pointer' }} className={styles.tableRow}>
+                          <td>{formatDate(txn.date)}</td>
+                          <td>{txn.merchant || "-"}</td>
+                          <td>{txn.notes || "-"}</td>
+                          <td>{txn.category?.name || "Uncategorized"}</td>
+                          <td>{txn.account?.name || "Unknown"}</td>
+                          <td>{txn.paymentMethod || "-"}</td>
+                          <td className={txn.amount >= 0 ? styles.amountIncome : styles.amountExpense}>
+                            {txn.amount >= 0 ? "+" : ""}{formatCurrency(txn.amount)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot style={{ background: 'var(--bg-secondary)', fontWeight: 600 }}>
+                      <tr>
+                        <td colSpan={6} style={{ textAlign: 'right', padding: '12px 16px', color: 'var(--text-muted)' }}>Total for Category:</td>
+                        <td style={{ padding: '12px 16px', color: transactions.reduce((acc: any, txn: any) => acc + txn.amount, 0) >= 0 ? 'var(--sporty-teal)' : '#e11d48' }}>
+                          {transactions.reduce((acc: any, txn: any) => acc + txn.amount, 0) >= 0 ? "+" : ""}{formatCurrency(transactions.reduce((acc: any, txn: any) => acc + txn.amount, 0))}
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                  <tfoot style={{ background: 'var(--bg-secondary)', fontWeight: 600 }}>
-                    <tr>
-                      <td colSpan={6} style={{ textAlign: 'right', padding: '12px 16px', color: 'var(--text-muted)' }}>Total for Category:</td>
-                      <td style={{ padding: '12px 16px', color: transactions.reduce((acc: any, txn: any) => acc + txn.amount, 0) >= 0 ? 'var(--sporty-teal)' : '#e11d48' }}>
-                        {transactions.reduce((acc: any, txn: any) => acc + txn.amount, 0) >= 0 ? "+" : ""}{formatCurrency(transactions.reduce((acc: any, txn: any) => acc + txn.amount, 0))}
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
+                    </tfoot>
+                  </table>
+                </div>
+
+                <div className={styles.mobileListContainer}>
+                  {Object.keys(groupedTransactions).map(dateStr => (
+                    <div key={dateStr} className={styles.mobileDateGroup}>
+                      <div className={styles.mobileDateHeader}>{dateStr}</div>
+                      <div className={styles.mobileGroupItems}>
+                        {groupedTransactions[dateStr].map((txn: any) => {
+                          const isIncome = txn.amount >= 0;
+                          const catLetter = txn.category?.name ? txn.category.name.charAt(0).toUpperCase() : "?";
+                          const catColor = getCategoryColor(txn.category?.name);
+                          
+                          return (
+                            <div key={txn.id} className={styles.mobileTxnCard} onClick={() => { setSelectedTxn(txn); setIsTxnModalOpen(true); }}>
+                              <div className={styles.mobileTxnLeft}>
+                                <div className={styles.categoryIcon} style={{ background: catColor }}>
+                                  {catLetter}
+                                </div>
+                                <div className={styles.mobileTxnMeta}>
+                                  <div className={styles.mobileTxnTitle}>
+                                    {txn.notes || txn.category?.name || "Transaction"}
+                                  </div>
+                                  <div className={styles.mobileTxnSubtitle}>
+                                    {txn.account?.name || "Unknown Account"}
+                                  </div>
+                                  {txn.merchant && (
+                                    <div className={styles.merchantBadge}>
+                                      {txn.merchant}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              
+                              <div className={styles.mobileTxnRight}>
+                                <div className={isIncome ? styles.mobileAmountIncome : styles.mobileAmountExpense}>
+                                  {isIncome ? "+" : ""}{formatCurrency(txn.amount)}
+                                </div>
+                                {txn.paymentMethod && (
+                                  <div className={styles.mobilePaymentMethod}>
+                                    {txn.paymentMethod}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <div style={{ marginTop: '16px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 600 }}>
+                    <span style={{ color: 'var(--text-muted)' }}>Total for Category:</span>
+                    <span style={{ color: transactions.reduce((acc: any, txn: any) => acc + txn.amount, 0) >= 0 ? 'var(--sporty-teal)' : '#e11d48', fontSize: '16px' }}>
+                      {transactions.reduce((acc: any, txn: any) => acc + txn.amount, 0) >= 0 ? "+" : ""}{formatCurrency(transactions.reduce((acc: any, txn: any) => acc + txn.amount, 0))}
+                    </span>
+                  </div>
+                </div>
+              </>
             ) : (
               <div className={styles.emptyState}>
                 <p>No transactions found for this category.</p>
