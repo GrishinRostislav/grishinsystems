@@ -148,8 +148,11 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
                   <thead>
                     <tr>
                       <th>Date</th>
+                      <th>Merchant</th>
                       <th>Description</th>
+                      <th>Category</th>
                       <th>Account</th>
+                      <th>Payment Method</th>
                       <th>Amount</th>
                     </tr>
                   </thead>
@@ -157,8 +160,11 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
                     {transactions.map((txn: any) => (
                       <tr key={txn.id} onClick={() => { setSelectedTxn(txn); setIsTxnModalOpen(true); }} style={{ cursor: 'pointer' }} className={styles.tableRow}>
                         <td>{formatDate(txn.date)}</td>
-                        <td>{txn.notes || txn.merchant || "-"}</td>
+                        <td>{txn.merchant || "-"}</td>
+                        <td>{txn.notes || "-"}</td>
+                        <td>{txn.category?.name || "Uncategorized"}</td>
                         <td>{txn.account?.name || "Unknown"}</td>
+                        <td>{txn.paymentMethod || "-"}</td>
                         <td className={txn.amount >= 0 ? styles.amountIncome : styles.amountExpense}>
                           {txn.amount >= 0 ? "+" : ""}{formatCurrency(txn.amount)}
                         </td>
@@ -167,7 +173,7 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
                   </tbody>
                   <tfoot style={{ background: 'var(--bg-secondary)', fontWeight: 600 }}>
                     <tr>
-                      <td colSpan={3} style={{ textAlign: 'right', padding: '12px 16px', color: 'var(--text-muted)' }}>Total for Category:</td>
+                      <td colSpan={6} style={{ textAlign: 'right', padding: '12px 16px', color: 'var(--text-muted)' }}>Total for Category:</td>
                       <td style={{ padding: '12px 16px', color: transactions.reduce((acc: any, txn: any) => acc + txn.amount, 0) >= 0 ? 'var(--sporty-teal)' : '#e11d48' }}>
                         {transactions.reduce((acc: any, txn: any) => acc + txn.amount, 0) >= 0 ? "+" : ""}{formatCurrency(transactions.reduce((acc: any, txn: any) => acc + txn.amount, 0))}
                       </td>
