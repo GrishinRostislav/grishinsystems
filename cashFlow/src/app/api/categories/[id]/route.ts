@@ -43,6 +43,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       },
       include: {
         account: true,
+        category: true,
       },
       orderBy: { date: "asc" }
     });
