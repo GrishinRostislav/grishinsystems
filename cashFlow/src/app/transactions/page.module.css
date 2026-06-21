@@ -324,6 +324,10 @@
   font-size: 14px;
   font-weight: 600;
   color: var(--text-main);
+  max-width: 22ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .mobileTxnSubtitle {
