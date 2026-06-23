@@ -4,6 +4,7 @@ import { useEffect, useState, use } from "react";
 import styles from "./page.module.css";
 import Link from "next/link";
 import TransactionModal from "@/components/TransactionModal";
+import TransactionList from "@/components/TransactionList";
 import { useRouter } from "next/navigation";
 import { formatCurrency, formatDate } from "@/utils/format";
 
@@ -127,44 +128,12 @@ export default function BudgetDetail({ params }: { params: Promise<{ id: string 
 
           <div>
             <h2 style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>Budget Transactions</h2>
-            {transactions && transactions.length > 0 ? (
-              <div className={styles.tableContainer}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Merchant</th>
-                      <th>Description</th>
-                      <th>Category</th>
-                      <th>Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {transactions.map((txn: any) => (
-                      <tr key={txn.id} onClick={() => openTxnEditModal(txn)} style={{ cursor: 'pointer' }} className={styles.tableRow}>
-                        <td>{formatDate(txn.date)}</td>
-                        <td>{txn.merchant || "-"}</td>
-                        <td>{txn.notes || "-"}</td>
-                        <td>{txn.category?.name || "Uncategorized"}</td>
-                        <td className={txn.amount >= 0 ? styles.amountIncome : styles.amountExpense}>
-                          {txn.amount >= 0 ? "+" : ""}{formatCurrency(txn.amount, homeCurrency)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <td colSpan={4} style={{ textAlign: 'right', fontWeight: 'bold' }}>Total Spent:</td>
-                      <td style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>
-                        {formatCurrency(transactions.reduce((sum: number, t: any) => sum + t.amount, 0), homeCurrency)}
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            ) : (
-              <div className={styles.emptyState}>No transactions found for this budget period.</div>
-            )}
+            <TransactionList
+              transactions={transactions || []}
+              onTransactionClick={(txn) => openTxnEditModal(txn)}
+              emptyMessage="No transactions found for this budget."
+              totalLabel="Total Spent:"
+            />
           </div>
         </>
       )}

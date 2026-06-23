@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import GlobalDateFilter from "@/components/GlobalDateFilter";
 import TransactionModal from "@/components/TransactionModal";
+import TransactionList from "@/components/TransactionList";
 import { formatCurrency, formatDate } from "@/utils/format";
 import { getChartDomain } from "@/utils/chart";
 
@@ -268,46 +269,12 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
         </div>
       </div>
 
-      <div className={styles.tableContainer}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Merchant</th>
-              <th>Category</th>
-              <th>Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {transactions.length > 0 ? (
-              transactions.map((txn: any) => (
-                <tr key={txn.id} onClick={() => openTransactionModal(txn)} style={{ cursor: 'pointer' }}>
-                  <td>{formatDate(txn.date)}</td>
-                  <td>{txn.merchant}</td>
-                  <td>{txn.category?.name || "Uncategorized"}</td>
-                  <td className={txn.amount >= 0 ? styles.amountIncome : styles.amountExpense}>
-                    {txn.amount >= 0 ? "+" : ""}{formatCurrency(txn.amount, account.currency)}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={4} className={styles.emptyState}>
-                  No transactions found in this date range.
-                </td>
-              </tr>
-            )}
-          </tbody>
-          <tfoot style={{ background: 'var(--bg-secondary)', fontWeight: 600 }}>
-            <tr>
-              <td colSpan={3} style={{ textAlign: 'right', padding: '12px 16px', color: 'var(--text-muted)' }}>Total for Period:</td>
-              <td style={{ padding: '12px 16px', color: (periodIncome - periodExpenses) >= 0 ? 'var(--sporty-teal)' : '#e11d48' }}>
-                {(periodIncome - periodExpenses) >= 0 ? "+" : ""}{formatCurrency(periodIncome - periodExpenses, account.currency)}
-              </td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
+      <TransactionList
+        transactions={transactions || []}
+        onTransactionClick={(txn) => openTransactionModal(txn)}
+        emptyMessage="No transactions found in this date range."
+        totalLabel="Total for Period:"
+      />
 
       <TransactionModal 
         isOpen={isTxnModalOpen} 

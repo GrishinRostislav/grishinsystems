@@ -1,0 +1,153 @@
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dateGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dateHeader {
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  padding: 0 4px;
+}
+
+.groupItems {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.txnCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color var(--transition-fast);
+}
+
+.txnCard:last-child {
+  border-bottom: none;
+}
+
+.txnCard:hover {
+  background-color: var(--bg-hover);
+}
+
+.txnLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.categoryIcon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.txnMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.txnTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  max-width: 22ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.txnSubtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.merchantBadge {
+  display: inline-block;
+  align-self: flex-start;
+  background-color: var(--silent-dark-blue);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 600;
+  margin-top: 1px;
+}
+
+.txnRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.amountIncome {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--sporty-teal);
+}
+
+.amountExpense {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e11d48;
+}
+
+.paymentMethod {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.totalBar {
+  padding: 14px 16px;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+.totalLabel {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.emptyState {
+  padding: 32px;
+  text-align: center;
+  color: var(--text-muted);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+}
