@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { formatCurrency, formatDate } from '@/utils/format';
 import GlobalDateFilter from '@/components/GlobalDateFilter';
+import TransactionModal from '@/components/TransactionModal';
 import styles from '../page.module.css';
 
 export default function MerchantDetailsPage() {
@@ -13,6 +14,25 @@ export default function MerchantDetailsPage() {
   
   const [merchant, setMerchant] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isTxnModalOpen, setIsTxnModalOpen] = useState(false);
+  const [selectedTxn, setSelectedTxn] = useState<any>(null);
+
+  const openTxnModal = (txn: any) => {
+    setSelectedTxn(txn);
+    setIsTxnModalOpen(true);
+  };
+
+  const handleTxnSave = () => {
+    setIsTxnModalOpen(false);
+    setSelectedTxn(null);
+    // Re-fetch merchant data
+    if (id && startDate && endDate) {
+      fetch(`/cashFlow/api/merchants/${id}?startDate=${startDate}&endDate=${endDate}`)
+        .then(res => res.json())
+        .then(data => setMerchant(data))
+        .catch(console.error);
+    }
+  };
   
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -164,7 +184,7 @@ export default function MerchantDetailsPage() {
                   </thead>
                   <tbody>
                     {merchant.transactions.map((tx: any) => (
-                      <tr key={tx.id}>
+                      <tr key={tx.id} onClick={() => openTxnModal(tx)} style={{ cursor: 'pointer' }} className={styles.tableRow}>
                         <td>{formatDate(tx.date)}</td>
                         <td style={{ color: tx.amount < 0 ? '#e11d48' : 'var(--sporty-teal)', fontWeight: 600 }}>
                           {tx.amount > 0 ? '+' : ''}{formatCurrency(tx.amount)}
@@ -193,7 +213,7 @@ export default function MerchantDetailsPage() {
                 {merchant.transactions.map((tx: any) => {
                   const isIncome = tx.amount >= 0;
                   return (
-                    <div key={tx.id} className={styles.mobileCard}>
+                    <div key={tx.id} className={styles.mobileCard} onClick={() => openTxnModal(tx)} style={{ cursor: 'pointer' }}>
                       <div className={styles.mobileLeft}>
                         <div className={styles.mobileNotes}>{tx.notes || "Transaction"}</div>
                         <div className={styles.mobileMeta}>{formatDate(tx.date)}</div>
@@ -229,6 +249,12 @@ export default function MerchantDetailsPage() {
           )}
         </>
       )}
+      <TransactionModal
+        isOpen={isTxnModalOpen}
+        onClose={() => { setIsTxnModalOpen(false); setSelectedTxn(null); }}
+        transaction={selectedTxn}
+        onSave={handleTxnSave}
+      />
     </div>
   );
 }
