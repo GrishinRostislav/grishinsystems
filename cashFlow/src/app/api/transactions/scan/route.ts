@@ -61,9 +61,9 @@ export async function POST(request: Request) {
     const base64Image = buffer.toString('base64');
     const mimeType = file.type;
 
-    // Initialize Gemini API Client
+    // Initialize Gemini API Client with fallback models
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
 
     // 3. Fetch recent product mappings to teach the AI
     const recentMappings = await prisma.productMapping.findMany({
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
       }
     `;
 
-    const result = await model.generateContent([
+    const contentPayload = [
       {
         inlineData: {
           data: base64Image,
@@ -114,7 +114,40 @@ export async function POST(request: Request) {
         }
       },
       prompt
-    ]);
+    ];
+
+    let result: any = null;
+    let lastError: any = null;
+
+    for (const modelName of modelsToTry) {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const model = genAI.getGenerativeModel({ model: modelName });
+          result = await model.generateContent(contentPayload);
+          break; // success
+        } catch (err: any) {
+          lastError = err;
+          const status = err?.status || err?.httpStatusCode || 0;
+          const msg = err?.message || '';
+          // Retry on 503 (overloaded) or 429 (rate limit)
+          if (status === 503 || status === 429 || msg.includes('503') || msg.includes('429') || msg.includes('overloaded') || msg.includes('high demand')) {
+            console.warn(`Model ${modelName} attempt ${attempt + 1} failed (${status}), trying next...`);
+            if (attempt === 0) {
+              await new Promise(r => setTimeout(r, 1500)); // brief pause before retry
+            }
+            continue;
+          }
+          // For other errors, don't retry this model
+          console.error(`Model ${modelName} failed with non-retryable error:`, msg);
+          break;
+        }
+      }
+      if (result) break; // got a successful result, stop trying models
+    }
+
+    if (!result) {
+      throw lastError || new Error('All AI models are currently unavailable. Please try again in a minute.');
+    }
 
     const textResponse = result.response.text();
     
