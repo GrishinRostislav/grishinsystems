@@ -15,7 +15,8 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const monthsParam = searchParams.get('months') || '60'; // Default 5 years
     const futureMonths = parseInt(monthsParam, 10);
-    const pastMonths = 1; // Only show 1 month of history so 'Today' sits on the far left
+    const pastMonthsParam = searchParams.get('pastMonths') || '12';
+    const pastMonths = parseInt(pastMonthsParam, 10);
     
     // Parse accountIds if provided
     const accountIdsParam = searchParams.get('accountIds');
@@ -305,7 +306,14 @@ export async function GET(request: Request) {
     }
 
     // 4. Combine data
-    const chartData = [...historicalPoints.map(p => ({ ...p, simulatedBalance: null })), ...projectedPoints];
+    const formattedHistoricalPoints = historicalPoints.map((p, index) => {
+      // Connect simulated line to history at the transition point (Today)
+      if (index === historicalPoints.length - 1 && hasActiveScenarios) {
+        return { ...p, simulatedBalance: p.balance };
+      }
+      return { ...p, simulatedBalance: null };
+    });
+    const chartData = [...formattedHistoricalPoints, ...projectedPoints];
 
     return NextResponse.json({
       homeCurrency,
