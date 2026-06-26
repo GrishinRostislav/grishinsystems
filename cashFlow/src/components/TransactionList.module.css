@@ -34,16 +34,15 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px 16px;
-  border-bottom: 1px solid var(--border-color);
   transition: background-color var(--transition-fast);
-}
-
-.txnCard:last-child {
-  border-bottom: none;
 }
 
 .txnCard:hover {
   background-color: var(--bg-hover);
+}
+
+.groupItems > *:not(:last-child) {
+  border-bottom: 1px solid var(--border-color);
 }
 
 .txnLeft {
@@ -150,4 +149,153 @@
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 12px;
+}
+
+/* --- New Merchant Group Styles --- */
+
+.merchantGroupWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.merchantGroupHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background-color: var(--bg-secondary);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--transition-fast);
+}
+
+.merchantGroupHeader:hover {
+  background-color: var(--bg-hover);
+}
+
+.merchantGroupHeader.expanded {
+  border-bottom: 1px dashed var(--border-color);
+}
+
+.groupLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.receiptIconContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: rgba(0, 128, 128, 0.1);
+  color: var(--sporty-teal);
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.groupMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.groupTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.groupSubtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.groupRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.chevronIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: transform var(--transition-fast);
+}
+
+.nestedItemsList {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(248, 250, 252, 0.6);
+  position: relative;
+}
+
+/* Visual connecting line indicating nesting hierarchy */
+.nestedItemsList::before {
+  content: '';
+  position: absolute;
+  left: 34px;
+  top: 0;
+  bottom: 24px;
+  width: 2px;
+  background-color: var(--border-color);
+}
+
+.nestedTxnCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px 10px 52px;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.4);
+}
+
+.nestedTxnCard:hover {
+  background-color: var(--bg-hover);
+}
+
+.nestedTxnCard:last-child {
+  border-bottom: none;
+}
+
+.categoryIconNested {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: white;
+  font-weight: 700;
+  font-size: 11px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  z-index: 1; /* Sits above the vertical connecting line */
+}
+
+.txnTitleNested {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-main);
+  max-width: 22ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.txnSubtitleNested {
+  font-size: 10px;
+  color: var(--text-muted);
 }
