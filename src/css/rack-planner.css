@@ -1948,3 +1948,272 @@ body.dragging-active .placed-device * {
     max-width: 440px;
   }
 }
+
+/* ----------------------------------------------------------
+   18. CABLING, PORT PATCHING & IP OVERLAYS
+   ---------------------------------------------------------- */
+.rack-cables-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 20;
+}
+
+@media print {
+  .rack-cables-svg {
+    z-index: 20 !important;
+    display: block !important;
+  }
+  .device-delete-btn {
+    display: none !important;
+  }
+}
+
+.cable-path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+  transition: opacity 0.2s, stroke-width 0.2s;
+  cursor: pointer;
+  pointer-events: stroke;
+}
+
+.cable-path:hover {
+  opacity: 1;
+  stroke-width: 3.5px !important;
+}
+
+/* Cable path styles based on color */
+.cable-path.cable-blue { stroke: #2563eb; }
+.cable-path.cable-yellow { stroke: #eab308; }
+.cable-path.cable-red { stroke: #ef4444; }
+.cable-path.cable-green { stroke: #22c55e; }
+.cable-path.cable-black { stroke: #0f172a; }
+.cable-path.cable-white { stroke: #f8fafc; }
+.cable-path.cable-orange { stroke: #f97316; }
+
+/* Interactive port highlights on faceplate */
+.port-dot {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.port-dot:hover {
+  transform: scale(1.3);
+  box-shadow: 0 0 8px currentColor;
+  z-index: 15;
+}
+
+.port-dot.connected {
+  box-shadow: 0 0 4px #2dd4bf;
+}
+
+/* IP address tag on physical device in rack */
+.device-ip-badge {
+  position: absolute;
+  top: 1px;
+  right: 22px; /* Next to the delete button */
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(45, 212, 191, 0.4);
+  color: #2dd4bf;
+  font-family: monospace;
+  font-size: 7px;
+  font-weight: 700;
+  padding: 0 3px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 8;
+  line-height: 1.2;
+}
+
+/* Large modal content modifier */
+.modal-content.modal-content--large {
+  max-width: 720px;
+}
+
+/* Patch table styling in modal */
+.patch-table-container {
+  margin-top: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  max-height: 300px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.patch-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.patch-table th {
+  background: #0f172a;
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.patch-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+}
+
+.patch-table tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.patch-port-label {
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.patch-selects-group {
+  display: grid;
+  grid-template-columns: 1.2fr 1.2fr 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.patch-selects-group select {
+  padding: 5px;
+  font-size: 12px;
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text);
+  border-radius: 4px;
+  width: 100%;
+}
+
+.patch-details-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.5fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.patch-color-select-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.patch-details-group select,
+.patch-details-group input {
+  padding: 5px;
+  font-size: 12px;
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text);
+  border-radius: 4px;
+  width: 100%;
+}
+
+/* Connection Matrix display on BOM / printable specs */
+.manifest-connections-title {
+  margin-top: 40px;
+  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.manifest-connections-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+  font-size: 12px;
+}
+
+.manifest-connections-table th {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.manifest-connections-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text);
+}
+
+.manifest-connections-table tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.connection-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.connection-tag-port {
+  color: #2dd4bf;
+}
+
+.cable-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+  text-align: center;
+}
+
+/* Printable Cable Tag next to exit cables */
+.cable-exit-text {
+  font-size: 7px;
+  font-weight: 800;
+  fill: #94a3b8;
+  font-family: monospace;
+}
+
+/* Device faceplate clickable indicator style */
+.placed-device {
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.placed-device:hover {
+  box-shadow: 0 0 0 2px #2dd4bf;
+}
+
+/* Toggles for toolbar */
+.rp-toolbar-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+  margin-left: 16px;
+}
+
+.rp-toolbar-checkbox-label input {
+  cursor: pointer;
+}
+

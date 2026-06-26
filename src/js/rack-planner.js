@@ -124,6 +124,8 @@ document.addEventListener("DOMContentLoaded", () => {
     localLines: 2,
     endpoints: [], // Added PoE endpoints: { id, name, brand, category, qty, wattage, poeClass, cost }
     placedDevices: [],
+    connections: [], // Structured cabling links
+    showCables: true, // Toggle show/hide visual paths
     draggedPresetId: null,
     draggedInstanceId: null,
     lastAddedInstanceId: null, // Keep track of the last added device to flash animate it
@@ -427,6 +429,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btn-clear").addEventListener("click", () => {
       if (confirm("Are you sure you want to clear the entire rack configuration?")) {
         state.placedDevices = [];
+        state.connections = [];
         saveState();
         update();
       }
@@ -488,6 +491,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     customFormEl.addEventListener("submit", handleCustomDeviceSubmit);
 
+    // Device Config Modal Events
+    if (modalConfigCloseEl) modalConfigCloseEl.addEventListener("click", closeDeviceConfigModal);
+    if (btnConfigCancelEl) btnConfigCancelEl.addEventListener("click", closeDeviceConfigModal);
+    if (btnConfigSaveEl) btnConfigSaveEl.addEventListener("click", saveDeviceConfig);
+    if (btnConfigClearConnectionsEl) btnConfigClearConnectionsEl.addEventListener("click", clearDeviceConnections);
+    if (deviceConfigModalEl) {
+      deviceConfigModalEl.addEventListener("click", (e) => {
+        if (e.target === deviceConfigModalEl) closeDeviceConfigModal();
+      });
+    }
+    if (toggleCablesEl) {
+      toggleCablesEl.checked = state.showCables;
+      toggleCablesEl.addEventListener("change", (e) => {
+        state.showCables = e.target.checked;
+        saveState();
+        drawRackCables();
+      });
+    }
+
     // Sort columns click listeners
 
     function handleSortClick(colName) {
@@ -519,6 +541,8 @@ document.addEventListener("DOMContentLoaded", () => {
       localLines: state.localLines,
       endpoints: state.endpoints,
       placedDevices: state.placedDevices,
+      connections: state.connections,
+      showCables: state.showCables,
       bomSortColumn: state.bomSortColumn,
       bomSortOrder: state.bomSortOrder,
       zoomLevel: state.zoomLevel
@@ -534,6 +558,8 @@ document.addEventListener("DOMContentLoaded", () => {
         state.dropPoints = parsed.dropPoints !== undefined ? parsed.dropPoints : 12;
         state.localLines = parsed.localLines !== undefined ? parsed.localLines : 2;
         state.placedDevices = parsed.placedDevices || [];
+        state.connections = parsed.connections || [];
+        state.showCables = parsed.showCables !== undefined ? parsed.showCables : true;
         state.bomSortColumn = parsed.bomSortColumn !== undefined ? parsed.bomSortColumn : null;
         state.bomSortOrder = parsed.bomSortOrder !== undefined ? parsed.bomSortOrder : "asc";
         state.zoomLevel = parsed.zoomLevel || 1.0;
@@ -887,6 +913,8 @@ document.addEventListener("DOMContentLoaded", () => {
     runValidations();
     renderManifest();
     updateStatusBar();
+    drawRackCables();
+    requestAnimationFrame(drawRackCables);
   }
 
   function updateStatusBar() {
@@ -1017,6 +1045,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const devEl = document.createElement("div");
       devEl.className = `placed-device device-brand-${dev.brand}`;
+      devEl.dataset.instanceId = dev.instanceId;
       
       // Visual pulse highlight for newly added hardware
       if (state.lastAddedInstanceId && dev.instanceId === state.lastAddedInstanceId) {
@@ -1134,7 +1163,14 @@ document.addEventListener("DOMContentLoaded", () => {
             classStr += " active";
           }
           
-          portsHtml += `<span class="${classStr}"></span>`;
+          const isPortConnected = state.connections.some(c => 
+            (c.fromDevice === dev.instanceId && c.fromPort === i) || 
+            (c.toDevice === dev.instanceId && c.toPort === i)
+          );
+          if (isPortConnected) {
+            classStr += " connected";
+          }
+          portsHtml += `<span class="${classStr}" data-port-idx="${i}" title="${dev.customLabel || dev.name} - Port ${i+1}"></span>`;
         }
         portsHtml += `</div>`;
       }
@@ -1172,6 +1208,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Render actual hardware faceplate - contains ports, LEDs, logo and tiny info label with action
+      let ipBadgeHtml = "";
+      if (dev.ipAddress) {
+        ipBadgeHtml = `<span class="device-ip-badge" title="IP: ${dev.ipAddress}">${dev.ipAddress}</span>`;
+      }
+
       devEl.innerHTML = `
         <div class="device-faceplate-top">
           <div class="device-faceplate-left">
@@ -1181,7 +1222,8 @@ document.addEventListener("DOMContentLoaded", () => {
           ${portsHtml}
         </div>
         <div class="device-faceplate-bottom">
-          <span class="device-faceplate-label">${dev.brand === "apple" ? "" : dev.name}</span>
+          <span class="device-faceplate-label">${dev.brand === "apple" ? "" : (dev.customLabel || dev.name)}</span>
+          ${ipBadgeHtml}
           <button class="device-delete-btn" title="Remove Device"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
         </div>
       `;
@@ -1190,6 +1232,18 @@ document.addEventListener("DOMContentLoaded", () => {
       devEl.querySelector(".device-delete-btn").addEventListener("click", (e) => {
         e.stopPropagation();
         removeDevice(dev.instanceId);
+      });
+
+      // Click handler to open Configuration Modal
+      devEl.addEventListener("click", (e) => {
+        if (e.target.closest(".device-delete-btn")) return;
+        const portDot = e.target.closest(".port-dot");
+        if (portDot) {
+          const portIdx = parseInt(portDot.dataset.portIdx);
+          openDeviceConfigModal(dev.instanceId, portIdx);
+        } else {
+          openDeviceConfigModal(dev.instanceId);
+        }
       });
 
       // Drag listener for reordering
@@ -1954,6 +2008,565 @@ document.addEventListener("DOMContentLoaded", () => {
     setZoom(Math.min(scaleH, scaleW, 2.0));
   }
 
+  // Selectors for device config modal
+  const deviceConfigModalEl = document.getElementById("device-config-modal");
+  const configCustomLabelEl = document.getElementById("config-custom-label");
+  const configIpAddressEl = document.getElementById("config-ip-address");
+  const configDeviceNotesEl = document.getElementById("config-device-notes");
+  const patchTableBodyEl = document.getElementById("patch-table-body");
+  const configDeviceTitleEl = document.getElementById("config-device-title");
+  
+  const btnConfigSaveEl = document.getElementById("btn-config-save");
+  const btnConfigCancelEl = document.getElementById("btn-config-cancel");
+  const btnConfigClearConnectionsEl = document.getElementById("btn-config-clear-connections");
+  const modalConfigCloseEl = document.getElementById("modal-config-close");
+  const toggleCablesEl = document.getElementById("toggle-cables");
+  
+  let currentEditingInstanceId = null;
+
+  // --- Device Config Modal Controller ---
+  function openDeviceConfigModal(instanceId, focusPortIdx = null) {
+    const dev = state.placedDevices.find(d => d.instanceId === instanceId);
+    if (!dev) return;
+    
+    currentEditingInstanceId = instanceId;
+    configCustomLabelEl.value = dev.customLabel || "";
+    configIpAddressEl.value = dev.ipAddress || "";
+    configDeviceNotesEl.value = dev.notes || "";
+    configDeviceTitleEl.textContent = `Configure ${dev.name} (Slot U${dev.slot})`;
+    
+    renderPatchTable(dev, focusPortIdx);
+    
+    deviceConfigModalEl.classList.add("open");
+  }
+  
+  function closeDeviceConfigModal() {
+    deviceConfigModalEl.classList.remove("open");
+    currentEditingInstanceId = null;
+  }
+  
+  function clearDeviceConnections() {
+    if (confirm("Are you sure you want to clear all connections for this device?")) {
+      state.connections = state.connections.filter(c => 
+        c.fromDevice !== currentEditingInstanceId && c.toDevice !== currentEditingInstanceId
+      );
+      saveState();
+      const dev = state.placedDevices.find(d => d.instanceId === currentEditingInstanceId);
+      if (dev) renderPatchTable(dev);
+      update();
+    }
+  }
+  
+  function renderPatchTable(dev, focusPortIdx = null) {
+    patchTableBodyEl.innerHTML = "";
+    
+    if (!dev.ports || dev.ports === 0) {
+      patchTableBodyEl.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-muted); padding:16px;">This device does not have any RJ45 ports.</td></tr>`;
+      return;
+    }
+    
+    const otherDevices = state.placedDevices.filter(d => d.instanceId !== dev.instanceId && d.ports > 0);
+    
+    const activeSwitches = state.placedDevices.filter(d => d.type === "switch");
+    const sortedSwitches = [...activeSwitches].sort((a, b) => {
+      if (b.ports !== a.ports) return b.ports - a.ports;
+      return b.slot - a.slot;
+    });
+    const hasRouter = state.placedDevices.some(d => d.type === "router");
+    const coreUplinks = (hasRouter ? 1 : 0) + Math.max(0, activeSwitches.length - 1);
+    
+    for (let i = 0; i < dev.ports; i++) {
+      const portNum = i + 1;
+      const conn = state.connections.find(c => c.fromDevice === dev.instanceId && c.fromPort === i) || 
+                   state.connections.find(c => c.toDevice === dev.instanceId && c.toPort === i);
+      
+      const tr = document.createElement("tr");
+      if (focusPortIdx === i) {
+        tr.style.background = "rgba(45, 212, 191, 0.15)";
+      }
+      
+      let destType = "none";
+      let destDeviceId = "";
+      let destPortIdx = 0;
+      let cableColor = "#2563eb";
+      let cableType = "Cat6";
+      let cableLabel = "";
+      
+      if (conn) {
+        cableColor = conn.cableColor || "#2563eb";
+        cableType = conn.cableType || "Cat6";
+        cableLabel = conn.label || "";
+        
+        if (conn.fromDevice === dev.instanceId && conn.fromPort === i) {
+          if (conn.toDevice === "wall-drop") {
+            destType = "drop";
+            destPortIdx = conn.toPort;
+          } else if (conn.toDevice === "poe-endpoint") {
+            destType = "endpoint";
+            destPortIdx = conn.toPort;
+          } else {
+            destType = "device";
+            destDeviceId = conn.toDevice;
+            destPortIdx = conn.toPort;
+          }
+        } else {
+          destType = "device";
+          destDeviceId = conn.fromDevice;
+          destPortIdx = conn.fromPort;
+        }
+      }
+      
+      const tdPort = document.createElement("td");
+      tdPort.className = "patch-port-label";
+      
+      let specialLabel = "";
+      if (dev.type === "switch") {
+        const uplinksNeeded = (dev.instanceId === (sortedSwitches.length > 0 ? sortedSwitches[0].instanceId : null) ? coreUplinks : 1);
+        const isUplink = (i < uplinksNeeded);
+        const isPoe = dev.poe_ports > 0 && i < dev.poe_ports;
+        if (isUplink) specialLabel = " <span style='font-size:9px;color:#3b82f6;'>▲ Uplink</span>";
+        else if (isPoe) specialLabel = " <span style='font-size:9px;color:#eab308;'>⚡ PoE</span>";
+      } else if (dev.type === "router") {
+        const numWan = dev.name.includes("2WAN") || dev.name.includes("4L2W") ? 2 : 1;
+        if (i < numWan) specialLabel = " <span style='font-size:9px;color:#ef4444;'>WAN</span>";
+        else if (i === numWan) specialLabel = " <span style='font-size:9px;color:#3b82f6;'>LAN Uplink</span>";
+        else specialLabel = " <span style='font-size:9px;color:#22c55e;'>LAN</span>";
+      }
+      tdPort.innerHTML = `Port ${portNum}${specialLabel}`;
+      
+      const tdDest = document.createElement("td");
+      const selectsGroup = document.createElement("div");
+      selectsGroup.className = "patch-selects-group";
+      
+      const typeSelect = document.createElement("select");
+      typeSelect.innerHTML = `
+        <option value="none" ${destType === "none" ? "selected" : ""}>[Not Connected]</option>
+        <option value="device" ${destType === "device" ? "selected" : ""}>Device in Rack</option>
+        <option value="drop" ${destType === "drop" ? "selected" : ""}>Wall Drop</option>
+        <option value="endpoint" ${destType === "endpoint" ? "selected" : ""}>PoE Endpoint</option>
+      `;
+      
+      const targetSelect = document.createElement("select");
+      targetSelect.style.display = destType === "none" ? "none" : "";
+      
+      const portSelect = document.createElement("select");
+      portSelect.style.display = destType === "device" ? "" : "none";
+      
+      const updateTargets = () => {
+        const type = typeSelect.value;
+        targetSelect.innerHTML = "";
+        portSelect.innerHTML = "";
+        
+        if (type === "none") {
+          targetSelect.style.display = "none";
+          portSelect.style.display = "none";
+        } else if (type === "device") {
+          targetSelect.style.display = "";
+          portSelect.style.display = "";
+          
+          otherDevices.forEach(d => {
+            const opt = document.createElement("option");
+            opt.value = d.instanceId;
+            opt.textContent = `U${d.slot}: ${d.customLabel || d.name}`;
+            if (d.instanceId === destDeviceId) opt.selected = true;
+            targetSelect.appendChild(opt);
+          });
+          
+          if (otherDevices.length === 0) {
+            const opt = document.createElement("option");
+            opt.textContent = "No other devices with ports";
+            targetSelect.appendChild(opt);
+            portSelect.style.display = "none";
+          } else {
+            updatePorts();
+          }
+        } else if (type === "drop") {
+          targetSelect.style.display = "";
+          portSelect.style.display = "none";
+          
+          for (let d = 1; d <= state.dropPoints; d++) {
+            const opt = document.createElement("option");
+            opt.value = d;
+            opt.textContent = `Drop #${d}`;
+            if (destType === "drop" && destPortIdx === d) opt.selected = true;
+            targetSelect.appendChild(opt);
+          }
+        } else if (type === "endpoint") {
+          targetSelect.style.display = "";
+          portSelect.style.display = "none";
+          
+          if (state.endpoints.length === 0) {
+            const opt = document.createElement("option");
+            opt.textContent = "Add PoE endpoints first";
+            targetSelect.appendChild(opt);
+          } else {
+            state.endpoints.forEach(e => {
+              for (let q = 1; q <= e.qty; q++) {
+                const opt = document.createElement("option");
+                const uniqueId = `${e.id}-${q}`;
+                opt.value = uniqueId;
+                opt.textContent = `${e.name} #${q}`;
+                if (destType === "endpoint" && destPortIdx === uniqueId) opt.selected = true;
+                targetSelect.appendChild(opt);
+              }
+            });
+          }
+        }
+      };
+      
+      const updatePorts = () => {
+        const targetId = targetSelect.value;
+        const targetDev = otherDevices.find(d => d.instanceId === targetId);
+        portSelect.innerHTML = "";
+        
+        if (targetDev) {
+          for (let p = 0; p < targetDev.ports; p++) {
+            const opt = document.createElement("option");
+            opt.value = p;
+            opt.textContent = `Port ${p + 1}`;
+            
+            const targetConn = state.connections.find(c => 
+              (c.fromDevice === targetDev.instanceId && c.fromPort === p) || 
+              (c.toDevice === targetDev.instanceId && c.toPort === p)
+            );
+            
+            if (targetConn) {
+              const isCurrentConn = conn && (
+                (targetConn.fromDevice === dev.instanceId && targetConn.fromPort === i) ||
+                (targetConn.toDevice === dev.instanceId && targetConn.toPort === i)
+              );
+              if (!isCurrentConn) {
+                opt.textContent += " (occupied)";
+                opt.style.color = "#dc2626";
+              }
+            }
+            
+            if (destType === "device" && destDeviceId === targetId && destPortIdx === p) {
+              opt.selected = true;
+            }
+            portSelect.appendChild(opt);
+          }
+        }
+      };
+      
+      typeSelect.addEventListener("change", updateTargets);
+      targetSelect.addEventListener("change", () => {
+        if (typeSelect.value === "device") updatePorts();
+      });
+      
+      selectsGroup.appendChild(typeSelect);
+      selectsGroup.appendChild(targetSelect);
+      selectsGroup.appendChild(portSelect);
+      tdDest.appendChild(selectsGroup);
+      
+      const tdCable = document.createElement("td");
+      const detailsGroup = document.createElement("div");
+      detailsGroup.className = "patch-details-group";
+      
+      const colorSelect = document.createElement("select");
+      colorSelect.innerHTML = `
+        <option value="#2563eb" ${cableColor === "#2563eb" ? "selected" : ""}>🔵 Blue</option>
+        <option value="#eab308" ${cableColor === "#eab308" ? "selected" : ""}>🟡 Yellow</option>
+        <option value="#ef4444" ${cableColor === "#ef4444" ? "selected" : ""}>🔴 Red</option>
+        <option value="#22c55e" ${cableColor === "#22c55e" ? "selected" : ""}>🟢 Green</option>
+        <option value="#0f172a" ${cableColor === "#0f172a" ? "selected" : ""}>⚫ Black</option>
+        <option value="#f8fafc" ${cableColor === "#f8fafc" ? "selected" : ""}>⚪ White</option>
+        <option value="#f97316" ${cableColor === "#f97316" ? "selected" : ""}>🟠 Orange</option>
+      `;
+      
+      const categorySelect = document.createElement("select");
+      categorySelect.innerHTML = `
+        <option value="Cat6" ${cableType === "Cat6" ? "selected" : ""}>Cat6</option>
+        <option value="Cat6A" ${cableType === "Cat6A" ? "selected" : ""}>Cat6A</option>
+        <option value="Fiber" ${cableType === "Fiber" ? "selected" : ""}>Fiber</option>
+        <option value="DAC" ${cableType === "DAC" ? "selected" : ""}>DAC SFP+</option>
+        <option value="Console" ${cableType === "Console" ? "selected" : ""}>Console</option>
+      `;
+      
+      const labelInput = document.createElement("input");
+      labelInput.type = "text";
+      labelInput.placeholder = "Label (e.g. Office 101)";
+      labelInput.value = cableLabel;
+      
+      detailsGroup.appendChild(colorSelect);
+      detailsGroup.appendChild(categorySelect);
+      detailsGroup.appendChild(labelInput);
+      tdCable.appendChild(detailsGroup);
+      
+      tr.portIndex = i;
+      tr.typeSelect = typeSelect;
+      tr.targetSelect = targetSelect;
+      tr.portSelect = portSelect;
+      tr.colorSelect = colorSelect;
+      tr.categorySelect = categorySelect;
+      tr.labelInput = labelInput;
+      
+      tr.appendChild(tdPort);
+      tr.appendChild(tdDest);
+      tr.appendChild(tdCable);
+      patchTableBodyEl.appendChild(tr);
+      
+      updateTargets();
+    }
+  }
+  
+  function saveDeviceConfig() {
+    const dev = state.placedDevices.find(d => d.instanceId === currentEditingInstanceId);
+    if (!dev) return;
+    
+    dev.customLabel = configCustomLabelEl.value.trim();
+    dev.ipAddress = configIpAddressEl.value.trim();
+    dev.notes = configDeviceNotesEl.value.trim();
+    
+    const rows = patchTableBodyEl.querySelectorAll("tr");
+    
+    rows.forEach(tr => {
+      if (tr.portIndex === undefined) return;
+      
+      const portIdx = tr.portIndex;
+      const type = tr.typeSelect.value;
+      const targetId = tr.targetSelect.value;
+      const targetPort = parseInt(tr.portSelect.value);
+      const color = tr.colorSelect.value;
+      const category = tr.categorySelect.value;
+      const label = tr.labelInput.value.trim();
+      
+      // Remove old mappings
+      state.connections = state.connections.filter(c => 
+        !((c.fromDevice === dev.instanceId && c.fromPort === portIdx) || 
+          (c.toDevice === dev.instanceId && c.toPort === portIdx))
+      );
+      
+      if (type !== "none") {
+        let destDevId = "";
+        let destPortIdx = 0;
+        
+        if (type === "device") {
+          destDevId = targetId;
+          destPortIdx = targetPort;
+          
+          // Evict target occupied port
+          state.connections = state.connections.filter(c => 
+            !((c.fromDevice === destDevId && c.fromPort === destPortIdx) || 
+              (c.toDevice === destDevId && c.toPort === destPortIdx))
+          );
+        } else if (type === "drop") {
+          destDevId = "wall-drop";
+          destPortIdx = parseInt(targetId);
+        } else if (type === "endpoint") {
+          destDevId = "poe-endpoint";
+          destPortIdx = targetId;
+        }
+        
+        state.connections.push({
+          id: `conn-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          fromDevice: dev.instanceId,
+          fromPort: portIdx,
+          toDevice: destDevId,
+          toPort: destPortIdx,
+          cableColor: color,
+          cableType: category,
+          label: label
+        });
+      }
+    });
+    
+    cleanOrphanConnections();
+    saveState();
+    update();
+    closeDeviceConfigModal();
+  }
+  
+  function cleanOrphanConnections() {
+    state.connections = state.connections.filter(conn => {
+      const fromDevExists = state.placedDevices.some(d => d.instanceId === conn.fromDevice);
+      if (!fromDevExists) return false;
+      
+      if (conn.toDevice === "wall-drop") {
+        return conn.toPort <= state.dropPoints;
+      } else if (conn.toDevice === "poe-endpoint") {
+        const epParts = conn.toPort.split("-");
+        const epId = epParts.slice(0, -1).join("-");
+        const epNum = parseInt(epParts[epParts.length - 1]);
+        const ep = state.endpoints.find(e => e.id === epId);
+        return ep && epNum <= ep.qty;
+      } else {
+        const toDevExists = state.placedDevices.some(d => d.instanceId === conn.toDevice);
+        return toDevExists;
+      }
+    });
+  }
+  
+  function drawRackCables() {
+    let svg = document.getElementById("rack-cables-svg");
+    if (!svg) {
+      svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.id = "rack-cables-svg";
+      svg.setAttribute("class", "rack-cables-svg");
+      cabinetRackEl.appendChild(svg);
+    }
+    
+    svg.innerHTML = "";
+    
+    if (!state.showCables || state.connections.length === 0) {
+      return;
+    }
+    
+    const rackRect = cabinetRackEl.getBoundingClientRect();
+    if (rackRect.width === 0 || rackRect.height === 0) return;
+    
+    const zoom = state.zoomLevel || 1.0;
+    
+    state.connections.forEach(conn => {
+      const fromDevEl = cabinetRackEl.querySelector(`.placed-device[data-instance-id="${conn.fromDevice}"]`);
+      if (!fromDevEl) return;
+      const fromPortEl = fromDevEl.querySelector(`[data-port-idx="${conn.fromPort}"]`);
+      if (!fromPortEl) return;
+      
+      const fromRect = fromPortEl.getBoundingClientRect();
+      const x1 = ((fromRect.left + fromRect.width / 2) - rackRect.left) / zoom;
+      const y1 = ((fromRect.top + fromRect.height / 2) - rackRect.top) / zoom;
+      
+      let colorClass = "";
+      if (conn.cableColor === "#2563eb") colorClass = "cable-blue";
+      else if (conn.cableColor === "#eab308") colorClass = "cable-yellow";
+      else if (conn.cableColor === "#ef4444") colorClass = "cable-red";
+      else if (conn.cableColor === "#22c55e") colorClass = "cable-green";
+      else if (conn.cableColor === "#0f172a") colorClass = "cable-black";
+      else if (conn.cableColor === "#f8fafc") colorClass = "cable-white";
+      else if (conn.cableColor === "#f97316") colorClass = "cable-orange";
+      
+      if (conn.toDevice === "wall-drop" || conn.toDevice === "poe-endpoint") {
+        const exitLeft = x1 < 220;
+        const x2 = exitLeft ? 15 : 425;
+        const y2 = y1 + 18;
+        
+        const pathD = `M ${x1} ${y1} C ${x1} ${y1 + 25}, ${x2} ${y2 + 10}, ${x2} ${y2}`;
+        
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", pathD);
+        path.setAttribute("class", `cable-path ${colorClass}`);
+        path.setAttribute("stroke-width", "2");
+        path.setAttribute("title", `${conn.cableType} | ${conn.label || ''}`);
+        svg.appendChild(path);
+        
+        let labelText = "";
+        if (conn.toDevice === "wall-drop") {
+          labelText = `Drop ${conn.toPort}`;
+        } else if (conn.toDevice === "poe-endpoint") {
+          const epParts = conn.toPort.split("-");
+          const epId = epParts.slice(0, -1).join("-");
+          const epNum = epParts[epParts.length - 1];
+          const ep = state.endpoints.find(e => e.id === epId);
+          labelText = ep ? `${ep.name.replace("UniFi ", "").replace("Araknis ", "")} #${epNum}` : `AP #${epNum}`;
+        }
+        
+        if (labelText.length > 20) labelText = labelText.substring(0, 17) + "...";
+        
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", exitLeft ? "18" : "422");
+        text.setAttribute("y", (y2 + 2).toString());
+        text.setAttribute("class", "cable-exit-text");
+        text.setAttribute("text-anchor", exitLeft ? "start" : "end");
+        text.textContent = labelText;
+        svg.appendChild(text);
+      } else {
+        const toDevEl = cabinetRackEl.querySelector(`.placed-device[data-instance-id="${conn.toDevice}"]`);
+        if (!toDevEl) return;
+        const toPortEl = toDevEl.querySelector(`[data-port-idx="${conn.toPort}"]`);
+        if (!toPortEl) return;
+        
+        const toRect = toPortEl.getBoundingClientRect();
+        const x2 = ((toRect.left + toRect.width / 2) - rackRect.left) / zoom;
+        const y2 = ((toRect.top + toRect.height / 2) - rackRect.top) / zoom;
+        
+        const sag = Math.max(30, Math.min(120, Math.abs(y2 - y1) * 0.4 + 20));
+        const pathD = `M ${x1} ${y1} C ${x1} ${y1 + sag}, ${x2} ${y2 + sag}, ${x2} ${y2}`;
+        
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", pathD);
+        path.setAttribute("class", `cable-path ${colorClass}`);
+        path.setAttribute("stroke-width", "2");
+        path.setAttribute("title", `${conn.cableType} | ${conn.label || ''}`);
+        svg.appendChild(path);
+      }
+    });
+  }
+  
+  function renderConnectionMatrix() {
+    const matrixBodyEl = document.getElementById("connection-matrix-body");
+    if (!matrixBodyEl) return;
+    
+    matrixBodyEl.innerHTML = "";
+    
+    if (state.connections.length === 0) {
+      matrixBodyEl.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding: 16px;">No connections configured yet. Click a device in the rack to start patching.</td></tr>`;
+      return;
+    }
+    
+    const sortedConns = [...state.connections].sort((a, b) => {
+      const devA = state.placedDevices.find(d => d.instanceId === a.fromDevice);
+      const devB = state.placedDevices.find(d => d.instanceId === b.fromDevice);
+      if (!devA || !devB) return 0;
+      
+      if (devB.slot !== devA.slot) return devB.slot - devA.slot;
+      return a.fromPort - b.fromPort;
+    });
+    
+    sortedConns.forEach(conn => {
+      const fromDev = state.placedDevices.find(d => d.instanceId === conn.fromDevice);
+      if (!fromDev) return;
+      
+      const tr = document.createElement("tr");
+      
+      const sourceName = `${fromDev.customLabel || fromDev.name} (U${fromDev.slot})`;
+      const sourceIp = fromDev.ipAddress ? ` [${fromDev.ipAddress}]` : "";
+      
+      let badgeBg = conn.cableColor || "#2563eb";
+      let badgeText = conn.cableColor === "#f8fafc" ? "#0f172a" : "#ffffff";
+      const cableBadge = `<span class="cable-badge" style="background: ${badgeBg}; color: ${badgeText};">${conn.cableType}</span>`;
+      
+      let destHtml = "";
+      let destPortHtml = "";
+      
+      if (conn.toDevice === "wall-drop") {
+        destHtml = `<span class="connection-tag">🏠 Wall Drop</span>`;
+        destPortHtml = `<span class="connection-tag-port">Drop #${conn.toPort}</span>`;
+      } else if (conn.toDevice === "poe-endpoint") {
+        const epParts = conn.toPort.split("-");
+        const epId = epParts.slice(0, -1).join("-");
+        const epNum = epParts[epParts.length - 1];
+        const ep = state.endpoints.find(e => e.id === epId);
+        const epName = ep ? ep.name : "PoE Device";
+        destHtml = `<span class="connection-tag">📡 ${epName} #${epNum}</span>`;
+        destPortHtml = `<span class="connection-tag-port">PoE</span>`;
+      } else {
+        const toDev = state.placedDevices.find(d => d.instanceId === conn.toDevice);
+        if (toDev) {
+          const toIp = toDev.ipAddress ? ` [${toDev.ipAddress}]` : "";
+          destHtml = `${toDev.customLabel || toDev.name} (U${toDev.slot})${toIp}`;
+          destPortHtml = `<span class="connection-tag-port">Port ${conn.toPort + 1}</span>`;
+        } else {
+          destHtml = `<span style="color:var(--danger);">[Removed Device]</span>`;
+          destPortHtml = "-";
+        }
+      }
+      
+      tr.innerHTML = `
+        <td><strong>${sourceName}</strong>${sourceIp}</td>
+        <td><span class="connection-tag-port">Port ${conn.fromPort + 1}</span></td>
+        <td>${cableBadge}</td>
+        <td><strong>${destHtml}</strong></td>
+        <td>${destPortHtml}</td>
+        <td style="color: var(--text-muted); font-style: italic;">${conn.label || "-"}</td>
+      `;
+      
+      matrixBodyEl.appendChild(tr);
+    });
+  }
+  
+  window.addEventListener("resize", drawRackCables);
+
   // --- Sidebar Resizer Logic ---
   const resizerLeft = document.getElementById("rp-resizer-left");
   const resizerRight = document.getElementById("rp-resizer-right");
@@ -1982,6 +2595,7 @@ document.addEventListener("DOMContentLoaded", () => {
         newWidth = Math.max(200, Math.min(600, startWidth - dx));
         mainEl.style.setProperty("--right-width", newWidth + "px");
       }
+      drawRackCables();
     };
 
     const onMouseUp = () => {
@@ -1997,6 +2611,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("rp-right-width", mainEl.style.getPropertyValue("--right-width").replace("px", ""));
       }
       fitToView(); // Re-adjust canvas zoom if needed
+      drawRackCables();
     };
 
     resizer.addEventListener("mousedown", (e) => {

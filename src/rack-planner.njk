@@ -43,6 +43,10 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
         <span class="rp-zoom-label" id="zoom-label">100%</span>
         <button class="rp-zoom-btn" id="zoom-fit" title="Fit to View">⊡</button>
       </div>
+      <label class="rp-toolbar-checkbox-label" for="toggle-cables" title="Show/Hide Cable Connections">
+        <input type="checkbox" id="toggle-cables" checked>
+        <span>Show Cables</span>
+      </label>
     </div>
     <div class="rp-toolbar-right">
       <button class="rp-toolbar-btn" id="btn-bom-toggle" title="Bill of Materials">📋 <span class="rp-btn-label">BOM</span></button>
@@ -237,6 +241,28 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
           <div class="summary-row total"><span>Est. Cost:</span><span id="manifest-total-cost" style="color:var(--accent-cyan);">$0</span></div>
         </div>
       </div>
+      <div class="rp-bom-connections-wrap" style="margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px;">
+        <h3 class="manifest-connections-title">🔗 Cabling &amp; Port Patching Matrix</h3>
+        <div class="manifest-table-wrapper">
+          <table class="manifest-connections-table">
+            <thead>
+              <tr>
+                <th>Source Device</th>
+                <th style="width:70px;">Port</th>
+                <th style="width:180px;">Cable Details</th>
+                <th>Destination Device / Endpoint</th>
+                <th style="width:90px;">Dest Port</th>
+                <th>Label / Notes</th>
+              </tr>
+            </thead>
+            <tbody id="connection-matrix-body">
+              <tr>
+                <td colspan="6" style="text-align:center; color:var(--text-muted); padding: 16px;">No connections configured yet. Click a device in the rack to start patching.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -361,6 +387,60 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
       </div>
       <button type="submit" class="btn btn-primary" id="btn-add-endpoint" style="width:100%;justify-content:center;padding:12px;font-weight:700;">Add to Project</button>
     </form>
+  </div>
+</div>
+
+<!-- Device Configuration & Cabling Modal -->
+<div class="modal-overlay" id="device-config-modal">
+  <div class="modal-content modal-content--large">
+    <div class="modal-header">
+      <h3 id="config-device-title">Device Configuration</h3>
+      <button class="modal-close" id="modal-config-close">✕</button>
+    </div>
+    
+    <div class="form-grid" style="margin-bottom:16px;">
+      <div class="form-group">
+        <label for="config-custom-label">Custom Label / Hostname</label>
+        <input type="text" id="config-custom-label" placeholder="e.g. Core-Switch-1">
+      </div>
+      <div class="form-group">
+        <label for="config-ip-address">IP Address</label>
+        <input type="text" id="config-ip-address" placeholder="e.g. 192.168.1.10">
+      </div>
+    </div>
+    
+    <div class="form-group" style="margin-bottom:20px;">
+      <label for="config-device-notes">Notes / Documentation</label>
+      <input type="text" id="config-device-notes" placeholder="e.g. Located on 3rd floor rack, managed by admin">
+    </div>
+    
+    <div style="border-top:1px solid rgba(255,255,255,0.06); padding-top:16px;">
+      <h4 style="margin:0 0 8px 0; color:#fff; font-size:14px; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
+        <span>🔌 Port Patching &amp; Cabling</span>
+        <span style="font-size:11px; font-weight:normal; color:var(--text-muted);">Configure connection endpoints for each port</span>
+      </h4>
+      
+      <div class="patch-table-container">
+        <table class="patch-table">
+          <thead>
+            <tr>
+              <th style="width:90px;">Port</th>
+              <th>Connects To...</th>
+              <th style="width:250px;">Cable Details</th>
+            </tr>
+          </thead>
+          <tbody id="patch-table-body">
+            <!-- Populated dynamically via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div style="margin-top:20px; display:flex; gap:12px; justify-content:flex-end;">
+      <button type="button" class="btn btn-secondary" id="btn-config-clear-connections" style="margin-right:auto; background:#dc2626; color:#fff; border-color:#dc2626;">Clear All Connections</button>
+      <button type="button" class="btn btn-secondary" id="btn-config-cancel">Cancel</button>
+      <button type="button" class="btn btn-primary" id="btn-config-save">Save Changes</button>
+    </div>
   </div>
 </div>
 
