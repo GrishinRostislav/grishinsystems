@@ -45,7 +45,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       await prisma.transaction.create({
         data: {
           amount: -Math.abs(sched.amount),
-          date: new Date(runDate),
+          date: new Date(),
           merchant: sched.merchant || "Transfer Out",
           payeeId: sched.payeeId,
           notes: sched.notes ? `[Manual Approve] ${sched.notes}` : '[Manual Approve Transfer]',
@@ -57,7 +57,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       await prisma.transaction.create({
         data: {
           amount: Math.abs(sched.amount),
-          date: new Date(runDate),
+          date: new Date(),
           merchant: sched.merchant || "Transfer In",
           payeeId: sched.payeeId,
           notes: sched.notes ? `[Manual Approve] ${sched.notes}` : '[Manual Approve Transfer]',
@@ -84,7 +84,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       await prisma.transaction.create({
         data: {
           amount: sched.amount,
-          date: new Date(runDate),
+          date: new Date(),
           merchant: sched.merchant,
           payeeId: sched.payeeId,
           notes: sched.notes ? `[Manual Approve] ${sched.notes}` : '[Manual Approve]',
