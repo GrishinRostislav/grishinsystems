@@ -34,6 +34,9 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "patch-24", name: "24-Port Blank Keystone Panel", brand: "generic", u: 1, ports: 24, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: false, type: "patch-panel", cost: 35 }
     ],
     routers: [
+      { id: "eero-poe-gateway", name: "eero PoE Gateway", brand: "eero", u: 1, ports: 10, poe_ports: 8, poe_budget: 148, outlets: 0, requires_power: true, type: "router", cost: 649 },
+      { id: "eero-max-7", name: "eero Max 7 Router (Shelf)", brand: "eero", u: 1, width_fraction: 0.33, ports: 4, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 599 },
+      { id: "eero-pro-6e", name: "eero Pro 6E AP (Shelf)", brand: "eero", u: 1, width_fraction: 0.25, ports: 2, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 299 },
       { id: "udm-pro", name: "UniFi Dream Machine Pro", brand: "ubiquiti", u: 1, ports: 8, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 379 },
       { id: "cisco-firepower", name: "Cisco Firepower 1010", brand: "cisco", u: 1, ports: 8, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 890 },
       { id: "araknis-110-rt", name: "Araknis AN-110-RT-2L1W Router", brand: "araknis", u: 1, ports: 3, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 249 },
@@ -46,6 +49,8 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "pdu-apc-1u", name: "APC 1U PDU Rackmount", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 10, requires_power: true, type: "power", cost: 99 }
     ],
     theater: [
+      { id: "savant-sipa125", name: "Savant IP Audio 125 (SIPA125)", brand: "savant", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1800 },
+      { id: "savant-sipa50", name: "Savant IP Audio 50 (SIPA50)", brand: "savant", u: 1, width_fraction: 0.5, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 950 },
       { id: "avr-denon-s570", name: "Denon AVR-S570H 5.2-Ch (1 Zone)", brand: "denon", u: 3, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 399 },
       { id: "avr-denon-x2800", name: "Denon AVR-X2800H 7.2-Ch (2 Zones)", brand: "denon", u: 3, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1199 },
       { id: "avr-marantz-c50", name: "Marantz Cinema 50 9.4-Ch (3 Zones)", brand: "marantz", u: 4, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 2500 },
@@ -59,6 +64,8 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "sonos-port", name: "Sonos Port Audio Streamer", brand: "sonos", u: 1, width_fraction: 0.33, ports: 2, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 449 }
     ],
     automation: [
+      { id: "savant-macmini-host", name: "Savant Mac Mini Host", brand: "savant", u: 1, width_fraction: 0.5, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 999 },
+      { id: "savant-smart-host", name: "Savant Smart Host (shc-2000)", brand: "savant", u: 1, width_fraction: 0.5, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 799 },
       { id: "c4-core-1", name: "Control4 CORE 1 Controller", brand: "control4", u: 1, width_fraction: 0.5, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 600 },
       { id: "c4-core-3", name: "Control4 CORE 3 Controller", brand: "control4", u: 1, width_fraction: 0.5, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1000 },
       { id: "c4-core-5", name: "Control4 CORE 5 Controller", brand: "control4", u: 1, width_fraction: 1, ports: 2, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 2000 },
@@ -88,6 +95,8 @@ document.addEventListener("DOMContentLoaded", () => {
     { id: "araknis-720-ap", name: "Araknis AN-720-AP-O-AC AP", brand: "araknis", category: "wireless", wattage: 15.6, poeClass: "at", cost: 550 },
     { id: "araknis-820-ap-ax", name: "Araknis AN-820-AP-I-AX AP", brand: "araknis", category: "wireless", wattage: 22.0, poeClass: "at", cost: 599 },
     { id: "araknis-530-ap", name: "Araknis AN-530-AP-I Wi-Fi 7 AP", brand: "araknis", category: "wireless", wattage: 25.0, poeClass: "at", cost: 699 },
+    { id: "eero-poe-6", name: "eero PoE 6 AP", brand: "eero", category: "wireless", wattage: 15.4, poeClass: "af", cost: 189 },
+    { id: "eero-outdoor-7", name: "eero Outdoor 7 AP", brand: "eero", category: "wireless", wattage: 21.0, poeClass: "at", cost: 349 },
 
     // IP Cameras
     { id: "unifi-g5-bullet", name: "UniFi G5 Bullet", brand: "ubiquiti", category: "cctv", wattage: 4.0, poeClass: "af", cost: 129 },
@@ -923,8 +932,8 @@ document.addEventListener("DOMContentLoaded", () => {
        for (let i = 0; i < d.u; i++) uniqueOccupiedUs.add(d.slot - i);
     });
     const totalU = uniqueOccupiedUs.size;
-    const totalPorts = state.placedDevices.reduce((s, d) => s + (d.type === "switch" ? d.ports : 0), 0);
-    const totalPoe = state.placedDevices.reduce((s, d) => s + (d.type === "switch" ? d.poe_budget : 0), 0);
+    const totalPorts = state.placedDevices.reduce((s, d) => s + ((d.type === "switch" || d.poe_budget > 0) ? d.ports : 0), 0);
+    const totalPoe = state.placedDevices.reduce((s, d) => s + ((d.type === "switch" || d.poe_budget > 0) ? d.poe_budget : 0), 0);
     let totalCost = state.placedDevices.reduce((s, d) => s + d.cost, 0);
     state.endpoints.forEach(e => { totalCost += e.cost * e.qty; });
 
@@ -1010,8 +1019,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let availableOutlets = state.placedDevices.reduce((sum, d) => sum + (d.outlets || 0), 0);
 
-    const activeSwitches = state.placedDevices.filter(d => d.type === "switch");
-    const hasRouter = state.placedDevices.some(d => d.type === "router");
+    const activeSwitches = state.placedDevices.filter(d => d.type === "switch" || d.poe_budget > 0);
+    const hasRouter = state.placedDevices.some(d => d.type === "router" && d.poe_budget === 0);
     
     // Core switch is the one with the most ports, then highest slot
     const sortedSwitches = [...activeSwitches].sort((a, b) => {
@@ -1123,7 +1132,7 @@ document.addEventListener("DOMContentLoaded", () => {
         for (let i = 0; i < dev.ports; i++) {
           let classStr = "port-dot";
           
-          if (dev.type === "switch") {
+          if (dev.type === "switch" || dev.poe_budget > 0) {
             const uplinksNeeded = dev.instanceId === coreSwitchId ? coreUplinks : 1;
             const isUplinkPort = (i < uplinksNeeded);
             const isPoeCapable = dev.poe_ports > 0 && i < dev.poe_ports;
@@ -1205,6 +1214,8 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (dev.brand === "sony") logoText = "Sony";
         else if (dev.brand === "sonos") logoText = "Sonos";
         else if (dev.brand === "control4") logoText = "C4";
+        else if (dev.brand === "eero") logoText = "eero";
+        else if (dev.brand === "savant") logoText = "Savant";
       }
 
       // Render actual hardware faceplate - contains ports, LEDs, logo and tiny info label with action
@@ -1523,18 +1534,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const endpointQtyCount = state.endpoints.reduce((sum, e) => sum + e.qty, 0);
     const totalDropPoints = state.dropPoints + endpointQtyCount;
     
-    const activeSwitches = state.placedDevices.filter(d => d.type === "switch");
+    const activeSwitches = state.placedDevices.filter(d => d.type === "switch" || d.poe_budget > 0);
     const numSwitches = activeSwitches.length;
     const uplinkPorts = numSwitches; // 1 uplink port per switch
     
     const localRackSources = state.placedDevices.reduce((sum, d) => {
-      if (d.type === "router") return sum + 1; // Only 1 LAN uplink goes to switch
-      if (d.type !== "switch" && d.type !== "patch-panel" && d.ports > 0) return sum + d.ports;
+      if (d.type === "router" && d.poe_budget === 0) return sum + 1; // Only 1 LAN uplink goes to switch
+      if (d.type !== "switch" && d.poe_budget === 0 && d.type !== "patch-panel" && d.ports > 0) return sum + d.ports;
       return sum;
     }, 0);
     
     const switchPortsNeeded = totalDropPoints + state.localLines + localRackSources + uplinkPorts;
-    const totalSwitchPorts = state.placedDevices.reduce((sum, d) => sum + (d.type === "switch" ? d.ports : 0), 0);
+    const totalSwitchPorts = state.placedDevices.reduce((sum, d) => sum + ((d.type === "switch" || d.poe_budget > 0) ? d.ports : 0), 0);
     
     let switchStatus = "valid";
     let switchMsg = "";
@@ -1564,7 +1575,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateValCard(valPatchPortsEl, patchStatus, "🎛️", "Patch Panels", patchMsg);
 
     // 3. PoE budget calculations
-    const combinedPoeBudget = state.placedDevices.reduce((sum, d) => sum + (d.type === "switch" ? d.poe_budget : 0), 0);
+    const combinedPoeBudget = state.placedDevices.reduce((sum, d) => sum + ((d.type === "switch" || d.poe_budget > 0) ? d.poe_budget : 0), 0);
     const totalPoeDevices = endpointQtyCount;
     const calculatedPoeDemand = state.endpoints.reduce((sum, e) => sum + (e.qty * e.wattage), 0);
     
@@ -1662,9 +1673,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (ln.includes("apple tv") || ln.includes("playstation") || ln.includes("cable") || ln.includes("shield") || ln.includes("core 1") || ln.includes("core 3") || ln.includes("core 5") || dev.brand === "denon" || dev.brand === "marantz" || ln.includes("receiver") || ln.includes("avr")) {
         hdmiQty += 1;
       }
-      if (dev.type === "switch") {
+      if (dev.type === "switch" || dev.poe_budget > 0) {
         switchCount++;
-      } else if (dev.type === "router") {
+      } else if (dev.type === "router" && dev.poe_budget === 0) {
         const numWan = dev.name.includes("2WAN") || dev.name.includes("4L2W") ? 2 : 1;
         patchcordQty += numWan + 1; // WAN ports + 1 LAN uplink
       } else if (dev.type !== "patch-panel" && dev.type !== "power" && dev.ports) {
@@ -1690,7 +1701,8 @@ document.addEventListener("DOMContentLoaded", () => {
     state.placedDevices.forEach(dev => {
       let typeLabel = "Rack Unit";
       let typeGroup = "misc";
-      if (dev.type === "switch") { typeLabel = "Switch"; typeGroup = "switch"; }
+      if (dev.id === "eero-poe-gateway") { typeLabel = "PoE Router / Switch"; typeGroup = "router"; }
+      else if (dev.type === "switch") { typeLabel = "Switch"; typeGroup = "switch"; }
       else if (dev.type === "patch-panel") { typeLabel = "Patch Panel"; typeGroup = "patch-panel"; }
       else if (dev.type === "router") { typeLabel = "Router"; typeGroup = "router"; }
       else if (dev.type === "power") { typeLabel = "Power/UPS"; typeGroup = "power"; }
@@ -2067,12 +2079,12 @@ document.addEventListener("DOMContentLoaded", () => {
     
     const otherDevices = state.placedDevices.filter(d => d.instanceId !== dev.instanceId && d.ports > 0);
     
-    const activeSwitches = state.placedDevices.filter(d => d.type === "switch");
+    const activeSwitches = state.placedDevices.filter(d => d.type === "switch" || d.poe_budget > 0);
     const sortedSwitches = [...activeSwitches].sort((a, b) => {
       if (b.ports !== a.ports) return b.ports - a.ports;
       return b.slot - a.slot;
     });
-    const hasRouter = state.placedDevices.some(d => d.type === "router");
+    const hasRouter = state.placedDevices.some(d => d.type === "router" && d.poe_budget === 0);
     const coreUplinks = (hasRouter ? 1 : 0) + Math.max(0, activeSwitches.length - 1);
     
     for (let i = 0; i < dev.ports; i++) {
@@ -2120,7 +2132,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tdPort.className = "patch-port-label";
       
       let specialLabel = "";
-      if (dev.type === "switch") {
+      if (dev.type === "switch" || dev.poe_budget > 0) {
         const uplinksNeeded = (dev.instanceId === (sortedSwitches.length > 0 ? sortedSwitches[0].instanceId : null) ? coreUplinks : 1);
         const isUplink = (i < uplinksNeeded);
         const isPoe = dev.poe_ports > 0 && i < dev.poe_ports;

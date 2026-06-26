@@ -917,6 +917,21 @@ body.dragging-active .placed-device * {
   border-left: 4px solid var(--text-secondary);
 }
 
+.device-brand-eero {
+  background: linear-gradient(135deg, #131722, #202634);
+  border-left: 4px solid #ff5a00;
+}
+
+.device-brand-savant {
+  background: linear-gradient(135deg, #120e25, #221a3e);
+  border-left: 4px solid #5a30b5;
+}
+
+.device-brand-control4 {
+  background: linear-gradient(135deg, #18191b, #2c2d30);
+  border-left: 4px solid #cc0000;
+}
+
 /* ----------------------------------------------------------
    9. RIGHT SIDEBAR PANELS
    ---------------------------------------------------------- */
