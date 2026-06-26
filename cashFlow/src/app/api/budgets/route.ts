@@ -60,8 +60,6 @@ export async function GET() {
         let projected = 0;
         const now = new Date();
         if (end > now) {
-          const simStart = start > now ? start : now;
-          
           const scheduledTxs = await prisma.scheduledTransaction.findMany({
             where: {
               isActive: true,
@@ -79,7 +77,7 @@ export async function GET() {
           for (const st of scheduledTxs) {
             let simDate = new Date(st.nextRunDate);
             while (simDate <= end) {
-              if (simDate >= simStart) {
+              if (simDate >= start) {
                 const convertedAmt = convertAmount(st.amount, st.account?.currency || homeCurrency, homeCurrency, rates);
                 projected += Math.abs(convertedAmt);
               }
