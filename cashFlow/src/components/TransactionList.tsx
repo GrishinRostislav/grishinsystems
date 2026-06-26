@@ -119,9 +119,23 @@ export default function TransactionList({
           return indexA - indexB;
         });
 
+        // Calculate total spent (expenses) for this day
+        const daySpent = dateTxns
+          .filter((t: any) => t.amount < 0)
+          .reduce((sum: number, t: any) => sum + t.amount, 0);
+
+        const currency = dateTxns[0]?.account?.currency;
+
         return (
           <div key={dateStr} className={styles.dateGroup}>
-            <div className={styles.dateHeader}>{dateStr}</div>
+            <div className={styles.dateHeader}>
+              <span>{dateStr}</span>
+              {daySpent < 0 && (
+                <span className={styles.daySpent}>
+                  Spent: {formatCurrency(Math.abs(daySpent), currency)}
+                </span>
+              )}
+            </div>
             <div className={styles.groupItems}>
               {renderItems.map((item) => {
                 if (item.isGroup) {
