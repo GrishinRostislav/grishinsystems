@@ -2493,3 +2493,144 @@ body.dragging-active .placed-device * {
   box-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
+/* Eero PoE Gateway Custom Faceplate */
+.eero-gateway-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  padding-right: 12px;
+  position: relative;
+  background: #11141a; /* dark chassis */
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.eero-brand-area {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  width: 110px;
+  height: 100%;
+  padding-left: 12px;
+  position: relative;
+  background: linear-gradient(135deg, #222938, #181d28);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0 16px 16px 0;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.4);
+}
+
+.eero-glossy-badge {
+  display: flex;
+  flex-direction: column;
+}
+
+.eero-text-logo {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+  line-height: 1;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.eero-badge-sub {
+  font-size: 5px;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 1px;
+}
+
+.eero-led-light {
+  width: 4px;
+  height: 4px;
+  background: #2d3748;
+  border-radius: 50%;
+  margin-top: 6px;
+  transition: all 0.3s ease;
+}
+
+.eero-led-light.active {
+  background: #fff;
+  box-shadow: 0 0 4px #fff, 0 0 8px #fff;
+}
+
+.eero-ports-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-left: auto;
+  padding: 4px 0;
+}
+
+.eero-poe-ports-block,
+.eero-ten-g-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.eero-ports-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 3px 6px;
+}
+
+.eero-ten-g-row {
+  display: flex;
+  gap: 6px;
+  padding: 3px 0;
+}
+
+.eero-port-wrapper,
+.eero-port-wrapper10g {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eero-ports-label,
+.eero-ten-g-label {
+  font-size: 6px;
+  color: #718096;
+  text-transform: uppercase;
+  margin-top: 3px;
+  letter-spacing: 0.3px;
+}
+
+.eero-usbc-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 2px;
+}
+
+.eero-usbc-port {
+  width: 8px;
+  height: 4px;
+  background: #050810;
+  border: 1px solid #718096;
+  border-radius: 2px;
+  position: relative;
+}
+
+.eero-usbc-port::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 2px;
+  width: 2px;
+  height: 1px;
+  background: #718096;
+}
+
+

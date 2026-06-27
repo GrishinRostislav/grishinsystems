@@ -1222,7 +1222,85 @@ document.addEventListener("DOMContentLoaded", () => {
       let faceplateOverlayHtml = "";
       let hideDefaultLeft = false;
 
-      if (dev.brand === "ubiquiti" && dev.type === "switch") {
+      if (dev.id === "eero-poe-gateway") {
+        // Pre-generate the 10 ports
+        const portHtmls = [];
+        for (let i = 0; i < 10; i++) {
+          let classStr = "port-dot";
+          const isPoeCapable = i < 8;
+          const isUplinkPort = i >= 8;
+          
+          if (isPoeCapable) {
+            classStr += " poe-capable";
+          }
+          if (isUplinkPort) {
+            classStr += " uplink";
+          }
+          
+          if (isPoeCapable && remainingPoeForSwitches > 0) {
+            classStr += " poe";
+            remainingPoeForSwitches--;
+          } else if (remainingNonPoeForSwitches > 0) {
+            classStr += " active";
+            remainingNonPoeForSwitches--;
+          }
+          
+          const isPortConnected = state.connections.some(c => 
+            (c.fromDevice === dev.instanceId && c.fromPort === i) || 
+            (c.toDevice === dev.instanceId && c.toPort === i)
+          );
+          if (isPortConnected) {
+            classStr += " connected";
+          }
+          
+          portHtmls.push(`<span class="${classStr}" data-port-idx="${i}" title="${dev.customLabel || dev.name} - Port ${i+1}"></span>`);
+        }
+
+        faceplateOverlayHtml = `
+          <div class="eero-gateway-panel">
+            <div class="eero-brand-area">
+              <div class="eero-glossy-badge">
+                <span class="eero-text-logo">eero</span>
+                <span class="eero-badge-sub">an amazon company</span>
+              </div>
+              <div class="eero-led-light ${dev.requires_power && availableOutlets > 0 ? 'active' : ''}"></div>
+            </div>
+            
+            <div class="eero-ports-section">
+              <div class="eero-poe-ports-block">
+                <div class="eero-ports-grid">
+                  <div class="eero-port-wrapper">${portHtmls[0]}</div>
+                  <div class="eero-port-wrapper">${portHtmls[2]}</div>
+                  <div class="eero-port-wrapper">${portHtmls[4]}</div>
+                  <div class="eero-port-wrapper">${portHtmls[6]}</div>
+                  <div class="eero-port-wrapper">${portHtmls[1]}</div>
+                  <div class="eero-port-wrapper">${portHtmls[3]}</div>
+                  <div class="eero-port-wrapper">${portHtmls[5]}</div>
+                  <div class="eero-port-wrapper">${portHtmls[7]}</div>
+                </div>
+                <div class="eero-ports-label">1 - 8 PoE+</div>
+              </div>
+              
+              <div class="eero-ten-g-block">
+                <div class="eero-ten-g-row">
+                  <div class="eero-port-wrapper10g">${portHtmls[8]}</div>
+                  <div class="eero-port-wrapper10g">${portHtmls[9]}</div>
+                </div>
+                <div class="eero-ten-g-label">10 GbE</div>
+              </div>
+              
+              <div class="eero-usbc-area">
+                <div class="eero-usbc-port" title="USB-C Power"></div>
+              </div>
+            </div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = ""; // Embedded inside faceplateOverlayHtml
+        if (availableOutlets > 0) {
+          availableOutlets--;
+        }
+      } else if (dev.brand === "ubiquiti" && dev.type === "switch") {
         faceplateOverlayHtml = `
           <div class="unifi-lcm-screen" title="UniFi LCM Display">
             <div class="lcm-glowing-dot"></div>
