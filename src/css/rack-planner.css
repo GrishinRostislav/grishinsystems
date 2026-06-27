@@ -2512,9 +2512,9 @@ body.dragging-active .placed-device * {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  width: 110px;
+  width: 75px;
   height: 100%;
-  padding-left: 12px;
+  padding-left: 8px;
   position: relative;
   background: linear-gradient(135deg, #222938, #181d28);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
@@ -2562,7 +2562,7 @@ body.dragging-active .placed-device * {
 .eero-ports-section {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 8px;
   margin-left: auto;
   padding: 4px 0;
 }
