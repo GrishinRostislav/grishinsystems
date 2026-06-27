@@ -90,7 +90,10 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "araknis-110-rt", name: "Araknis AN-110-RT-2L1W Router", brand: "araknis", u: 1, ports: 3, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 249 },
       { id: "araknis-220-rt", name: "Araknis AN-220-RT-2WAN Router (2.5G)", brand: "araknis", u: 1, ports: 5, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 450 },
       { id: "araknis-310-rt", name: "Araknis AN-310-RT-4L2W Router", brand: "araknis", u: 1, ports: 6, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 399 },
-      { id: "araknis-520-rt", name: "Araknis AN-520-RT-2WAN Router", brand: "araknis", u: 1, ports: 5, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 650 }
+      { id: "araknis-520-rt", name: "Araknis AN-520-RT-2WAN Router", brand: "araknis", u: 1, ports: 5, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 650 },
+      { id: "telus-nah", name: "TELUS Network Access Hub (NAH)", brand: "telus", u: 1, width_fraction: 0.5, ports: 6, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 150 },
+      { id: "rogers-xb8", name: "Rogers Ignite WiFi Gateway (XB8)", brand: "rogers", u: 1, width_fraction: 0.33, ports: 4, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 200 },
+      { id: "bell-gigahub", name: "Bell Giga Hub Fibe Gateway", brand: "bell", u: 1, width_fraction: 0.5, ports: 5, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 250 }
     ],
     power: [
       { id: "ups-cyberpower-2u", name: "CyberPower 1500VA UPS", brand: "cyberpower", u: 2, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 8, requires_power: true, type: "power", cost: 249 },
@@ -1215,7 +1218,7 @@ document.addEventListener("DOMContentLoaded", () => {
       devEl.draggable = true;
       
       const widthFrac = dev.width_fraction || 1;
-      const isCleanChassis = dev.id === "apple-tv-4k" || dev.id === "eero-max-7" || dev.id === "eero-pro-6e" || dev.id === "sonos-port" || dev.id === "savant-macmini-host" || dev.id === "amp-sonos" || dev.id === "nv-shield" || dev.id === "cable-box";
+      const isCleanChassis = dev.id === "apple-tv-4k" || dev.id === "eero-max-7" || dev.id === "eero-pro-6e" || dev.id === "sonos-port" || dev.id === "savant-macmini-host" || dev.id === "amp-sonos" || dev.id === "nv-shield" || dev.id === "cable-box" || dev.id === "telus-nah" || dev.id === "rogers-xb8" || dev.id === "bell-gigahub";
       
       if (isSideSlot(dev.slot)) {
         devEl.className = `placed-device side-placed-device device-brand-${dev.brand}${isCleanChassis ? ' clean-chassis' : ''}`;
@@ -1743,6 +1746,105 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="nvshield-ports-bracket" style="margin-left: auto; display: flex; align-items: center; gap: 4px; pointer-events: auto; padding-right: 6px;">
               <span class="nvshield-port-label" style="font-size: 6.5px; font-weight: bold; color: #666;">LAN</span>
               ${customSinglePort(0, "Ethernet (LAN)")}
+            </div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
+      } else if (dev.id === "telus-nah") {
+        faceplateOverlayHtml = `
+          <div class="telus-nah-chassis">
+            <div class="telus-nah-front">
+              <div class="telus-nah-led glowing"></div>
+              <span class="telus-nah-logo">TELUS NAH</span>
+            </div>
+            <div class="telus-nah-ports" style="display: flex; gap: 4px; pointer-events: auto; margin-left: auto; padding-right: 4px;">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:1px;">
+                <span style="font-size:4.5px; color:#999; font-weight:bold;">10G WAN</span>
+                ${customSinglePort(0, "10G WAN", "wan-port")}
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:1px;">
+                <span style="font-size:4.5px; color:#999; font-weight:bold;">10G LAN</span>
+                ${customSinglePort(1, "10G LAN")}
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:1px;">
+                <span style="font-size:4.5px; color:#999; font-weight:bold;">LAN1</span>
+                ${customSinglePort(2, "LAN 1")}
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:1px;">
+                <span style="font-size:4.5px; color:#999; font-weight:bold;">LAN2</span>
+                ${customSinglePort(3, "LAN 2")}
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:1px;">
+                <span style="font-size:4.5px; color:#999; font-weight:bold;">LAN3</span>
+                ${customSinglePort(4, "LAN 3")}
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:1px;">
+                <span style="font-size:4.5px; color:#999; font-weight:bold;">LAN4</span>
+                ${customSinglePort(5, "LAN 4")}
+              </div>
+            </div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
+      } else if (dev.id === "rogers-xb8") {
+        faceplateOverlayHtml = `
+          <div class="rogers-xb8-chassis">
+            <div class="rogers-xb8-front">
+              <div class="rogers-xb8-led glowing"></div>
+              <span class="rogers-xb8-logo">ROGERS XB8</span>
+            </div>
+            <div class="rogers-xb8-ports" style="display: flex; gap: 4px; pointer-events: auto; margin-left: auto; padding-right: 6px;">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:1px;">
+                <span style="font-size:4.5px; color:#999; font-weight:bold;">WAN/LAN</span>
+                ${customSinglePort(0, "2.5G WAN/LAN", "wan-port")}
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:1px;">
+                <span style="font-size:4.5px; color:#999; font-weight:bold;">LAN1</span>
+                ${customSinglePort(1, "LAN 1")}
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:1px;">
+                <span style="font-size:4.5px; color:#999; font-weight:bold;">LAN2</span>
+                ${customSinglePort(2, "LAN 2")}
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:1px;">
+                <span style="font-size:4.5px; color:#999; font-weight:bold;">LAN3</span>
+                ${customSinglePort(3, "LAN 3")}
+              </div>
+            </div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
+      } else if (dev.id === "bell-gigahub") {
+        faceplateOverlayHtml = `
+          <div class="bell-gigahub-chassis">
+            <div class="bell-gigahub-front">
+              <div class="bell-gigahub-led-bar"></div>
+              <span class="bell-gigahub-logo">bell giga hub</span>
+            </div>
+            <div class="bell-gigahub-ports" style="display: flex; gap: 5px; pointer-events: auto; margin-left: auto; padding-right: 8px;">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:1px;">
+                <span style="font-size:4.5px; color:#999; font-weight:bold;">10G WAN</span>
+                ${customSinglePort(0, "10G WAN/LAN", "wan-port")}
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:1px;">
+                <span style="font-size:4.5px; color:#999; font-weight:bold;">LAN1</span>
+                ${customSinglePort(1, "LAN 1")}
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:1px;">
+                <span style="font-size:4.5px; color:#999; font-weight:bold;">LAN2</span>
+                ${customSinglePort(2, "LAN 2")}
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:1px;">
+                <span style="font-size:4.5px; color:#999; font-weight:bold;">LAN3</span>
+                ${customSinglePort(3, "LAN 3")}
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:1px;">
+                <span style="font-size:4.5px; color:#999; font-weight:bold;">LAN4</span>
+                ${customSinglePort(4, "LAN 4")}
+              </div>
             </div>
           </div>
         `;

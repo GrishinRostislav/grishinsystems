@@ -2327,7 +2327,10 @@ body.dragging-active .placed-device * {
 .macmini-ports-bracket,
 .savant-ports-bracket,
 .cable-box-ports,
-.nvshield-ports-bracket {
+.nvshield-ports-bracket,
+.telus-nah-ports,
+.rogers-xb8-ports,
+.bell-gigahub-ports {
   pointer-events: auto !important;
 }
 
@@ -2502,7 +2505,10 @@ body.dragging-active .placed-device * {
 .placed-device.clean-chassis:hover .sonos-port-chassis,
 .placed-device.clean-chassis:hover .eero-max7-chassis,
 .placed-device.clean-chassis:hover .eero-pro6e-chassis,
-.placed-device.clean-chassis:hover .nvshield-chassis {
+.placed-device.clean-chassis:hover .nvshield-chassis,
+.placed-device.clean-chassis:hover .telus-nah-chassis,
+.placed-device.clean-chassis:hover .rogers-xb8-chassis,
+.placed-device.clean-chassis:hover .bell-gigahub-chassis {
   box-shadow: 0 0 0 2px var(--accent-cyan), 0 4px 10px rgba(0, 0, 0, 0.6) !important;
 }
 
@@ -3039,6 +3045,118 @@ body.dragging-active .placed-device * {
   width: 2px;
   height: 1px;
   background: #718096;
+}
+
+/* Canadian ISP Routers Styles */
+
+/* Hiding floating WAN labels for ISP chassis to prevent overlap */
+.telus-nah-chassis .port-dot.wan-port::before,
+.rogers-xb8-chassis .port-dot.wan-port::before,
+.bell-gigahub-chassis .port-dot.wan-port::before {
+  display: none !important;
+}
+
+/* Telus NAH */
+.telus-nah-chassis {
+  width: 170px;
+  height: 24px;
+  background: linear-gradient(to bottom, #ffffff, #f1f5f9);
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: auto;
+  padding: 0 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+}
+.telus-nah-front {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.telus-nah-led {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #22c55e; /* Green status LED */
+  box-shadow: 0 0 4px #22c55e;
+}
+.telus-nah-logo {
+  font-size: 7px;
+  font-weight: 800;
+  color: #4c1d95; /* Telus purple theme */
+  letter-spacing: 0.3px;
+  user-select: none;
+}
+
+/* Rogers XB8 */
+.rogers-xb8-chassis {
+  width: 110px;
+  height: 24px;
+  background: linear-gradient(to bottom, #e2e8f0, #cbd5e1);
+  border: 1px solid #94a3b8;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: auto;
+  padding: 0 6px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+}
+.rogers-xb8-front {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.rogers-xb8-led {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fff; /* White status LED */
+  box-shadow: 0 0 3px #fff;
+}
+.rogers-xb8-logo {
+  font-size: 6px;
+  font-weight: 800;
+  color: #da291c; /* Rogers Red theme */
+  letter-spacing: 0.3px;
+  user-select: none;
+}
+
+/* Bell Giga Hub */
+.bell-gigahub-chassis {
+  width: 170px;
+  height: 24px;
+  background: linear-gradient(to bottom, #18181b, #09090b);
+  border: 1.5px solid #27272a;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: auto;
+  padding: 0 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+}
+.bell-gigahub-front {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.bell-gigahub-led-bar {
+  width: 14px;
+  height: 2px;
+  background: #3b82f6; /* Bell Blue status light strip */
+  box-shadow: 0 0 4px #3b82f6;
+  border-radius: 1px;
+}
+.bell-gigahub-logo {
+  font-size: 7px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  user-select: none;
 }
 
 /* Zero-U Side Cabinet / Non-Rack Space */
