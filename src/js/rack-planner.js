@@ -98,11 +98,12 @@ document.addEventListener("DOMContentLoaded", () => {
     power: [
       { id: "ups-cyberpower-2u", name: "CyberPower 1500VA UPS", brand: "cyberpower", u: 2, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 8, requires_power: true, type: "power", cost: 249 },
       { id: "pdu-apc-1u", name: "APC 1U PDU Rackmount", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 10, requires_power: true, type: "power", cost: 99 },
-      { id: "wattbox-800-12", name: "WattBox 800 Series IP PDU (12 Outlets, 2U)", brand: "wattbox", u: 2, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 12, requires_power: true, type: "power", cost: 749 },
-      { id: "wattbox-800-8", name: "WattBox 800 Series IP PDU (8 Outlets, 1U)", brand: "wattbox", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 8, requires_power: true, type: "power", cost: 599 },
-      { id: "wattbox-700-12", name: "WattBox 700 Series IP PDU (12 Outlets, 2U)", brand: "wattbox", u: 2, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 12, requires_power: true, type: "power", cost: 649 },
-      { id: "wattbox-300-3", name: "WattBox 300 Series IP PDU (3 Outlets, Compact)", brand: "wattbox", u: 1, width_fraction: 0.33, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 3, requires_power: true, type: "power", cost: 299 },
-      { id: "wattbox-250-2", name: "WattBox 250 Series Smart PDU (2 Outlets, Compact)", brand: "wattbox", u: 1, width_fraction: 0.25, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 2, requires_power: true, type: "power", cost: 189 },
+      { id: "wattbox-800-12", name: "WattBox 800 Series IP PDU (12 Outlets, 2U)", brand: "wattbox", u: 2, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 12, requires_power: true, type: "power", cost: 749 },
+      { id: "wattbox-800-8", name: "WattBox 800 Series IP PDU (8 Outlets, 1U)", brand: "wattbox", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 8, requires_power: true, type: "power", cost: 599 },
+      { id: "wattbox-700-12", name: "WattBox 700 Series IP PDU (12 Outlets, 2U)", brand: "wattbox", u: 2, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 12, requires_power: true, type: "power", cost: 649 },
+      { id: "wattbox-400-8", name: "WattBox 400 Series IP PDU (8 Outlets, 1U)", brand: "wattbox", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 8, requires_power: true, type: "power", cost: 449 },
+      { id: "wattbox-300-3", name: "WattBox 300 Series IP PDU (3 Outlets, Compact)", brand: "wattbox", u: 1, width_fraction: 0.33, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 3, requires_power: true, type: "power", cost: 299 },
+      { id: "wattbox-250-2", name: "WattBox 250 Series Smart PDU (2 Outlets, Compact)", brand: "wattbox", u: 1, width_fraction: 0.25, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 2, requires_power: true, type: "power", cost: 189 },
       { id: "power-strip-6", name: "Standard 6-Outlet Power Strip (Shelf)", brand: "generic", u: 1, width_fraction: 0.5, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 6, requires_power: true, type: "power", cost: 25 }
     ],
     theater: [
@@ -1870,6 +1871,10 @@ document.addEventListener("DOMContentLoaded", () => {
               <div class="wb-lightovrc glowing" title="OvrC Cloud Link">OvrC</div>
               <div class="wb-lightlink glowing" title="Network Link">LINK</div>
             </div>
+            <div class="wattbox-network-ports" style="display: flex; align-items: center; gap: 4px; pointer-events: auto;">
+              <span style="font-size: 5px; color: #888; font-weight: bold;">LAN</span>
+              ${customSinglePort(0, "Ethernet (LAN)")}
+            </div>
             <div class="wattbox-outlets-grid">
               ${Array.from({length: 12}, (_, i) => `
                 <div class="wb-outlet-indicator" title="Outlet ${i+1} Status">
@@ -1883,12 +1888,12 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         hideDefaultLeft = true;
         portsHtml = "";
-      } else if (dev.id === "wattbox-800-8") {
+      } else if (dev.id === "wattbox-800-8" || dev.id === "wattbox-400-8") {
         faceplateOverlayHtml = `
           <div class="wattbox-chassis wattbox-1u">
             <div class="wattbox-brand">
               <span class="wattbox-logo-text">WATTBOX</span>
-              <span class="wattbox-model-tag">800-8 IP PDU</span>
+              <span class="wattbox-model-tag">${dev.id.includes("800") ? "800-8 IP PDU" : "400-8 IP PDU"}</span>
             </div>
             <div class="wattbox-lcd" title="Voltage Monitor">
               <span class="wattbox-lcd-text">120<span>V</span></span>
@@ -1896,6 +1901,10 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="wattbox-status-lights">
               <div class="wb-lightovrc glowing" title="OvrC Cloud Link">OvrC</div>
               <div class="wb-lightlink glowing" title="Network Link">LINK</div>
+            </div>
+            <div class="wattbox-network-ports" style="display: flex; align-items: center; gap: 4px; pointer-events: auto;">
+              <span style="font-size: 5px; color: #888; font-weight: bold;">LAN</span>
+              ${customSinglePort(0, "Ethernet (LAN)")}
             </div>
             <div class="wattbox-outlets-row">
               ${Array.from({length: 8}, (_, i) => `
@@ -1917,10 +1926,16 @@ document.addEventListener("DOMContentLoaded", () => {
               <span class="wb-logo-compact">WATTBOX 300</span>
               <div class="wb-compact-led active"></div>
             </div>
-            <div class="wb-compact-outlets">
-              <div class="wb-outlet-dot active" title="Outlet 1 On"></div>
-              <div class="wb-outlet-dot active" title="Outlet 2 On"></div>
-              <div class="wb-outlet-dot active" title="Outlet 3 On"></div>
+            <div class="wb-compact-outlets-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <div class="wb-compact-outlets" style="display: flex; gap: 4px;">
+                <div class="wb-outlet-dot active" title="Outlet 1 On"></div>
+                <div class="wb-outlet-dot active" title="Outlet 2 On"></div>
+                <div class="wb-outlet-dot active" title="Outlet 3 On"></div>
+              </div>
+              <div class="wb-compact-network" style="display: flex; align-items: center; gap: 2px; pointer-events: auto;">
+                <span style="font-size: 4.5px; color: #888; font-weight: bold;">LAN</span>
+                ${customSinglePort(0, "Ethernet (LAN)")}
+              </div>
             </div>
           </div>
         `;
@@ -1933,9 +1948,15 @@ document.addEventListener("DOMContentLoaded", () => {
               <span class="wb-logo-compact">WATTBOX 250</span>
               <div class="wb-compact-led active"></div>
             </div>
-            <div class="wb-compact-outlets">
-              <div class="wb-outlet-dot active" title="Outlet 1 On"></div>
-              <div class="wb-outlet-dot active" title="Outlet 2 On"></div>
+            <div class="wb-compact-outlets-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <div class="wb-compact-outlets" style="display: flex; gap: 4px;">
+                <div class="wb-outlet-dot active" title="Outlet 1 On"></div>
+                <div class="wb-outlet-dot active" title="Outlet 2 On"></div>
+              </div>
+              <div class="wb-compact-network" style="display: flex; align-items: center; gap: 2px; pointer-events: auto;">
+                <span style="font-size: 4.5px; color: #888; font-weight: bold;">LAN</span>
+                ${customSinglePort(0, "Ethernet (LAN)")}
+              </div>
             </div>
           </div>
         `;

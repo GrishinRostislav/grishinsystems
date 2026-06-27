@@ -2317,7 +2317,9 @@ body.dragging-active .placed-device * {
 .nvshield-ports-bracket,
 .telus-nah-ports,
 .rogers-xb8-ports,
-.bell-gigahub-ports {
+.bell-gigahub-ports,
+.wattbox-network-ports,
+.wb-compact-network {
   pointer-events: auto !important;
 }
 
