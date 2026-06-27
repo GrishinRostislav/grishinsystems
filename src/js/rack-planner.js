@@ -1761,14 +1761,16 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "apple-tv-4k") {
         faceplateOverlayHtml = `
           <div class="appletv-chassis">
-            <div class="appletv-front-decor" style="display: flex; align-items: center; gap: 4px;">
-              <div class="appletv-logo">tv</div>
+            <div class="appletv-front-decor" style="display: flex; align-items: center; gap: 4px; justify-content: center; width: 100%;">
+              <div class="appletv-logo" style="font-size: 7px; color: #888; font-weight: bold;">tv</div>
               <div class="appletv-led"></div>
             </div>
-            <div class="appletv-ports-bracket" style="margin-left: auto; display: flex; align-items: center; gap: 6px; pointer-events: auto; padding-right: 6px;">
+            <div class="appletv-ports-bracket" style="display: flex; align-items: center; justify-content: center; gap: 4px; pointer-events: auto; width: 100%; padding-bottom: 2px;">
               ${customPowerInletPort()}
-              <span class="appletv-port-label" style="font-size: 6px; font-weight: bold; color: #666;">LAN</span>
-              ${customSinglePort(0, "Ethernet (LAN)")}
+              <div style="display: flex; align-items: center; gap: 1px;">
+                <span class="appletv-port-label" style="font-size: 5px; font-weight: bold; color: #555;">LAN</span>
+                ${customSinglePort(0, "Ethernet (LAN)")}
+              </div>
             </div>
           </div>
         `;
@@ -1796,14 +1798,16 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "nv-shield") {
         faceplateOverlayHtml = `
           <div class="nvshield-chassis">
-            <div class="nvshield-front">
+            <div class="nvshield-front" style="display: flex; align-items: center; gap: 4px; justify-content: center; width: 100%;">
               <div class="nvshield-green-light"></div>
-              <span class="nvshield-logo">SHIELD</span>
+              <span class="nvshield-logo" style="font-size: 6px; font-weight: bold; color: #a1a1aa; letter-spacing: 0.5px;">SHIELD</span>
             </div>
-            <div class="nvshield-ports-bracket" style="margin-left: auto; display: flex; align-items: center; gap: 6px; pointer-events: auto; padding-right: 6px;">
+            <div class="nvshield-ports-bracket" style="display: flex; align-items: center; justify-content: center; gap: 4px; pointer-events: auto; width: 100%; padding-bottom: 2px;">
               ${customPowerInletPort()}
-              <span class="nvshield-port-label" style="font-size: 6.5px; font-weight: bold; color: #666;">LAN</span>
-              ${customSinglePort(0, "Ethernet (LAN)")}
+              <div style="display: flex; align-items: center; gap: 1px;">
+                <span class="nvshield-port-label" style="font-size: 5px; font-weight: bold; color: #555;">LAN</span>
+                ${customSinglePort(0, "Ethernet (LAN)")}
+              </div>
             </div>
           </div>
         `;

@@ -2581,10 +2581,13 @@ body.dragging-active .placed-device * {
   border: 1.5px solid #222;
   box-shadow: 0 4px 8px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05);
   display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
   position: relative;
   margin: auto;
-  padding: 0 8px;
+  padding: 4px;
+  box-sizing: border-box;
 }
 .appletv-front-decor {
   display: flex;
@@ -2730,11 +2733,12 @@ body.dragging-active .placed-device * {
   border: 1.5px solid #2c2c2e;
   border-radius: 4px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: space-between;
+  align-items: center;
   margin: auto;
   box-shadow: 0 3px 8px rgba(0,0,0,0.5);
-  padding: 0 8px;
+  padding: 4px;
   box-sizing: border-box;
 }
 .sonos-port-front {
@@ -2893,14 +2897,17 @@ body.dragging-active .placed-device * {
   border: 1px solid #222;
   box-shadow: 0 4px 8px rgba(0,0,0,0.6);
   display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
   position: relative;
   margin: auto;
-  padding: 0 8px;
+  padding: 4px;
   /* Add angular geometric facets background pattern */
   background-image: linear-gradient(135deg, #1f1f23 25%, transparent 25%), 
                     linear-gradient(225deg, #1f1f23 25%, transparent 25%);
   background-size: 12px 12px;
+  box-sizing: border-box;
 }
 .nvshield-front {
   display: flex;
