@@ -270,8 +270,72 @@ document.addEventListener("DOMContentLoaded", () => {
   const statusPoeEl = document.getElementById("status-poe");
   const statusCostEl = document.getElementById("status-cost");
 
+  let tooltipEl = null;
+
+  function initCustomTooltip() {
+    tooltipEl = document.createElement("div");
+    tooltipEl.className = "rp-tooltip-card";
+    document.body.appendChild(tooltipEl);
+
+    document.addEventListener("mouseover", (e) => {
+      const target = e.target.closest(".port-dot, .wall-socket, .power-strip-socket, [data-port-idx]");
+      if (!target) return;
+
+      const titleAttr = target.getAttribute("title");
+      if (titleAttr) {
+        target.setAttribute("data-stored-title", titleAttr);
+        target.removeAttribute("title");
+      }
+
+      const text = target.getAttribute("data-stored-title");
+      if (!text) return;
+
+      let htmlContent = text;
+      if (text.includes("🔗")) {
+        const parts = text.split("🔗");
+        htmlContent = `<div style="font-weight: bold; color: #2dd4bf; margin-bottom: 2px;">${parts[0].trim()}</div><div style="color: #a1a1aa;">🔗 ${parts[1].trim()}</div>`;
+      } else {
+        htmlContent = `<div style="color: #f1f5f9;">${text}</div>`;
+      }
+
+      tooltipEl.innerHTML = htmlContent;
+      tooltipEl.classList.add("visible");
+
+      const rect = target.getBoundingClientRect();
+      let top = window.scrollY + rect.top - tooltipEl.offsetHeight - 8;
+      let left = window.scrollX + rect.left + (rect.width / 2) - (tooltipEl.offsetWidth / 2);
+
+      if (top < window.scrollY) {
+        top = window.scrollY + rect.bottom + 8;
+      }
+      if (left < 0) left = 4;
+      if (left + tooltipEl.offsetWidth > window.innerWidth) {
+        left = window.innerWidth - tooltipEl.offsetWidth - 4;
+      }
+
+      tooltipEl.style.top = `${top}px`;
+      tooltipEl.style.left = `${left}px`;
+    });
+
+    document.addEventListener("mouseout", (e) => {
+      const target = e.target.closest(".port-dot, .wall-socket, .power-strip-socket, [data-port-idx]");
+      if (!target) return;
+
+      const storedTitle = target.getAttribute("data-stored-title");
+      if (storedTitle) {
+        target.setAttribute("title", storedTitle);
+        target.removeAttribute("data-stored-title");
+      }
+
+      if (tooltipEl) {
+        tooltipEl.classList.remove("visible");
+      }
+    });
+  }
+
   // Initialize
   function init() {
+    initCustomTooltip();
     loadState();
     
     // Set inputs to match state
@@ -2340,7 +2404,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ${portsHtml}
         </div>
         <div class="device-faceplate-bottom">
-          <span class="device-faceplate-label">${(dev.brand === "apple" || dev.brand === "sonos" || dev.id === "nv-shield") ? "" : (dev.customLabel || dev.name)}</span>
+          <span class="device-faceplate-label">${isCleanChassis ? "" : (dev.customLabel || dev.name)}</span>
           ${ipBadgeHtml}
           <button class="device-delete-btn" title="Remove Device"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
         </div>

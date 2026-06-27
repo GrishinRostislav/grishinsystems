@@ -3816,8 +3816,8 @@ body.dragging-active .placed-device * {
 
 /* OvrC Pro Hub Custom Chassis */
 .ovrc-hub-chassis {
-  width: 100px;
-  height: 24px;
+  width: 90px;
+  height: 38px;
   background: linear-gradient(to bottom, #1e293b, #0f172a);
   border: 1px solid #475569;
   border-radius: 4px;
@@ -3825,14 +3825,16 @@ body.dragging-active .placed-device * {
   align-items: center;
   justify-content: space-between;
   margin: auto;
-  padding: 0 8px;
+  padding: 0 6px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.5);
   box-sizing: border-box;
 }
 .ovrc-hub-front {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 3px;
 }
 .ovrc-logo-text {
   font-size: 7px;
@@ -3840,6 +3842,7 @@ body.dragging-active .placed-device * {
   color: #0ea5e9; /* Light blue brand logo */
   letter-spacing: 0.5px;
   text-transform: uppercase;
+  line-height: 1;
 }
 .ovrc-leds-group {
   display: flex;
@@ -3848,8 +3851,8 @@ body.dragging-active .placed-device * {
 
 /* Lutron RA3 Processor Custom Chassis */
 .lutron-ra3-chassis {
-  width: 110px;
-  height: 24px;
+  width: 90px;
+  height: 38px;
   background: #09090b;
   border: 1.5px solid #27272a;
   border-radius: 3px;
@@ -3857,14 +3860,16 @@ body.dragging-active .placed-device * {
   align-items: center;
   justify-content: space-between;
   margin: auto;
-  padding: 0 8px;
+  padding: 0 6px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.6);
   box-sizing: border-box;
 }
 .lutron-ra3-front {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
 }
 .lutron-logo-text {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -3872,9 +3877,10 @@ body.dragging-active .placed-device * {
   font-weight: 800;
   color: #ffffff;
   letter-spacing: 1px;
+  line-height: 1;
 }
 .lutron-ra3-lightbar {
-  width: 12px;
+  width: 14px;
   height: 2px;
   background: #ef4444; /* red unpowered lightbar */
   box-shadow: 0 0 3px #ef4444;
@@ -3888,8 +3894,8 @@ body.dragging-active .placed-device * {
 
 /* Lutron Caseta Custom Chassis */
 .lutron-caseta-chassis {
-  width: 80px;
-  height: 24px;
+  width: 90px;
+  height: 38px;
   background: linear-gradient(to bottom, #ffffff, #f1f5f9);
   border: 1px solid #cbd5e1;
   border-radius: 4px;
@@ -3903,14 +3909,17 @@ body.dragging-active .placed-device * {
 }
 .lutron-caseta-front {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
 }
 .lutron-logo-mini {
   font-size: 6px;
   font-weight: 900;
   color: #94a3b8;
   letter-spacing: 0.5px;
+  line-height: 1;
 }
 .lutron-caseta-ring {
   width: 5px;
@@ -3927,8 +3936,8 @@ body.dragging-active .placed-device * {
 
 /* Hunter Douglas Custom Chassis */
 .hunter-douglas-chassis {
-  width: 85px;
-  height: 24px;
+  width: 90px;
+  height: 38px;
   background: #fdfdfd;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
@@ -3942,7 +3951,9 @@ body.dragging-active .placed-device * {
 }
 .hunter-douglas-front {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
   gap: 4px;
 }
 .hd-logo-text {
@@ -3950,6 +3961,7 @@ body.dragging-active .placed-device * {
   font-weight: 800;
   color: #1e3a8a;
   letter-spacing: -0.2px;
+  line-height: 1;
 }
 .hd-led {
   width: 3.5px;
@@ -3962,4 +3974,51 @@ body.dragging-active .placed-device * {
 .hd-led.active {
   background: #22c55e; /* green powered */
   box-shadow: 0 0 3px #22c55e;
+}
+
+/* Auto-stretching for clean chassis inside side cabinet slots */
+.side-placed-device .appletv-chassis,
+.side-placed-device .macmini-chassis,
+.side-placed-device .sonos-amp-chassis,
+.side-placed-device .sonos-port-chassis,
+.side-placed-device .eero-max7-chassis,
+.side-placed-device .eero-pro6e-chassis,
+.side-placed-device .nvshield-chassis,
+.side-placed-device .telus-nah-chassis,
+.side-placed-device .rogers-xb8-chassis,
+.side-placed-device .bell-gigahub-chassis,
+.side-placed-device .wattbox-compact-chassis,
+.side-placed-device .generic-power-strip-chassis,
+.side-placed-device .ovrc-hub-chassis,
+.side-placed-device .lutron-ra3-chassis,
+.side-placed-device .lutron-caseta-chassis,
+.side-placed-device .hunter-douglas-chassis {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Custom Stylish Immediate Tooltip Card */
+.rp-tooltip-card {
+  position: absolute;
+  z-index: 10000;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(45, 212, 191, 0.5);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity 0.1s ease-out, transform 0.1s ease-out;
+  max-width: 280px;
+  line-height: 1.4;
+}
+
+.rp-tooltip-card.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
