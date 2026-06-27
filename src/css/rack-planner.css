@@ -4039,3 +4039,42 @@ body.dragging-active .placed-device * {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* Premium Device Asset Tags */
+.device-asset-tag {
+  position: absolute;
+  top: 4px;
+  left: 20px; /* Aligned nicely with the left rack ear */
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(6, 182, 212, 0.4);
+  color: #2dd4bf;
+  font-family: monospace;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 1.5px 6px;
+  border-radius: 3px;
+  z-index: 15;
+  pointer-events: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  max-width: 140px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: opacity 0.2s;
+}
+
+.placed-device:not(.has-ears) .device-asset-tag {
+  left: 8px;
+}
+
+.side-placed-device .device-asset-tag {
+  left: 8px !important;
+}
+
+/* Hide tags when toggle is unchecked */
+body.hide-device-labels .device-asset-tag {
+  display: none !important;
+}

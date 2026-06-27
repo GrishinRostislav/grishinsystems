@@ -650,6 +650,21 @@ document.addEventListener("DOMContentLoaded", () => {
       window.print();
     });
 
+    // Show Labels Toggle
+    const chkShowLabelsEl = document.getElementById("chk-show-labels");
+    if (chkShowLabelsEl) {
+      const updateLabelVisibility = () => {
+        if (chkShowLabelsEl.checked) {
+          document.body.classList.remove("hide-device-labels");
+        } else {
+          document.body.classList.add("hide-device-labels");
+        }
+      };
+      
+      chkShowLabelsEl.addEventListener("change", updateLabelVisibility);
+      updateLabelVisibility(); // Initial check
+    }
+
     // Zoom Controls
     if (zoomInEl) {
       zoomInEl.addEventListener("click", () => setZoom(state.zoomLevel + 0.1));
@@ -2423,8 +2438,11 @@ document.addEventListener("DOMContentLoaded", () => {
         ipBadgeHtml += `<span class="device-ip-badge wan-ip-badge" style="right: ${dev.ipAddress ? '90px' : '22px'}; border-color: rgba(249, 115, 22, 0.5); color: #f97316;" title="WAN IP: ${dev.wanIpAddress}">WAN: ${dev.wanIpAddress}</span>`;
       }
 
+      const assetTagHtml = `<span class="device-asset-tag">${dev.customLabel || dev.name}</span>`;
+
       devEl.innerHTML = `
         ${earsHtml}
+        ${assetTagHtml}
         <div class="device-faceplate-top" style="height: 100%; align-items: center;">
           ${!hideDefaultLeft ? `
             <div class="device-faceplate-left" style="height: 100%;">
@@ -2437,7 +2455,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ${portsHtml}
         </div>
         <div class="device-faceplate-bottom">
-          <span class="device-faceplate-label">${isCleanChassis ? "" : (dev.customLabel || dev.name)}</span>
+          <span class="device-faceplate-label"></span>
           ${ipBadgeHtml}
           <button class="device-delete-btn" title="Remove Device"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
         </div>
