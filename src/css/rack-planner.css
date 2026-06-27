@@ -816,6 +816,41 @@ body.dragging-active .placed-device * {
   left: 3px;
 }
 
+/* Power Inlet and Outlet dots style overrides */
+.port-dot.power-inlet-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #18181b;
+  border: 1.5px solid #f97316 !important;
+  box-shadow: 0 0 3px rgba(249, 115, 22, 0.4);
+  box-sizing: border-box;
+}
+.port-dot.power-inlet-dot::after {
+  display: none !important;
+}
+.port-dot.power-inlet-dot.connected {
+  background: #f97316 !important;
+  box-shadow: 0 0 5px #f97316;
+}
+
+.port-dot.power-outlet-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #18181b;
+  border: 1.5px solid #f97316 !important;
+  box-shadow: 0 0 3px rgba(249, 115, 22, 0.4);
+  box-sizing: border-box;
+}
+.port-dot.power-outlet-dot::after {
+  display: none !important;
+}
+.port-dot.power-outlet-dot.connected {
+  background: #f97316 !important;
+  box-shadow: 0 0 5px #f97316;
+}
+
 /* Brush strip & shelf plate */
 .device-brush-strip {
   width: 100%;
@@ -2319,7 +2354,9 @@ body.dragging-active .placed-device * {
 .rogers-xb8-ports,
 .bell-gigahub-ports,
 .wattbox-network-ports,
-.wb-compact-network {
+.wb-compact-network,
+.custom-pwr-wrapper,
+.power-inlet-wrapper {
   pointer-events: auto !important;
 }
 
