@@ -232,6 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const valPatchPortsEl = document.getElementById("val-patch-ports");
   const valPoeEl = document.getElementById("val-poe");
   const valOutletsEl = document.getElementById("val-outlets");
+  const valNatEl = document.getElementById("val-nat");
   
   // Manifest Elements
   const manifestBodyEl = document.getElementById("manifest-body");
@@ -2075,12 +2076,15 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "telus-nah") {
         faceplateOverlayHtml = `
           <div class="telus-nah-chassis">
-            <div class="telus-nah-front">
+            <div class="telus-nah-front" style="display: flex; align-items: center; gap: 4px;">
               <div class="telus-nah-led ${isDevicePowered(dev) ? 'glowing' : ''}"></div>
-              <span class="telus-nah-logo" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 90px; display: inline-block;">${dev.customLabel || 'TELUS NAH'}</span>
+              <div style="display: flex; flex-direction: column; line-height: 1.1;">
+                <span class="telus-nah-logo" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 90px; display: inline-block;">${dev.customLabel || 'TELUS NAH'}</span>
+                ${dev.bridgeMode ? '<span style="font-size: 5px; color: #fff; background: #6b21a8; padding: 0.5px 2px; border-radius: 1.5px; font-weight: bold; width: fit-content; text-transform: uppercase;">BRIDGE</span>' : ''}
+              </div>
             </div>
-            <div class="telus-nah-ports" style="display: flex; gap: 4px; pointer-events: auto; margin-left: auto; padding-right: 4px; align-items: flex-end;">
-              <div style="display:flex; flex-direction:column; align-items:center; gap:2px; margin-bottom:2px; margin-right:4px;">
+            <div class="telus-nah-ports" style="display: flex; gap: 4px; pointer-events: auto; margin-left: auto; padding-right: 4px; align-items: center;">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:2px; margin-right:4px;">
                 ${customPowerInletPort()}
               </div>
               <div style="display:flex; flex-direction:column; align-items:center; gap:1px;">
@@ -2115,12 +2119,15 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "rogers-xb8") {
         faceplateOverlayHtml = `
           <div class="rogers-xb8-chassis">
-            <div class="rogers-xb8-front">
+            <div class="rogers-xb8-front" style="display: flex; align-items: center; gap: 4px;">
               <div class="rogers-xb8-led ${isDevicePowered(dev) ? 'glowing' : ''}"></div>
-              <span class="rogers-xb8-logo" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 90px; display: inline-block;">${dev.customLabel || 'ROGERS XB8'}</span>
+              <div style="display: flex; flex-direction: column; line-height: 1.1;">
+                <span class="rogers-xb8-logo" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 90px; display: inline-block;">${dev.customLabel || 'ROGERS XB8'}</span>
+                ${dev.bridgeMode ? '<span style="font-size: 5px; color: #fff; background: #6b21a8; padding: 0.5px 2px; border-radius: 1.5px; font-weight: bold; width: fit-content; text-transform: uppercase;">BRIDGE</span>' : ''}
+              </div>
             </div>
-            <div class="rogers-xb8-ports" style="display: flex; gap: 4px; pointer-events: auto; margin-left: auto; padding-right: 6px; align-items: flex-end;">
-              <div style="display:flex; flex-direction:column; align-items:center; gap:2px; margin-bottom:2px; margin-right:4px;">
+            <div class="rogers-xb8-ports" style="display: flex; gap: 4px; pointer-events: auto; margin-left: auto; padding-right: 6px; align-items: center;">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:2px; margin-right:4px;">
                 ${customPowerInletPort()}
               </div>
               <div style="display:flex; flex-direction:column; align-items:center; gap:1px;">
@@ -2147,12 +2154,15 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "bell-gigahub") {
         faceplateOverlayHtml = `
           <div class="bell-gigahub-chassis">
-            <div class="bell-gigahub-front">
+            <div class="bell-gigahub-front" style="display: flex; align-items: center; gap: 4px;">
               <div class="bell-gigahub-led-bar ${isDevicePowered(dev) ? 'active' : ''}"></div>
-              <span class="bell-gigahub-logo" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 90px; display: inline-block;">${dev.customLabel || 'bell giga hub'}</span>
+              <div style="display: flex; flex-direction: column; line-height: 1.1;">
+                <span class="bell-gigahub-logo" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 90px; display: inline-block;">${dev.customLabel || 'bell giga hub'}</span>
+                ${dev.bridgeMode ? '<span style="font-size: 5px; color: #fff; background: #6b21a8; padding: 0.5px 2px; border-radius: 1.5px; font-weight: bold; width: fit-content; text-transform: uppercase;">BRIDGE</span>' : ''}
+              </div>
             </div>
-            <div class="bell-gigahub-ports" style="display: flex; gap: 5px; pointer-events: auto; margin-left: auto; padding-right: 8px; align-items: flex-end;">
-              <div style="display:flex; flex-direction:column; align-items:center; gap:2px; margin-bottom:2px; margin-right:4px;">
+            <div class="bell-gigahub-ports" style="display: flex; gap: 5px; pointer-events: auto; margin-left: auto; padding-right: 8px; align-items: center;">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:2px; margin-right:4px;">
                 ${customPowerInletPort()}
               </div>
               <div style="display:flex; flex-direction:column; align-items:center; gap:1px;">
@@ -2915,7 +2925,46 @@ document.addEventListener("DOMContentLoaded", () => {
       outletMsg = `No UPS or PDU Placed`;
     }
     
+    // 5. Network & Double NAT Check
+    let doubleNatCount = 0;
+    let wanRouterList = [];
+    
+    state.placedDevices.forEach(dev => {
+      if (dev.type === "router") {
+        const wanPortsCount = (() => {
+          const id = dev.id.toLowerCase();
+          if (id === "eero-poe-gateway") return 2;
+          if (id.includes("2wan") || id.includes("4l2w")) return 2;
+          return 1;
+        })();
+        
+        for (let w = 0; w < wanPortsCount; w++) {
+          const conn = state.connections.find(c => 
+            (c.fromDevice === dev.instanceId && c.fromPort === w) || 
+            (c.toDevice === dev.instanceId && c.toPort === w)
+          );
+          if (conn) {
+            const otherId = conn.fromDevice === dev.instanceId ? conn.toDevice : conn.fromDevice;
+            const otherDev = state.placedDevices.find(d => d.instanceId === otherId);
+            // If the upstream device is another router, and it is NOT in bridge mode, it's Double NAT!
+            if (otherDev && otherDev.type === "router" && !otherDev.bridgeMode) {
+              doubleNatCount++;
+              wanRouterList.push(`U${dev.slot} behind U${otherDev.slot}`);
+            }
+          }
+        }
+      }
+    });
+
+    let natStatus = "valid";
+    let natMsg = "No Double NAT issues";
+    if (doubleNatCount > 0) {
+      natStatus = "warning";
+      natMsg = `Double NAT: ${wanRouterList.join(', ')}`;
+    }
+    
     updateValCard(valOutletsEl, outletStatus, "🔌", "Power Outlets", outletMsg);
+    updateValCard(valNatEl, natStatus, "🌐", "Network & NAT", natMsg);
   }
 
   function updateValCard(cardEl, status, icon, title, valText) {
@@ -3413,7 +3462,91 @@ document.addEventListener("DOMContentLoaded", () => {
       configInternetGroupEl.style.display = "block";
       configInternetActiveEl.checked = !!dev.internetActive;
       configWanIpGroupEl.style.display = "block";
-      configWanIpEl.value = dev.wanIpAddress || "";
+      
+      const wanPortsCount = (() => {
+        const id = dev.id.toLowerCase();
+        if (id === "eero-poe-gateway") return 2;
+        if (id.includes("2wan") || id.includes("4l2w")) return 2;
+        return 1;
+      })();
+
+      let html = "";
+      // Add Bridge Mode checkbox
+      html += `
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px; border-radius: 6px; margin-bottom: 12px;">
+          <label class="rp-toolbar-checkbox-label" style="margin-left: 0; font-weight: bold; color: var(--accent-cyan); display: flex; align-items: center; gap: 6px; pointer-events: auto; cursor: pointer;">
+            <input type="checkbox" id="config-bridge-mode" ${dev.bridgeMode ? 'checked' : ''}> Enable Bridge Mode (Modem Passthrough)
+          </label>
+          <span style="font-size: 10px; color: var(--text-muted); display: block; margin-top: 4px;">Transparently bridges WAN traffic to downstream router. NAT/DHCP will be bypassed.</span>
+        </div>
+      `;
+
+      if (!dev.wanSettings) {
+        dev.wanSettings = [];
+      }
+
+      for (let w = 0; w < wanPortsCount; w++) {
+        const settings = dev.wanSettings[w] || {
+          connectionType: "DHCP",
+          ipAddress: "",
+          subnetMask: "255.255.255.0",
+          gateway: "",
+          primaryDns: "8.8.8.8",
+          secondaryDns: "1.1.1.1"
+        };
+        
+        html += `
+          <div class="wan-port-settings-block" style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px; margin-top: 10px;">
+            <label style="display:block; font-size:11px; color:var(--accent-cyan); text-transform:uppercase; font-weight:bold; margin-bottom:6px;">WAN Port ${w + 1} Configuration</label>
+            <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+              <div class="form-group">
+                <label style="font-size: 10px;">Connection Type</label>
+                <select class="wan-conn-type" data-wan-idx="${w}" style="width:100%; font-size: 11px; background: rgba(15, 23, 42, 0.8); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 4px; border-radius: 4px;">
+                  <option value="DHCP" ${settings.connectionType === 'DHCP' ? 'selected' : ''}>DHCP (Auto IP)</option>
+                  <option value="Static" ${settings.connectionType === 'Static' ? 'selected' : ''}>Static IP</option>
+                </select>
+              </div>
+              <div class="form-group wan-ip-fields-${w}" style="display: ${settings.connectionType === 'Static' ? 'block' : 'none'};">
+                <label style="font-size: 10px;">IP Address</label>
+                <input type="text" class="wan-ip-addr" data-wan-idx="${w}" value="${settings.ipAddress || ''}" placeholder="e.g. 203.0.113.50" style="font-size: 11px; padding: 4px 8px; width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;">
+              </div>
+            </div>
+            <div class="form-grid wan-ip-fields-${w}" style="display: ${settings.connectionType === 'Static' ? 'grid' : 'none'}; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+              <div class="form-group">
+                <label style="font-size: 10px;">Subnet Mask</label>
+                <input type="text" class="wan-subnet" data-wan-idx="${w}" value="${settings.subnetMask || '255.255.255.0'}" placeholder="255.255.255.0" style="font-size: 11px; padding: 4px 8px; width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;">
+              </div>
+              <div class="form-group">
+                <label style="font-size: 10px;">Default Gateway</label>
+                <input type="text" class="wan-gateway" data-wan-idx="${w}" value="${settings.gateway || ''}" placeholder="e.g. 203.0.113.1" style="font-size: 11px; padding: 4px 8px; width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;">
+              </div>
+            </div>
+            <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <div class="form-group">
+                <label style="font-size: 10px;">Primary DNS</label>
+                <input type="text" class="wan-dns1" data-wan-idx="${w}" value="${settings.primaryDns || '8.8.8.8'}" placeholder="8.8.8.8" style="font-size: 11px; padding: 4px 8px; width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;">
+              </div>
+              <div class="form-group">
+                <label style="font-size: 10px;">Secondary DNS</label>
+                <input type="text" class="wan-dns2" data-wan-idx="${w}" value="${settings.secondaryDns || '1.1.1.1'}" placeholder="1.1.1.1" style="font-size: 11px; padding: 4px 8px; width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;">
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      configWanIpGroupEl.innerHTML = html;
+
+      // Add change listener to show/hide static IP fields
+      configWanIpGroupEl.querySelectorAll(".wan-conn-type").forEach(select => {
+        select.addEventListener("change", (e) => {
+          const idx = e.target.getAttribute("data-wan-idx");
+          const fields = configWanIpGroupEl.querySelectorAll(`.wan-ip-fields-${idx}`);
+          fields.forEach(f => {
+            f.style.display = e.target.value === "Static" ? (f.classList.contains("form-grid") ? "grid" : "block") : "none";
+          });
+        });
+      });
+
     } else {
       configInternetGroupEl.style.display = "none";
       configWanIpGroupEl.style.display = "none";
@@ -3800,7 +3933,29 @@ document.addEventListener("DOMContentLoaded", () => {
     dev.notes = configDeviceNotesEl.value.trim();
     if (dev.type === "router") {
       dev.internetActive = configInternetActiveEl.checked;
-      dev.wanIpAddress = configWanIpEl.value.trim();
+      dev.bridgeMode = document.getElementById("config-bridge-mode") ? document.getElementById("config-bridge-mode").checked : false;
+
+      // Save each WAN port settings
+      dev.wanSettings = [];
+      const blocks = configWanIpGroupEl.querySelectorAll(".wan-port-settings-block");
+      blocks.forEach(block => {
+        const typeSelect = block.querySelector(".wan-conn-type");
+        const idx = parseInt(typeSelect.getAttribute("data-wan-idx"));
+        dev.wanSettings[idx] = {
+          connectionType: typeSelect.value,
+          ipAddress: block.querySelector(".wan-ip-addr").value.trim(),
+          subnetMask: block.querySelector(".wan-subnet").value.trim(),
+          gateway: block.querySelector(".wan-gateway").value.trim(),
+          primaryDns: block.querySelector(".wan-dns1").value.trim(),
+          secondaryDns: block.querySelector(".wan-dns2").value.trim()
+        };
+      });
+      // Fallback for single IP display
+      if (dev.wanSettings[0]) {
+        dev.wanIpAddress = dev.wanSettings[0].connectionType === "DHCP" ? "DHCP" : dev.wanSettings[0].ipAddress;
+      } else {
+        dev.wanIpAddress = "";
+      }
     }
     const rows = patchTableBodyEl.querySelectorAll("tr");
     

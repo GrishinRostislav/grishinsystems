@@ -3143,7 +3143,7 @@ body.dragging-active .placed-device * {
 /* Telus NAH */
 .telus-nah-chassis {
   width: 210px;
-  height: 24px;
+  height: 42px;
   background: linear-gradient(to bottom, #ffffff, #f1f5f9);
   border: 1px solid #cbd5e1;
   border-radius: 4px;
@@ -3182,7 +3182,7 @@ body.dragging-active .placed-device * {
 /* Rogers XB8 */
 .rogers-xb8-chassis {
   width: 200px;
-  height: 24px;
+  height: 42px;
   background: linear-gradient(to bottom, #e2e8f0, #cbd5e1);
   border: 1px solid #94a3b8;
   border-radius: 4px;
@@ -3221,7 +3221,7 @@ body.dragging-active .placed-device * {
 /* Bell Giga Hub */
 .bell-gigahub-chassis {
   width: 210px;
-  height: 24px;
+  height: 42px;
   background: linear-gradient(to bottom, #18181b, #09090b);
   border: 1.5px solid #27272a;
   border-radius: 4px;
