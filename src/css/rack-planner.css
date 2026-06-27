@@ -2248,6 +2248,39 @@ body.dragging-active .placed-device * {
   padding-right: 20px !important;
 }
 
+/* Ensure faceplate decorations do not intercept drag-and-drop gestures */
+.rack-ear-left,
+.rack-ear-right,
+.device-faceplate-top,
+.device-faceplate-left,
+.device-faceplate-bottom,
+.device-faceplate-label,
+.device-logo,
+.device-leds,
+.led,
+.unifi-lcm-screen,
+.lcm-glowing-dot,
+.avr-front-panel,
+.avr-knob,
+.avr-display-panel,
+.avr-display-text,
+.avr-ports-area,
+.macmini-chassis,
+.macmini-apple-logo,
+.macmini-led,
+.macmini-ports-area,
+.appletv-chassis,
+.appletv-logo,
+.appletv-ports-area {
+  pointer-events: none;
+}
+
+.port-dot,
+.device-delete-btn,
+.device-ip-badge {
+  pointer-events: auto !important;
+}
+
 .rack-ear-left {
   position: absolute;
   top: 0;
