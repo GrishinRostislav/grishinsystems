@@ -2057,34 +2057,8 @@ body.dragging-active .placed-device * {
   }
 }
 
-.cable-path {
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  opacity: 0.85;
-  transition: opacity 0.2s, stroke-width 0.2s;
-  cursor: pointer;
-  pointer-events: stroke;
-}
-
-.cable-path:hover,
-.cable-path.hover-highlight {
-  opacity: 1 !important;
-  stroke-width: 4px !important;
-}
-
-.rack-cables-svg.has-hovered-cable .cable-path:not(.hover-highlight) {
-  opacity: 0.15 !important;
-}
-
-/* Cable path styles based on color */
-.cable-path.cable-blue { stroke: #2563eb; }
-.cable-path.cable-yellow { stroke: #eab308; }
-.cable-path.cable-red { stroke: #ef4444; }
-.cable-path.cable-green { stroke: #22c55e; }
-.cable-path.cable-black { stroke: #0f172a; }
-.cable-path.cable-white { stroke: #f8fafc; }
-.cable-path.cable-orange { stroke: #f97316; }
+/* Cable SVG visualization is disabled */
+.rack-cables-svg { display: none; }
 
 /* Interactive port highlights on faceplate */
 .port-dot {
@@ -2093,8 +2067,7 @@ body.dragging-active .placed-device * {
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.port-dot:hover,
-.port-dot.hover-highlight {
+.port-dot:hover {
   transform: scale(1.35) !important;
   box-shadow: 0 0 10px #3b82f6, 0 0 4px #3b82f6 !important;
   border-color: #3b82f6 !important;
@@ -2102,9 +2075,7 @@ body.dragging-active .placed-device * {
 }
 
 .port-dot.power-inlet-dot:hover,
-.port-dot.power-inlet-dot.hover-highlight,
-.port-dot.power-outlet-dot:hover,
-.port-dot.power-outlet-dot.hover-highlight {
+.port-dot.power-outlet-dot:hover {
   box-shadow: 0 0 10px #f97316, 0 0 4px #f97316 !important;
   border-color: #f97316 !important;
 }

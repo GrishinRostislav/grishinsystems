@@ -104,7 +104,9 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "wattbox-400-8", name: "WattBox 400 Series IP PDU (8 Outlets, 1U)", brand: "wattbox", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 8, requires_power: true, type: "power", cost: 449 },
       { id: "wattbox-300-3", name: "WattBox 300 Series IP PDU (3 Outlets, Compact)", brand: "wattbox", u: 1, width_fraction: 0.33, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 3, requires_power: true, type: "power", cost: 299 },
       { id: "wattbox-250-2", name: "WattBox 250 Series Smart PDU (2 Outlets, Compact)", brand: "wattbox", u: 1, width_fraction: 0.25, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 2, requires_power: true, type: "power", cost: 189 },
-      { id: "power-strip-6", name: "Standard 6-Outlet Power Strip (Shelf)", brand: "generic", u: 1, width_fraction: 0.5, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 6, requires_power: true, type: "power", cost: 25 }
+      { id: "power-strip-6", name: "Standard 6-Outlet Power Strip (Shelf)", brand: "generic", u: 1, width_fraction: 0.5, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 6, requires_power: true, type: "power", cost: 25 },
+      { id: "wall-outlet-6", name: "Wall Outlet (6 Sockets) – Power Source", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 6, requires_power: false, type: "power", cost: 0 },
+      { id: "wall-outlet-5", name: "Wall Outlet (5 Sockets) – Power Source", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 5, requires_power: false, type: "power", cost: 0 }
     ],
     theater: [
       { id: "savant-sipa125", name: "Savant IP Audio 125 (SIPA125)", brand: "savant", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1800 },
@@ -336,8 +338,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (catalogSearchInput) {
       catalogSearchInput.addEventListener("input", () => {
         const activeTabEl = catalogTabsEl.querySelector(".catalog-tab.active");
-        const activeTab = activeTabEl ? activeTabEl.dataset.tab : "switches";
-        renderCatalog(activeTab);
+        const activeTab = activeTabEl ? activeTabEl.dataset.tab : "routers";
+        // Auto-switch to All tab when user types a search query
+        const query = catalogSearchInput.value.trim();
+        if (query && activeTab !== "all") {
+          document.querySelectorAll(".catalog-tab").forEach(tab => tab.classList.remove("active"));
+          const allTab = catalogTabsEl.querySelector('[data-tab="all"]');
+          if (allTab) allTab.classList.add("active");
+          renderCatalog("all");
+        } else {
+          renderCatalog(activeTab);
+        }
         if (catalogSearchClear) {
           catalogSearchClear.style.display = catalogSearchInput.value ? "block" : "none";
         }
@@ -349,7 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {
         catalogSearchInput.value = "";
         catalogSearchClear.style.display = "none";
         const activeTabEl = catalogTabsEl.querySelector(".catalog-tab.active");
-        const activeTab = activeTabEl ? activeTabEl.dataset.tab : "switches";
+        const activeTab = activeTabEl ? activeTabEl.dataset.tab : "routers";
         renderCatalog(activeTab);
         catalogSearchInput.focus();
       });
@@ -648,49 +659,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    cabinetRackEl.addEventListener("mouseover", (e) => {
-      const portDot = e.target.closest(".port-dot");
-      if (!portDot) return;
-      
-      const devEl = portDot.closest(".placed-device");
-      if (!devEl) return;
-      
-      const devId = devEl.dataset.instanceId;
-      const portIdx = parseInt(portDot.dataset.portIdx);
-      
-      const path = cabinetRackEl.querySelector(`path[data-from-dev="${devId}"][data-from-port="${portIdx}"], path[data-to-dev="${devId}"][data-to-port="${portIdx}"]`);
-      if (path) {
-        const svg = cabinetRackEl.querySelector(".rack-cables-svg");
-        if (svg) svg.classList.add("has-hovered-cable");
-        path.classList.add("hover-highlight");
-        
-        const fromDev = path.getAttribute("data-from-dev");
-        const fromPort = parseInt(path.getAttribute("data-from-port"));
-        const toDev = path.getAttribute("data-to-dev");
-        const toPort = parseInt(path.getAttribute("data-to-port"));
-        
-        const targetDevId = fromDev === devId ? toDev : fromDev;
-        const targetPortIdx = fromDev === devId ? toPort : fromPort;
-        
-        const targetPortEl = cabinetRackEl.querySelector(`.placed-device[data-instance-id="${targetDevId}"] [data-port-idx="${targetPortIdx}"]`);
-        if (targetPortEl) {
-          targetPortEl.classList.add("hover-highlight");
-        }
-      }
-    });
-
-    cabinetRackEl.addEventListener("mouseout", (e) => {
-      const portDot = e.target.closest(".port-dot");
-      if (!portDot) return;
-      
-      const svg = cabinetRackEl.querySelector(".rack-cables-svg");
-      if (svg) svg.classList.remove("has-hovered-cable");
-      
-      cabinetRackEl.querySelectorAll(".cable-path.hover-highlight").forEach(p => p.classList.remove("hover-highlight"));
-      cabinetRackEl.querySelectorAll(".port-dot.hover-highlight").forEach(p => p.classList.remove("hover-highlight"));
-    });
-
-    state.showCables = true;
+    state.showCables = false;
 
     // Sort columns click listeners
 
@@ -931,7 +900,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById("catalog-search");
     const query = searchInput ? searchInput.value.toLowerCase().trim() : "";
     
-    const items = presets[category] || [];
+    let items;
+    if (category === "all") {
+      // Combine all categories into one list
+      items = [];
+      Object.keys(presets).forEach(cat => {
+        presets[cat].forEach(item => {
+          items.push({ ...item, _category: cat });
+        });
+      });
+    } else {
+      items = (presets[category] || []).map(item => ({ ...item, _category: category }));
+    }
     
     const filteredItems = items.filter(item => {
       if (!query) return true;
@@ -948,7 +928,7 @@ document.addEventListener("DOMContentLoaded", () => {
       itemEl.className = "catalog-item";
       itemEl.draggable = true;
       itemEl.dataset.presetId = item.id;
-      itemEl.dataset.category = category;
+      itemEl.dataset.category = item._category || category;
 
       let specStr = `${item.u}U`;
       if (item.ports) specStr += ` · ${item.ports} Ports`;
@@ -1107,8 +1087,6 @@ document.addEventListener("DOMContentLoaded", () => {
     runValidations();
     renderManifest();
     updateStatusBar();
-    drawRackCables();
-    requestAnimationFrame(drawRackCables);
   }
 
   function updateStatusBar() {
@@ -3526,6 +3504,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   
   function drawRackCables() {
+    // Cable visualization removed – connections are managed via the config modal only
+    const svg = document.getElementById("rack-cables-svg");
+    if (svg) svg.innerHTML = "";
+    return;
+  }
+
+  function _drawRackCables_disabled() {
     let svg = document.getElementById("rack-cables-svg");
     if (!svg) {
       svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
