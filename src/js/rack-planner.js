@@ -28,7 +28,13 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "araknis-620-8p", name: "Araknis AN-620-SW-R-8-PoE (2.5G)", brand: "araknis", u: 1, ports: 8, poe_ports: 8, poe_budget: 240, outlets: 0, requires_power: true, type: "switch", cost: 750 },
       { id: "araknis-620-24p", name: "Araknis AN-620-SW-R-24-PoE (2.5G)", brand: "araknis", u: 1, ports: 24, poe_ports: 24, poe_budget: 720, outlets: 0, requires_power: true, type: "switch", cost: 1450 },
       { id: "araknis-920-12p", name: "Araknis AN-920-SW-F-12-PoE (10G)", brand: "araknis", u: 1, ports: 12, poe_ports: 12, poe_budget: 480, outlets: 0, requires_power: true, type: "switch", cost: 2200 },
-      { id: "araknis-920-24p", name: "Araknis AN-920-SW-F-24-PoE (10G)", brand: "araknis", u: 1, ports: 24, poe_ports: 24, poe_budget: 740, outlets: 0, requires_power: true, type: "switch", cost: 3500 }
+      { id: "araknis-920-24p", name: "Araknis AN-920-SW-F-24-PoE (10G)", brand: "araknis", u: 1, ports: 24, poe_ports: 24, poe_budget: 740, outlets: 0, requires_power: true, type: "switch", cost: 3500 },
+      { id: "netgear-gs724tpp", name: "Netgear GS724TPP 24-Port PoE+", brand: "netgear", u: 1, ports: 24, poe_ports: 24, poe_budget: 380, outlets: 0, requires_power: true, type: "switch", cost: 429 },
+      { id: "netgear-gs748tp", name: "Netgear GS748TP 48-Port PoE+", brand: "netgear", u: 1, ports: 48, poe_ports: 48, poe_budget: 380, outlets: 0, requires_power: true, type: "switch", cost: 599 },
+      { id: "netgear-gs324tp", name: "Netgear GS324TP 24-Port PoE+ Smart", brand: "netgear", u: 1, ports: 24, poe_ports: 24, poe_budget: 190, outlets: 0, requires_power: true, type: "switch", cost: 289 },
+      { id: "netgear-ms510txpp", name: "Netgear MS510TXPP 10G Multi-Gig PoE+", brand: "netgear", u: 1, ports: 8, poe_ports: 8, poe_budget: 300, outlets: 0, requires_power: true, type: "switch", cost: 699 },
+      { id: "netgear-gs110tpp", name: "Netgear GS110TPP 8-Port PoE+", brand: "netgear", u: 1, ports: 8, poe_ports: 8, poe_budget: 120, outlets: 0, requires_power: true, type: "switch", cost: 149 },
+      { id: "netgear-gs324-npoe", name: "Netgear GS324 24-Port (Non-PoE)", brand: "netgear", u: 1, ports: 24, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "switch", cost: 119 }
     ],
     panels: [
       { id: "patch-24", name: "24-Port Blank Keystone Panel", brand: "generic", u: 1, ports: 24, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: false, type: "patch-panel", cost: 35 }
@@ -57,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "amp-sonos", name: "Sonos Amp 125W (2-Ch Stereo Zone)", brand: "sonos", u: 1, width_fraction: 0.5, ports: 2, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 699 }
     ],
     sources: [
-      { id: "apple-tv-4k", name: "Apple TV 4K Media Player", brand: "apple", u: 1, width_fraction: 0.25, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 149 },
+      { id: "apple-tv-4k", name: "Apple TV 4K", brand: "apple", u: 1, width_fraction: 0.20, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 149 },
       { id: "sony-ps5", name: "Sony PlayStation 5 Console", brand: "sony", u: 3, width_fraction: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 499 },
       { id: "cable-box", name: "Generic Cable / Satellite Box", brand: "generic", u: 1, width_fraction: 0.5, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 99 },
       { id: "nv-shield", name: "NVIDIA Shield TV Pro Media Player", brand: "generic", u: 1, width_fraction: 0.25, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 199 },
@@ -434,29 +440,28 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Setup Side Panel drag-and-drop
-    const sideCabinetWrapper = document.querySelector(".side-cabinet-wrapper");
-    if (sideCabinetWrapper) {
-      sideCabinetWrapper.addEventListener("dragover", (e) => {
+    // Setup Side Panel drag-and-drop (Left + Right)
+    function setupSidePanelDnD(wrapperEl, slotName) {
+      if (!wrapperEl) return;
+      wrapperEl.addEventListener("dragover", (e) => {
         e.preventDefault();
-        sideCabinetWrapper.classList.add("dragover");
+        wrapperEl.classList.add("dragover");
       });
-      
-      sideCabinetWrapper.addEventListener("dragleave", () => {
-        sideCabinetWrapper.classList.remove("dragover");
+      wrapperEl.addEventListener("dragleave", () => {
+        wrapperEl.classList.remove("dragover");
       });
-      
-      sideCabinetWrapper.addEventListener("drop", (e) => {
+      wrapperEl.addEventListener("drop", (e) => {
         e.preventDefault();
-        sideCabinetWrapper.classList.remove("dragover");
-        
+        wrapperEl.classList.remove("dragover");
         if (state.draggedPresetId) {
-          addDevice(state.draggedPresetId, "side");
+          addDevice(state.draggedPresetId, slotName);
         } else if (state.draggedInstanceId) {
-          moveDevice(state.draggedInstanceId, "side");
+          moveDevice(state.draggedInstanceId, slotName);
         }
       });
     }
+    setupSidePanelDnD(document.getElementById("side-cabinet-left-wrapper"), "side-left");
+    setupSidePanelDnD(document.getElementById("side-cabinet-right-wrapper"), "side-right");
 
     // Setup clear & print buttons
     document.getElementById("btn-clear").addEventListener("click", () => {
@@ -852,6 +857,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Helper to check if a slot value is a side panel slot
+  function isSideSlot(slot) {
+    return typeof slot === "string" && slot.startsWith("side");
+  }
+
   // Check if U slots are occupied
   function isSlotOccupied(slot, height, excludeInstanceId = null, incomingFraction = 1) {
     for (let i = 0; i < height; i++) {
@@ -859,6 +869,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (targetU <= 0 || targetU > state.rackSize) return true; // Out of bounds
       
       const occupyingDevices = state.placedDevices.filter(dev => {
+        if (isSideSlot(dev.slot)) return false;
         if (excludeInstanceId && dev.instanceId === excludeInstanceId) return false;
         // Device occupies slots from dev.slot down to dev.slot - dev.u + 1
         const devStart = dev.slot;
@@ -911,7 +922,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!foundPreset) return;
 
-    if (findFirstAvailableSlot(foundPreset.u, foundPreset.width_fraction || 1) === null) {
+    if (!isSideSlot(slot) && findFirstAvailableSlot(foundPreset.u, foundPreset.width_fraction || 1) === null) {
       alert(`Not enough space in the rack cabinet to add ${foundPreset.name} (${foundPreset.u}U).`);
       return;
     }
@@ -925,8 +936,10 @@ document.addEventListener("DOMContentLoaded", () => {
     state.placedDevices.push(newDevice);
     state.lastAddedInstanceId = newDevice.instanceId; // Set last added ID to trigger pulse animation
     
-    // Resolve collisions so other gear slides out of the way
-    resolveCollisions(newDevice.instanceId, slot);
+    // Resolve collisions so other gear slides out of the way (skip for side panels)
+    if (!isSideSlot(slot)) {
+      resolveCollisions(newDevice.instanceId, slot);
+    }
 
     saveState();
     update();
@@ -970,9 +983,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Render visual cabinet rack
   function renderCabinet() {
     cabinetRackEl.innerHTML = "";
-    const sideCabinetRackEl = document.getElementById("side-cabinet-rack");
+    const sideCabinetRackEl = document.getElementById("side-cabinet-rack-left");
+    const sideCabinetRackRightEl = document.getElementById("side-cabinet-rack-right");
     if (sideCabinetRackEl) {
       sideCabinetRackEl.innerHTML = "";
+    }
+    if (sideCabinetRackRightEl) {
+      sideCabinetRackRightEl.innerHTML = "";
     }
     
     // Create rack container
@@ -1059,11 +1076,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const coreUplinks = (hasRouter ? 1 : 0) + Math.max(0, activeSwitches.length - 1);
 
     // Sort devices by slot descending to ensure consistent top-down port allocation
-    const sortedDevices = [...state.placedDevices].sort((a, b) => b.slot - a.slot);
+    // Side-panel devices go at the end
+    const sortedDevices = [...state.placedDevices].sort((a, b) => {
+      const aSide = isSideSlot(a.slot);
+      const bSide = isSideSlot(b.slot);
+      if (aSide && bSide) return 0;
+      if (aSide) return 1;
+      if (bSide) return -1;
+      return b.slot - a.slot;
+    });
 
     // Precalculate total fractional width used per slot to center them
     const slotTotalFraction = {};
     sortedDevices.forEach(dev => {
+      if (isSideSlot(dev.slot)) return;
       const frac = dev.width_fraction || 1;
       for (let i = 0; i < dev.u; i++) {
         const u = dev.slot - i;
@@ -1077,7 +1103,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Place devices absolutely in their correct slot positions
     sortedDevices.forEach(dev => {
       // Find the slot element corresponding to the dev.slot if it's not a side device
-      if (dev.slot !== "side") {
+      if (!isSideSlot(dev.slot)) {
         const slotEl = container.querySelector(`.rack-slot[data-u="${dev.slot}"]`);
         if (!slotEl) return;
       }
@@ -1095,7 +1121,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       const widthFrac = dev.width_fraction || 1;
       
-      if (dev.slot === "side") {
+      if (isSideSlot(dev.slot)) {
         devEl.className = `placed-device side-placed-device device-brand-${dev.brand}`;
         devEl.style.position = 'relative';
         devEl.style.height = 'auto';
@@ -1239,9 +1265,10 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (dev.brand === "cyberpower") logoText = "CP";
         else if (dev.brand === "tplink") logoText = "TP-Link";
         else if (dev.brand === "araknis") logoText = "Araknis";
+        else if (dev.brand === "netgear") logoText = "NETGEAR";
         else if (dev.brand === "denon") logoText = "Denon";
         else if (dev.brand === "marantz") logoText = "Marantz";
-        else if (dev.brand === "apple") logoText = "Apple TV";
+        else if (dev.brand === "apple") logoText = "";
         else if (dev.brand === "sony") logoText = "Sony";
         else if (dev.brand === "sonos") logoText = "Sonos";
         else if (dev.brand === "control4") logoText = "C4";
@@ -1366,15 +1393,11 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "apple-tv-4k") {
         faceplateOverlayHtml = `
           <div class="appletv-chassis">
-            <div class="appletv-logo">tv</div>
-            <div class="appletv-ports-area" style="position: absolute; right: 8px; top: 12px; opacity: 0.2; z-index: 12;">
-              ${portsHtml}
-            </div>
-            <div class="appletv-led" style="position: absolute; bottom: 4px; right: 8px; width: 3px; height: 3px; background: #fff; border-radius: 50%; box-shadow: 0 0 3px #fff;"></div>
+            <div class="appletv-logo"></div>
           </div>
         `;
         hideDefaultLeft = true;
-        portsHtml = ""; // Embedded inside appletv-ports-area
+        portsHtml = ""; // Ports on back, not visible
       }
 
       // Add rack ears if full width
@@ -1477,22 +1500,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      if (dev.slot === "side") {
-        if (sideCabinetRackEl) {
-          sideCabinetRackEl.appendChild(devEl);
+      if (isSideSlot(dev.slot)) {
+        const targetEl = dev.slot === "side-left" ? sideCabinetRackEl : sideCabinetRackRightEl;
+        if (targetEl) {
+          targetEl.appendChild(devEl);
         }
       } else {
         container.appendChild(devEl);
       }
     });
 
-    const sideDevices = state.placedDevices.filter(d => d.slot === "side");
-    if (sideCabinetRackEl && sideDevices.length === 0) {
-      sideCabinetRackEl.innerHTML = `
-        <div class="side-panel-empty-hint">
-          Перетащите сюда PDU, удлинители или другое оборудование для бокового монтажа
-        </div>
-      `;
+    // Show empty hints for each side panel
+    const sideLeftDevices = state.placedDevices.filter(d => d.slot === "side-left");
+    const sideRightDevices = state.placedDevices.filter(d => d.slot === "side-right");
+    const emptyHint = `<div class="side-panel-empty-hint">Drag PDUs, power strips, or other equipment here for side-mount installation</div>`;
+    if (sideCabinetRackEl && sideLeftDevices.length === 0) {
+      sideCabinetRackEl.innerHTML = emptyHint;
+    }
+    if (sideCabinetRackRightEl && sideRightDevices.length === 0) {
+      sideCabinetRackRightEl.innerHTML = emptyHint;
     }
 
     // Automatically generate 14U print chunks
@@ -1571,8 +1597,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const targetDev = state.placedDevices.find(d => d.instanceId === insertedInstanceId);
     if (!targetDev) return;
 
-    if (targetSlot === "side") {
-      targetDev.slot = "side";
+    if (isSideSlot(targetSlot)) {
+      targetDev.slot = targetSlot;
       return;
     }
 
@@ -1581,7 +1607,7 @@ document.addEventListener("DOMContentLoaded", () => {
     targetDev.slot = targetSlot;
 
     // Collect all other devices, excluding side panel ones
-    const otherDevices = state.placedDevices.filter(d => d.instanceId !== insertedInstanceId && d.slot !== "side");
+    const otherDevices = state.placedDevices.filter(d => d.instanceId !== insertedInstanceId && !isSideSlot(d.slot));
 
     // Partition based on preferred shift direction to create a natural slide cascade
     const above = [];
@@ -1705,8 +1731,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const dev = state.placedDevices.find(x => x.instanceId === instanceId);
     if (!dev) return;
 
-    if (newSlot === "side") {
-      dev.slot = "side";
+    if (isSideSlot(newSlot)) {
+      dev.slot = newSlot;
       saveState();
       update();
       return;
@@ -1725,7 +1751,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 1. Space validation
     const uniqueOccupiedUs = new Set();
     state.placedDevices.forEach(d => {
-       if (d.slot === "side") return; // Skip zero-U side devices
+       if (isSideSlot(d.slot)) return; // Skip zero-U side devices
        for (let i = 0; i < d.u; i++) uniqueOccupiedUs.add(d.slot - i);
     });
     const totalUUsed = uniqueOccupiedUs.size;

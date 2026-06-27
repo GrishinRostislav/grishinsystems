@@ -104,17 +104,28 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
     <div class="rp-canvas" id="rp-canvas">
       <div class="rp-canvas-content" id="rp-canvas-content">
         <div class="cabinet-wrapper">
+          <div class="side-cabinet-wrapper" id="side-cabinet-left-wrapper">
+            <h4 class="side-cabinet-title">
+              <span>🔌</span> Side Panel L (Zero-U)
+            </h4>
+            <div id="side-cabinet-rack-left" class="side-cabinet-rack-inner">
+              <div class="side-panel-empty-hint">
+                Drag PDUs, power strips, or other equipment here for side-mount installation
+              </div>
+            </div>
+          </div>
+
           <div class="cabinet-rack" id="cabinet-rack">
             <!-- Rendered dynamically by JS -->
           </div>
           
-          <div class="side-cabinet-wrapper">
+          <div class="side-cabinet-wrapper" id="side-cabinet-right-wrapper">
             <h4 class="side-cabinet-title">
-              <span>🔌</span> Боковая панель (Zero-U)
+              <span>🔌</span> Side Panel R (Zero-U)
             </h4>
-            <div id="side-cabinet-rack">
+            <div id="side-cabinet-rack-right" class="side-cabinet-rack-inner">
               <div class="side-panel-empty-hint">
-                Перетащите сюда PDU, удлинители или другое оборудование для бокового монтажа
+                Drag PDUs, power strips, or other equipment here for side-mount installation
               </div>
             </div>
           </div>
