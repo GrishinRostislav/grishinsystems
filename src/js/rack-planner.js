@@ -1178,9 +1178,8 @@ document.addEventListener("DOMContentLoaded", () => {
       // Add LEDs
       let ledsHtml = "";
       if (dev.requires_power) {
-        let isPowered = false;
-        if (availableOutlets > 0) {
-          isPowered = true;
+        const isPowered = dev.powerConnected !== false;
+        if (isPowered && availableOutlets > 0) {
           availableOutlets--;
         }
         ledsHtml = `
@@ -1252,9 +1251,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="eero-brand-area">
               <div class="eero-glossy-badge">
                 <span class="eero-text-logo">eero</span>
-                <span class="eero-badge-sub">an amazon company</span>
               </div>
-              <div class="eero-led-light ${dev.requires_power && availableOutlets > 0 ? 'active' : ''}"></div>
+              <div class="eero-led-light ${dev.requires_power && dev.powerConnected !== false ? 'active' : ''}"></div>
             </div>
             
             <div class="eero-ports-section">
@@ -1288,7 +1286,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         hideDefaultLeft = true;
         portsHtml = ""; // Embedded inside faceplateOverlayHtml
-        if (availableOutlets > 0) {
+        if (dev.powerConnected !== false && availableOutlets > 0) {
           availableOutlets--;
         }
       } else if (dev.brand === "ubiquiti" && dev.type === "switch") {
@@ -2152,6 +2150,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const configDeviceNotesEl = document.getElementById("config-device-notes");
   const patchTableBodyEl = document.getElementById("patch-table-body");
   const configDeviceTitleEl = document.getElementById("config-device-title");
+  const configPowerGroupEl = document.getElementById("config-power-group");
+  const configPowerConnectedEl = document.getElementById("config-power-connected");
   
   const btnConfigSaveEl = document.getElementById("btn-config-save");
   const btnConfigCancelEl = document.getElementById("btn-config-cancel");
@@ -2171,6 +2171,13 @@ document.addEventListener("DOMContentLoaded", () => {
     configIpAddressEl.value = dev.ipAddress || "";
     configDeviceNotesEl.value = dev.notes || "";
     configDeviceTitleEl.textContent = `Configure ${dev.name} (Slot U${dev.slot})`;
+    
+    if (dev.requires_power) {
+      configPowerGroupEl.style.display = "block";
+      configPowerConnectedEl.checked = dev.powerConnected !== false;
+    } else {
+      configPowerGroupEl.style.display = "none";
+    }
     
     renderPatchTable(dev, focusPortIdx);
     
@@ -2421,6 +2428,9 @@ document.addEventListener("DOMContentLoaded", () => {
     dev.customLabel = configCustomLabelEl.value.trim();
     dev.ipAddress = configIpAddressEl.value.trim();
     dev.notes = configDeviceNotesEl.value.trim();
+    if (dev.requires_power) {
+      dev.powerConnected = configPowerConnectedEl.checked;
+    }
     
     const rows = patchTableBodyEl.querySelectorAll("tr");
     

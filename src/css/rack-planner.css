@@ -841,8 +841,11 @@ body.dragging-active .placed-device * {
 }
 
 .device-delete-btn {
-  width: 18px;
-  height: 18px;
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: 16px;
+  height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -850,16 +853,21 @@ body.dragging-active .placed-device * {
   border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: 3px;
   color: var(--danger);
-  font-size: 12px;
+  font-size: 10px;
   cursor: pointer;
-  transition: var(--transition);
-  line-height: 1;
-  padding: 0;
+  transition: all 0.2s ease;
+  z-index: 15;
+  opacity: 0;
+}
+
+.placed-device:hover .device-delete-btn {
+  opacity: 1;
 }
 
 .device-delete-btn:hover {
   background: var(--danger);
   color: #fff;
+  border-color: var(--danger);
 }
 
 /* ----------------------------------------------------------
