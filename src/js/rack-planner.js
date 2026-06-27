@@ -1216,9 +1216,10 @@ document.addEventListener("DOMContentLoaded", () => {
       devEl.draggable = true;
       
       const widthFrac = dev.width_fraction || 1;
+      const isCleanChassis = dev.id === "apple-tv-4k" || dev.id === "eero-max-7" || dev.id === "eero-pro-6e" || dev.id === "sonos-port" || dev.id === "savant-macmini-host" || dev.id === "amp-sonos" || dev.id === "nv-shield" || dev.id === "cable-box";
       
       if (isSideSlot(dev.slot)) {
-        devEl.className = `placed-device side-placed-device device-brand-${dev.brand}`;
+        devEl.className = `placed-device side-placed-device device-brand-${dev.brand}${isCleanChassis ? ' clean-chassis' : ''}`;
         devEl.style.position = 'relative';
         devEl.style.height = 'auto';
         devEl.style.left = '0';
@@ -1226,7 +1227,7 @@ document.addEventListener("DOMContentLoaded", () => {
         devEl.style.top = '0';
       } else {
         const slotEl = container.querySelector(`.rack-slot[data-u="${dev.slot}"]`);
-        devEl.className = `placed-device device-brand-${dev.brand}${widthFrac === 1 ? ' has-ears' : ''}`;
+        devEl.className = `placed-device device-brand-${dev.brand}${widthFrac === 1 ? ' has-ears' : ''}${isCleanChassis ? ' clean-chassis' : ''}`;
         devEl.style.height = `${dev.u * 56 - 4}px`; // 1U = 56px. Subtract a little padding
         
         if (slotLeftOffsets[dev.slot] === undefined) {
@@ -1474,6 +1475,75 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         hideDefaultLeft = true;
         portsHtml = ""; // Embedded inside avr-ports-area
+      } else if (dev.brand === "savant" && (dev.id.includes("sipa") || dev.id.includes("host"))) {
+        faceplateOverlayHtml = `
+          <div class="savant-chassis">
+            <div class="savant-glossy-strip">
+              <div class="savant-led"></div>
+              <div class="savant-logo-text">SAVANT</div>
+            </div>
+            <div class="savant-ports-area" style="position: absolute; right: 24px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; z-index: 12;">
+              ${portsHtml}
+            </div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
+      } else if (dev.id === "sony-ps5") {
+        faceplateOverlayHtml = `
+          <div class="ps5-chassis">
+            <div class="ps5-wing ps5-wing-top"></div>
+            <div class="ps5-center-core">
+              <div class="ps5-led-strip"></div>
+              <div class="ps5-logo">SONY</div>
+              <div class="ps5-ports">
+                <span class="ps5-usb-c"></span>
+                <span class="ps5-usb-a"></span>
+              </div>
+            </div>
+            <div class="ps5-wing ps5-wing-bottom"></div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
+      } else if (dev.id === "amp-sonos") {
+        faceplateOverlayHtml = `
+          <div class="sonos-amp-chassis">
+            <div class="sonos-front-clean">
+              <div class="sonos-controls">
+                <span class="sonos-control-line"></span>
+                <span class="sonos-led glowing"></span>
+                <span class="sonos-control-line"></span>
+              </div>
+            </div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
+      } else if (dev.id === "sonos-port") {
+        faceplateOverlayHtml = `
+          <div class="sonos-port-chassis">
+            <div class="sonos-led glowing"></div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
+      } else if (dev.id === "eero-max-7") {
+        faceplateOverlayHtml = `
+          <div class="eero-max7-chassis">
+            <div class="eero-max7-led active"></div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
+      } else if (dev.id === "eero-pro-6e") {
+        faceplateOverlayHtml = `
+          <div class="eero-pro6e-chassis">
+            <div class="eero-pro6e-led active"></div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
       } else if (dev.id === "savant-macmini-host") {
         faceplateOverlayHtml = `
           <div class="macmini-chassis">
@@ -1490,6 +1560,7 @@ document.addEventListener("DOMContentLoaded", () => {
         faceplateOverlayHtml = `
           <div class="appletv-chassis">
             <div class="appletv-logo"></div>
+            <div class="appletv-led"></div>
           </div>
         `;
         hideDefaultLeft = true;
