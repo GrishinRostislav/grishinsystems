@@ -125,6 +125,10 @@ document.addEventListener("DOMContentLoaded", () => {
     automation: [
       { id: "savant-macmini-host", name: "Savant Mac Mini Host", brand: "savant", u: 1, width_fraction: 0.5, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 999 },
       { id: "savant-smart-host", name: "Savant Smart Host (shc-2000)", brand: "savant", u: 1, width_fraction: 0.5, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 799 },
+      { id: "ovrc-hub", name: "OvrC Pro Hub", brand: "araknis", u: 1, width_fraction: 0.33, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 300 },
+      { id: "lutron-ra3", name: "Lutron RadioRA 3 Processor", brand: "lutron", u: 1, width_fraction: 0.33, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 500 },
+      { id: "lutron-caseta", name: "Lutron Caseta Smart Bridge Pro", brand: "lutron", u: 1, width_fraction: 0.25, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 150 },
+      { id: "hunter-douglas-powerview", name: "Hunter Douglas PowerView Gen 3 Gateway", brand: "hunter-douglas", u: 1, width_fraction: 0.25, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 250 },
       { id: "c4-core-1", name: "Control4 CORE 1 Controller", brand: "control4", u: 1, width_fraction: 0.5, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 600 },
       { id: "c4-core-3", name: "Control4 CORE 3 Controller", brand: "control4", u: 1, width_fraction: 0.5, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1000 },
       { id: "c4-core-5", name: "Control4 CORE 5 Controller", brand: "control4", u: 1, width_fraction: 1, ports: 2, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 2000 },
@@ -1350,7 +1354,7 @@ document.addEventListener("DOMContentLoaded", () => {
       devEl.draggable = true;
       
       const widthFrac = dev.width_fraction || 1;
-      const isCleanChassis = dev.id === "apple-tv-4k" || dev.id === "eero-max-7" || dev.id === "eero-pro-6e" || dev.id === "sonos-port" || dev.id === "savant-macmini-host" || dev.id === "amp-sonos" || dev.id === "nv-shield" || dev.id === "cable-box" || dev.id === "telus-nah" || dev.id === "rogers-xb8" || dev.id === "bell-gigahub" || dev.id === "wattbox-300-3" || dev.id === "wattbox-250-2" || dev.id === "power-strip-6";
+      const isCleanChassis = dev.id === "apple-tv-4k" || dev.id === "eero-max-7" || dev.id === "eero-pro-6e" || dev.id === "sonos-port" || dev.id === "savant-macmini-host" || dev.id === "amp-sonos" || dev.id === "nv-shield" || dev.id === "cable-box" || dev.id === "telus-nah" || dev.id === "rogers-xb8" || dev.id === "bell-gigahub" || dev.id === "wattbox-300-3" || dev.id === "wattbox-250-2" || dev.id === "power-strip-6" || dev.id === "ovrc-hub" || dev.id === "lutron-ra3" || dev.id === "lutron-caseta" || dev.id === "hunter-douglas-powerview";
       
       const getPortTooltip = (portIndex, customLabel = "") => {
         const conn = state.connections.find(c => 
@@ -2229,6 +2233,69 @@ document.addEventListener("DOMContentLoaded", () => {
                   </div>
                 `;
               }).join('')}
+            </div>
+          </div>
+        `;
+      } else if (dev.id === "ovrc-hub") {
+        faceplateOverlayHtml = `
+          <div class="ovrc-hub-chassis">
+            <div class="ovrc-hub-front">
+              <span class="ovrc-logo-text">OvrC</span>
+              <div class="ovrc-leds-group">
+                <span class="led ${isDevicePowered(dev) ? 'glowing' : 'unpowered'}" title="Power"></span>
+                <span class="led ${isDevicePowered(dev) ? 'glowing' : 'unpowered'}" style="background: ${isDevicePowered(dev) ? '#3b82f6' : '#ef4444'}; box-shadow: 0 0 4px ${isDevicePowered(dev) ? '#3b82f6' : '#ef4444'};" title="Cloud Link"></span>
+              </div>
+            </div>
+            <div class="ovrc-hub-ports" style="display: flex; align-items: center; gap: 4px; pointer-events: auto; margin-left: auto;">
+              ${customPowerInletPort()}
+              <span style="font-size: 5px; color: #888; font-weight: bold; line-height: 1;">LAN</span>
+              ${customSinglePort(0, "Ethernet (LAN)")}
+            </div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
+      } else if (dev.id === "lutron-ra3") {
+        faceplateOverlayHtml = `
+          <div class="lutron-ra3-chassis">
+            <div class="lutron-ra3-front">
+              <span class="lutron-logo-text">LUTRON</span>
+              <div class="lutron-ra3-lightbar ${isDevicePowered(dev) ? 'active' : ''}"></div>
+            </div>
+            <div class="lutron-ra3-ports" style="display: flex; align-items: center; gap: 4px; pointer-events: auto; margin-left: auto; padding-right: 4px;">
+              ${customPowerInletPort()}
+              <span style="font-size: 5px; color: #888; font-weight: bold; line-height: 1;">LAN</span>
+              ${customSinglePort(0, "Ethernet (LAN)")}
+            </div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
+      } else if (dev.id === "lutron-caseta") {
+        faceplateOverlayHtml = `
+          <div class="lutron-caseta-chassis">
+            <div class="lutron-caseta-front">
+              <span class="lutron-logo-mini">LUTRON</span>
+              <div class="lutron-caseta-ring ${isDevicePowered(dev) ? 'active' : ''}"></div>
+            </div>
+            <div class="lutron-caseta-ports" style="display: flex; align-items: center; gap: 4px; pointer-events: auto; margin-left: auto; padding-right: 4px;">
+              ${customPowerInletPort()}
+              ${customSinglePort(0, "Ethernet (LAN)")}
+            </div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
+      } else if (dev.id === "hunter-douglas-powerview") {
+        faceplateOverlayHtml = `
+          <div class="hunter-douglas-chassis">
+            <div class="hunter-douglas-front">
+              <span class="hd-logo-text">HunterDouglas</span>
+              <div class="hd-led ${isDevicePowered(dev) ? 'active' : ''}"></div>
+            </div>
+            <div class="hunter-douglas-ports" style="display: flex; align-items: center; gap: 4px; pointer-events: auto; margin-left: auto; padding-right: 4px;">
+              ${customPowerInletPort()}
+              ${customSinglePort(0, "Ethernet (LAN)")}
             </div>
           </div>
         `;
