@@ -808,6 +808,17 @@ body.dragging-active .placed-device * {
   display: none !important;
 }
 
+.port-dot.wan-port.internet-active {
+  background: #10b981 !important;
+  border-color: #34d399 !important;
+  box-shadow: 0 0 6px #10b981, inset 0 1px 0 rgba(255,255,255,0.2) !important;
+}
+.port-dot.wan-port.internet-active::after {
+  background: #10b981 !important;
+  border-color: #34d399 !important;
+  box-shadow: 0 0 3px #10b981 !important;
+}
+
 .port-dot.wan-last {
   margin-right: 36px; /* Large gap between WAN and LAN */
 }

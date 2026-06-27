@@ -1567,6 +1567,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             if (classPrefix.includes("wan-port")) {
               classStr += " wan-port";
+              if (dev.internetActive) {
+                classStr += " connected internet-active";
+              }
             } else if (classPrefix.includes("sfp-port")) {
               classStr += " sfp-port";
             }
@@ -1577,7 +1580,9 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
             if (conn) {
-              classStr += " connected";
+              if (!classStr.includes("connected")) {
+                classStr += " connected";
+              }
               const targetInstanceId = conn.fromDevice === dev.instanceId ? conn.toDevice : conn.fromDevice;
               const targetDev = state.placedDevices.find(d => d.instanceId === targetInstanceId);
               const isUplinkConnection = targetDev && (targetDev.type === "switch" || targetDev.type === "router");
@@ -1738,6 +1743,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (classPrefix.includes("wan-port")) {
           classStr += " wan-port";
+          if (dev.internetActive) {
+            classStr += " connected internet-active";
+          }
         } else if (classPrefix.includes("sfp-port")) {
           classStr += " sfp-port";
         }
@@ -1748,7 +1756,9 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
         if (conn) {
-          classStr += " connected";
+          if (!classStr.includes("connected")) {
+            classStr += " connected";
+          }
           const targetInstanceId = conn.fromDevice === dev.instanceId ? conn.toDevice : conn.fromDevice;
           const targetDev = state.placedDevices.find(d => d.instanceId === targetInstanceId);
           const isUplinkConnection = targetDev && (targetDev.type === "switch" || targetDev.type === "router");
@@ -3357,6 +3367,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const configDeviceTitleEl = document.getElementById("config-device-title");
   const configPowerGroupEl = document.getElementById("config-power-group");
   const configPowerStatusEl = document.getElementById("config-power-status");
+  const configInternetGroupEl = document.getElementById("config-internet-group");
+  const configInternetActiveEl = document.getElementById("config-internet-active");
   
   const btnConfigSaveEl = document.getElementById("btn-config-save");
   const btnConfigCancelEl = document.getElementById("btn-config-cancel");
@@ -3384,6 +3396,13 @@ document.addEventListener("DOMContentLoaded", () => {
         : `<span style="color:#ef4444; font-weight:bold;">⚠️ Unpowered (No outlet connection)</span>`;
     } else {
       configPowerGroupEl.style.display = "none";
+    }
+
+    if (dev.type === "router") {
+      configInternetGroupEl.style.display = "block";
+      configInternetActiveEl.checked = !!dev.internetActive;
+    } else {
+      configInternetGroupEl.style.display = "none";
     }
     
     renderPatchTable(dev, focusPortIdx);
@@ -3742,6 +3761,9 @@ document.addEventListener("DOMContentLoaded", () => {
     dev.customLabel = configCustomLabelEl.value.trim();
     dev.ipAddress = configIpAddressEl.value.trim();
     dev.notes = configDeviceNotesEl.value.trim();
+    if (dev.type === "router") {
+      dev.internetActive = configInternetActiveEl.checked;
+    }
     const rows = patchTableBodyEl.querySelectorAll("tr");
     
     rows.forEach(tr => {
