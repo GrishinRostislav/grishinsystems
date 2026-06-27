@@ -146,7 +146,9 @@ document.addEventListener("DOMContentLoaded", () => {
     lastAddedInstanceId: null, // Keep track of the last added device to flash animate it
     bomSortColumn: null, // Sort column (null for default, "type", "name", "qty", "cost")
     bomSortOrder: "asc",  // Sort order ("asc" or "desc")
-    zoomLevel: 1.0
+    zoomLevel: 1.0,
+    panX: 0,
+    panY: 0
   };
 
   // Selectors
@@ -491,11 +493,65 @@ document.addEventListener("DOMContentLoaded", () => {
       zoomFitEl.addEventListener("click", fitToView);
     }
     if (canvasEl) {
+      let isPanning = false;
+      let startX, startY;
+      let startPanX, startPanY;
+
+      canvasEl.addEventListener("mousedown", (e) => {
+        // Prevent panning when interacting with placed devices, catalog items, toolbars, sidebar, or modals
+        if (
+          e.target.closest(".placed-device") ||
+          e.target.closest(".rp-toolbar") ||
+          e.target.closest(".rp-sidebar") ||
+          e.target.closest(".modal-overlay") ||
+          e.target.closest(".catalog-item") ||
+          e.target.closest(".form-group") ||
+          e.target.closest("button") ||
+          e.target.closest("input") ||
+          e.target.closest("select")
+        ) {
+          return;
+        }
+        
+        isPanning = true;
+        canvasEl.style.cursor = "grabbing";
+        startX = e.clientX;
+        startY = e.clientY;
+        startPanX = state.panX || 0;
+        startPanY = state.panY || 0;
+        
+        e.preventDefault();
+      });
+
+      window.addEventListener("mousemove", (e) => {
+        if (!isPanning) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        state.panX = startPanX + dx;
+        state.panY = startPanY + dy;
+        applyZoom();
+      });
+
+      window.addEventListener("mouseup", () => {
+        if (isPanning) {
+          isPanning = false;
+          canvasEl.style.cursor = "grab";
+          saveState();
+        }
+      });
+
       canvasEl.addEventListener("wheel", (e) => {
         if (e.ctrlKey || e.metaKey) {
           e.preventDefault();
           const delta = e.deltaY > 0 ? -0.05 : 0.05;
-          setZoom(state.zoomLevel + delta);
+          // Zoom centered on current cursor
+          zoomAt(e.clientX, e.clientY, delta);
+        } else {
+          // Trackpad scroll gesture panning
+          e.preventDefault();
+          state.panX = (state.panX || 0) - e.deltaX;
+          state.panY = (state.panY || 0) - e.deltaY;
+          applyZoom();
         }
       }, { passive: false });
     }
@@ -583,7 +639,9 @@ document.addEventListener("DOMContentLoaded", () => {
       showCables: state.showCables,
       bomSortColumn: state.bomSortColumn,
       bomSortOrder: state.bomSortOrder,
-      zoomLevel: state.zoomLevel
+      zoomLevel: state.zoomLevel,
+      panX: state.panX,
+      panY: state.panY
     }));
   }
 
@@ -601,6 +659,8 @@ document.addEventListener("DOMContentLoaded", () => {
         state.bomSortColumn = parsed.bomSortColumn !== undefined ? parsed.bomSortColumn : null;
         state.bomSortOrder = parsed.bomSortOrder !== undefined ? parsed.bomSortOrder : "asc";
         state.zoomLevel = parsed.zoomLevel || 1.0;
+        state.panX = parsed.panX !== undefined ? parsed.panX : 0;
+        state.panY = parsed.panY !== undefined ? parsed.panY : 0;
         
         if (parsed.endpoints) {
           state.endpoints = parsed.endpoints;
@@ -2227,13 +2287,50 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ─── Zoom Functions ─────────────────────────────────
   function setZoom(level) {
-    state.zoomLevel = Math.max(0.25, Math.min(2.0, level));
+    const oldZoom = state.zoomLevel;
+    const newZoom = Math.max(0.25, Math.min(2.0, level));
+    if (oldZoom === newZoom) return;
+    
+    if (!canvasEl) {
+      state.zoomLevel = newZoom;
+      applyZoom();
+      return;
+    }
+
+    const canvasRect = canvasEl.getBoundingClientRect();
+    const x = canvasRect.width / 2;
+    const y = canvasRect.height / 2;
+    
+    const factor = newZoom / oldZoom;
+    state.panX = x - (x - (state.panX || 0)) * factor;
+    state.panY = y - (y - (state.panY || 0)) * factor;
+    state.zoomLevel = newZoom;
+    
     applyZoom();
+  }
+
+  function zoomAt(clientX, clientY, delta) {
+    if (!canvasEl || !canvasContentEl) return;
+    const canvasRect = canvasEl.getBoundingClientRect();
+    const x = clientX - canvasRect.left;
+    const y = clientY - canvasRect.top;
+    
+    const oldZoom = state.zoomLevel;
+    const newZoom = Math.max(0.25, Math.min(2.0, oldZoom + delta));
+    if (oldZoom === newZoom) return;
+    
+    const factor = newZoom / oldZoom;
+    state.panX = x - (x - (state.panX || 0)) * factor;
+    state.panY = y - (y - (state.panY || 0)) * factor;
+    state.zoomLevel = newZoom;
+    
+    applyZoom();
+    saveState();
   }
 
   function applyZoom() {
     if (canvasContentEl) {
-      canvasContentEl.style.transform = `scale(${state.zoomLevel})`;
+      canvasContentEl.style.transform = `translate(${state.panX || 0}px, ${state.panY || 0}px) scale(${state.zoomLevel})`;
     }
     if (zoomSliderEl) {
       zoomSliderEl.value = Math.round(state.zoomLevel * 100);
@@ -2247,10 +2344,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!canvasEl || !canvasContentEl) return;
     const canvasRect = canvasEl.getBoundingClientRect();
     const rackHeight = state.rackSize * 56 + 36 + 48; // slots + borders + padding
-    const rackWidth = 560 + 32; // rack width + padding
+    const rackWidth = 1048; // Left panel (220) + gap (24) + Rack (560) + gap (24) + Right panel (220) = 1048
     const scaleH = (canvasRect.height - 48) / rackHeight;
     const scaleW = (canvasRect.width - 48) / rackWidth;
-    setZoom(Math.min(scaleH, scaleW, 2.0));
+    state.zoomLevel = Math.max(0.25, Math.min(scaleH, scaleW, 2.0));
+    
+    state.panX = (canvasRect.width - rackWidth * state.zoomLevel) / 2;
+    state.panY = 24;
+    
+    applyZoom();
   }
 
   // Selectors for device config modal
