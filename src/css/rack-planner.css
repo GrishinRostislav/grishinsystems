@@ -3394,21 +3394,28 @@ body.dragging-active .placed-device * {
 .power-strip-switch {
   width: 14px;
   height: 14px;
-  background: #7f1d1d;
+  background: #991b1b; /* dark red switch base */
   border-radius: 2px;
-  border: 1px solid #991b1b;
+  border: 1px solid #7f1d1d;
   position: relative;
   cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
 }
 .power-strip-switch.active {
-  background: #ef4444;
+  background: #16a34a; /* green switch base when powered */
+  border-color: #15803d;
 }
 .switch-glow {
   width: 100%;
   height: 100%;
-  background: rgba(239, 68, 68, 0.4);
-  box-shadow: 0 0 4px #ef4444;
   border-radius: 2px;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  background: rgba(239, 68, 68, 0.45);
+  box-shadow: 0 0 4px #ef4444;
+}
+.power-strip-switch.active .switch-glow {
+  background: rgba(74, 222, 128, 0.45);
+  box-shadow: 0 0 6px #4ade80;
 }
 .power-strip-outlets {
   display: flex;

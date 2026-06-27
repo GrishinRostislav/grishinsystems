@@ -2190,8 +2190,8 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "power-strip-6") {
         faceplateOverlayHtml = `
           <div class="generic-power-strip-chassis">
-            <div class="power-strip-switch ${isDevicePowered(dev) ? 'active' : ''}" title="Power Switch (ON)">
-              <div class="switch-glow" style="display: ${isDevicePowered(dev) ? 'block' : 'none'};"></div>
+            <div class="power-strip-switch ${isDevicePowered(dev) ? 'active' : ''}" title="Power Switch">
+              <div class="switch-glow"></div>
             </div>
             <div class="power-strip-outlets">
               ${Array.from({length: 6}, (_, i) => {
@@ -3255,17 +3255,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   
-  function isDevicePowered(dev) {
+  function isDevicePowered(dev, visited = new Set()) {
+    if (!dev) return false;
+    if (visited.has(dev.instanceId)) return false; // Break loops/cycles
+    visited.add(dev.instanceId);
+
+    // Wall Outlet / Power Source is always powered
     if (!dev.requires_power) return true;
+
+    // Find the connection connected to the power inlet (port 1000)
     const conn = state.connections.find(c => 
       (c.fromDevice === dev.instanceId && c.fromPort === 1000) ||
       (c.toDevice === dev.instanceId && c.toPort === 1000)
     );
     if (!conn) return false;
+
     const otherDevId = conn.fromDevice === dev.instanceId ? conn.toDevice : conn.fromDevice;
     const otherPort = conn.fromDevice === dev.instanceId ? conn.toPort : conn.fromPort;
+
+    // The supplier port must be an outlet (port >= 2000)
     if (otherPort < 2000) return false;
-    return state.placedDevices.some(d => d.instanceId === otherDevId);
+
+    const supplyingDev = state.placedDevices.find(d => d.instanceId === otherDevId);
+    if (!supplyingDev) return false;
+
+    // Recursively check if the supplying device itself has power
+    return isDevicePowered(supplyingDev, visited);
   }
 
   function renderPatchTable(dev, focusPortIdx = null) {
