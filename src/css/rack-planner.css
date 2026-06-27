@@ -2574,8 +2574,8 @@ body.dragging-active .placed-device * {
 }
 
 .appletv-chassis {
-  width: 76px;
-  height: 22px;
+  width: 115px;
+  height: 28px;
   background: #111;
   border-radius: 5px;
   border: 1.5px solid #222;
@@ -2584,7 +2584,7 @@ body.dragging-active .placed-device * {
   align-items: center;
   position: relative;
   margin: auto;
-  padding: 0 6px;
+  padding: 0 8px;
 }
 .appletv-front-decor {
   display: flex;
@@ -2743,8 +2743,8 @@ body.dragging-active .placed-device * {
 
 /* Eero Max 7 / Pro 6E Styling */
 .eero-max7-chassis {
-  width: 110px;
-  height: 38px;
+  width: 145px;
+  height: 42px;
   background: linear-gradient(135deg, #ffffff 40%, #e2e8f0 90%);
   border: 1px solid #cbd5e1;
   border-radius: 6px;
@@ -2769,8 +2769,8 @@ body.dragging-active .placed-device * {
 }
 
 .eero-pro6e-chassis {
-  width: 76px;
-  height: 28px;
+  width: 105px;
+  height: 34px;
   background: linear-gradient(135deg, #ffffff 50%, #f1f5f9 95%);
   border: 1px solid #e2e8f0;
   border-radius: 5px;
@@ -2884,8 +2884,8 @@ body.dragging-active .placed-device * {
 
 /* NVIDIA Shield TV Pro Custom Chassis styling */
 .nvshield-chassis {
-  width: 90px;
-  height: 22px;
+  width: 135px;
+  height: 28px;
   background: #0f0f11;
   border-radius: 4px;
   border: 1px solid #222;
