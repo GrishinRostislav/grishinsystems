@@ -647,6 +647,49 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.target === deviceConfigModalEl) closeDeviceConfigModal();
       });
     }
+
+    cabinetRackEl.addEventListener("mouseover", (e) => {
+      const portDot = e.target.closest(".port-dot");
+      if (!portDot) return;
+      
+      const devEl = portDot.closest(".placed-device");
+      if (!devEl) return;
+      
+      const devId = devEl.dataset.instanceId;
+      const portIdx = parseInt(portDot.dataset.portIdx);
+      
+      const path = cabinetRackEl.querySelector(`path[data-from-dev="${devId}"][data-from-port="${portIdx}"], path[data-to-dev="${devId}"][data-to-port="${portIdx}"]`);
+      if (path) {
+        const svg = cabinetRackEl.querySelector(".rack-cables-svg");
+        if (svg) svg.classList.add("has-hovered-cable");
+        path.classList.add("hover-highlight");
+        
+        const fromDev = path.getAttribute("data-from-dev");
+        const fromPort = parseInt(path.getAttribute("data-from-port"));
+        const toDev = path.getAttribute("data-to-dev");
+        const toPort = parseInt(path.getAttribute("data-to-port"));
+        
+        const targetDevId = fromDev === devId ? toDev : fromDev;
+        const targetPortIdx = fromDev === devId ? toPort : fromPort;
+        
+        const targetPortEl = cabinetRackEl.querySelector(`.placed-device[data-instance-id="${targetDevId}"] [data-port-idx="${targetPortIdx}"]`);
+        if (targetPortEl) {
+          targetPortEl.classList.add("hover-highlight");
+        }
+      }
+    });
+
+    cabinetRackEl.addEventListener("mouseout", (e) => {
+      const portDot = e.target.closest(".port-dot");
+      if (!portDot) return;
+      
+      const svg = cabinetRackEl.querySelector(".rack-cables-svg");
+      if (svg) svg.classList.remove("has-hovered-cable");
+      
+      cabinetRackEl.querySelectorAll(".cable-path.hover-highlight").forEach(p => p.classList.remove("hover-highlight"));
+      cabinetRackEl.querySelectorAll(".port-dot.hover-highlight").forEach(p => p.classList.remove("hover-highlight"));
+    });
+
     state.showCables = true;
 
     // Sort columns click listeners
@@ -1227,6 +1270,59 @@ document.addEventListener("DOMContentLoaded", () => {
       const widthFrac = dev.width_fraction || 1;
       const isCleanChassis = dev.id === "apple-tv-4k" || dev.id === "eero-max-7" || dev.id === "eero-pro-6e" || dev.id === "sonos-port" || dev.id === "savant-macmini-host" || dev.id === "amp-sonos" || dev.id === "nv-shield" || dev.id === "cable-box" || dev.id === "telus-nah" || dev.id === "rogers-xb8" || dev.id === "bell-gigahub" || dev.id === "wattbox-300-3" || dev.id === "wattbox-250-2" || dev.id === "power-strip-6";
       
+      const getPortTooltip = (portIndex, customLabel = "") => {
+        const conn = state.connections.find(c => 
+          (c.fromDevice === dev.instanceId && c.fromPort === portIndex) || 
+          (c.toDevice === dev.instanceId && c.toPort === portIndex)
+        );
+        
+        let portName = "";
+        if (portIndex === 1000) {
+          portName = "Power Inlet";
+        } else if (portIndex >= 2000) {
+          portName = `Outlet ${portIndex - 2000 + 1}`;
+        } else {
+          portName = customLabel || `Port ${portIndex + 1}`;
+        }
+        
+        const baseName = dev.customLabel || dev.name;
+        if (!conn) {
+          return `${baseName} (${portName}) [Not Connected]`;
+        }
+        
+        const isFrom = conn.fromDevice === dev.instanceId;
+        const targetDevId = isFrom ? conn.toDevice : conn.fromDevice;
+        const targetPortIdx = isFrom ? conn.toPort : conn.fromPort;
+        
+        let destLabel = "";
+        if (targetDevId === "wall-drop") {
+          destLabel = `Wall Drop #${targetPortIdx}`;
+        } else if (targetDevId === "poe-endpoint") {
+          const epParts = targetPortIdx.split("-");
+          const epId = epParts.slice(0, -1).join("-");
+          const epNum = epParts[epParts.length - 1];
+          const ep = state.endpoints.find(e => e.id === epId);
+          destLabel = ep ? `${ep.name} #${epNum}` : `PoE Endpoint #${epNum}`;
+        } else {
+          const targetDev = state.placedDevices.find(d => d.instanceId === targetDevId);
+          if (targetDev) {
+            let targetPortName = "";
+            if (targetPortIdx === 1000) {
+              targetPortName = "Power Inlet";
+            } else if (targetPortIdx >= 2000) {
+              targetPortName = `Outlet ${targetPortIdx - 2000 + 1}`;
+            } else {
+              targetPortName = `Port ${targetPortIdx + 1}`;
+            }
+            destLabel = `U${targetDev.slot}: ${targetDev.customLabel || targetDev.name} (${targetPortName})`;
+          } else {
+            destLabel = "Unknown Device";
+          }
+        }
+        
+        return `${baseName} (${portName}) 🔗 Connected to: ${destLabel}`;
+      };
+
       if (isSideSlot(dev.slot)) {
         devEl.className = `placed-device side-placed-device device-brand-${dev.brand}${isCleanChassis ? ' clean-chassis' : ''}`;
         devEl.style.position = 'relative';
@@ -1346,7 +1442,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 classStr += " active";
               }
             }
-            return `<span class="${classStr} ${classPrefix}" data-port-idx="${portIndex}" title="${dev.customLabel || dev.name} - ${label || ('Port ' + (portIndex + 1))}"></span>`;
+            return `<span class="${classStr} ${classPrefix}" data-port-idx="${portIndex}" title="${getPortTooltip(portIndex, label)}"></span>`;
           };
 
           const sfpPortsCount = (() => {
@@ -1517,7 +1613,7 @@ document.addEventListener("DOMContentLoaded", () => {
             classStr += " active";
           }
         }
-        return `<span class="${classStr} ${classPrefix}" data-port-idx="${portIndex}" title="${dev.customLabel || dev.name} - ${label || ('Port ' + (portIndex + 1))}"></span>`;
+        return `<span class="${classStr} ${classPrefix}" data-port-idx="${portIndex}" title="${getPortTooltip(portIndex, label)}"></span>`;
       };
 
       const customPowerInletPort = () => {
@@ -1530,7 +1626,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return `
           <div class="custom-pwr-wrapper" style="display:flex; align-items:center; gap:2px; pointer-events:auto;">
             <span style="font-size: 5px; color: #f97316; font-weight: bold; line-height: 1;">PWR</span>
-            <span class="port-dot power-inlet-dot${connectedClass}" data-port-idx="1000" title="${dev.customLabel || dev.name} - Power Inlet"></span>
+            <span class="port-dot power-inlet-dot${connectedClass}" data-port-idx="1000" title="${getPortTooltip(1000)}"></span>
           </div>
         `;
       };
@@ -1542,7 +1638,7 @@ document.addEventListener("DOMContentLoaded", () => {
           (c.toDevice === dev.instanceId && c.toPort === portIndex)
         );
         const connectedClass = conn ? " connected" : "";
-        return `<span class="port-dot power-outlet-dot${connectedClass}" data-port-idx="${portIndex}" title="${dev.customLabel || dev.name} - Outlet ${outletIdx + 1}"></span>`;
+        return `<span class="port-dot power-outlet-dot${connectedClass}" data-port-idx="${portIndex}" title="${getPortTooltip(portIndex)}"></span>`;
       };
 
       if (dev.id === "eero-poe-gateway") {
@@ -2061,9 +2157,9 @@ document.addEventListener("DOMContentLoaded", () => {
         );
         const connectedClass = conn ? " connected" : "";
         return `
-          <div class="power-inlet-wrapper" style="display: flex; align-items: center; gap: 3px; margin-left: 6px; z-index: 12;" title="Power Input (120V AC)">
+          <div class="power-inlet-wrapper" style="display: flex; align-items: center; gap: 3px; margin-left: 6px; z-index: 12;" title="${getPortTooltip(1000)}">
             <span style="font-size: 5px; color: #f97316; font-weight: bold;">PWR</span>
-            <span class="port-dot power-inlet-dot${connectedClass}" data-port-idx="1000"></span>
+            <span class="port-dot power-inlet-dot${connectedClass}" data-port-idx="1000" title="${getPortTooltip(1000)}"></span>
           </div>
         `;
       };
@@ -3479,6 +3575,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         path.setAttribute("d", pathD);
         path.setAttribute("class", `cable-path ${colorClass}`);
+        path.setAttribute("data-from-dev", conn.fromDevice);
+        path.setAttribute("data-from-port", conn.fromPort);
+        path.setAttribute("data-to-dev", conn.toDevice);
+        path.setAttribute("data-to-port", conn.toPort);
         path.setAttribute("stroke-width", "2");
         if (conn.cableColor) {
           path.setAttribute("stroke", conn.cableColor);
@@ -3522,6 +3622,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         path.setAttribute("d", pathD);
         path.setAttribute("class", `cable-path ${colorClass}`);
+        path.setAttribute("data-from-dev", conn.fromDevice);
+        path.setAttribute("data-from-port", conn.fromPort);
+        path.setAttribute("data-to-dev", conn.toDevice);
+        path.setAttribute("data-to-port", conn.toPort);
         path.setAttribute("stroke-width", "2");
         if (conn.cableColor) {
           path.setAttribute("stroke", conn.cableColor);

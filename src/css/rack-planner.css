@@ -2067,9 +2067,14 @@ body.dragging-active .placed-device * {
   pointer-events: stroke;
 }
 
-.cable-path:hover {
-  opacity: 1;
-  stroke-width: 3.5px !important;
+.cable-path:hover,
+.cable-path.hover-highlight {
+  opacity: 1 !important;
+  stroke-width: 4px !important;
+}
+
+.rack-cables-svg.has-hovered-cable .cable-path:not(.hover-highlight) {
+  opacity: 0.15 !important;
 }
 
 /* Cable path styles based on color */
@@ -2085,12 +2090,23 @@ body.dragging-active .placed-device * {
 .port-dot {
   cursor: pointer;
   pointer-events: auto;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.port-dot:hover {
-  transform: scale(1.3);
-  box-shadow: 0 0 8px currentColor;
-  z-index: 15;
+.port-dot:hover,
+.port-dot.hover-highlight {
+  transform: scale(1.35) !important;
+  box-shadow: 0 0 10px #3b82f6, 0 0 4px #3b82f6 !important;
+  border-color: #3b82f6 !important;
+  z-index: 50;
+}
+
+.port-dot.power-inlet-dot:hover,
+.port-dot.power-inlet-dot.hover-highlight,
+.port-dot.power-outlet-dot:hover,
+.port-dot.power-outlet-dot.hover-highlight {
+  box-shadow: 0 0 10px #f97316, 0 0 4px #f97316 !important;
+  border-color: #f97316 !important;
 }
 
 .port-dot.connected {
