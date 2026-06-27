@@ -2324,7 +2324,8 @@ body.dragging-active .placed-device * {
 .eero-pro6e-ports,
 .macmini-ports-bracket,
 .savant-ports-bracket,
-.cable-box-ports {
+.cable-box-ports,
+.nvshield-ports-bracket {
   pointer-events: auto !important;
 }
 
@@ -2498,7 +2499,8 @@ body.dragging-active .placed-device * {
 .placed-device.clean-chassis:hover .sonos-amp-chassis,
 .placed-device.clean-chassis:hover .sonos-port-chassis,
 .placed-device.clean-chassis:hover .eero-max7-chassis,
-.placed-device.clean-chassis:hover .eero-pro6e-chassis {
+.placed-device.clean-chassis:hover .eero-pro6e-chassis,
+.placed-device.clean-chassis:hover .nvshield-chassis {
   box-shadow: 0 0 0 2px var(--accent-cyan), 0 4px 10px rgba(0, 0, 0, 0.6) !important;
 }
 
@@ -2843,6 +2845,45 @@ body.dragging-active .placed-device * {
   font-weight: 800;
   text-transform: uppercase;
 }
+
+/* NVIDIA Shield TV Pro Custom Chassis styling */
+.nvshield-chassis {
+  width: 90px;
+  height: 22px;
+  background: #0f0f11;
+  border-radius: 4px;
+  border: 1px solid #222;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin: auto;
+  padding: 0 8px;
+  /* Add angular geometric facets background pattern */
+  background-image: linear-gradient(135deg, #1f1f23 25%, transparent 25%), 
+                    linear-gradient(225deg, #1f1f23 25%, transparent 25%);
+  background-size: 12px 12px;
+}
+.nvshield-front {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.nvshield-green-light {
+  width: 16px;
+  height: 1.5px;
+  background: #22c55e; /* NVIDIA green glow strip */
+  box-shadow: 0 0 5px #22c55e;
+  border-radius: 1px;
+}
+.nvshield-logo {
+  font-size: 6px;
+  color: #a1a1aa;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+
 
 .rack-shelf-bg::after {
   content: '';

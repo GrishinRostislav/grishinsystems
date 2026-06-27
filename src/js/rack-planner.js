@@ -1727,6 +1727,21 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         hideDefaultLeft = true;
         portsHtml = "";
+      } else if (dev.id === "nv-shield") {
+        faceplateOverlayHtml = `
+          <div class="nvshield-chassis">
+            <div class="nvshield-front">
+              <div class="nvshield-green-light"></div>
+              <span class="nvshield-logo">SHIELD TV PRO</span>
+            </div>
+            <div class="nvshield-ports-bracket" style="margin-left: auto; display: flex; align-items: center; gap: 4px; pointer-events: auto; padding-right: 6px;">
+              <span class="nvshield-port-label" style="font-size: 6.5px; font-weight: bold; color: #666;">LAN</span>
+              ${customSinglePort(0, "Ethernet (LAN)")}
+            </div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
       }
 
       // Add rack ears if full width
@@ -2745,15 +2760,11 @@ document.addEventListener("DOMContentLoaded", () => {
       
       let specialLabel = "";
       if (dev.type === "switch" || dev.poe_budget > 0) {
-        const uplinksNeeded = (dev.instanceId === (sortedSwitches.length > 0 ? sortedSwitches[0].instanceId : null) ? coreUplinks : 1);
-        const isUplink = (i < uplinksNeeded);
         const isPoe = dev.poe_ports > 0 && i < dev.poe_ports;
-        if (isUplink) specialLabel = " <span style='font-size:9px;color:#3b82f6;'>▲ Uplink</span>";
-        else if (isPoe) specialLabel = " <span style='font-size:9px;color:#eab308;'>⚡ PoE</span>";
+        if (isPoe) specialLabel = " <span style='font-size:9px;color:#eab308;'>⚡ PoE</span>";
       } else if (dev.type === "router") {
         const numWan = dev.name.includes("2WAN") || dev.name.includes("4L2W") ? 2 : 1;
         if (i < numWan) specialLabel = " <span style='font-size:9px;color:#ef4444;'>WAN</span>";
-        else if (i === numWan) specialLabel = " <span style='font-size:9px;color:#3b82f6;'>LAN Uplink</span>";
         else specialLabel = " <span style='font-size:9px;color:#22c55e;'>LAN</span>";
       }
       tdPort.innerHTML = `Port ${portNum}${specialLabel}`;
