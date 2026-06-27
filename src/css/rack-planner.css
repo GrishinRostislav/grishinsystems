@@ -2688,7 +2688,7 @@ body.dragging-active .placed-device * {
 /* Sonos Styling */
 .sonos-amp-chassis {
   width: 100%;
-  height: 32px;
+  height: 38px;
   background: #121212;
   border: 1.5px solid #222;
   border-radius: 4px;
@@ -2697,6 +2697,7 @@ body.dragging-active .placed-device * {
   margin: auto;
   box-shadow: 0 4px 10px rgba(0,0,0,0.6);
   padding: 0 10px;
+  box-sizing: border-box;
 }
 .sonos-amp-front {
   display: flex;
@@ -2723,8 +2724,8 @@ body.dragging-active .placed-device * {
 }
 
 .sonos-port-chassis {
-  width: 82px;
-  height: 24px;
+  width: 90px;
+  height: 38px;
   background: #1c1c1e;
   border: 1.5px solid #2c2c2e;
   border-radius: 4px;
@@ -2733,7 +2734,8 @@ body.dragging-active .placed-device * {
   justify-content: space-between;
   margin: auto;
   box-shadow: 0 3px 8px rgba(0,0,0,0.5);
-  padding: 0 6px;
+  padding: 0 8px;
+  box-sizing: border-box;
 }
 .sonos-port-front {
   display: flex;

@@ -1663,14 +1663,10 @@ document.addEventListener("DOMContentLoaded", () => {
               </div>
               <span class="sonos-chassis-label" style="font-size: 8px; font-weight: 800; color: #444; margin-left: 6px; letter-spacing: 0.5px;">SONOS AMP</span>
             </div>
-            <div class="sonos-amp-ports" style="display: flex; align-items: center; gap: 8px; margin-left: auto; padding-right: 12px; pointer-events: auto;">
+            <div class="sonos-amp-ports" style="display: flex; align-items: center; gap: 6px; margin-left: auto; pointer-events: auto; background: rgba(0,0,0,0.35); border: 1px solid #333; border-radius: 3px; padding: 2px 4px;">
               ${customPowerInletPort()}
-              <div class="sonos-amp-port-wrapper" style="display:flex; align-items:center; gap:2px;">
-                <span style="font-size:5px; color:#666;">LAN1</span>
+              <div style="display: flex; gap: 2px; align-items: center;">
                 ${customSinglePort(0, "Ethernet 1")}
-              </div>
-              <div class="sonos-amp-port-wrapper" style="display:flex; align-items:center; gap:2px;">
-                <span style="font-size:5px; color:#666;">LAN2</span>
                 ${customSinglePort(1, "Ethernet 2")}
               </div>
             </div>
@@ -1681,14 +1677,16 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "sonos-port") {
         faceplateOverlayHtml = `
           <div class="sonos-port-chassis">
-            <div class="sonos-port-front">
+            <div class="sonos-port-front" style="display: flex; align-items: center; gap: 4px;">
               <span class="sonos-led glowing"></span>
-              <span style="font-size: 7px; font-weight: bold; color: #fff; letter-spacing: 0.5px;">SONOS PORT</span>
+              <span style="font-size: 8px; font-weight: 800; color: #fff; letter-spacing: 0.5px;">SONOS</span>
             </div>
-            <div class="sonos-port-ports" style="display: flex; align-items: center; gap: 6px; pointer-events: auto;">
+            <div class="sonos-port-ports" style="display: flex; align-items: center; gap: 4px; pointer-events: auto; background: rgba(0,0,0,0.35); border: 1px solid #333; border-radius: 3px; padding: 2px 4px;">
               ${customPowerInletPort()}
-              ${customSinglePort(0, "Ethernet 1")}
-              ${customSinglePort(1, "Ethernet 2")}
+              <div style="display: flex; gap: 2px; align-items: center;">
+                ${customSinglePort(0, "Ethernet 1")}
+                ${customSinglePort(1, "Ethernet 2")}
+              </div>
             </div>
           </div>
         `;
