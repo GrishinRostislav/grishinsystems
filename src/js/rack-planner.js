@@ -738,6 +738,23 @@ document.addEventListener("DOMContentLoaded", () => {
         state.dropPoints = parsed.dropPoints !== undefined ? parsed.dropPoints : 12;
         state.localLines = parsed.localLines !== undefined ? parsed.localLines : 2;
         state.placedDevices = parsed.placedDevices || [];
+        if (!state.placedDevices.some(d => d.slot === "wall-outlet")) {
+          state.placedDevices.push({
+            instanceId: "inst_wall_outlet_default",
+            id: "wall-outlet-6",
+            name: "Wall Outlet (6 Sockets) – Power Source",
+            brand: "generic",
+            u: 1,
+            ports: 0,
+            poe_ports: 0,
+            poe_budget: 0,
+            outlets: 6,
+            requires_power: false,
+            type: "power",
+            cost: 0,
+            slot: "wall-outlet"
+          });
+        }
         state.connections = parsed.connections || [];
         state.showCables = parsed.showCables !== undefined ? parsed.showCables : true;
         state.bomSortColumn = parsed.bomSortColumn !== undefined ? parsed.bomSortColumn : null;
@@ -778,6 +795,27 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (e) {
         console.error("Error parsing saved state", e);
       }
+    }
+    ensureDefaultWallOutlet();
+  }
+
+  function ensureDefaultWallOutlet() {
+    if (!state.placedDevices.some(d => d.slot === "wall-outlet")) {
+      state.placedDevices.push({
+        instanceId: "inst_wall_outlet_default",
+        id: "wall-outlet-6",
+        name: "Wall Outlet (6 Sockets) – Power Source",
+        brand: "generic",
+        u: 1,
+        ports: 0,
+        poe_ports: 0,
+        poe_budget: 0,
+        outlets: 6,
+        requires_power: false,
+        type: "power",
+        cost: 0,
+        slot: "wall-outlet"
+      });
     }
   }
 
@@ -941,6 +979,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     
     const filteredItems = items.filter(item => {
+      if (item.id === "wall-outlet-6") return false; // Wall Outlet is pre-installed on the wall by default
       if (!query) return true;
       return item.name.toLowerCase().includes(query) || item.brand.toLowerCase().includes(query);
     });
@@ -1128,6 +1167,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Visual Update Loop
   function update() {
+    ensureDefaultWallOutlet();
     renderCabinet();
     renderEndpointList();
     runValidations();
@@ -1736,7 +1776,7 @@ document.addEventListener("DOMContentLoaded", () => {
         faceplateOverlayHtml = `
           <div class="savant-chassis">
             <div class="savant-glossy-strip">
-              <div class="savant-led"></div>
+              <div class="savant-led ${isDevicePowered(dev) ? 'active' : ''}"></div>
               <div class="savant-logo-text">${dev.id.includes("sipa125") ? 'IP AUDIO 125' : (dev.id.includes("sipa50") ? 'IP AUDIO 50' : 'SAVANT SMART HOST')}</div>
             </div>
             <div class="savant-ports-bracket" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 8px; z-index: 12; pointer-events: auto;">
@@ -1753,7 +1793,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="ps5-chassis">
             <div class="ps5-wing ps5-wing-top"></div>
             <div class="ps5-center-core">
-              <div class="ps5-led-strip"></div>
+              <div class="ps5-led-strip ${isDevicePowered(dev) ? 'active' : ''}"></div>
               <div class="ps5-front-panel">
                 <span class="ps5-logo-text">PS5</span>
                 <div class="ps5-usb-slots">
@@ -1778,7 +1818,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="sonos-amp-front">
               <div class="sonos-controls">
                 <span class="sonos-control-line"></span>
-                <span class="sonos-led glowing"></span>
+                <span class="sonos-led ${isDevicePowered(dev) ? 'glowing' : ''}"></span>
                 <span class="sonos-control-line"></span>
               </div>
               <span class="sonos-chassis-label" style="font-size: 8px; font-weight: 800; color: #444; margin-left: 6px; letter-spacing: 0.5px;">SONOS AMP</span>
@@ -1798,7 +1838,7 @@ document.addEventListener("DOMContentLoaded", () => {
         faceplateOverlayHtml = `
           <div class="sonos-port-chassis">
             <div class="sonos-port-front" style="display: flex; align-items: center; gap: 4px;">
-              <span class="sonos-led glowing"></span>
+              <span class="sonos-led ${isDevicePowered(dev) ? 'glowing' : ''}"></span>
               <span style="font-size: 8px; font-weight: 800; color: #fff; letter-spacing: 0.5px;">SONOS</span>
             </div>
             <div class="sonos-port-ports" style="display: flex; align-items: center; gap: 4px; pointer-events: auto; background: rgba(0,0,0,0.35); border: 1px solid #333; border-radius: 3px; padding: 2px 4px;">
@@ -1816,7 +1856,7 @@ document.addEventListener("DOMContentLoaded", () => {
         faceplateOverlayHtml = `
           <div class="eero-max7-chassis">
             <div class="eero-max7-top">
-              <div class="eero-max7-led active"></div>
+              <div class="eero-max7-led ${isDevicePowered(dev) ? 'active' : ''}"></div>
               <span class="eero-logo-text" style="font-size: 7px; color: #222; font-weight: bold;">eero MAX 7</span>
             </div>
             <div class="eero-max7-ports" style="display: flex; gap: 6px; padding: 4px; pointer-events: auto; justify-content: center; align-items: center;">
@@ -1846,7 +1886,7 @@ document.addEventListener("DOMContentLoaded", () => {
         faceplateOverlayHtml = `
           <div class="eero-pro6e-chassis">
             <div class="eero-pro6e-top">
-              <div class="eero-pro6e-led active"></div>
+              <div class="eero-pro6e-led ${isDevicePowered(dev) ? 'active' : ''}"></div>
               <span class="eero-logo-text" style="font-size: 6px; color: #222; font-weight: bold;">eero PRO 6E</span>
             </div>
             <div class="eero-pro6e-ports" style="display: flex; gap: 6px; padding: 3px; pointer-events: auto; justify-content: center; align-items: center;">
@@ -1868,7 +1908,7 @@ document.addEventListener("DOMContentLoaded", () => {
         faceplateOverlayHtml = `
           <div class="macmini-chassis">
             <div class="macmini-apple-logo"></div>
-            <div class="macmini-led"></div>
+            <div class="macmini-led ${isDevicePowered(dev) ? 'active' : ''}"></div>
             <div class="macmini-ports-bracket" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 6px; z-index: 12; pointer-events: auto;">
               ${customPowerInletPort()}
               <span class="macmini-port-label" style="font-size: 6px; color: #475569; font-weight: bold;">LAN</span>
@@ -1883,7 +1923,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="appletv-chassis">
             <div class="appletv-front-decor" style="display: flex; align-items: center; gap: 4px; justify-content: center; width: 100%;">
               <div class="appletv-logo" style="font-size: 7px; color: #888; font-weight: bold;">tv</div>
-              <div class="appletv-led"></div>
+              <div class="appletv-led ${isDevicePowered(dev) ? 'active' : ''}"></div>
             </div>
             <div class="appletv-ports-bracket" style="display: flex; align-items: center; justify-content: center; gap: 4px; pointer-events: auto; width: 100%; padding-bottom: 2px;">
               ${customPowerInletPort()}
@@ -1919,7 +1959,7 @@ document.addEventListener("DOMContentLoaded", () => {
         faceplateOverlayHtml = `
           <div class="nvshield-chassis">
             <div class="nvshield-front" style="display: flex; align-items: center; gap: 4px; justify-content: center; width: 100%;">
-              <div class="nvshield-green-light"></div>
+              <div class="nvshield-green-light ${isDevicePowered(dev) ? 'active' : ''}"></div>
               <span class="nvshield-logo" style="font-size: 6px; font-weight: bold; color: #a1a1aa; letter-spacing: 0.5px;">SHIELD</span>
             </div>
             <div class="nvshield-ports-bracket" style="display: flex; align-items: center; justify-content: center; gap: 4px; pointer-events: auto; width: 100%; padding-bottom: 2px;">
@@ -1937,7 +1977,7 @@ document.addEventListener("DOMContentLoaded", () => {
         faceplateOverlayHtml = `
           <div class="telus-nah-chassis">
             <div class="telus-nah-front">
-              <div class="telus-nah-led glowing"></div>
+              <div class="telus-nah-led ${isDevicePowered(dev) ? 'glowing' : ''}"></div>
               <span class="telus-nah-logo">TELUS NAH</span>
             </div>
             <div class="telus-nah-ports" style="display: flex; gap: 4px; pointer-events: auto; margin-left: auto; padding-right: 4px; align-items: flex-end;">
@@ -1977,7 +2017,7 @@ document.addEventListener("DOMContentLoaded", () => {
         faceplateOverlayHtml = `
           <div class="rogers-xb8-chassis">
             <div class="rogers-xb8-front">
-              <div class="rogers-xb8-led glowing"></div>
+              <div class="rogers-xb8-led ${isDevicePowered(dev) ? 'glowing' : ''}"></div>
               <span class="rogers-xb8-logo">ROGERS XB8</span>
             </div>
             <div class="rogers-xb8-ports" style="display: flex; gap: 4px; pointer-events: auto; margin-left: auto; padding-right: 6px; align-items: flex-end;">
@@ -2009,7 +2049,7 @@ document.addEventListener("DOMContentLoaded", () => {
         faceplateOverlayHtml = `
           <div class="bell-gigahub-chassis">
             <div class="bell-gigahub-front">
-              <div class="bell-gigahub-led-bar"></div>
+              <div class="bell-gigahub-led-bar ${isDevicePowered(dev) ? 'active' : ''}"></div>
               <span class="bell-gigahub-logo">bell giga hub</span>
             </div>
             <div class="bell-gigahub-ports" style="display: flex; gap: 5px; pointer-events: auto; margin-left: auto; padding-right: 8px; align-items: flex-end;">
@@ -2049,11 +2089,11 @@ document.addEventListener("DOMContentLoaded", () => {
               <span class="wattbox-model-tag">${dev.id.includes("800") ? "800 SERIES IP PDU" : "700 SERIES IP PDU"}</span>
             </div>
             <div class="wattbox-lcd" title="Voltage Monitor">
-              <span class="wattbox-lcd-text">120<span>V</span></span>
+              <span class="wattbox-lcd-text">${isDevicePowered(dev) ? '120<span>V</span>' : '000<span>V</span>'}</span>
             </div>
             <div class="wattbox-status-lights">
-              <div class="wb-lightovrc glowing" title="OvrC Cloud Link">OvrC</div>
-              <div class="wb-lightlink glowing" title="Network Link">LINK</div>
+              <div class="wb-lightovrc ${isDevicePowered(dev) ? 'glowing' : ''}" title="OvrC Cloud Link">OvrC</div>
+              <div class="wb-lightlink ${isDevicePowered(dev) ? 'glowing' : ''}" title="Network Link">LINK</div>
             </div>
             <div class="wattbox-network-ports" style="display: flex; align-items: center; gap: 4px; pointer-events: auto;">
               <span style="font-size: 5px; color: #888; font-weight: bold;">LAN</span>
@@ -2082,11 +2122,11 @@ document.addEventListener("DOMContentLoaded", () => {
               <span class="wattbox-model-tag">${dev.id.includes("800") ? "800-8 IP PDU" : "400-8 IP PDU"}</span>
             </div>
             <div class="wattbox-lcd" title="Voltage Monitor">
-              <span class="wattbox-lcd-text">120<span>V</span></span>
+              <span class="wattbox-lcd-text">${isDevicePowered(dev) ? '120<span>V</span>' : '000<span>V</span>'}</span>
             </div>
             <div class="wattbox-status-lights">
-              <div class="wb-lightovrc glowing" title="OvrC Cloud Link">OvrC</div>
-              <div class="wb-lightlink glowing" title="Network Link">LINK</div>
+              <div class="wb-lightovrc ${isDevicePowered(dev) ? 'glowing' : ''}" title="OvrC Cloud Link">OvrC</div>
+              <div class="wb-lightlink ${isDevicePowered(dev) ? 'glowing' : ''}" title="Network Link">LINK</div>
             </div>
             <div class="wattbox-network-ports" style="display: flex; align-items: center; gap: 4px; pointer-events: auto;">
               <span style="font-size: 5px; color: #888; font-weight: bold;">LAN</span>
@@ -2112,7 +2152,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="wattbox-compact-chassis wb-300">
             <div class="wb-compact-header">
               <span class="wb-logo-compact">WATTBOX 300</span>
-              <div class="wb-compact-led active"></div>
+              <div class="wb-compact-led ${isDevicePowered(dev) ? 'active' : ''}"></div>
             </div>
             <div class="wb-compact-outlets-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
               <div class="wb-compact-outlets" style="display: flex; gap: 4px; pointer-events: auto; align-items: center;">
@@ -2132,7 +2172,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="wattbox-compact-chassis wb-250">
             <div class="wb-compact-header">
               <span class="wb-logo-compact">WATTBOX 250</span>
-              <div class="wb-compact-led active"></div>
+              <div class="wb-compact-led ${isDevicePowered(dev) ? 'active' : ''}"></div>
             </div>
             <div class="wb-compact-outlets-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
               <div class="wb-compact-outlets" style="display: flex; gap: 4px; pointer-events: auto; align-items: center;">
@@ -2150,22 +2190,27 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "power-strip-6") {
         faceplateOverlayHtml = `
           <div class="generic-power-strip-chassis">
-            <div class="power-strip-switch active" title="Power Switch (ON)">
-              <div class="switch-glow"></div>
+            <div class="power-strip-switch ${isDevicePowered(dev) ? 'active' : ''}" title="Power Switch (ON)">
+              <div class="switch-glow" style="display: ${isDevicePowered(dev) ? 'block' : 'none'};"></div>
             </div>
             <div class="power-strip-outlets">
-              ${Array.from({length: 6}, (_, i) => `
-                <div class="power-strip-socket" title="Outlet ${i+1}">
-                  <div class="socket-ground"></div>
-                  <div class="socket-slits">
-                    <div class="slit-left"></div>
-                    <div class="slit-right"></div>
+              ${Array.from({length: 6}, (_, i) => {
+                const portIndex = 2000 + i;
+                const conn = state.connections.find(c => 
+                  (c.fromDevice === dev.instanceId && c.fromPort === portIndex) || 
+                  (c.toDevice === dev.instanceId && c.toPort === portIndex)
+                );
+                const connectedClass = conn ? " connected" : "";
+                return `
+                  <div class="power-strip-socket port-dot power-outlet-dot${connectedClass}" data-port-idx="${portIndex}" title="${getPortTooltip(portIndex)}">
+                    <div class="socket-face-mini">
+                      <div class="socket-slot-mini"></div>
+                      <div class="socket-ground-mini"></div>
+                      <div class="socket-slot-mini"></div>
+                    </div>
                   </div>
-                  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 12; pointer-events: auto; display: flex; align-items: center; justify-content: center;">
-                    ${customPowerOutletPort(i)}
-                  </div>
-                </div>
-              `).join('')}
+                `;
+              }).join('')}
             </div>
           </div>
         `;
@@ -2308,7 +2353,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const wallOutletDevices = state.placedDevices.filter(d => isWallOutletSlot(d.slot));
       
       if (wallOutletDevices.length === 0) {
-        wallOutletContent.innerHTML = `<div class="wall-outlet-empty-hint">Drag a Wall Outlet here — this is the main power feed for the rack</div>`;
+        wallOutletContent.innerHTML = `<div class="wall-outlet-empty-hint">Wall Outlet is pre-installed on the wall</div>`;
       } else {
         wallOutletDevices.forEach(dev => {
           const outletEl = document.createElement("div");
@@ -2351,7 +2396,6 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="wall-outlet-plate">
               <div class="wall-outlet-sockets">${socketsHtml}</div>
             </div>
-            <button class="wall-outlet-delete-btn" title="Remove Wall Outlet">✕</button>
           `;
           
           // Click on socket to open config modal
@@ -2359,11 +2403,6 @@ document.addEventListener("DOMContentLoaded", () => {
             socketEl.addEventListener("click", () => {
               openDeviceConfigModal(dev.instanceId);
             });
-          });
-          
-          // Delete button
-          outletEl.querySelector(".wall-outlet-delete-btn").addEventListener("click", () => {
-            removeDevice(dev.instanceId);
           });
           
           wallOutletContent.appendChild(outletEl);

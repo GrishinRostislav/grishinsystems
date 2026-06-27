@@ -100,6 +100,15 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
     <!-- ── Center: Zoomable Canvas ─────────────────────── -->
     <div class="rp-canvas" id="rp-canvas">
       <div class="rp-canvas-content" id="rp-canvas-content">
+        <!-- Wall Outlet Zone (Outside the Rack) -->
+        <div class="wall-outlet-zone" id="wall-outlet-zone">
+          <div class="wall-outlet-zone-label">
+            <span>⚡</span> Wall Power Source
+          </div>
+          <div class="wall-outlet-zone-content" id="wall-outlet-zone-content">
+          </div>
+        </div>
+
         <div class="cabinet-wrapper">
           <div class="side-cabinet-wrapper" id="side-cabinet-left-wrapper">
             <h4 class="side-cabinet-title">
@@ -124,18 +133,6 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
               <div class="side-panel-empty-hint">
                 Drag PDUs, power strips, or other equipment here for side-mount installation
               </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Wall Outlet Zone (Outside the Rack) -->
-        <div class="wall-outlet-zone" id="wall-outlet-zone">
-          <div class="wall-outlet-zone-label">
-            <span>⚡</span> Wall Power Source
-          </div>
-          <div class="wall-outlet-zone-content" id="wall-outlet-zone-content">
-            <div class="wall-outlet-empty-hint">
-              Drag a Wall Outlet here — this is the main power feed for the rack
             </div>
           </div>
         </div>

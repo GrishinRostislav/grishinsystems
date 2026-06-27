@@ -3376,11 +3376,10 @@ body.dragging-active .placed-device * {
   background: #22c55e;
   box-shadow: 0 0 2px #22c55e;
 }
-
 /* Generic 6-Outlet Power Strip */
 .generic-power-strip-chassis {
-  width: 170px;
-  height: 24px;
+  width: 200px;
+  height: 38px;
   background: linear-gradient(to bottom, #f8fafc, #e2e8f0);
   border: 1px solid #cbd5e1;
   border-radius: 6px;
@@ -3393,8 +3392,8 @@ body.dragging-active .placed-device * {
   box-sizing: border-box;
 }
 .power-strip-switch {
-  width: 12px;
-  height: 7px;
+  width: 14px;
+  height: 14px;
   background: #7f1d1d;
   border-radius: 2px;
   border: 1px solid #991b1b;
@@ -3408,49 +3407,75 @@ body.dragging-active .placed-device * {
   width: 100%;
   height: 100%;
   background: rgba(239, 68, 68, 0.4);
-  box-shadow: 0 0 3px #ef4444;
+  box-shadow: 0 0 4px #ef4444;
   border-radius: 2px;
 }
 .power-strip-outlets {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
 }
 .power-strip-socket {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 24px;
   background: #f1f5f9;
   border: 1px solid #cbd5e1;
-  border-radius: 50%;
+  border-radius: 4px;
   position: relative;
   box-sizing: border-box;
-}
-.socket-ground {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: #94a3b8;
-  position: absolute;
-  bottom: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-.socket-slits {
   display: flex;
-  justify-content: space-between;
-  width: 8px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  pointer-events: auto !important;
+}
+.power-strip-socket.port-dot {
+  width: 18px !important;
+  height: 24px !important;
+  border-radius: 4px !important;
+  background: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.2) !important;
+}
+.power-strip-socket.port-dot::after {
+  display: none !important;
+}
+.power-strip-socket.connected {
+  border-color: #22c55e !important;
+  box-shadow: 0 0 5px rgba(34, 197, 94, 0.6) !important;
+}
+.power-strip-socket:hover {
+  border-color: #f97316 !important;
+  box-shadow: 0 0 5px rgba(249, 115, 22, 0.6) !important;
+  transform: scale(1.08);
+}
+.socket-face-mini {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 12px;
+  height: 12px;
+  position: relative;
+}
+.socket-slot-mini {
+  width: 1.5px;
+  height: 6px;
+  background: #2c2520;
+  border-radius: 0.2px;
+}
+.socket-ground-mini {
+  width: 3.5px;
+  height: 3.5px;
+  border-radius: 50%;
+  background: #2c2520;
   position: absolute;
-  top: 4px;
+  bottom: 0px;
   left: 50%;
   transform: translateX(-50%);
 }
-.slit-left, .slit-right {
-  width: 1.5px;
-  height: 4px;
-  background: #64748b;
-  border-radius: 0.5px;
-}
-
 /* Zero-U Side Cabinet / Non-Rack Space */
 .side-cabinet-wrapper {
   width: 220px;
