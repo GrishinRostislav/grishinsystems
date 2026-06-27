@@ -1502,7 +1502,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         const slotEl = container.querySelector(`.rack-slot[data-u="${dev.slot}"]`);
         devEl.className = `placed-device device-brand-${dev.brand}${widthFrac === 1 ? ' has-ears' : ''}${isCleanChassis ? ' clean-chassis' : ''}`;
-        devEl.style.height = `${dev.u * 56 - 4}px`; // 1U = 56px. Subtract a little padding
+        devEl.style.height = `${dev.u * 72 - 4}px`; // 1U = 72px. Subtract a little padding
         
         if (slotLeftOffsets[dev.slot] === undefined) {
           const totalFrac = Math.min(1, slotTotalFraction[dev.slot] || 1);
@@ -1543,7 +1543,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         // Calculate top position of the absolute element
         const slotsFromTop = state.rackSize - dev.slot;
-        const topPosPx = slotsFromTop * 56 + 1;
+        const topPosPx = slotsFromTop * 72 + 1;
         devEl.style.top = `${topPosPx}px`;
       }
 
@@ -2653,7 +2653,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const cabinetRack = document.createElement("div");
       cabinetRack.className = "cabinet-rack";
-      cabinetRack.style.minHeight = `${actualSize * 56}px`;
+      cabinetRack.style.minHeight = `${actualSize * 72}px`;
       
       const slotsContainer = document.createElement("div");
       slotsContainer.className = "rack-slots-container";
@@ -2671,8 +2671,8 @@ document.addEventListener("DOMContentLoaded", () => {
       cabinetRack.appendChild(slotsContainer);
 
       // Clone devices that belong to this chunk (based on their top position)
-      const chunkTopPx = (state.rackSize - chunkStart) * 56;
-      const chunkBottomPx = (state.rackSize - chunkEnd) * 56; // This is the top of the last slot in the chunk
+      const chunkTopPx = (state.rackSize - chunkStart) * 72;
+      const chunkBottomPx = (state.rackSize - chunkEnd) * 72; // This is the top of the last slot in the chunk
 
       Array.from(cabinetRackEl.children).forEach(el => {
         if (el.classList.contains("placed-device")) {
@@ -3422,7 +3422,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function fitToView() {
     if (!canvasEl || !canvasContentEl) return;
     const canvasRect = canvasEl.getBoundingClientRect();
-    const rackHeight = state.rackSize * 56 + 36 + 48; // slots + borders + padding
+    const rackHeight = state.rackSize * 72 + 36 + 48; // slots + borders + padding
     const rackWidth = 1048; // Left panel (220) + gap (24) + Rack (560) + gap (24) + Right panel (220) = 1048
     const scaleH = (canvasRect.height - 48) / rackHeight;
     const scaleW = (canvasRect.width - 48) / rackWidth;
