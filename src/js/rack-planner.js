@@ -1614,7 +1614,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const isPowered = isDevicePowered(dev);
         ledsHtml = `
           <div class="device-leds">
-            <span class="led ${isPowered ? 'glowing' : ''}"></span>
+            <span class="led ${isPowered ? 'glowing' : 'unpowered'}"></span>
           </div>
         `;
       }

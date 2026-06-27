@@ -651,8 +651,13 @@ body.dragging-active .placed-device * {
 }
 
 .led.glowing {
-  background: var(--success);
-  box-shadow: 0 0 4px var(--success);
+  background: #22c55e !important;
+  box-shadow: 0 0 4px #22c55e !important;
+}
+
+.led.unpowered {
+  background: #ef4444 !important;
+  box-shadow: 0 0 4px #ef4444 !important;
 }
 
 .led.orange {
@@ -2555,9 +2560,14 @@ body.dragging-active .placed-device * {
   right: 6px;
   width: 2px;
   height: 2px;
-  background: #fff;
+  background: #ef4444;
   border-radius: 50%;
-  box-shadow: 0 0 2px #fff;
+  box-shadow: 0 0 2px #ef4444;
+  transition: all 0.2s;
+}
+.macmini-led.active {
+  background: #22c55e;
+  box-shadow: 0 0 3px #22c55e;
 }
 
 .appletv-chassis {
@@ -2591,9 +2601,14 @@ body.dragging-active .placed-device * {
 .appletv-led {
   width: 2px;
   height: 2px;
-  background: #fff;
+  background: #ef4444;
   border-radius: 50%;
-  box-shadow: 0 0 3px #fff;
+  box-shadow: 0 0 2px #ef4444;
+  transition: all 0.2s;
+}
+.appletv-led.active {
+  background: #22c55e;
+  box-shadow: 0 0 3px #22c55e;
   animation: pulse-glowing 2s infinite alternate;
 }
 
@@ -2640,9 +2655,14 @@ body.dragging-active .placed-device * {
   right: 12px;
   height: 1.5px;
   top: 2px;
-  background: #2563eb;
-  box-shadow: 0 0 6px #2563eb;
+  background: #ef4444;
+  box-shadow: 0 0 4px #ef4444;
   opacity: 0.85;
+  transition: all 0.2s;
+}
+.ps5-led-strip.active {
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
 }
 .ps5-front-panel {
   display: flex;
@@ -2706,11 +2726,13 @@ body.dragging-active .placed-device * {
 .sonos-led {
   width: 3px;
   height: 3px;
-  background: #fff;
+  background: #ef4444;
   border-radius: 50%;
+  box-shadow: 0 0 3px #ef4444;
 }
 .sonos-led.glowing {
-  box-shadow: 0 0 3px #fff;
+  background: #22c55e;
+  box-shadow: 0 0 4px #22c55e;
 }
 
 .sonos-port-chassis {
@@ -2756,9 +2778,14 @@ body.dragging-active .placed-device * {
 .eero-max7-led {
   width: 3.5px;
   height: 3.5px;
-  background: #3b82f6;
+  background: #ef4444;
   border-radius: 50%;
-  box-shadow: 0 0 4px #3b82f6;
+  box-shadow: 0 0 4px #ef4444;
+  transition: all 0.2s;
+}
+.eero-max7-led.active {
+  background: #22c55e;
+  box-shadow: 0 0 4px #22c55e;
 }
 
 .eero-pro6e-chassis {
@@ -2782,9 +2809,14 @@ body.dragging-active .placed-device * {
 .eero-pro6e-led {
   width: 3px;
   height: 3px;
-  background: #3b82f6;
+  background: #ef4444;
   border-radius: 50%;
-  box-shadow: 0 0 3px #3b82f6;
+  box-shadow: 0 0 3px #ef4444;
+  transition: all 0.2s;
+}
+.eero-pro6e-led.active {
+  background: #22c55e;
+  box-shadow: 0 0 3px #22c55e;
 }
 
 /* Savant Premium Chassis Styling */
@@ -2813,9 +2845,14 @@ body.dragging-active .placed-device * {
 .savant-led {
   width: 4px;
   height: 4px;
-  background: #06b6d4; /* cyan status LED */
+  background: #ef4444; /* red when unpowered */
   border-radius: 50%;
-  box-shadow: 0 0 5px #06b6d4;
+  box-shadow: 0 0 4px #ef4444;
+  transition: all 0.2s;
+}
+.savant-led.active {
+  background: #22c55e; /* green when powered */
+  box-shadow: 0 0 5px #22c55e;
 }
 .savant-logo-text {
   color: #a1a1aa;
@@ -2904,9 +2941,14 @@ body.dragging-active .placed-device * {
 .nvshield-green-light {
   width: 16px;
   height: 1.5px;
+  background: #ef4444; /* red unpowered glow */
+  box-shadow: 0 0 4px #ef4444;
+  border-radius: 1px;
+  transition: all 0.2s;
+}
+.nvshield-green-light.active {
   background: #22c55e; /* NVIDIA green glow strip */
   box-shadow: 0 0 5px #22c55e;
-  border-radius: 1px;
 }
 .nvshield-logo {
   font-size: 6px;
@@ -2986,15 +3028,16 @@ body.dragging-active .placed-device * {
 .eero-led-light {
   width: 4px;
   height: 4px;
-  background: #2d3748;
+  background: #ef4444; /* red unpowered */
+  box-shadow: 0 0 4px #ef4444;
   border-radius: 50%;
   margin-top: 6px;
   transition: all 0.3s ease;
 }
 
 .eero-led-light.active {
-  background: #fff;
-  box-shadow: 0 0 4px #fff, 0 0 8px #fff;
+  background: #22c55e; /* green powered */
+  box-shadow: 0 0 4px #22c55e, 0 0 8px #22c55e;
 }
 
 .eero-ports-section {
@@ -3103,6 +3146,11 @@ body.dragging-active .placed-device * {
   width: 5px;
   height: 5px;
   border-radius: 50%;
+  background: #ef4444; /* Red unpowered status LED */
+  box-shadow: 0 0 4px #ef4444;
+  transition: all 0.2s;
+}
+.telus-nah-led.glowing {
   background: #22c55e; /* Green status LED */
   box-shadow: 0 0 4px #22c55e;
 }
@@ -3137,8 +3185,13 @@ body.dragging-active .placed-device * {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #fff; /* White status LED */
-  box-shadow: 0 0 3px #fff;
+  background: #ef4444; /* Red unpowered status LED */
+  box-shadow: 0 0 3px #ef4444;
+  transition: all 0.2s;
+}
+.rogers-xb8-led.glowing {
+  background: #22c55e; /* Green status LED */
+  box-shadow: 0 0 4px #22c55e;
 }
 .rogers-xb8-logo {
   font-size: 6px;
@@ -3170,9 +3223,14 @@ body.dragging-active .placed-device * {
 .bell-gigahub-led-bar {
   width: 14px;
   height: 2px;
-  background: #3b82f6; /* Bell Blue status light strip */
-  box-shadow: 0 0 4px #3b82f6;
+  background: #ef4444; /* Red unpowered status LED bar */
+  box-shadow: 0 0 4px #ef4444;
   border-radius: 1px;
+  transition: all 0.2s;
+}
+.bell-gigahub-led-bar.active {
+  background: #22c55e; /* Green status LED bar */
+  box-shadow: 0 0 4px #22c55e;
 }
 .bell-gigahub-logo {
   font-size: 7px;
@@ -3354,12 +3412,17 @@ body.dragging-active .placed-device * {
   color: #06b6d4;
   letter-spacing: 0.5px;
 }
-.wb-compact-led.active {
+.wb-compact-led {
   width: 3px;
   height: 3px;
-  background: #06b6d4;
-  box-shadow: 0 0 2px #06b6d4;
+  background: #ef4444; /* red unpowered */
+  box-shadow: 0 0 2px #ef4444;
   border-radius: 50%;
+  transition: all 0.2s;
+}
+.wb-compact-led.active {
+  background: #22c55e; /* green powered */
+  box-shadow: 0 0 2px #22c55e;
 }
 .wb-compact-outlets {
   display: flex;
