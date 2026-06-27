@@ -105,8 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "wattbox-300-3", name: "WattBox 300 Series IP PDU (3 Outlets, Compact)", brand: "wattbox", u: 1, width_fraction: 0.33, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 3, requires_power: true, type: "power", cost: 299 },
       { id: "wattbox-250-2", name: "WattBox 250 Series Smart PDU (2 Outlets, Compact)", brand: "wattbox", u: 1, width_fraction: 0.25, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 2, requires_power: true, type: "power", cost: 189 },
       { id: "power-strip-6", name: "Standard 6-Outlet Power Strip (Shelf)", brand: "generic", u: 1, width_fraction: 0.5, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 6, requires_power: true, type: "power", cost: 25 },
-      { id: "wall-outlet-6", name: "Wall Outlet (6 Sockets) – Power Source", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 6, requires_power: false, type: "power", cost: 0 },
-      { id: "wall-outlet-5", name: "Wall Outlet (5 Sockets) – Power Source", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 5, requires_power: false, type: "power", cost: 0 }
+      { id: "wall-outlet-6", name: "Wall Outlet (6 Sockets) – Power Source", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 6, requires_power: false, type: "power", cost: 0 }
     ],
     theater: [
       { id: "savant-sipa125", name: "Savant IP Audio 125 (SIPA125)", brand: "savant", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1800 },
@@ -527,6 +526,34 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     setupSidePanelDnD(document.getElementById("side-cabinet-left-wrapper"), "side-left");
     setupSidePanelDnD(document.getElementById("side-cabinet-right-wrapper"), "side-right");
+
+    // Setup Wall Outlet Zone drag-and-drop
+    const wallOutletZone = document.getElementById("wall-outlet-zone");
+    if (wallOutletZone) {
+      wallOutletZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        wallOutletZone.classList.add("dragover");
+      });
+      wallOutletZone.addEventListener("dragleave", () => {
+        wallOutletZone.classList.remove("dragover");
+      });
+      wallOutletZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        wallOutletZone.classList.remove("dragover");
+        if (state.draggedPresetId) {
+          if (state.draggedPresetId.startsWith("wall-outlet")) {
+            addDevice(state.draggedPresetId, "wall-outlet");
+          } else {
+            alert("Only Wall Outlet devices can be placed in the power source zone.");
+          }
+        } else if (state.draggedInstanceId) {
+          const dev = state.placedDevices.find(d => d.instanceId === state.draggedInstanceId);
+          if (dev && dev.id.startsWith("wall-outlet")) {
+            moveDevice(state.draggedInstanceId, "wall-outlet");
+          }
+        }
+      });
+    }
 
     // Setup clear & print buttons
     document.getElementById("btn-clear").addEventListener("click", () => {
@@ -960,6 +987,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Quick Click action - Find first empty slot that fits
       itemEl.querySelector(".catalog-item-action").addEventListener("click", (e) => {
+        // Wall outlet goes to wall-outlet zone, not rack
+        if (item.id.startsWith("wall-outlet")) {
+          addDevice(item.id, "wall-outlet");
+          const btn = e.currentTarget;
+          const originalText = btn.textContent;
+          btn.textContent = "Added! ✓";
+          btn.classList.add("added-success");
+          btn.disabled = true;
+          setTimeout(() => {
+            btn.textContent = originalText;
+            btn.classList.remove("added-success");
+            btn.disabled = false;
+          }, 800);
+          return;
+        }
         const slot = findFirstAvailableSlot(item.u, item.width_fraction || 1);
         if (slot) {
           addDevice(item.id, slot);
@@ -987,7 +1029,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Helper to check if a slot value is a side panel slot
   function isSideSlot(slot) {
-    return typeof slot === "string" && slot.startsWith("side");
+    return typeof slot === "string" && (slot.startsWith("side") || slot === "wall-outlet");
+  }
+
+  function isWallOutletSlot(slot) {
+    return slot === "wall-outlet";
   }
 
   // Check if U slots are occupied
@@ -2243,7 +2289,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      if (isSideSlot(dev.slot)) {
+      if (isWallOutletSlot(dev.slot)) {
+        // Will be handled separately below
+      } else if (isSideSlot(dev.slot)) {
         const targetEl = dev.slot === "side-left" ? sideCabinetRackEl : sideCabinetRackRightEl;
         if (targetEl) {
           targetEl.appendChild(devEl);
@@ -2252,6 +2300,76 @@ document.addEventListener("DOMContentLoaded", () => {
         container.appendChild(devEl);
       }
     });
+
+    // Render wall outlet zone
+    const wallOutletContent = document.getElementById("wall-outlet-zone-content");
+    if (wallOutletContent) {
+      wallOutletContent.innerHTML = "";
+      const wallOutletDevices = state.placedDevices.filter(d => isWallOutletSlot(d.slot));
+      
+      if (wallOutletDevices.length === 0) {
+        wallOutletContent.innerHTML = `<div class="wall-outlet-empty-hint">Drag a Wall Outlet here — this is the main power feed for the rack</div>`;
+      } else {
+        wallOutletDevices.forEach(dev => {
+          const outletEl = document.createElement("div");
+          outletEl.className = "wall-outlet-device";
+          outletEl.dataset.instanceId = dev.instanceId;
+          
+          let socketsHtml = "";
+          for (let i = 0; i < dev.outlets; i++) {
+            const portIndex = 2000 + i;
+            const conn = state.connections.find(c => 
+              (c.fromDevice === dev.instanceId && c.fromPort === portIndex) || 
+              (c.toDevice === dev.instanceId && c.toPort === portIndex)
+            );
+            const connectedClass = conn ? " connected" : "";
+            
+            // Get connected device name for tooltip
+            let tooltipText = `Socket ${i + 1} [Not Connected]`;
+            if (conn) {
+              const isFrom = conn.fromDevice === dev.instanceId;
+              const targetDevId = isFrom ? conn.toDevice : conn.fromDevice;
+              const targetDev = state.placedDevices.find(d => d.instanceId === targetDevId);
+              if (targetDev) {
+                tooltipText = `Socket ${i + 1} 🔗 ${targetDev.customLabel || targetDev.name}`;
+              }
+            }
+            
+            socketsHtml += `
+              <div class="wall-socket${connectedClass}" data-port-idx="${portIndex}" title="${tooltipText}">
+                <div class="socket-face">
+                  <div class="socket-slot socket-slot-left"></div>
+                  <div class="socket-ground"></div>
+                  <div class="socket-slot socket-slot-right"></div>
+                </div>
+                <div class="socket-number">${i + 1}</div>
+              </div>
+            `;
+          }
+          
+          outletEl.innerHTML = `
+            <div class="wall-outlet-plate">
+              <div class="wall-outlet-sockets">${socketsHtml}</div>
+            </div>
+            <button class="wall-outlet-delete-btn" title="Remove Wall Outlet">✕</button>
+          `;
+          
+          // Click on socket to open config modal
+          outletEl.querySelectorAll(".wall-socket").forEach(socketEl => {
+            socketEl.addEventListener("click", () => {
+              openDeviceConfigModal(dev.instanceId);
+            });
+          });
+          
+          // Delete button
+          outletEl.querySelector(".wall-outlet-delete-btn").addEventListener("click", () => {
+            removeDevice(dev.instanceId);
+          });
+          
+          wallOutletContent.appendChild(outletEl);
+        });
+      }
+    }
 
     // Show empty hints for each side panel
     const sideLeftDevices = state.placedDevices.filter(d => d.slot === "side-left");
