@@ -281,6 +281,17 @@ document.addEventListener("DOMContentLoaded", () => {
     // Attach Event Listeners
     dropsInputEl.addEventListener("input", (e) => {
       state.dropPoints = parseInt(e.target.value) || 0;
+      state.connections = state.connections.filter(c => {
+        if (c.toDevice === "wall-drop") {
+          const portNum = parseInt(c.toPort);
+          return portNum <= state.dropPoints;
+        }
+        if (c.fromDevice === "wall-drop") {
+          const portNum = parseInt(c.fromPort);
+          return portNum <= state.dropPoints;
+        }
+        return true;
+      });
       saveState();
       update();
     });
@@ -954,6 +965,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function removeEndpoint(id) {
     state.endpoints = state.endpoints.filter(e => e.id !== id);
+    state.connections = state.connections.filter(c => 
+      !(c.toDevice === "poe-endpoint" && c.toPort.startsWith(id + "-")) &&
+      !(c.fromDevice === "poe-endpoint" && c.fromPort.startsWith(id + "-"))
+    );
     saveState();
     update();
   }
@@ -1161,6 +1176,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Find placed device by coordinates / instance
   function removeDevice(instanceId) {
     state.placedDevices = state.placedDevices.filter(dev => dev.instanceId !== instanceId);
+    state.connections = state.connections.filter(c => 
+      c.fromDevice !== instanceId && c.toDevice !== instanceId
+    );
     saveState();
     update();
   }
