@@ -1800,7 +1800,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="nvshield-chassis">
             <div class="nvshield-front">
               <div class="nvshield-green-light"></div>
-              <span class="nvshield-logo">SHIELD TV PRO</span>
+              <span class="nvshield-logo">SHIELD</span>
             </div>
             <div class="nvshield-ports-bracket" style="margin-left: auto; display: flex; align-items: center; gap: 6px; pointer-events: auto; padding-right: 6px;">
               ${customPowerInletPort()}
@@ -2088,7 +2088,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ${portsHtml}
         </div>
         <div class="device-faceplate-bottom">
-          <span class="device-faceplate-label">${dev.brand === "apple" ? "" : (dev.customLabel || dev.name)}</span>
+          <span class="device-faceplate-label">${(dev.brand === "apple" || dev.brand === "sonos" || dev.id === "nv-shield") ? "" : (dev.customLabel || dev.name)}</span>
           ${ipBadgeHtml}
           <button class="device-delete-btn" title="Remove Device"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
         </div>
