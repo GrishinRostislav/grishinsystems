@@ -27,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "araknis-210-16p", name: "Araknis AN-210-SW-F-16-PoE", brand: "araknis", u: 1, ports: 18, poe_ports: 16, poe_budget: 240, outlets: 0, requires_power: true, type: "switch", cost: 499 },
       { id: "araknis-210-24", name: "Araknis AN-210-SW-F-24 (Non-PoE)", brand: "araknis", u: 1, ports: 26, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "switch", cost: 499 },
       { id: "araknis-210-24p", name: "Araknis AN-210-SW-F-24-PoE", brand: "araknis", u: 1, ports: 26, poe_ports: 24, poe_budget: 375, outlets: 0, requires_power: true, type: "switch", cost: 650 },
+      { id: "araknis-220-24p", name: "Araknis AN-220-SW-R-24-PoE", brand: "araknis", u: 1, ports: 26, poe_ports: 12, poe_budget: 190, outlets: 0, requires_power: true, type: "switch", cost: 599 },
       { id: "araknis-210-48", name: "Araknis AN-210-SW-F-48 (Non-PoE)", brand: "araknis", u: 1, ports: 52, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "switch", cost: 899 },
       { id: "araknis-310-8p", name: "Araknis AN-310-SW-F-8-PoE", brand: "araknis", u: 1, ports: 10, poe_ports: 8, poe_budget: 130, outlets: 0, requires_power: true, type: "switch", cost: 499 },
       { id: "araknis-310-16p", name: "Araknis AN-310-SW-F-16-PoE", brand: "araknis", u: 1, ports: 18, poe_ports: 16, poe_budget: 240, outlets: 0, requires_power: true, type: "switch", cost: 699 },
