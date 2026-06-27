@@ -1801,7 +1801,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="eero-gateway-panel">
             <div class="eero-brand-area">
               <div class="eero-glossy-badge">
-                <span class="eero-text-logo">eero</span>
+                <span class="eero-text-logo" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 65px; display: inline-block;">${dev.customLabel || 'eero'}</span>
               </div>
               <div class="eero-led-light ${isDevicePowered(dev) ? 'active' : ''}"></div>
             </div>
@@ -1863,7 +1863,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="savant-chassis">
             <div class="savant-glossy-strip">
               <div class="savant-led ${isDevicePowered(dev) ? 'active' : ''}"></div>
-              <div class="savant-logo-text">${dev.id.includes("sipa125") ? 'IP AUDIO 125' : (dev.id.includes("sipa50") ? 'IP AUDIO 50' : 'SAVANT SMART HOST')}</div>
+              <div class="savant-logo-text">${dev.customLabel || (dev.id.includes("sipa125") ? 'IP AUDIO 125' : (dev.id.includes("sipa50") ? 'IP AUDIO 50' : 'SAVANT SMART HOST'))}</div>
             </div>
             <div class="savant-ports-bracket" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 8px; z-index: 12; pointer-events: auto;">
               ${customPowerInletPort()}
@@ -1923,11 +1923,11 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "sonos-port") {
         faceplateOverlayHtml = `
           <div class="sonos-port-chassis">
-            <div class="sonos-port-front" style="display: flex; align-items: center; gap: 4px;">
+            <div class="sonos-port-front" style="display: flex; align-items: center; gap: 4px; justify-content: center; width: 100%;">
               <span class="sonos-led ${isDevicePowered(dev) ? 'glowing' : ''}"></span>
-              <span style="font-size: 8px; font-weight: 800; color: #fff; letter-spacing: 0.5px;">SONOS</span>
+              <span style="font-size: 8px; font-weight: 800; color: #fff; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 85%;">${dev.customLabel || 'SONOS'}</span>
             </div>
-            <div class="sonos-port-ports" style="display: flex; align-items: center; gap: 4px; pointer-events: auto; background: rgba(0,0,0,0.35); border: 1px solid #333; border-radius: 3px; padding: 2px 4px;">
+            <div class="sonos-port-ports" style="display: flex; align-items: center; justify-content: center; gap: 4px; pointer-events: auto; width: 100%; padding-bottom: 2px;">
               ${customPowerInletPort()}
               <div style="display: flex; gap: 2px; align-items: center;">
                 ${customSinglePort(0, "Ethernet 1")}
@@ -1943,7 +1943,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="eero-max7-chassis">
             <div class="eero-max7-top">
               <div class="eero-max7-led ${isDevicePowered(dev) ? 'active' : ''}"></div>
-              <span class="eero-logo-text" style="font-size: 7px; color: #222; font-weight: bold;">eero MAX 7</span>
+              <span class="eero-logo-text" style="font-size: 7px; color: #222; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;">${dev.customLabel || 'eero MAX 7'}</span>
             </div>
             <div class="eero-max7-ports" style="display: flex; gap: 6px; padding: 4px; pointer-events: auto; justify-content: center; align-items: center;">
               ${customPowerInletPort()}
@@ -1973,7 +1973,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="eero-pro6e-chassis">
             <div class="eero-pro6e-top">
               <div class="eero-pro6e-led ${isDevicePowered(dev) ? 'active' : ''}"></div>
-              <span class="eero-logo-text" style="font-size: 6px; color: #222; font-weight: bold;">eero PRO 6E</span>
+              <span class="eero-logo-text" style="font-size: 6px; color: #222; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;">${dev.customLabel || 'eero PRO 6E'}</span>
             </div>
             <div class="eero-pro6e-ports" style="display: flex; gap: 6px; padding: 3px; pointer-events: auto; justify-content: center; align-items: center;">
               ${customPowerInletPort()}
@@ -1993,7 +1993,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "savant-macmini-host") {
         faceplateOverlayHtml = `
           <div class="macmini-chassis">
-            <div class="macmini-apple-logo"></div>
+            <div class="macmini-apple-logo" style="${dev.customLabel ? 'font-size: 7px; color: #475569; font-weight: bold; width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;' : ''}">${dev.customLabel || ''}</div>
             <div class="macmini-led ${isDevicePowered(dev) ? 'active' : ''}"></div>
             <div class="macmini-ports-bracket" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 6px; z-index: 12; pointer-events: auto;">
               ${customPowerInletPort()}
@@ -2008,7 +2008,7 @@ document.addEventListener("DOMContentLoaded", () => {
         faceplateOverlayHtml = `
           <div class="appletv-chassis">
             <div class="appletv-front-decor" style="display: flex; align-items: center; gap: 4px; justify-content: center; width: 100%;">
-              <div class="appletv-logo" style="font-size: 7px; color: #888; font-weight: bold;">tv</div>
+              <div class="appletv-logo" style="font-size: 7px; color: #888; font-weight: bold; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 85%;">${dev.customLabel || 'tv'}</div>
               <div class="appletv-led ${isDevicePowered(dev) ? 'active' : ''}"></div>
             </div>
             <div class="appletv-ports-bracket" style="display: flex; align-items: center; justify-content: center; gap: 4px; pointer-events: auto; width: 100%; padding-bottom: 2px;">
@@ -2046,7 +2046,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="nvshield-chassis">
             <div class="nvshield-front" style="display: flex; align-items: center; gap: 4px; justify-content: center; width: 100%;">
               <div class="nvshield-green-light ${isDevicePowered(dev) ? 'active' : ''}"></div>
-              <span class="nvshield-logo" style="font-size: 6px; font-weight: bold; color: #a1a1aa; letter-spacing: 0.5px;">SHIELD</span>
+              <span class="nvshield-logo" style="font-size: 6px; font-weight: bold; color: #a1a1aa; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 85%;">${dev.customLabel || 'SHIELD'}</span>
             </div>
             <div class="nvshield-ports-bracket" style="display: flex; align-items: center; justify-content: center; gap: 4px; pointer-events: auto; width: 100%; padding-bottom: 2px;">
               ${customPowerInletPort()}
@@ -2064,7 +2064,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="telus-nah-chassis">
             <div class="telus-nah-front">
               <div class="telus-nah-led ${isDevicePowered(dev) ? 'glowing' : ''}"></div>
-              <span class="telus-nah-logo">TELUS NAH</span>
+              <span class="telus-nah-logo" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 90px; display: inline-block;">${dev.customLabel || 'TELUS NAH'}</span>
             </div>
             <div class="telus-nah-ports" style="display: flex; gap: 4px; pointer-events: auto; margin-left: auto; padding-right: 4px; align-items: flex-end;">
               <div style="display:flex; flex-direction:column; align-items:center; gap:2px; margin-bottom:2px; margin-right:4px;">
@@ -2104,7 +2104,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="rogers-xb8-chassis">
             <div class="rogers-xb8-front">
               <div class="rogers-xb8-led ${isDevicePowered(dev) ? 'glowing' : ''}"></div>
-              <span class="rogers-xb8-logo">ROGERS XB8</span>
+              <span class="rogers-xb8-logo" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 90px; display: inline-block;">${dev.customLabel || 'ROGERS XB8'}</span>
             </div>
             <div class="rogers-xb8-ports" style="display: flex; gap: 4px; pointer-events: auto; margin-left: auto; padding-right: 6px; align-items: flex-end;">
               <div style="display:flex; flex-direction:column; align-items:center; gap:2px; margin-bottom:2px; margin-right:4px;">
@@ -2136,7 +2136,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="bell-gigahub-chassis">
             <div class="bell-gigahub-front">
               <div class="bell-gigahub-led-bar ${isDevicePowered(dev) ? 'active' : ''}"></div>
-              <span class="bell-gigahub-logo">bell giga hub</span>
+              <span class="bell-gigahub-logo" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 90px; display: inline-block;">${dev.customLabel || 'bell giga hub'}</span>
             </div>
             <div class="bell-gigahub-ports" style="display: flex; gap: 5px; pointer-events: auto; margin-left: auto; padding-right: 8px; align-items: flex-end;">
               <div style="display:flex; flex-direction:column; align-items:center; gap:2px; margin-bottom:2px; margin-right:4px;">
@@ -2237,7 +2237,7 @@ document.addEventListener("DOMContentLoaded", () => {
         faceplateOverlayHtml = `
           <div class="wattbox-compact-chassis wb-300">
             <div class="wb-compact-header">
-              <span class="wb-logo-compact">WATTBOX 300</span>
+              <span class="wb-logo-compact" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px; display: inline-block;">${dev.customLabel || 'WATTBOX 300'}</span>
               <div class="wb-compact-led ${isDevicePowered(dev) ? 'active' : ''}"></div>
             </div>
             <div class="wb-compact-outlets-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
@@ -2257,7 +2257,7 @@ document.addEventListener("DOMContentLoaded", () => {
         faceplateOverlayHtml = `
           <div class="wattbox-compact-chassis wb-250">
             <div class="wb-compact-header">
-              <span class="wb-logo-compact">WATTBOX 250</span>
+              <span class="wb-logo-compact" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px; display: inline-block;">${dev.customLabel || 'WATTBOX 250'}</span>
               <div class="wb-compact-led ${isDevicePowered(dev) ? 'active' : ''}"></div>
             </div>
             <div class="wb-compact-outlets-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
@@ -2303,17 +2303,19 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "ovrc-hub") {
         faceplateOverlayHtml = `
           <div class="ovrc-hub-chassis">
-            <div class="ovrc-hub-front">
-              <span class="ovrc-logo-text">OvrC</span>
-              <div class="ovrc-leds-group">
+            <div class="ovrc-hub-front" style="display: flex; align-items: center; gap: 4px; justify-content: center; width: 100%;">
+              <span class="ovrc-logo-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;">${dev.customLabel || 'OvrC'}</span>
+              <div class="ovrc-leds-group" style="display: flex; gap: 3px;">
                 <span class="led ${isDevicePowered(dev) ? 'glowing' : 'unpowered'}" title="Power"></span>
                 <span class="led ${isDevicePowered(dev) ? 'glowing' : 'unpowered'}" style="background: ${isDevicePowered(dev) ? '#3b82f6' : '#ef4444'}; box-shadow: 0 0 4px ${isDevicePowered(dev) ? '#3b82f6' : '#ef4444'};" title="Cloud Link"></span>
               </div>
             </div>
-            <div class="ovrc-hub-ports" style="display: flex; align-items: center; gap: 4px; pointer-events: auto; margin-left: auto;">
+            <div class="ovrc-hub-ports" style="display: flex; align-items: center; justify-content: center; gap: 4px; pointer-events: auto; width: 100%; padding-bottom: 2px;">
               ${customPowerInletPort()}
-              <span style="font-size: 5px; color: #888; font-weight: bold; line-height: 1;">LAN</span>
-              ${customSinglePort(0, "Ethernet (LAN)")}
+              <div style="display: flex; align-items: center; gap: 1px;">
+                <span style="font-size: 5px; color: #888; font-weight: bold; line-height: 1;">LAN</span>
+                ${customSinglePort(0, "Ethernet (LAN)")}
+              </div>
             </div>
           </div>
         `;
@@ -2322,14 +2324,16 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "lutron-ra3") {
         faceplateOverlayHtml = `
           <div class="lutron-ra3-chassis">
-            <div class="lutron-ra3-front">
-              <span class="lutron-logo-text">LUTRON</span>
+            <div class="lutron-ra3-front" style="display: flex; align-items: center; gap: 4px; justify-content: center; width: 100%;">
+              <span class="lutron-logo-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;">${dev.customLabel || 'LUTRON'}</span>
               <div class="lutron-ra3-lightbar ${isDevicePowered(dev) ? 'active' : ''}"></div>
             </div>
-            <div class="lutron-ra3-ports" style="display: flex; align-items: center; gap: 4px; pointer-events: auto; margin-left: auto; padding-right: 4px;">
+            <div class="lutron-ra3-ports" style="display: flex; align-items: center; justify-content: center; gap: 4px; pointer-events: auto; width: 100%; padding-bottom: 2px;">
               ${customPowerInletPort()}
-              <span style="font-size: 5px; color: #888; font-weight: bold; line-height: 1;">LAN</span>
-              ${customSinglePort(0, "Ethernet (LAN)")}
+              <div style="display: flex; align-items: center; gap: 1px;">
+                <span style="font-size: 5px; color: #888; font-weight: bold; line-height: 1;">LAN</span>
+                ${customSinglePort(0, "Ethernet (LAN)")}
+              </div>
             </div>
           </div>
         `;
@@ -2338,11 +2342,11 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "lutron-caseta") {
         faceplateOverlayHtml = `
           <div class="lutron-caseta-chassis">
-            <div class="lutron-caseta-front">
-              <span class="lutron-logo-mini">LUTRON</span>
+            <div class="lutron-caseta-front" style="display: flex; align-items: center; gap: 4px; justify-content: center; width: 100%;">
+              <span class="lutron-logo-mini" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;">${dev.customLabel || 'LUTRON'}</span>
               <div class="lutron-caseta-ring ${isDevicePowered(dev) ? 'active' : ''}"></div>
             </div>
-            <div class="lutron-caseta-ports" style="display: flex; align-items: center; gap: 4px; pointer-events: auto; margin-left: auto; padding-right: 4px;">
+            <div class="lutron-caseta-ports" style="display: flex; align-items: center; justify-content: center; gap: 4px; pointer-events: auto; width: 100%; padding-bottom: 2px;">
               ${customPowerInletPort()}
               ${customSinglePort(0, "Ethernet (LAN)")}
             </div>
@@ -2353,11 +2357,11 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "hunter-douglas-powerview") {
         faceplateOverlayHtml = `
           <div class="hunter-douglas-chassis">
-            <div class="hunter-douglas-front">
-              <span class="hd-logo-text">HunterDouglas</span>
+            <div class="hunter-douglas-front" style="display: flex; align-items: center; gap: 4px; justify-content: center; width: 100%;">
+              <span class="hd-logo-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;">${dev.customLabel || 'HunterDouglas'}</span>
               <div class="hd-led ${isDevicePowered(dev) ? 'active' : ''}"></div>
             </div>
-            <div class="hunter-douglas-ports" style="display: flex; align-items: center; gap: 4px; pointer-events: auto; margin-left: auto; padding-right: 4px;">
+            <div class="hunter-douglas-ports" style="display: flex; align-items: center; justify-content: center; gap: 4px; pointer-events: auto; width: 100%; padding-bottom: 2px;">
               ${customPowerInletPort()}
               ${customSinglePort(0, "Ethernet (LAN)")}
             </div>

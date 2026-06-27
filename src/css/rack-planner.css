@@ -2575,7 +2575,7 @@ body.dragging-active .placed-device * {
 }
 
 .appletv-chassis {
-  width: 90px;
+  width: 130px;
   height: 38px;
   background: #111;
   border-radius: 5px;
@@ -2740,7 +2740,7 @@ body.dragging-active .placed-device * {
 }
 
 .sonos-port-chassis {
-  width: 90px;
+  width: 130px;
   height: 38px;
   background: #1c1c1e;
   border: 1.5px solid #2c2c2e;
@@ -2918,7 +2918,7 @@ body.dragging-active .placed-device * {
 
 /* NVIDIA Shield TV Pro Custom Chassis styling */
 .nvshield-chassis {
-  width: 90px;
+  width: 130px;
   height: 38px;
   background: #0f0f11;
   border-radius: 4px;
@@ -3816,25 +3816,26 @@ body.dragging-active .placed-device * {
 
 /* OvrC Pro Hub Custom Chassis */
 .ovrc-hub-chassis {
-  width: 90px;
+  width: 130px;
   height: 38px;
   background: linear-gradient(to bottom, #1e293b, #0f172a);
   border: 1px solid #475569;
   border-radius: 4px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: space-between;
+  align-items: center;
   margin: auto;
-  padding: 0 6px;
+  padding: 4px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.5);
   box-sizing: border-box;
 }
 .ovrc-hub-front {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 8px;
+  width: 100%;
 }
 .ovrc-logo-text {
   font-size: 7px;
@@ -3851,25 +3852,26 @@ body.dragging-active .placed-device * {
 
 /* Lutron RA3 Processor Custom Chassis */
 .lutron-ra3-chassis {
-  width: 90px;
+  width: 130px;
   height: 38px;
   background: #09090b;
   border: 1.5px solid #27272a;
   border-radius: 3px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: space-between;
+  align-items: center;
   margin: auto;
-  padding: 0 6px;
+  padding: 4px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.6);
   box-sizing: border-box;
 }
 .lutron-ra3-front {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 12px;
+  width: 100%;
 }
 .lutron-logo-text {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -3894,25 +3896,26 @@ body.dragging-active .placed-device * {
 
 /* Lutron Caseta Custom Chassis */
 .lutron-caseta-chassis {
-  width: 90px;
+  width: 130px;
   height: 38px;
   background: linear-gradient(to bottom, #ffffff, #f1f5f9);
   border: 1px solid #cbd5e1;
   border-radius: 4px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: space-between;
+  align-items: center;
   margin: auto;
-  padding: 0 6px;
+  padding: 4px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.5);
   box-sizing: border-box;
 }
 .lutron-caseta-front {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 6px;
+  width: 100%;
 }
 .lutron-logo-mini {
   font-size: 6px;
@@ -3936,25 +3939,26 @@ body.dragging-active .placed-device * {
 
 /* Hunter Douglas Custom Chassis */
 .hunter-douglas-chassis {
-  width: 90px;
+  width: 130px;
   height: 38px;
   background: #fdfdfd;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: space-between;
+  align-items: center;
   margin: auto;
-  padding: 0 6px;
+  padding: 4px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.4);
   box-sizing: border-box;
 }
 .hunter-douglas-front {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 6px;
+  width: 100%;
 }
 .hd-logo-text {
   font-size: 6.5px;
