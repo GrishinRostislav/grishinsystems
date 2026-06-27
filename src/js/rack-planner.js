@@ -631,14 +631,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.target === deviceConfigModalEl) closeDeviceConfigModal();
       });
     }
-    if (toggleCablesEl) {
-      toggleCablesEl.checked = state.showCables;
-      toggleCablesEl.addEventListener("change", (e) => {
-        state.showCables = e.target.checked;
-        saveState();
-        drawRackCables();
-      });
-    }
+    state.showCables = true;
 
     // Sort columns click listeners
 
@@ -659,7 +652,7 @@ document.addEventListener("DOMContentLoaded", () => {
     thCost?.addEventListener("click", () => handleSortClick("cost"));
 
     // Initial render & validation
-    renderCatalog("switches");
+    renderCatalog("routers");
     update();
   }
 
@@ -1280,41 +1273,22 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "shelf-1u" || dev.name.toLowerCase().includes("shelf")) {
         portsHtml = `<div class="device-shelf-plate" title="Equipment Shelf Tray"></div>`;
       } else if (dev.ports > 0) {
-        if (dev.type === "patch-panel") {
-          // Render patch panel ports in a single row of 24 evenly spaced
-          const cols = dev.ports;
-          portsHtml += `<div class="device-ports patch-panel-ports" style="grid-template-columns: repeat(${cols}, 1fr);">`;
-        } else if (dev.type === "router") {
-          const cols = dev.ports;
-          portsHtml += `<div class="device-ports" style="grid-template-columns: repeat(${cols}, auto);">`;
-        } else {
-          // Switches render in 2 rows
-          const cols = Math.ceil(dev.ports / 2);
-          portsHtml += `<div class="device-ports" style="grid-template-columns: repeat(${cols}, auto);">`;
-        }
-        
-        for (let i = 0; i < dev.ports; i++) {
+        // Helper to render a single interactive port dot for custom layouts
+        const renderDeviceSinglePort = (portIndex, label, classPrefix = "") => {
           let classStr = "port-dot";
-          const isPoeCapable = dev.poe_ports > 0 && i < dev.poe_ports;
+          const isPoeCapable = dev.poe_ports > 0 && portIndex < dev.poe_ports;
           if (isPoeCapable) {
             classStr += " poe-capable";
           }
-
-          let isRouterWan = false;
-          if (dev.type === "router") {
-            const numWan = dev.id === "eero-poe-gateway" || dev.name.includes("2WAN") || dev.name.includes("4L2W") ? 2 : 1;
-            if (i < numWan) {
-              isRouterWan = true;
-              classStr += " wan-port";
-              if (i === numWan - 1) {
-                classStr += " wan-last";
-              }
-            }
+          if (classPrefix.includes("wan-port")) {
+            classStr += " wan-port";
+          } else if (classPrefix.includes("sfp-port")) {
+            classStr += " sfp-port";
           }
-
+          
           const conn = state.connections.find(c => 
-            (c.fromDevice === dev.instanceId && c.fromPort === i) || 
-            (c.toDevice === dev.instanceId && c.toPort === i)
+            (c.fromDevice === dev.instanceId && c.fromPort === portIndex) || 
+            (c.toDevice === dev.instanceId && c.toPort === portIndex)
           );
 
           if (conn) {
@@ -1323,8 +1297,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const targetDev = state.placedDevices.find(d => d.instanceId === targetInstanceId);
             const isUplinkConnection = targetDev && (targetDev.type === "switch" || targetDev.type === "router");
 
-            if (isRouterWan) {
-              // Keep wan-port styling
+            if (classPrefix.includes("wan-port")) {
+              // keep WAN styling
             } else if (isUplinkConnection) {
               classStr += " uplink";
             } else if (isPoeCapable) {
@@ -1333,8 +1307,103 @@ document.addEventListener("DOMContentLoaded", () => {
               classStr += " active";
             }
           }
+          return `<span class="${classStr} ${classPrefix}" data-port-idx="${portIndex}" title="${dev.customLabel || dev.name} - ${label || ('Port ' + (portIndex + 1))}"></span>`;
+        };
 
-          portsHtml += `<span class="${classStr}" data-port-idx="${i}" title="${dev.customLabel || dev.name} - Port ${i+1}"></span>`;
+        const sfpPortsCount = (() => {
+          if (dev.type !== "switch" && dev.type !== "router") return 0;
+          const id = dev.id.toLowerCase();
+          if (id.includes("pro-24") || id.includes("24-poe")) return 2;
+          if (id.includes("pro-48") || id.includes("48-poe")) return 4;
+          if (id === "usw-24") return 2;
+          if (id === "usw-48") return 4;
+          if (id.includes("c1000-24") || id.includes("1000-24")) return 4;
+          if (id.includes("9200l-48") || id.includes("1000-48")) return 4;
+          if (id.includes("crs328")) return 4;
+          if (id.includes("crs326")) return 2;
+          if (id.includes("sg3428xmp")) return 4;
+          if (id.startsWith("araknis")) {
+            if (id.includes("-8")) return 2;
+            if (id.includes("-12")) return 4;
+            if (id.includes("-24")) return 2;
+            if (id.includes("-48")) return 4;
+          }
+          if (id.startsWith("netgear")) {
+            if (id.includes("msm4320")) return 4;
+            if (id.includes("csm4316")) return 16;
+            if (id.includes("xsm4344fc")) return 44;
+            if (id.includes("msm4332")) return 8;
+            if (id.includes("msm4328f")) return 28;
+            if (id.includes("msm4310")) return 2;
+            if (id.includes("xsm4344c")) return 44;
+            if (id.includes("vsm4320c")) return 20;
+            if (id.includes("xsm4340v")) return 16;
+            if (id.includes("xsm4340fv")) return 40;
+            if (id.includes("xsm4340cv")) return 4;
+            if (id.includes("xsm4328fv")) return 28;
+            if (id.includes("xsm4328cv")) return 4;
+            if (id.includes("xsm4324")) return 24;
+            if (id.includes("xsm4316")) return 16;
+            if (id.includes("msm4352")) return 4;
+            if (id.includes("gsm4352")) return 4;
+            if (id.includes("gsm4328")) return 4;
+            if (id.includes("gsm4210px")) return 2;
+            if (id.includes("gsm4210pd")) return 2;
+            if (id.includes("gsm4230px")) return 6;
+            if (id.includes("gsm4230p")) return 6;
+            if (id.includes("gsm4248ux")) return 8;
+            if (id.includes("xsm4556")) return 56;
+            if (id.includes("xsm4348s")) return 48;
+            if (id.includes("xsm4316s")) return 16;
+            if (id.includes("xsm4216f")) return 16;
+            if (id.includes("msm4214x")) return 2;
+            if (id.includes("gsm4352s") || id.includes("gsm4352pb") || id.includes("gsm4352pa")) return 4;
+            if (id.includes("gsm4328pb")) return 4;
+            if (id.includes("gsm4248px") || id.includes("gsm4248p")) return 8;
+            if (id.includes("gsm4230up")) return 6;
+            if (id.includes("gsm4212ux") || id.includes("gsm4212px") || id.includes("gsm4212p")) return 4;
+            if (id.includes("csm4532")) return 32;
+          }
+          return 0;
+        })();
+
+        const wanPortsCount = (() => {
+          if (dev.type !== "router") return 0;
+          const id = dev.id.toLowerCase();
+          if (id === "eero-poe-gateway") return 2;
+          if (id.includes("2wan") || id.includes("4l2w")) return 2;
+          return 1;
+        })();
+
+        if (dev.type === "patch-panel") {
+          const cols = dev.ports;
+          portsHtml += `<div class="device-ports patch-panel-ports" style="grid-template-columns: repeat(${cols}, 1fr);">`;
+        } else if (dev.type === "router") {
+          const cols = dev.ports;
+          portsHtml += `<div class="device-ports" style="grid-template-columns: repeat(${cols}, auto);">`;
+        } else {
+          const cols = Math.ceil(dev.ports / 2);
+          portsHtml += `<div class="device-ports" style="grid-template-columns: repeat(${cols}, auto);">`;
+        }
+        
+        for (let i = 0; i < dev.ports; i++) {
+          const isSfp = sfpPortsCount > 0 && i >= (dev.ports - sfpPortsCount);
+          const isWan = dev.type === "router" && i < wanPortsCount;
+          let label = "";
+          let classPrefix = "";
+          if (isSfp) {
+            label = "SFP Uplink";
+            classPrefix = "sfp-port";
+          } else if (isWan) {
+            label = "WAN Port";
+            classPrefix = "wan-port";
+            if (i === wanPortsCount - 1) {
+              classPrefix += " wan-last";
+            }
+          } else {
+            label = `Port ${i + 1}`;
+          }
+          portsHtml += renderDeviceSinglePort(i, label, classPrefix);
         }
         portsHtml += `</div>`;
       }
@@ -1377,38 +1446,47 @@ document.addEventListener("DOMContentLoaded", () => {
       let faceplateOverlayHtml = "";
       let hideDefaultLeft = false;
 
+      // Helper to render single port on custom overlay panel
+      const customSinglePort = (portIndex, label, classPrefix = "") => {
+        let classStr = "port-dot";
+        const isPoeCapable = dev.poe_ports > 0 && portIndex < dev.poe_ports;
+        if (isPoeCapable) {
+          classStr += " poe-capable";
+        }
+        if (classPrefix.includes("wan-port")) {
+          classStr += " wan-port";
+        } else if (classPrefix.includes("sfp-port")) {
+          classStr += " sfp-port";
+        }
+        
+        const conn = state.connections.find(c => 
+          (c.fromDevice === dev.instanceId && c.fromPort === portIndex) || 
+          (c.toDevice === dev.instanceId && c.toPort === portIndex)
+        );
+
+        if (conn) {
+          classStr += " connected";
+          const targetInstanceId = conn.fromDevice === dev.instanceId ? conn.toDevice : conn.fromDevice;
+          const targetDev = state.placedDevices.find(d => d.instanceId === targetInstanceId);
+          const isUplinkConnection = targetDev && (targetDev.type === "switch" || targetDev.type === "router");
+
+          if (classPrefix.includes("wan-port")) {
+            // keep WAN styling
+          } else if (isUplinkConnection) {
+            classStr += " uplink";
+          } else if (isPoeCapable) {
+            classStr += " poe";
+          } else {
+            classStr += " active";
+          }
+        }
+        return `<span class="${classStr} ${classPrefix}" data-port-idx="${portIndex}" title="${dev.customLabel || dev.name} - ${label || ('Port ' + (portIndex + 1))}"></span>`;
+      };
+
       if (dev.id === "eero-poe-gateway") {
-        // Pre-generate the 10 ports
         const portHtmls = [];
         for (let i = 0; i < 10; i++) {
-          let classStr = "port-dot";
-          const isPoeCapable = i < 8;
-          
-          if (isPoeCapable) {
-            classStr += " poe-capable";
-          }
-          
-          const conn = state.connections.find(c => 
-            (c.fromDevice === dev.instanceId && c.fromPort === i) || 
-            (c.toDevice === dev.instanceId && c.toPort === i)
-          );
-          
-          if (conn) {
-            classStr += " connected";
-            const targetInstanceId = conn.fromDevice === dev.instanceId ? conn.toDevice : conn.fromDevice;
-            const targetDev = state.placedDevices.find(d => d.instanceId === targetInstanceId);
-            const isUplinkConnection = targetDev && (targetDev.type === "switch" || targetDev.type === "router");
-            
-            if (isUplinkConnection) {
-              classStr += " uplink";
-            } else if (isPoeCapable) {
-              classStr += " poe";
-            } else {
-              classStr += " active";
-            }
-          }
-          
-          portHtmls.push(`<span class="${classStr}" data-port-idx="${i}" title="${dev.customLabel || dev.name} - Port ${i+1}"></span>`);
+          portHtmls.push(customSinglePort(i, `Port ${i+1}`, i < 8 ? "poe-capable" : "wan-port"));
         }
 
         faceplateOverlayHtml = `
@@ -1475,15 +1553,16 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         hideDefaultLeft = true;
         portsHtml = ""; // Embedded inside avr-ports-area
-      } else if (dev.brand === "savant" && (dev.id.includes("sipa") || dev.id.includes("host"))) {
+      } else if (dev.brand === "savant" && (dev.id.includes("sipa") || dev.id.includes("smart-host"))) {
         faceplateOverlayHtml = `
           <div class="savant-chassis">
             <div class="savant-glossy-strip">
               <div class="savant-led"></div>
-              <div class="savant-logo-text">SAVANT</div>
+              <div class="savant-logo-text">${dev.id.includes("sipa125") ? 'IP AUDIO 125' : (dev.id.includes("sipa50") ? 'IP AUDIO 50' : 'SAVANT SMART HOST')}</div>
             </div>
-            <div class="savant-ports-area" style="position: absolute; right: 24px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; z-index: 12;">
-              ${portsHtml}
+            <div class="savant-ports-bracket" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 6px; z-index: 12; pointer-events: auto;">
+              <span class="custom-port-mini-label" style="font-size: 6px; font-weight: bold; color: var(--text-muted);">LAN</span>
+              ${customSinglePort(0, "Ethernet (LAN)")}
             </div>
           </div>
         `;
@@ -1495,10 +1574,16 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="ps5-wing ps5-wing-top"></div>
             <div class="ps5-center-core">
               <div class="ps5-led-strip"></div>
-              <div class="ps5-logo">SONY</div>
-              <div class="ps5-ports">
-                <span class="ps5-usb-c"></span>
-                <span class="ps5-usb-a"></span>
+              <div class="ps5-front-panel">
+                <span class="ps5-logo-text">PS5</span>
+                <div class="ps5-usb-slots">
+                  <span class="ps5-usb-c" title="USB-C (Front)"></span>
+                  <span class="ps5-usb-a" title="USB-A (Front)"></span>
+                </div>
+              </div>
+              <div class="ps5-back-port" style="display: flex; align-items: center; gap: 4px; pointer-events: auto;">
+                <span class="custom-port-mini-label" style="font-size: 6px; font-weight: bold; color: var(--text-muted);">LAN</span>
+                ${customSinglePort(0, "Ethernet (LAN)")}
               </div>
             </div>
             <div class="ps5-wing ps5-wing-bottom"></div>
@@ -1509,11 +1594,22 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "amp-sonos") {
         faceplateOverlayHtml = `
           <div class="sonos-amp-chassis">
-            <div class="sonos-front-clean">
+            <div class="sonos-amp-front">
               <div class="sonos-controls">
                 <span class="sonos-control-line"></span>
                 <span class="sonos-led glowing"></span>
                 <span class="sonos-control-line"></span>
+              </div>
+              <span class="sonos-chassis-label" style="font-size: 8px; font-weight: 800; color: #444; margin-left: 6px; letter-spacing: 0.5px;">SONOS AMP</span>
+            </div>
+            <div class="sonos-amp-ports" style="display: flex; align-items: center; gap: 8px; margin-left: auto; padding-right: 12px; pointer-events: auto;">
+              <div class="sonos-amp-port-wrapper" style="display:flex; align-items:center; gap:2px;">
+                <span style="font-size:5px; color:#666;">LAN1</span>
+                ${customSinglePort(0, "Ethernet 1")}
+              </div>
+              <div class="sonos-amp-port-wrapper" style="display:flex; align-items:center; gap:2px;">
+                <span style="font-size:5px; color:#666;">LAN2</span>
+                ${customSinglePort(1, "Ethernet 2")}
               </div>
             </div>
           </div>
@@ -1523,7 +1619,14 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "sonos-port") {
         faceplateOverlayHtml = `
           <div class="sonos-port-chassis">
-            <div class="sonos-led glowing"></div>
+            <div class="sonos-port-front">
+              <span class="sonos-led glowing"></span>
+              <span style="font-size: 7px; font-weight: bold; color: #fff; letter-spacing: 0.5px;">SONOS PORT</span>
+            </div>
+            <div class="sonos-port-ports" style="display: flex; align-items: center; gap: 4px; pointer-events: auto;">
+              ${customSinglePort(0, "Ethernet 1")}
+              ${customSinglePort(1, "Ethernet 2")}
+            </div>
           </div>
         `;
         hideDefaultLeft = true;
@@ -1531,7 +1634,28 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "eero-max-7") {
         faceplateOverlayHtml = `
           <div class="eero-max7-chassis">
-            <div class="eero-max7-led active"></div>
+            <div class="eero-max7-top">
+              <div class="eero-max7-led active"></div>
+              <span class="eero-logo-text" style="font-size: 7px; color: #222; font-weight: bold;">eero MAX 7</span>
+            </div>
+            <div class="eero-max7-ports" style="display: flex; gap: 4px; padding: 4px; pointer-events: auto; justify-content: center;">
+              <div class="eero-max7-port-group" style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
+                <span style="font-size: 5px; color: #718096;">10G WAN</span>
+                ${customSinglePort(0, "10GbE Port 1 (WAN)", "wan-port")}
+              </div>
+              <div class="eero-max7-port-group" style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
+                <span style="font-size: 5px; color: #718096;">10G</span>
+                ${customSinglePort(1, "10GbE Port 2")}
+              </div>
+              <div class="eero-max7-port-group" style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
+                <span style="font-size: 5px; color: #718096;">2.5G</span>
+                ${customSinglePort(2, "2.5GbE Port 3")}
+              </div>
+              <div class="eero-max7-port-group" style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
+                <span style="font-size: 5px; color: #718096;">2.5G</span>
+                ${customSinglePort(3, "2.5GbE Port 4")}
+              </div>
+            </div>
           </div>
         `;
         hideDefaultLeft = true;
@@ -1539,7 +1663,20 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "eero-pro-6e") {
         faceplateOverlayHtml = `
           <div class="eero-pro6e-chassis">
-            <div class="eero-pro6e-led active"></div>
+            <div class="eero-pro6e-top">
+              <div class="eero-pro6e-led active"></div>
+              <span class="eero-logo-text" style="font-size: 6px; color: #222; font-weight: bold;">eero PRO 6E</span>
+            </div>
+            <div class="eero-pro6e-ports" style="display: flex; gap: 6px; padding: 3px; pointer-events: auto; justify-content: center;">
+              <div class="eero-pro6e-port-group" style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
+                <span style="font-size: 4.5px; color: #718096;">2.5G WAN</span>
+                ${customSinglePort(0, "2.5GbE Port (WAN)", "wan-port")}
+              </div>
+              <div class="eero-pro6e-port-group" style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
+                <span style="font-size: 4.5px; color: #718096;">1G LAN</span>
+                ${customSinglePort(1, "1GbE Port")}
+              </div>
+            </div>
           </div>
         `;
         hideDefaultLeft = true;
@@ -1549,8 +1686,9 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="macmini-chassis">
             <div class="macmini-apple-logo"></div>
             <div class="macmini-led"></div>
-            <div class="macmini-ports-area" style="position: absolute; right: 10px; top: 11px; z-index: 12;">
-              ${portsHtml}
+            <div class="macmini-ports-bracket" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 4px; z-index: 12; pointer-events: auto;">
+              <span class="macmini-port-label" style="font-size: 6px; color: #475569; font-weight: bold;">LAN</span>
+              ${customSinglePort(0, "Ethernet (LAN)")}
             </div>
           </div>
         `;
@@ -1559,12 +1697,36 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "apple-tv-4k") {
         faceplateOverlayHtml = `
           <div class="appletv-chassis">
-            <div class="appletv-logo"></div>
-            <div class="appletv-led"></div>
+            <div class="appletv-front-decor" style="display: flex; align-items: center; gap: 4px;">
+              <div class="appletv-logo">tv</div>
+              <div class="appletv-led"></div>
+            </div>
+            <div class="appletv-ports-bracket" style="margin-left: auto; display: flex; align-items: center; gap: 4px; pointer-events: auto; padding-right: 6px;">
+              <span class="appletv-port-label" style="font-size: 6px; font-weight: bold; color: #666;">LAN</span>
+              ${customSinglePort(0, "Ethernet (LAN)")}
+            </div>
           </div>
         `;
         hideDefaultLeft = true;
         portsHtml = ""; // Ports on back, not visible
+      } else if (dev.id === "cable-box") {
+        faceplateOverlayHtml = `
+          <div class="cable-box-chassis">
+            <div class="cable-box-front">
+              <div class="cable-box-power" title="Power Button"></div>
+              <div class="cable-box-display">
+                <span class="cable-box-time">12:00</span>
+                <span class="cable-box-hd-label">1080p</span>
+              </div>
+            </div>
+            <div class="cable-box-ports" style="display: flex; align-items: center; gap: 4px; margin-left: auto; pointer-events: auto; padding-right: 6px;">
+              <span class="cable-box-port-label" style="font-size: 6px; font-weight: bold; color: #666;">LAN</span>
+              ${customSinglePort(0, "Ethernet")}
+            </div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
       }
 
       // Add rack ears if full width
@@ -2476,7 +2638,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnConfigCancelEl = document.getElementById("btn-config-cancel");
   const btnConfigClearConnectionsEl = document.getElementById("btn-config-clear-connections");
   const modalConfigCloseEl = document.getElementById("modal-config-close");
-  const toggleCablesEl = document.getElementById("toggle-cables");
   
   let currentEditingInstanceId = null;
 

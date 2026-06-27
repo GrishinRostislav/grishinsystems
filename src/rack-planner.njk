@@ -43,10 +43,6 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
         <span class="rp-zoom-label" id="zoom-label">100%</span>
         <button class="rp-zoom-btn" id="zoom-fit" title="Fit to View">⊡</button>
       </div>
-      <label class="rp-toolbar-checkbox-label" for="toggle-cables" title="Show/Hide Cable Connections">
-        <input type="checkbox" id="toggle-cables" checked>
-        <span>Show Cables</span>
-      </label>
     </div>
     <div class="rp-toolbar-right">
       <button class="rp-toolbar-btn" id="btn-bom-toggle" title="Bill of Materials">📋 <span class="rp-btn-label">BOM</span></button>
@@ -83,13 +79,13 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
       </div>
 
       <div class="catalog-tabs" id="catalog-tabs">
-        <button class="catalog-tab active" data-tab="switches">Switches</button>
+        <button class="catalog-tab active" data-tab="routers">Routers</button>
+        <button class="catalog-tab" data-tab="switches">Switches</button>
         <button class="catalog-tab" data-tab="panels">Panels</button>
-        <button class="catalog-tab" data-tab="routers">Routers</button>
         <button class="catalog-tab" data-tab="power">Power</button>
+        <button class="catalog-tab" data-tab="automation">Automation</button>
         <button class="catalog-tab" data-tab="theater">Theater</button>
         <button class="catalog-tab" data-tab="sources">Sources</button>
-        <button class="catalog-tab" data-tab="automation">Automation</button>
         <button class="catalog-tab" data-tab="misc">Misc</button>
       </div>
 
