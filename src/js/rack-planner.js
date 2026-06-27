@@ -1274,6 +1274,8 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="rack-ear-right"></div>
       ` : "";
 
+      const ipBadgeHtml = dev.ipAddress ? `<span class="device-ip-badge" title="IP: ${dev.ipAddress}">${dev.ipAddress}</span>` : "";
+
       devEl.innerHTML = `
         ${earsHtml}
         <div class="device-faceplate-top" style="height: 100%; align-items: center;">
