@@ -1053,7 +1053,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!slotEl) return;
 
       const devEl = document.createElement("div");
-      devEl.className = `placed-device device-brand-${dev.brand}`;
       devEl.dataset.instanceId = dev.instanceId;
       
       // Visual pulse highlight for newly added hardware
@@ -1063,9 +1062,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       devEl.draggable = true;
-      devEl.style.height = `${dev.u * 42 - 3}px`; // 1U = 42px. Subtract a little padding
       
       const widthFrac = dev.width_fraction || 1;
+      devEl.className = `placed-device device-brand-${dev.brand}${widthFrac === 1 ? ' has-ears' : ''}`;
+      devEl.style.height = `${dev.u * 56 - 4}px`; // 1U = 56px. Subtract a little padding
       
       if (slotLeftOffsets[dev.slot] === undefined) {
         const totalFrac = Math.min(1, slotTotalFraction[dev.slot] || 1);
@@ -1106,7 +1106,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       // Calculate top position of the absolute element
       const slotsFromTop = state.rackSize - dev.slot;
-      const topPosPx = slotsFromTop * 42 + 1;
+      const topPosPx = slotsFromTop * 56 + 1;
       devEl.style.top = `${topPosPx}px`;
 
       // Build RJ45 port dots visual simulation or custom accessories
@@ -1159,7 +1159,7 @@ document.addEventListener("DOMContentLoaded", () => {
               remainingNonPoeForPanels--;
             }
           } else if (dev.type === "router") {
-            const numWan = dev.name.includes("2WAN") || dev.name.includes("4L2W") ? 2 : 1;
+            const numWan = dev.id === "eero-poe-gateway" || dev.name.includes("2WAN") || dev.name.includes("4L2W") ? 2 : 1;
             
             if (i < numWan) {
               classStr += " wan-port"; // Color WAN ports red and label them
@@ -1218,18 +1218,72 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (dev.brand === "savant") logoText = "Savant";
       }
 
-      // Render actual hardware faceplate - contains ports, LEDs, logo and tiny info label with action
-      let ipBadgeHtml = "";
-      if (dev.ipAddress) {
-        ipBadgeHtml = `<span class="device-ip-badge" title="IP: ${dev.ipAddress}">${dev.ipAddress}</span>`;
+      // Determine if custom physical front panel graphics should be rendered
+      let faceplateOverlayHtml = "";
+      let hideDefaultLeft = false;
+
+      if (dev.brand === "ubiquiti" && dev.type === "switch") {
+        faceplateOverlayHtml = `
+          <div class="unifi-lcm-screen" title="UniFi LCM Display">
+            <div class="lcm-glowing-dot"></div>
+          </div>
+        `;
+      } else if (dev.brand === "denon" || dev.brand === "marantz") {
+        faceplateOverlayHtml = `
+          <div class="avr-front-panel">
+            <div class="avr-knob knob-left" title="Input Source"></div>
+            <div class="avr-display-panel" title="AVR Status Display">
+              <div class="avr-display-text">${dev.customLabel || (dev.brand.toUpperCase() + " AVR")}</div>
+            </div>
+            <div class="avr-ports-area">
+              ${portsHtml}
+            </div>
+            <div class="avr-knob knob-right" title="Volume Dial"></div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = ""; // Embedded inside avr-ports-area
+      } else if (dev.id === "savant-macmini-host") {
+        faceplateOverlayHtml = `
+          <div class="macmini-chassis">
+            <div class="macmini-apple-logo"></div>
+            <div class="macmini-led"></div>
+            <div class="macmini-ports-area" style="position: absolute; right: 10px; top: 11px; z-index: 12;">
+              ${portsHtml}
+            </div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = ""; // Embedded inside macmini-ports-area
+      } else if (dev.id === "apple-tv-4k") {
+        faceplateOverlayHtml = `
+          <div class="appletv-chassis">
+            <div class="appletv-logo">tv</div>
+            <div class="appletv-ports-area" style="position: absolute; right: 4px; top: 9px; opacity: 0.1; z-index: 12;">
+              ${portsHtml}
+            </div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = ""; // Embedded inside appletv-ports-area
       }
 
+      // Add rack ears if full width
+      const earsHtml = widthFrac === 1 ? `
+        <div class="rack-ear-left"></div>
+        <div class="rack-ear-right"></div>
+      ` : "";
+
       devEl.innerHTML = `
-        <div class="device-faceplate-top">
-          <div class="device-faceplate-left">
-            ${ledsHtml}
-            ${logoText ? `<span class="device-logo">${logoText}</span>` : ""}
-          </div>
+        ${earsHtml}
+        <div class="device-faceplate-top" style="height: 100%; align-items: center;">
+          ${!hideDefaultLeft ? `
+            <div class="device-faceplate-left" style="height: 100%;">
+              ${ledsHtml}
+              ${faceplateOverlayHtml}
+              ${logoText ? `<span class="device-logo">${logoText}</span>` : ""}
+            </div>
+          ` : faceplateOverlayHtml}
           ${portsHtml}
         </div>
         <div class="device-faceplate-bottom">
@@ -1333,7 +1387,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const cabinetRack = document.createElement("div");
       cabinetRack.className = "cabinet-rack";
-      cabinetRack.style.minHeight = `${actualSize * 42}px`;
+      cabinetRack.style.minHeight = `${actualSize * 56}px`;
       
       const slotsContainer = document.createElement("div");
       slotsContainer.className = "rack-slots-container";
@@ -1351,8 +1405,8 @@ document.addEventListener("DOMContentLoaded", () => {
       cabinetRack.appendChild(slotsContainer);
 
       // Clone devices that belong to this chunk (based on their top position)
-      const chunkTopPx = (state.rackSize - chunkStart) * 42;
-      const chunkBottomPx = (state.rackSize - chunkEnd) * 42; // This is the top of the last slot in the chunk
+      const chunkTopPx = (state.rackSize - chunkStart) * 56;
+      const chunkBottomPx = (state.rackSize - chunkEnd) * 56; // This is the top of the last slot in the chunk
 
       Array.from(cabinetRackEl.children).forEach(el => {
         if (el.classList.contains("placed-device")) {
@@ -2013,8 +2067,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function fitToView() {
     if (!canvasEl || !canvasContentEl) return;
     const canvasRect = canvasEl.getBoundingClientRect();
-    const rackHeight = state.rackSize * 42 + 36 + 48; // slots + borders + padding
-    const rackWidth = 440 + 32; // rack width + padding
+    const rackHeight = state.rackSize * 56 + 36 + 48; // slots + borders + padding
+    const rackWidth = 560 + 32; // rack width + padding
     const scaleH = (canvasRect.height - 48) / rackHeight;
     const scaleW = (canvasRect.width - 48) / rackWidth;
     setZoom(Math.min(scaleH, scaleW, 2.0));
@@ -2449,8 +2503,9 @@ document.addEventListener("DOMContentLoaded", () => {
       else if (conn.cableColor === "#f97316") colorClass = "cable-orange";
       
       if (conn.toDevice === "wall-drop" || conn.toDevice === "poe-endpoint") {
-        const exitLeft = x1 < 220;
-        const x2 = exitLeft ? 15 : 425;
+        const rackWidth = rackRect.width / zoom;
+        const exitLeft = x1 < (rackWidth / 2);
+        const x2 = exitLeft ? 15 : (rackWidth - 15);
         const y2 = y1 + 18;
         
         const pathD = `M ${x1} ${y1} C ${x1} ${y1 + 25}, ${x2} ${y2 + 10}, ${x2} ${y2}`;
@@ -2476,7 +2531,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (labelText.length > 20) labelText = labelText.substring(0, 17) + "...";
         
         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text.setAttribute("x", exitLeft ? "18" : "422");
+        text.setAttribute("x", exitLeft ? "18" : (rackWidth - 18).toString());
         text.setAttribute("y", (y2 + 2).toString());
         text.setAttribute("class", "cable-exit-text");
         text.setAttribute("text-anchor", exitLeft ? "start" : "end");
