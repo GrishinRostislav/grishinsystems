@@ -92,9 +92,9 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "araknis-220-rt", name: "Araknis AN-220-RT-2WAN Router (2.5G)", brand: "araknis", u: 1, ports: 5, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 450 },
       { id: "araknis-310-rt", name: "Araknis AN-310-RT-4L2W Router", brand: "araknis", u: 1, ports: 6, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 399 },
       { id: "araknis-520-rt", name: "Araknis AN-520-RT-2WAN Router", brand: "araknis", u: 1, ports: 5, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 650 },
-      { id: "telus-nah", name: "TELUS Network Access Hub (NAH)", brand: "telus", u: 1, width_fraction: 0.5, ports: 6, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 150 },
-      { id: "rogers-xb8", name: "Rogers Ignite WiFi Gateway (XB8)", brand: "rogers", u: 1, width_fraction: 0.33, ports: 4, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 200 },
-      { id: "bell-gigahub", name: "Bell Giga Hub Fibe Gateway", brand: "bell", u: 1, width_fraction: 0.5, ports: 5, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 250 }
+      { id: "telus-nah", name: "TELUS Network Access Hub (NAH)", brand: "telus", u: 1, width_fraction: 0.5, ports: 6, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 150 },
+      { id: "rogers-xb8", name: "Rogers Ignite WiFi Gateway (XB8)", brand: "rogers", u: 1, width_fraction: 0.5, ports: 4, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 200 },
+      { id: "bell-gigahub", name: "Bell Giga Hub Fibe Gateway", brand: "bell", u: 1, width_fraction: 0.5, ports: 5, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 250 }
     ],
     power: [
       { id: "ups-cyberpower-2u", name: "CyberPower 1500VA UPS", brand: "cyberpower", u: 2, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 8, requires_power: true, type: "power", cost: 249 },
@@ -1454,6 +1454,8 @@ document.addEventListener("DOMContentLoaded", () => {
           const epNum = epParts[epParts.length - 1];
           const ep = state.endpoints.find(e => e.id === epId);
           destLabel = ep ? `${ep.name} #${epNum}` : `PoE Endpoint #${epNum}`;
+        } else if (targetDevId === "internet") {
+          destLabel = "🌐 ISP Internet / WAN Gateway";
         } else {
           const targetDev = state.placedDevices.find(d => d.instanceId === targetDevId);
           if (targetDev) {
@@ -2403,7 +2405,13 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="rack-ear-right"></div>
       ` : "";
 
-      const ipBadgeHtml = dev.ipAddress ? `<span class="device-ip-badge" title="IP: ${dev.ipAddress}">${dev.ipAddress}</span>` : "";
+      let ipBadgeHtml = "";
+      if (dev.ipAddress) {
+        ipBadgeHtml += `<span class="device-ip-badge" title="LAN IP: ${dev.ipAddress}">${dev.ipAddress}</span>`;
+      }
+      if (dev.type === "router" && dev.wanIpAddress) {
+        ipBadgeHtml += `<span class="device-ip-badge wan-ip-badge" style="right: ${dev.ipAddress ? '90px' : '22px'}; border-color: rgba(249, 115, 22, 0.5); color: #f97316;" title="WAN IP: ${dev.wanIpAddress}">WAN: ${dev.wanIpAddress}</span>`;
+      }
 
       devEl.innerHTML = `
         ${earsHtml}
@@ -3370,6 +3378,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const configPowerStatusEl = document.getElementById("config-power-status");
   const configInternetGroupEl = document.getElementById("config-internet-group");
   const configInternetActiveEl = document.getElementById("config-internet-active");
+  const configWanIpGroupEl = document.getElementById("config-wan-ip-group");
+  const configWanIpEl = document.getElementById("config-wan-ip");
   
   const btnConfigSaveEl = document.getElementById("btn-config-save");
   const btnConfigCancelEl = document.getElementById("btn-config-cancel");
@@ -3402,8 +3412,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (dev.type === "router") {
       configInternetGroupEl.style.display = "block";
       configInternetActiveEl.checked = !!dev.internetActive;
+      configWanIpGroupEl.style.display = "block";
+      configWanIpEl.value = dev.wanIpAddress || "";
     } else {
       configInternetGroupEl.style.display = "none";
+      configWanIpGroupEl.style.display = "none";
     }
     
     renderPatchTable(dev, focusPortIdx);
@@ -3461,8 +3474,21 @@ document.addEventListener("DOMContentLoaded", () => {
     
     const logicalPorts = [];
     if (dev.ports > 0) {
+      const wanPortsCount = (() => {
+        if (dev.type !== "router") return 0;
+        const id = dev.id.toLowerCase();
+        if (id === "eero-poe-gateway") return 2;
+        if (id.includes("2wan") || id.includes("4l2w")) return 2;
+        return 1;
+      })();
+
       for (let i = 0; i < dev.ports; i++) {
-        logicalPorts.push({ index: i, type: "network", label: `Port ${i + 1}` });
+        const isWan = i < wanPortsCount;
+        let portLabel = `Port ${i + 1}`;
+        if (isWan) {
+          portLabel = `Port ${i + 1} (WAN)`;
+        }
+        logicalPorts.push({ index: i, type: "network", label: portLabel, isWan });
       }
     }
     if (dev.requires_power) {
@@ -3516,15 +3542,21 @@ document.addEventListener("DOMContentLoaded", () => {
           } else if (conn.toDevice === "poe-endpoint") {
             destType = "endpoint";
             destPortIdx = conn.toPort;
+          } else if (conn.toDevice === "internet") {
+            destType = "internet";
           } else {
             destType = "device";
             destDeviceId = conn.toDevice;
             destPortIdx = conn.toPort;
           }
         } else {
-          destType = "device";
-          destDeviceId = conn.fromDevice;
-          destPortIdx = conn.fromPort;
+          if (conn.fromDevice === "internet") {
+            destType = "internet";
+          } else {
+            destType = "device";
+            destDeviceId = conn.fromDevice;
+            destPortIdx = conn.fromPort;
+          }
         }
       }
       
@@ -3550,12 +3582,16 @@ document.addEventListener("DOMContentLoaded", () => {
       
       const typeSelect = document.createElement("select");
       if (pInfo.type === "network") {
-        typeSelect.innerHTML = `
+        let optHtml = `
           <option value="none" ${destType === "none" ? "selected" : ""}>[Not Connected]</option>
           <option value="device" ${destType === "device" ? "selected" : ""}>Device in Rack</option>
           <option value="drop" ${destType === "drop" ? "selected" : ""}>Wall Drop</option>
           <option value="endpoint" ${destType === "endpoint" ? "selected" : ""}>PoE Endpoint</option>
         `;
+        if (pInfo.isWan) {
+          optHtml += `<option value="internet" ${destType === "internet" ? "selected" : ""}>🌐 ISP Internet (WAN)</option>`;
+        }
+        typeSelect.innerHTML = optHtml;
       } else {
         typeSelect.innerHTML = `
           <option value="none" ${destType === "none" ? "selected" : ""}>[Not Connected]</option>
@@ -3564,7 +3600,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       
       const targetSelect = document.createElement("select");
-      targetSelect.style.display = destType === "none" ? "none" : "";
+      targetSelect.style.display = (destType === "none" || destType === "internet") ? "none" : "";
       
       const portSelect = document.createElement("select");
       portSelect.style.display = destType === "device" ? "" : "none";
@@ -3583,7 +3619,7 @@ document.addEventListener("DOMContentLoaded", () => {
         targetSelect.innerHTML = "";
         portSelect.innerHTML = "";
         
-        if (type === "none") {
+        if (type === "none" || type === "internet") {
           targetSelect.style.display = "none";
           portSelect.style.display = "none";
         } else if (type === "device") {
@@ -3764,6 +3800,7 @@ document.addEventListener("DOMContentLoaded", () => {
     dev.notes = configDeviceNotesEl.value.trim();
     if (dev.type === "router") {
       dev.internetActive = configInternetActiveEl.checked;
+      dev.wanIpAddress = configWanIpEl.value.trim();
     }
     const rows = patchTableBodyEl.querySelectorAll("tr");
     
@@ -3810,6 +3847,9 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (type === "endpoint") {
           destDevId = "poe-endpoint";
           destPortIdx = targetId;
+        } else if (type === "internet") {
+          destDevId = "internet";
+          destPortIdx = 0;
         }
         
         state.connections.push({
@@ -3844,6 +3884,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const epNum = parseInt(epParts[epParts.length - 1]);
         const ep = state.endpoints.find(e => e.id === epId);
         return ep && epNum <= ep.qty;
+      } else if (conn.toDevice === "internet") {
+        return true;
       } else {
         const toDevExists = state.placedDevices.some(d => d.instanceId === conn.toDevice);
         return toDevExists;

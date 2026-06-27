@@ -808,11 +808,13 @@ body.dragging-active .placed-device * {
   display: none !important;
 }
 
+.port-dot.wan-port.connected,
 .port-dot.wan-port.internet-active {
   background: #10b981 !important;
   border-color: #34d399 !important;
   box-shadow: 0 0 6px #10b981, inset 0 1px 0 rgba(255,255,255,0.2) !important;
 }
+.port-dot.wan-port.connected::after,
 .port-dot.wan-port.internet-active::after {
   background: #10b981 !important;
   border-color: #34d399 !important;
@@ -3140,7 +3142,7 @@ body.dragging-active .placed-device * {
 
 /* Telus NAH */
 .telus-nah-chassis {
-  width: 170px;
+  width: 210px;
   height: 24px;
   background: linear-gradient(to bottom, #ffffff, #f1f5f9);
   border: 1px solid #cbd5e1;
@@ -3179,7 +3181,7 @@ body.dragging-active .placed-device * {
 
 /* Rogers XB8 */
 .rogers-xb8-chassis {
-  width: 110px;
+  width: 200px;
   height: 24px;
   background: linear-gradient(to bottom, #e2e8f0, #cbd5e1);
   border: 1px solid #94a3b8;
@@ -3218,7 +3220,7 @@ body.dragging-active .placed-device * {
 
 /* Bell Giga Hub */
 .bell-gigahub-chassis {
-  width: 170px;
+  width: 210px;
   height: 24px;
   background: linear-gradient(to bottom, #18181b, #09090b);
   border: 1.5px solid #27272a;
