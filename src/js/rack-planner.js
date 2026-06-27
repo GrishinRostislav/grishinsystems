@@ -434,6 +434,30 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
+    // Setup Side Panel drag-and-drop
+    const sideCabinetWrapper = document.querySelector(".side-cabinet-wrapper");
+    if (sideCabinetWrapper) {
+      sideCabinetWrapper.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        sideCabinetWrapper.classList.add("dragover");
+      });
+      
+      sideCabinetWrapper.addEventListener("dragleave", () => {
+        sideCabinetWrapper.classList.remove("dragover");
+      });
+      
+      sideCabinetWrapper.addEventListener("drop", (e) => {
+        e.preventDefault();
+        sideCabinetWrapper.classList.remove("dragover");
+        
+        if (state.draggedPresetId) {
+          addDevice(state.draggedPresetId, "side");
+        } else if (state.draggedInstanceId) {
+          moveDevice(state.draggedInstanceId, "side");
+        }
+      });
+    }
+
     // Setup clear & print buttons
     document.getElementById("btn-clear").addEventListener("click", () => {
       if (confirm("Are you sure you want to clear the entire rack configuration?")) {
@@ -946,6 +970,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Render visual cabinet rack
   function renderCabinet() {
     cabinetRackEl.innerHTML = "";
+    const sideCabinetRackEl = document.getElementById("side-cabinet-rack");
+    if (sideCabinetRackEl) {
+      sideCabinetRackEl.innerHTML = "";
+    }
     
     // Create rack container
     const container = document.createElement("div");
@@ -1048,9 +1076,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Place devices absolutely in their correct slot positions
     sortedDevices.forEach(dev => {
-      // Find the slot element corresponding to the dev.slot
-      const slotEl = container.querySelector(`.rack-slot[data-u="${dev.slot}"]`);
-      if (!slotEl) return;
+      // Find the slot element corresponding to the dev.slot if it's not a side device
+      if (dev.slot !== "side") {
+        const slotEl = container.querySelector(`.rack-slot[data-u="${dev.slot}"]`);
+        if (!slotEl) return;
+      }
 
       const devEl = document.createElement("div");
       devEl.dataset.instanceId = dev.instanceId;
@@ -1064,50 +1094,61 @@ document.addEventListener("DOMContentLoaded", () => {
       devEl.draggable = true;
       
       const widthFrac = dev.width_fraction || 1;
-      devEl.className = `placed-device device-brand-${dev.brand}${widthFrac === 1 ? ' has-ears' : ''}`;
-      devEl.style.height = `${dev.u * 56 - 4}px`; // 1U = 56px. Subtract a little padding
       
-      if (slotLeftOffsets[dev.slot] === undefined) {
-        const totalFrac = Math.min(1, slotTotalFraction[dev.slot] || 1);
-        slotLeftOffsets[dev.slot] = (1 - totalFrac) / 2;
-      }
-      const currentLeft = slotLeftOffsets[dev.slot];
-      
-      for (let i = 0; i < dev.u; i++) {
-        const u = dev.slot - i;
-        if (slotLeftOffsets[u] === undefined) {
-           const tFrac = Math.min(1, slotTotalFraction[u] || 1);
-           slotLeftOffsets[u] = (1 - tFrac) / 2;
-        }
-        slotLeftOffsets[u] = Math.max(slotLeftOffsets[u], currentLeft + widthFrac);
-      }
-
-      // Add shelf background if it's the first fractional device in the slot
-      if (widthFrac < 1 && !slotHasShelf[dev.slot]) {
-        slotHasShelf[dev.slot] = true;
-        const shelfBg = document.createElement("div");
-        shelfBg.className = "rack-shelf-bg";
-        slotEl.appendChild(shelfBg);
-      }
-      
-      // Calculate layout
-      const paddingLeft = 37;
-      const totalPadding = 43; // 37px left + 6px right
-      
-      if (widthFrac < 1) {
-        // Add horizontal gap (2px margin on each side = 4px between items)
-        devEl.style.left = `calc(${paddingLeft}px + (100% - ${totalPadding}px) * ${currentLeft} + 2px)`;
-        devEl.style.width = `calc((100% - ${totalPadding}px) * ${widthFrac} - 4px)`;
+      if (dev.slot === "side") {
+        devEl.className = `placed-device side-placed-device device-brand-${dev.brand}`;
+        devEl.style.position = 'relative';
+        devEl.style.height = 'auto';
+        devEl.style.left = '0';
+        devEl.style.width = '100%';
+        devEl.style.top = '0';
       } else {
-        devEl.style.left = `calc(${paddingLeft}px + (100% - ${totalPadding}px) * ${currentLeft})`;
-        devEl.style.width = `calc((100% - ${totalPadding}px) * ${widthFrac})`;
+        const slotEl = container.querySelector(`.rack-slot[data-u="${dev.slot}"]`);
+        devEl.className = `placed-device device-brand-${dev.brand}${widthFrac === 1 ? ' has-ears' : ''}`;
+        devEl.style.height = `${dev.u * 56 - 4}px`; // 1U = 56px. Subtract a little padding
+        
+        if (slotLeftOffsets[dev.slot] === undefined) {
+          const totalFrac = Math.min(1, slotTotalFraction[dev.slot] || 1);
+          slotLeftOffsets[dev.slot] = (1 - totalFrac) / 2;
+        }
+        const currentLeft = slotLeftOffsets[dev.slot];
+        
+        for (let i = 0; i < dev.u; i++) {
+          const u = dev.slot - i;
+          if (slotLeftOffsets[u] === undefined) {
+             const tFrac = Math.min(1, slotTotalFraction[u] || 1);
+             slotLeftOffsets[u] = (1 - tFrac) / 2;
+          }
+          slotLeftOffsets[u] = Math.max(slotLeftOffsets[u], currentLeft + widthFrac);
+        }
+
+        // Add shelf background if it's the first fractional device in the slot
+        if (widthFrac < 1 && !slotHasShelf[dev.slot]) {
+          slotHasShelf[dev.slot] = true;
+          const shelfBg = document.createElement("div");
+          shelfBg.className = "rack-shelf-bg";
+          slotEl.appendChild(shelfBg);
+        }
+        
+        // Calculate layout
+        const paddingLeft = 37;
+        const totalPadding = 43; // 37px left + 6px right
+        
+        if (widthFrac < 1) {
+          // Add horizontal gap (2px margin on each side = 4px between items)
+          devEl.style.left = `calc(${paddingLeft}px + (100% - ${totalPadding}px) * ${currentLeft} + 2px)`;
+          devEl.style.width = `calc((100% - ${totalPadding}px) * ${widthFrac} - 4px)`;
+        } else {
+          devEl.style.left = `calc(${paddingLeft}px + (100% - ${totalPadding}px) * ${currentLeft})`;
+          devEl.style.width = `calc((100% - ${totalPadding}px) * ${widthFrac})`;
+        }
+        devEl.style.right = 'auto'; // override CSS default
+        
+        // Calculate top position of the absolute element
+        const slotsFromTop = state.rackSize - dev.slot;
+        const topPosPx = slotsFromTop * 56 + 1;
+        devEl.style.top = `${topPosPx}px`;
       }
-      devEl.style.right = 'auto'; // override CSS default
-      
-      // Calculate top position of the absolute element
-      const slotsFromTop = state.rackSize - dev.slot;
-      const topPosPx = slotsFromTop * 56 + 1;
-      devEl.style.top = `${topPosPx}px`;
 
       // Build RJ45 port dots visual simulation or custom accessories
       let portsHtml = "";
@@ -1325,10 +1366,11 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "apple-tv-4k") {
         faceplateOverlayHtml = `
           <div class="appletv-chassis">
-            <div class="appletv-logo">tv</div>
-            <div class="appletv-ports-area" style="position: absolute; right: 4px; top: 9px; opacity: 0.1; z-index: 12;">
+            <div class="appletv-logo">tv</div>
+            <div class="appletv-ports-area" style="position: absolute; right: 8px; top: 12px; opacity: 0.2; z-index: 12;">
               ${portsHtml}
             </div>
+            <div class="appletv-led" style="position: absolute; bottom: 4px; right: 8px; width: 3px; height: 3px; background: #fff; border-radius: 50%; box-shadow: 0 0 3px #fff;"></div>
           </div>
         `;
         hideDefaultLeft = true;
@@ -1417,12 +1459,41 @@ document.addEventListener("DOMContentLoaded", () => {
         if (state.draggedPresetId) {
           addDevice(state.draggedPresetId, dev.slot);
         } else if (state.draggedInstanceId) {
-          moveDevice(state.draggedInstanceId, dev.slot);
+          const draggedDev = state.placedDevices.find(d => d.instanceId === state.draggedInstanceId);
+          if (draggedDev && draggedDev.slot === dev.slot) {
+            // Reorder within the same slot/panel
+            const idxDrag = state.placedDevices.findIndex(d => d.instanceId === state.draggedInstanceId);
+            const idxTarget = state.placedDevices.findIndex(d => d.instanceId === dev.instanceId);
+            if (idxDrag !== -1 && idxTarget !== -1) {
+              state.placedDevices.splice(idxDrag, 1);
+              state.placedDevices.splice(idxTarget, 0, draggedDev);
+              saveState();
+              update();
+            }
+          } else {
+            // Move to a different slot
+            moveDevice(state.draggedInstanceId, dev.slot);
+          }
         }
       });
 
-      cabinetRackEl.appendChild(devEl);
+      if (dev.slot === "side") {
+        if (sideCabinetRackEl) {
+          sideCabinetRackEl.appendChild(devEl);
+        }
+      } else {
+        container.appendChild(devEl);
+      }
     });
+
+    const sideDevices = state.placedDevices.filter(d => d.slot === "side");
+    if (sideCabinetRackEl && sideDevices.length === 0) {
+      sideCabinetRackEl.innerHTML = `
+        <div class="side-panel-empty-hint">
+          Перетащите сюда PDU, удлинители или другое оборудование для бокового монтажа
+        </div>
+      `;
+    }
 
     // Automatically generate 14U print chunks
     generatePrintRacks();
@@ -1500,12 +1571,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const targetDev = state.placedDevices.find(d => d.instanceId === insertedInstanceId);
     if (!targetDev) return;
 
+    if (targetSlot === "side") {
+      targetDev.slot = "side";
+      return;
+    }
+
     // Cap targetSlot so the device fits inside the rack
     targetSlot = Math.min(state.rackSize, Math.max(targetDev.u, targetSlot));
     targetDev.slot = targetSlot;
 
-    // Collect all other devices
-    const otherDevices = state.placedDevices.filter(d => d.instanceId !== insertedInstanceId);
+    // Collect all other devices, excluding side panel ones
+    const otherDevices = state.placedDevices.filter(d => d.instanceId !== insertedInstanceId && d.slot !== "side");
 
     // Partition based on preferred shift direction to create a natural slide cascade
     const above = [];
@@ -1629,6 +1705,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const dev = state.placedDevices.find(x => x.instanceId === instanceId);
     if (!dev) return;
 
+    if (newSlot === "side") {
+      dev.slot = "side";
+      saveState();
+      update();
+      return;
+    }
+
     dev._originalSlot = dev.slot;
 
     resolveCollisions(instanceId, newSlot);
@@ -1642,6 +1725,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 1. Space validation
     const uniqueOccupiedUs = new Set();
     state.placedDevices.forEach(d => {
+       if (d.slot === "side") return; // Skip zero-U side devices
        for (let i = 0; i < d.u; i++) uniqueOccupiedUs.add(d.slot - i);
     });
     const totalUUsed = uniqueOccupiedUs.size;
