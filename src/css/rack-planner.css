@@ -2495,7 +2495,9 @@ body.dragging-active .placed-device * {
 .placed-device.clean-chassis:hover .nvshield-chassis,
 .placed-device.clean-chassis:hover .telus-nah-chassis,
 .placed-device.clean-chassis:hover .rogers-xb8-chassis,
-.placed-device.clean-chassis:hover .bell-gigahub-chassis {
+.placed-device.clean-chassis:hover .bell-gigahub-chassis,
+.placed-device.clean-chassis:hover .wattbox-compact-chassis,
+.placed-device.clean-chassis:hover .generic-power-strip-chassis {
   box-shadow: 0 0 0 2px var(--accent-cyan), 0 4px 10px rgba(0, 0, 0, 0.6) !important;
 }
 
@@ -3144,6 +3146,274 @@ body.dragging-active .placed-device * {
   letter-spacing: 0.8px;
   text-transform: uppercase;
   user-select: none;
+}
+
+}
+
+/* WattBox PDUs Front Panel CSS */
+.wattbox-chassis {
+  width: 100%;
+  background: linear-gradient(to bottom, #111827, #030712);
+  border: 1px solid #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  box-sizing: border-box;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+  position: relative;
+  height: 100%;
+}
+.wattbox-chassis.wattbox-2u {
+  border-radius: 4px;
+}
+.wattbox-chassis.wattbox-1u {
+  border-radius: 4px;
+}
+
+.wattbox-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+.wattbox-logo-text {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 11px;
+  font-weight: 900;
+  color: #06b6d4; /* teal/cyan color */
+  letter-spacing: 1px;
+  text-shadow: 0 0 3px rgba(6, 182, 212, 0.4);
+}
+.wattbox-model-tag {
+  font-size: 5px;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.wattbox-lcd {
+  background: #020617;
+  border: 1px solid #0f172a;
+  border-radius: 2px;
+  padding: 2px 6px;
+  display: flex;
+  align-items: center;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
+}
+.wattbox-lcd-text {
+  font-family: monospace;
+  font-size: 9px;
+  font-weight: bold;
+  color: #38bdf8; /* bright blue LCD digits */
+  text-shadow: 0 0 4px rgba(56, 189, 248, 0.8);
+}
+.wattbox-lcd-text span {
+  font-size: 6px;
+  color: #0284c7;
+  margin-left: 1px;
+}
+
+.wattbox-status-lights {
+  display: flex;
+  gap: 8px;
+}
+.wb-lightovrc, .wb-lightlink {
+  font-size: 5px;
+  font-weight: bold;
+  color: #111827;
+  background: #1f2937;
+  padding: 1px 3px;
+  border-radius: 1px;
+  text-transform: uppercase;
+}
+.wb-lightovrc.glowing {
+  background: #0891b2; /* OvrC Blue */
+  color: #fff;
+  box-shadow: 0 0 4px #0891b2;
+}
+.wb-lightlink.glowing {
+  background: #16a34a; /* Link Green */
+  color: #fff;
+  box-shadow: 0 0 4px #16a34a;
+}
+
+.wattbox-outlets-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 2px 8px;
+  background: rgba(0,0,0,0.4);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #1f2937;
+}
+.wattbox-outlets-row {
+  display: flex;
+  gap: 8px;
+  background: rgba(0,0,0,0.4);
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid #1f2937;
+}
+
+.wb-outlet-indicator {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.wb-num {
+  font-size: 5.5px;
+  color: #9ca3af;
+  font-weight: bold;
+}
+.wb-dot {
+  width: 3.5px;
+  height: 3.5px;
+  border-radius: 50%;
+  background: #374151;
+}
+.wb-dot.active {
+  background: #22c55e;
+  box-shadow: 0 0 3px #22c55e;
+}
+
+.wattbox-breaker-button {
+  background: #991b1b;
+  border: 1px solid #7f1d1d;
+  color: #fca5a5;
+  font-size: 5.5px;
+  font-weight: 800;
+  padding: 2px 4px;
+  border-radius: 2px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+/* WattBox Compact (300 / 250) */
+.wattbox-compact-chassis {
+  width: 90px;
+  height: 22px;
+  background: linear-gradient(to bottom, #111827, #030712);
+  border: 1px solid #1f2937;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 6px;
+  margin: auto;
+  box-sizing: border-box;
+}
+.wb-compact-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding-bottom: 1px;
+  margin-bottom: 2px;
+}
+.wb-logo-compact {
+  font-size: 5px;
+  font-weight: 900;
+  color: #06b6d4;
+  letter-spacing: 0.5px;
+}
+.wb-compact-led.active {
+  width: 3px;
+  height: 3px;
+  background: #06b6d4;
+  box-shadow: 0 0 2px #06b6d4;
+  border-radius: 50%;
+}
+.wb-compact-outlets {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+.wb-outlet-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #374151;
+}
+.wb-outlet-dot.active {
+  background: #22c55e;
+  box-shadow: 0 0 2px #22c55e;
+}
+
+/* Generic 6-Outlet Power Strip */
+.generic-power-strip-chassis {
+  width: 170px;
+  height: 24px;
+  background: linear-gradient(to bottom, #f8fafc, #e2e8f0);
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  justify-content: space-between;
+  margin: auto;
+  box-sizing: border-box;
+}
+.power-strip-switch {
+  width: 12px;
+  height: 7px;
+  background: #7f1d1d;
+  border-radius: 2px;
+  border: 1px solid #991b1b;
+  position: relative;
+  cursor: pointer;
+}
+.power-strip-switch.active {
+  background: #ef4444;
+}
+.switch-glow {
+  width: 100%;
+  height: 100%;
+  background: rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 3px #ef4444;
+  border-radius: 2px;
+}
+.power-strip-outlets {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.power-strip-socket {
+  width: 16px;
+  height: 16px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 50%;
+  position: relative;
+  box-sizing: border-box;
+}
+.socket-ground {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #94a3b8;
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.socket-slits {
+  display: flex;
+  justify-content: space-between;
+  width: 8px;
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.slit-left, .slit-right {
+  width: 1.5px;
+  height: 4px;
+  background: #64748b;
+  border-radius: 0.5px;
 }
 
 /* Zero-U Side Cabinet / Non-Rack Space */

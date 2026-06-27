@@ -97,7 +97,13 @@ document.addEventListener("DOMContentLoaded", () => {
     ],
     power: [
       { id: "ups-cyberpower-2u", name: "CyberPower 1500VA UPS", brand: "cyberpower", u: 2, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 8, requires_power: true, type: "power", cost: 249 },
-      { id: "pdu-apc-1u", name: "APC 1U PDU Rackmount", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 10, requires_power: true, type: "power", cost: 99 }
+      { id: "pdu-apc-1u", name: "APC 1U PDU Rackmount", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 10, requires_power: true, type: "power", cost: 99 },
+      { id: "wattbox-800-12", name: "WattBox 800 Series IP PDU (12 Outlets, 2U)", brand: "wattbox", u: 2, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 12, requires_power: true, type: "power", cost: 749 },
+      { id: "wattbox-800-8", name: "WattBox 800 Series IP PDU (8 Outlets, 1U)", brand: "wattbox", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 8, requires_power: true, type: "power", cost: 599 },
+      { id: "wattbox-700-12", name: "WattBox 700 Series IP PDU (12 Outlets, 2U)", brand: "wattbox", u: 2, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 12, requires_power: true, type: "power", cost: 649 },
+      { id: "wattbox-300-3", name: "WattBox 300 Series IP PDU (3 Outlets, Compact)", brand: "wattbox", u: 1, width_fraction: 0.33, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 3, requires_power: true, type: "power", cost: 299 },
+      { id: "wattbox-250-2", name: "WattBox 250 Series Smart PDU (2 Outlets, Compact)", brand: "wattbox", u: 1, width_fraction: 0.25, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 2, requires_power: true, type: "power", cost: 189 },
+      { id: "power-strip-6", name: "Standard 6-Outlet Power Strip (Shelf)", brand: "generic", u: 1, width_fraction: 0.5, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 6, requires_power: true, type: "power", cost: 25 }
     ],
     theater: [
       { id: "savant-sipa125", name: "Savant IP Audio 125 (SIPA125)", brand: "savant", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1800 },
@@ -1218,7 +1224,7 @@ document.addEventListener("DOMContentLoaded", () => {
       devEl.draggable = true;
       
       const widthFrac = dev.width_fraction || 1;
-      const isCleanChassis = dev.id === "apple-tv-4k" || dev.id === "eero-max-7" || dev.id === "eero-pro-6e" || dev.id === "sonos-port" || dev.id === "savant-macmini-host" || dev.id === "amp-sonos" || dev.id === "nv-shield" || dev.id === "cable-box" || dev.id === "telus-nah" || dev.id === "rogers-xb8" || dev.id === "bell-gigahub";
+      const isCleanChassis = dev.id === "apple-tv-4k" || dev.id === "eero-max-7" || dev.id === "eero-pro-6e" || dev.id === "sonos-port" || dev.id === "savant-macmini-host" || dev.id === "amp-sonos" || dev.id === "nv-shield" || dev.id === "cable-box" || dev.id === "telus-nah" || dev.id === "rogers-xb8" || dev.id === "bell-gigahub" || dev.id === "wattbox-300-3" || dev.id === "wattbox-250-2" || dev.id === "power-strip-6";
       
       if (isSideSlot(dev.slot)) {
         devEl.className = `placed-device side-placed-device device-brand-${dev.brand}${isCleanChassis ? ' clean-chassis' : ''}`;
@@ -1845,6 +1851,112 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span style="font-size:4.5px; color:#999; font-weight:bold;">LAN4</span>
                 ${customSinglePort(4, "LAN 4")}
               </div>
+            </div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
+      } else if (dev.id === "wattbox-800-12" || dev.id === "wattbox-700-12") {
+        faceplateOverlayHtml = `
+          <div class="wattbox-chassis wattbox-2u">
+            <div class="wattbox-brand">
+              <span class="wattbox-logo-text">WATTBOX</span>
+              <span class="wattbox-model-tag">${dev.id.includes("800") ? "800 SERIES IP PDU" : "700 SERIES IP PDU"}</span>
+            </div>
+            <div class="wattbox-lcd" title="Voltage Monitor">
+              <span class="wattbox-lcd-text">120<span>V</span></span>
+            </div>
+            <div class="wattbox-status-lights">
+              <div class="wb-lightovrc glowing" title="OvrC Cloud Link">OvrC</div>
+              <div class="wb-lightlink glowing" title="Network Link">LINK</div>
+            </div>
+            <div class="wattbox-outlets-grid">
+              ${Array.from({length: 12}, (_, i) => `
+                <div class="wb-outlet-indicator" title="Outlet ${i+1} Status">
+                  <span class="wb-num">${i+1}</span>
+                  <div class="wb-dot active"></div>
+                </div>
+              `).join('')}
+            </div>
+            <div class="wattbox-breaker-button" title="Breaker Reset">RESET</div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
+      } else if (dev.id === "wattbox-800-8") {
+        faceplateOverlayHtml = `
+          <div class="wattbox-chassis wattbox-1u">
+            <div class="wattbox-brand">
+              <span class="wattbox-logo-text">WATTBOX</span>
+              <span class="wattbox-model-tag">800-8 IP PDU</span>
+            </div>
+            <div class="wattbox-lcd" title="Voltage Monitor">
+              <span class="wattbox-lcd-text">120<span>V</span></span>
+            </div>
+            <div class="wattbox-status-lights">
+              <div class="wb-lightovrc glowing" title="OvrC Cloud Link">OvrC</div>
+              <div class="wb-lightlink glowing" title="Network Link">LINK</div>
+            </div>
+            <div class="wattbox-outlets-row">
+              ${Array.from({length: 8}, (_, i) => `
+                <div class="wb-outlet-indicator" title="Outlet ${i+1} Status">
+                  <span class="wb-num">${i+1}</span>
+                  <div class="wb-dot active"></div>
+                </div>
+              `).join('')}
+            </div>
+            <div class="wattbox-breaker-button" title="Breaker Reset">RESET</div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
+      } else if (dev.id === "wattbox-300-3") {
+        faceplateOverlayHtml = `
+          <div class="wattbox-compact-chassis wb-300">
+            <div class="wb-compact-header">
+              <span class="wb-logo-compact">WATTBOX 300</span>
+              <div class="wb-compact-led active"></div>
+            </div>
+            <div class="wb-compact-outlets">
+              <div class="wb-outlet-dot active" title="Outlet 1 On"></div>
+              <div class="wb-outlet-dot active" title="Outlet 2 On"></div>
+              <div class="wb-outlet-dot active" title="Outlet 3 On"></div>
+            </div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
+      } else if (dev.id === "wattbox-250-2") {
+        faceplateOverlayHtml = `
+          <div class="wattbox-compact-chassis wb-250">
+            <div class="wb-compact-header">
+              <span class="wb-logo-compact">WATTBOX 250</span>
+              <div class="wb-compact-led active"></div>
+            </div>
+            <div class="wb-compact-outlets">
+              <div class="wb-outlet-dot active" title="Outlet 1 On"></div>
+              <div class="wb-outlet-dot active" title="Outlet 2 On"></div>
+            </div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
+      } else if (dev.id === "power-strip-6") {
+        faceplateOverlayHtml = `
+          <div class="generic-power-strip-chassis">
+            <div class="power-strip-switch active" title="Power Switch (ON)">
+              <div class="switch-glow"></div>
+            </div>
+            <div class="power-strip-outlets">
+              ${Array.from({length: 6}, (_, i) => `
+                <div class="power-strip-socket" title="Outlet ${i+1}">
+                  <div class="socket-ground"></div>
+                  <div class="socket-slits">
+                    <div class="slit-left"></div>
+                    <div class="slit-right"></div>
+                  </div>
+                </div>
+              `).join('')}
             </div>
           </div>
         `;
