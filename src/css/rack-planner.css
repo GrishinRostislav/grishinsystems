@@ -593,7 +593,7 @@ body.dragging-active .placed-device * {
 }
 
 .device-faceplate-label {
-  font-size: 9px;
+  font-size: 7.5px;
   font-family: monospace;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -2529,7 +2529,7 @@ body.dragging-active .placed-device * {
 
 .eero-text-logo {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 600;
   color: #ffffff;
   letter-spacing: -0.3px;

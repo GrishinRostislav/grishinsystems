@@ -1131,54 +1131,45 @@ document.addEventListener("DOMContentLoaded", () => {
         
         for (let i = 0; i < dev.ports; i++) {
           let classStr = "port-dot";
-          
-          if (dev.type === "switch" || dev.poe_budget > 0) {
-            const uplinksNeeded = dev.instanceId === coreSwitchId ? coreUplinks : 1;
-            const isUplinkPort = (i < uplinksNeeded);
-            const isPoeCapable = dev.poe_ports > 0 && i < dev.poe_ports;
-            
-            if (isPoeCapable) {
-              classStr += " poe-capable";
-            }
-            
-            if (isUplinkPort) {
-              classStr += " uplink";
-            } else if (isPoeCapable && remainingPoeForSwitches > 0) {
-              classStr += " poe";
-              remainingPoeForSwitches--;
-            } else if (remainingNonPoeForSwitches > 0) {
-              classStr += " active";
-              remainingNonPoeForSwitches--;
-            }
-          } else if (dev.type === "patch-panel") {
-            if (remainingPoeForPanels > 0) {
-              classStr += " poe";
-              remainingPoeForPanels--;
-            } else if (remainingNonPoeForPanels > 0) {
-              classStr += " active";
-              remainingNonPoeForPanels--;
-            }
-          } else if (dev.type === "router") {
-            const numWan = dev.id === "eero-poe-gateway" || dev.name.includes("2WAN") || dev.name.includes("4L2W") ? 2 : 1;
-            
-            if (i < numWan) {
-              classStr += " wan-port"; // Color WAN ports red and label them
-              if (i === numWan - 1) classStr += " wan-last"; // Gap between WAN and LAN
-            } else if (i === numWan) {
-              classStr += " uplink"; // LAN uplink to switch is also part of backbone
-            }
-          } else {
-            // For sources and misc devices, show their ports as actively connected
-            classStr += " active";
+          const isPoeCapable = dev.poe_ports > 0 && i < dev.poe_ports;
+          if (isPoeCapable) {
+            classStr += " poe-capable";
           }
-          
-          const isPortConnected = state.connections.some(c => 
+
+          let isRouterWan = false;
+          if (dev.type === "router") {
+            const numWan = dev.id === "eero-poe-gateway" || dev.name.includes("2WAN") || dev.name.includes("4L2W") ? 2 : 1;
+            if (i < numWan) {
+              isRouterWan = true;
+              classStr += " wan-port";
+              if (i === numWan - 1) {
+                classStr += " wan-last";
+              }
+            }
+          }
+
+          const conn = state.connections.find(c => 
             (c.fromDevice === dev.instanceId && c.fromPort === i) || 
             (c.toDevice === dev.instanceId && c.toPort === i)
           );
-          if (isPortConnected) {
+
+          if (conn) {
             classStr += " connected";
+            const targetInstanceId = conn.fromDevice === dev.instanceId ? conn.toDevice : conn.fromDevice;
+            const targetDev = state.placedDevices.find(d => d.instanceId === targetInstanceId);
+            const isUplinkConnection = targetDev && (targetDev.type === "switch" || targetDev.type === "router");
+
+            if (isRouterWan) {
+              // Keep wan-port styling
+            } else if (isUplinkConnection) {
+              classStr += " uplink";
+            } else if (isPoeCapable) {
+              classStr += " poe";
+            } else {
+              classStr += " active";
+            }
           }
+
           portsHtml += `<span class="${classStr}" data-port-idx="${i}" title="${dev.customLabel || dev.name} - Port ${i+1}"></span>`;
         }
         portsHtml += `</div>`;
@@ -1228,29 +1219,29 @@ document.addEventListener("DOMContentLoaded", () => {
         for (let i = 0; i < 10; i++) {
           let classStr = "port-dot";
           const isPoeCapable = i < 8;
-          const isUplinkPort = i >= 8;
           
           if (isPoeCapable) {
             classStr += " poe-capable";
           }
-          if (isUplinkPort) {
-            classStr += " uplink";
-          }
           
-          if (isPoeCapable && remainingPoeForSwitches > 0) {
-            classStr += " poe";
-            remainingPoeForSwitches--;
-          } else if (remainingNonPoeForSwitches > 0) {
-            classStr += " active";
-            remainingNonPoeForSwitches--;
-          }
-          
-          const isPortConnected = state.connections.some(c => 
+          const conn = state.connections.find(c => 
             (c.fromDevice === dev.instanceId && c.fromPort === i) || 
             (c.toDevice === dev.instanceId && c.toPort === i)
           );
-          if (isPortConnected) {
+          
+          if (conn) {
             classStr += " connected";
+            const targetInstanceId = conn.fromDevice === dev.instanceId ? conn.toDevice : conn.fromDevice;
+            const targetDev = state.placedDevices.find(d => d.instanceId === targetInstanceId);
+            const isUplinkConnection = targetDev && (targetDev.type === "switch" || targetDev.type === "router");
+            
+            if (isUplinkConnection) {
+              classStr += " uplink";
+            } else if (isPoeCapable) {
+              classStr += " poe";
+            } else {
+              classStr += " active";
+            }
           }
           
           portHtmls.push(`<span class="${classStr}" data-port-idx="${i}" title="${dev.customLabel || dev.name} - Port ${i+1}"></span>`);
@@ -2405,57 +2396,24 @@ document.addEventListener("DOMContentLoaded", () => {
       selectsGroup.appendChild(portSelect);
       tdDest.appendChild(selectsGroup);
       
-      const tdCable = document.createElement("td");
-      const detailsGroup = document.createElement("div");
-      detailsGroup.className = "patch-details-group";
-      
-      const colorSelect = document.createElement("select");
-      colorSelect.innerHTML = `
-        <option value="#2563eb" ${cableColor === "#2563eb" ? "selected" : ""}>🔵 Blue</option>
-        <option value="#eab308" ${cableColor === "#eab308" ? "selected" : ""}>🟡 Yellow</option>
-        <option value="#ef4444" ${cableColor === "#ef4444" ? "selected" : ""}>🔴 Red</option>
-        <option value="#22c55e" ${cableColor === "#22c55e" ? "selected" : ""}>🟢 Green</option>
-        <option value="#0f172a" ${cableColor === "#0f172a" ? "selected" : ""}>⚫ Black</option>
-        <option value="#f8fafc" ${cableColor === "#f8fafc" ? "selected" : ""}>⚪ White</option>
-        <option value="#f97316" ${cableColor === "#f97316" ? "selected" : ""}>🟠 Orange</option>
-      `;
-      
-      const categorySelect = document.createElement("select");
-      categorySelect.innerHTML = `
-        <option value="Cat6" ${cableType === "Cat6" ? "selected" : ""}>Cat6</option>
-        <option value="Cat6A" ${cableType === "Cat6A" ? "selected" : ""}>Cat6A</option>
-        <option value="Fiber" ${cableType === "Fiber" ? "selected" : ""}>Fiber</option>
-        <option value="DAC" ${cableType === "DAC" ? "selected" : ""}>DAC SFP+</option>
-        <option value="Console" ${cableType === "Console" ? "selected" : ""}>Console</option>
-      `;
-      
-      const labelInput = document.createElement("input");
-      labelInput.type = "text";
-      labelInput.placeholder = "Label (e.g. Office 101)";
-      labelInput.value = cableLabel;
-      
-      detailsGroup.appendChild(colorSelect);
-      detailsGroup.appendChild(categorySelect);
-      detailsGroup.appendChild(labelInput);
-      tdCable.appendChild(detailsGroup);
-      
       tr.portIndex = i;
       tr.typeSelect = typeSelect;
       tr.targetSelect = targetSelect;
       tr.portSelect = portSelect;
-      tr.colorSelect = colorSelect;
-      tr.categorySelect = categorySelect;
-      tr.labelInput = labelInput;
       
       tr.appendChild(tdPort);
       tr.appendChild(tdDest);
-      tr.appendChild(tdCable);
       patchTableBodyEl.appendChild(tr);
       
       updateTargets();
     }
   }
   
+  function getRandomHueColor() {
+    const hue = Math.floor(Math.random() * 360);
+    return `hsl(${hue}, 85%, 55%)`;
+  }
+
   function saveDeviceConfig() {
     const dev = state.placedDevices.find(d => d.instanceId === currentEditingInstanceId);
     if (!dev) return;
@@ -2473,9 +2431,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const type = tr.typeSelect.value;
       const targetId = tr.targetSelect.value;
       const targetPort = parseInt(tr.portSelect.value);
-      const color = tr.colorSelect.value;
-      const category = tr.categorySelect.value;
-      const label = tr.labelInput.value.trim();
+
+      // Find existing connection to reuse properties like color if it exists
+      const existingConn = state.connections.find(c => 
+        (c.fromDevice === dev.instanceId && c.fromPort === portIdx) || 
+        (c.toDevice === dev.instanceId && c.toPort === portIdx)
+      );
+      const color = existingConn ? (existingConn.cableColor || getRandomHueColor()) : getRandomHueColor();
+      const category = "Cat6";
+      const label = "";
       
       // Remove old mappings
       state.connections = state.connections.filter(c => 
@@ -2594,7 +2558,10 @@ document.addEventListener("DOMContentLoaded", () => {
         path.setAttribute("d", pathD);
         path.setAttribute("class", `cable-path ${colorClass}`);
         path.setAttribute("stroke-width", "2");
-        path.setAttribute("title", `${conn.cableType} | ${conn.label || ''}`);
+        if (conn.cableColor) {
+          path.setAttribute("stroke", conn.cableColor);
+        }
+        path.setAttribute("title", `${conn.cableType || ''} ${conn.label ? '| ' + conn.label : ''}`);
         svg.appendChild(path);
         
         let labelText = "";
@@ -2634,7 +2601,10 @@ document.addEventListener("DOMContentLoaded", () => {
         path.setAttribute("d", pathD);
         path.setAttribute("class", `cable-path ${colorClass}`);
         path.setAttribute("stroke-width", "2");
-        path.setAttribute("title", `${conn.cableType} | ${conn.label || ''}`);
+        if (conn.cableColor) {
+          path.setAttribute("stroke", conn.cableColor);
+        }
+        path.setAttribute("title", `${conn.cableType || ''} ${conn.label ? '| ' + conn.label : ''}`);
         svg.appendChild(path);
       }
     });
