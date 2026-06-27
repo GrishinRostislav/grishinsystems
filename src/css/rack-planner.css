@@ -800,20 +800,7 @@ body.dragging-active .placed-device * {
   border-color: #ef4444;
 }
 .port-dot.wan-port::before {
-  content: "WAN";
-  position: absolute;
-  top: -14px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 8px;
-  color: #fca5a5;
-  background: #7f1d1d;
-  padding: 1px 3px;
-  border-radius: 2px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  text-shadow: none;
-  pointer-events: none;
+  display: none !important;
 }
 
 .port-dot.wan-last {
