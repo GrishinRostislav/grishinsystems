@@ -77,8 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
     ],
     routers: [
       { id: "eero-poe-gateway", name: "eero PoE Gateway", brand: "eero", u: 1, width_fraction: 0.45, ports: 10, poe_ports: 8, poe_budget: 148, outlets: 0, requires_power: true, type: "router", cost: 649 },
-      { id: "eero-max-7", name: "eero Max 7 Router (Shelf)", brand: "eero", u: 1, width_fraction: 0.33, ports: 4, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 599 },
-      { id: "eero-pro-6e", name: "eero Pro 6E AP (Shelf)", brand: "eero", u: 1, width_fraction: 0.25, ports: 2, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 299 },
       { id: "udm-pro", name: "UniFi Dream Machine Pro", brand: "ubiquiti", u: 1, ports: 8, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 379 },
       { id: "cisco-firepower", name: "Cisco Firepower 1010", brand: "cisco", u: 1, ports: 8, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 890 },
       { id: "araknis-110-rt", name: "Araknis AN-110-RT-2L1W Router", brand: "araknis", u: 1, ports: 3, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 249 },
