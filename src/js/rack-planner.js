@@ -3347,7 +3347,7 @@ cabinetRackEl.appendChild(container);
             remoteName = "Wall RJ45 Drop";
             remotePortName = `#${remotePortIdx}`;
           } else if (remoteDevId === "poe-endpoint") {
-            const epParts = remotePortIdx.split("-");
+            const epParts = String(remotePortIdx).split("-");
             const epId = epParts.slice(0, -1).join("-");
             const epNum = epParts[epParts.length - 1];
             const ep = state.endpoints.find(e => e.id === epId);

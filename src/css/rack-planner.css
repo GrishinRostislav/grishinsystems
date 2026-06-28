@@ -1840,7 +1840,8 @@ body.dragging-active .placed-device * {
   display: none;
 }
 
-.print-only {
+.print-only,
+.print-only-report {
   display: none;
 }
 
