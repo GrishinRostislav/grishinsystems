@@ -600,6 +600,78 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
+    // Helper to find the element we are dragging over in side panels
+    function getDragAfterElement(container, y) {
+      const draggableElements = [...container.querySelectorAll('.placed-device:not(.dragging)')];
+      return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+          return { offset: offset, element: child };
+        } else {
+          return closest;
+        }
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    function addDeviceAtPosition(presetId, slotName, afterElement) {
+      let foundPreset = null;
+      for (const cat in presets) {
+        const p = presets[cat].find(x => x.id === presetId);
+        if (p) {
+          foundPreset = p;
+          break;
+        }
+      }
+      if (!foundPreset) return;
+
+      const newDevice = {
+        instanceId: "inst_" + Math.random().toString(36).substr(2, 9),
+        ...foundPreset,
+        slot: slotName
+      };
+      
+      if (afterElement) {
+        const targetInstanceId = afterElement.dataset.instanceId;
+        const targetIdx = state.placedDevices.findIndex(x => x.instanceId === targetInstanceId);
+        if (targetIdx !== -1) {
+          state.placedDevices.splice(targetIdx, 0, newDevice);
+        } else {
+          state.placedDevices.push(newDevice);
+        }
+      } else {
+        state.placedDevices.push(newDevice);
+      }
+      
+      state.lastAddedInstanceId = newDevice.instanceId;
+      saveState();
+      update();
+    }
+
+    function moveDeviceToPosition(instanceId, slotName, afterElement) {
+      const dev = state.placedDevices.find(x => x.instanceId === instanceId);
+      if (!dev) return;
+
+      // Remove from old position
+      state.placedDevices = state.placedDevices.filter(x => x.instanceId !== instanceId);
+      dev.slot = slotName;
+
+      if (afterElement) {
+        const targetInstanceId = afterElement.dataset.instanceId;
+        const targetIdx = state.placedDevices.findIndex(x => x.instanceId === targetInstanceId);
+        if (targetIdx !== -1) {
+          state.placedDevices.splice(targetIdx, 0, dev);
+        } else {
+          state.placedDevices.push(dev);
+        }
+      } else {
+        state.placedDevices.push(dev);
+      }
+
+      saveState();
+      update();
+    }
+
     // Setup Side Panel drag-and-drop (Left + Right)
     function setupSidePanelDnD(wrapperEl, slotName) {
       if (!wrapperEl) return;
@@ -613,10 +685,14 @@ document.addEventListener("DOMContentLoaded", () => {
       wrapperEl.addEventListener("drop", (e) => {
         e.preventDefault();
         wrapperEl.classList.remove("dragover");
+        
+        const sidePanel = wrapperEl.querySelector('.side-cabinet-rack-inner') || wrapperEl;
+        const afterElement = getDragAfterElement(sidePanel, e.clientY);
+
         if (state.draggedPresetId) {
-          addDevice(state.draggedPresetId, slotName);
+          addDeviceAtPosition(state.draggedPresetId, slotName, afterElement);
         } else if (state.draggedInstanceId) {
-          moveDevice(state.draggedInstanceId, slotName);
+          moveDeviceToPosition(state.draggedInstanceId, slotName, afterElement);
         }
       });
     }
@@ -2221,7 +2297,7 @@ cabinetRackEl.appendChild(container);
             
             <div class="avr-knob knob-left" title="Input Source"></div>
             <div class="avr-display-panel" title="AVR Status Display" style="background: #09090b;">
-              <div class="avr-display-text" style="${hasPower ? '' : 'color: #18181b; text-shadow: none;'}">${dev.customLabel || (dev.brand.toUpperCase() + " AVR")}</div>
+              <div class="avr-display-text" style="${hasPower ? '' : 'color: #3f3f46; text-shadow: none;'}">${dev.customLabel || (dev.brand.toUpperCase() + " AVR")}</div>
             </div>
             <div class="avr-ports-area" style="pointer-events: auto; display: flex; align-items: center; gap: 4px;">
               <span class="custom-port-mini-label" style="font-size: 6px; font-weight: bold; color: var(--text-muted);">LAN</span>
@@ -2813,6 +2889,8 @@ cabinetRackEl.appendChild(container);
             </div>
           </div>
         `;
+        hideDefaultLeft = true;
+        portsHtml = "";
       } else if (dev.id === "ovrc-hub") {
         faceplateOverlayHtml = `
           <div class="ovrc-hub-chassis">

@@ -975,18 +975,24 @@ body.dragging-active .placed-device * {
 }
 
 .device-brand-denon {
-  background: linear-gradient(135deg, #181818, #2a2a2a);
-  border-left: 4px solid #b89753;
+  background: linear-gradient(180deg, #34373c 0%, #1e2022 100%) !important;
+  border-left: 4px solid #b89753 !important;
+  border-top: 1.5px solid #52565e !important;
+  border-bottom: 1.5px solid #111214 !important;
 }
 
 .device-brand-marantz {
-  background: linear-gradient(135deg, #101010, #222222);
-  border-left: 4px solid #d4af37;
+  background: linear-gradient(180deg, #34373c 0%, #1e2022 100%) !important;
+  border-left: 4px solid #d4af37 !important;
+  border-top: 1.5px solid #52565e !important;
+  border-bottom: 1.5px solid #111214 !important;
 }
 
 .device-brand-anthem {
-  background: linear-gradient(135deg, #181818, #2a2a2a);
-  border-left: 4px solid #b89753;
+  background: linear-gradient(180deg, #34373c 0%, #1e2022 100%) !important;
+  border-left: 4px solid #da291c !important;
+  border-top: 1.5px solid #52565e !important;
+  border-bottom: 1.5px solid #111214 !important;
 }
 
 .device-brand-apple {
@@ -995,8 +1001,10 @@ body.dragging-active .placed-device * {
 }
 
 .device-brand-sony {
-  background: linear-gradient(135deg, #0b0c10, #1b1c21);
-  border-left: 4px solid #0096d6;
+  background: linear-gradient(180deg, #34373c 0%, #1e2022 100%) !important;
+  border-left: 4px solid #0096d6 !important;
+  border-top: 1.5px solid #52565e !important;
+  border-bottom: 1.5px solid #111214 !important;
 }
 
 .device-brand-sonos {
@@ -2536,8 +2544,8 @@ body.dragging-active .placed-device * {
   flex: 1;
   max-width: 140px;
   height: 20px;
-  background: #09090b;
-  border: 1px solid #27272a;
+  background: #111827;
+  border: 1px solid #374151;
   border-radius: 2px;
   display: flex;
   align-items: center;
@@ -3534,6 +3542,7 @@ body.dragging-active .placed-device * {
   position: relative;
   cursor: pointer;
   transition: background-color 0.2s, border-color 0.2s;
+  margin-left: -5px;
 }
 .power-strip-switch.active {
   background: #16a34a; /* green switch base when powered */
@@ -3555,6 +3564,7 @@ body.dragging-active .placed-device * {
   display: flex;
   gap: 8px;
   align-items: center;
+  margin-right: -5px;
 }
 .power-strip-socket {
   width: 18px;
