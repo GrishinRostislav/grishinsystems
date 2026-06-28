@@ -111,6 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
     theater: [
       { id: "savant-sipa125", name: "Savant IP Audio 125 (SIPA125)", brand: "savant", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1800 },
       { id: "savant-sipa50", name: "Savant IP Audio 50 (SIPA50)", brand: "savant", u: 1, width_fraction: 0.33, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 950 },
+      { id: "savant-sipa1sm", name: "Savant IP Audio 1 (SIPA1SM)", brand: "savant", u: 1, width_fraction: 0.5, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1200 },
       { id: "avr-anthem-mrx740", name: "Anthem MRX 740 11.2-Ch AV Receiver", brand: "anthem", u: 4, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 3099 },
       { id: "avr-anthem-mrx1140", name: "Anthem MRX 1140 15.2-Ch AV Receiver", brand: "anthem", u: 4, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 4199 },
       { id: "avr-sony-az1000es", name: "Sony STR-AZ1000ES 7.2-Ch ES Receiver", brand: "sony", u: 3, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 899 },
@@ -240,6 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const valPoeEl = document.getElementById("val-poe");
   const valOutletsEl = document.getElementById("val-outlets");
   const valNatEl = document.getElementById("val-nat");
+  const valCablingEl = document.getElementById("val-cabling");
   
   // Manifest Elements
   const manifestBodyEl = document.getElementById("manifest-body");
@@ -1658,7 +1660,7 @@ document.addEventListener("DOMContentLoaded", () => {
       devEl.draggable = true;
       
       const widthFrac = dev.width_fraction || 1;
-      const isCleanChassis = dev.id === "apple-tv-4k" || dev.id === "eero-max-7" || dev.id === "eero-pro-6e" || dev.id === "sonos-port" || dev.id === "savant-macmini-host" || dev.id === "amp-sonos" || dev.id === "nv-shield" || dev.id === "cable-box" || dev.id === "telus-nah" || dev.id === "rogers-xb8" || dev.id === "bell-gigahub" || dev.id === "wattbox-300-3" || dev.id === "wattbox-250-2" || dev.id === "power-strip-6" || dev.id === "ovrc-hub" || dev.id === "lutron-ra3" || dev.id === "lutron-caseta" || dev.id === "hunter-douglas-powerview" || dev.id === "savant-sipa50" || dev.id === "savant-smart-host";
+      const isCleanChassis = dev.id === "apple-tv-4k" || dev.id === "eero-max-7" || dev.id === "eero-pro-6e" || dev.id === "sonos-port" || dev.id === "savant-macmini-host" || dev.id === "amp-sonos" || dev.id === "nv-shield" || dev.id === "cable-box" || dev.id === "telus-nah" || dev.id === "rogers-xb8" || dev.id === "bell-gigahub" || dev.id === "wattbox-300-3" || dev.id === "wattbox-250-2" || dev.id === "power-strip-6" || dev.id === "ovrc-hub" || dev.id === "lutron-ra3" || dev.id === "lutron-caseta" || dev.id === "hunter-douglas-powerview" || dev.id === "savant-sipa50" || dev.id === "savant-smart-host" || dev.id === "savant-sipa1sm";
       
       const getPortTooltip = (portIndex, customLabel = "") => {
         const conn = state.connections.find(c => 
@@ -2113,10 +2115,10 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.brand === "savant" && (dev.id.includes("sipa") || dev.id.includes("smart-host"))) {
         faceplateOverlayHtml = `
           <div class="savant-chassis">
-            <div class="savant-glossy-strip">
-              <div class="savant-led ${isDevicePowered(dev) ? 'active' : ''}"></div>
-              <div class="savant-logo-text">${dev.customLabel || (dev.id.includes("sipa125") ? 'IP AUDIO 125' : (dev.id.includes("sipa50") ? 'IP AUDIO 50' : 'SAVANT SMART HOST'))}</div>
-            </div>
+            <div class="savant-led ${isDevicePowered(dev) ? 'active' : ''}" style="position: absolute; left: 16px; top: 10px;"></div>
+            <span style="position: absolute; left: 16px; bottom: 8px; font-size: 8.5px; font-weight: bold; color: #a1a1aa; font-family: monospace; text-transform: uppercase; letter-spacing: 0.5px;">
+              ${dev.customLabel || (dev.id.includes("sipa125") ? 'IP AUDIO 125' : (dev.id.includes("sipa50") ? 'IP AUDIO 50' : (dev.id.includes("sipa1sm") ? 'SIPA1SM' : 'SAVANT SMART HOST')))}
+            </span>
             <div class="savant-ports-bracket" style="position: absolute; right: 20px; bottom: 8px; display: flex; align-items: center; gap: 8px; z-index: 12; pointer-events: auto;">
               ${customPowerInletPort()}
               <span class="custom-port-mini-label" style="font-size: 6px; font-weight: bold; color: var(--text-muted);">LAN</span>
@@ -3206,6 +3208,54 @@ document.addEventListener("DOMContentLoaded", () => {
     
     updateValCard(valOutletsEl, outletStatus, "🔌", "Power Outlets", outletMsg);
     updateValCard(valNatEl, natStatus, "🌐", "Network & NAT", natMsg);
+
+    // 6. Cabling & Connections Validation (danger if any device has unconnected power or network ports)
+    let unconnectedPowerCount = 0;
+    let unconnectedNetworkCount = 0;
+    const unconnectedDevNames = [];
+
+    state.placedDevices.forEach(dev => {
+      if (dev.id === "wall-outlet-6" || dev.id === "organizer-1u" || dev.id === "shelf-1u") return;
+
+      if (dev.requires_power) {
+        const powerConn = state.connections.find(c => 
+          (c.fromDevice === dev.instanceId && c.fromPort === 1000) ||
+          (c.toDevice === dev.instanceId && c.toPort === 1000)
+        );
+        if (!powerConn) {
+          unconnectedPowerCount++;
+          unconnectedDevNames.push(dev.customLabel || dev.name);
+        }
+      }
+
+      if (dev.ports > 0) {
+        const netConn = state.connections.find(c => 
+          (c.fromDevice === dev.instanceId && c.fromPort < 1000) ||
+          (c.toDevice === dev.instanceId && c.toPort < 1000)
+        );
+        if (!netConn) {
+          unconnectedNetworkCount++;
+          if (!unconnectedDevNames.includes(dev.customLabel || dev.name)) {
+            unconnectedDevNames.push(dev.customLabel || dev.name);
+          }
+        }
+      }
+    });
+
+    let cablingStatus = "valid";
+    let cablingMsg = "All devices cabled & powered";
+    if (unconnectedPowerCount > 0 || unconnectedNetworkCount > 0) {
+      cablingStatus = "danger";
+      if (unconnectedPowerCount > 0 && unconnectedNetworkCount > 0) {
+        cablingMsg = `Unconnected: ${unconnectedDevNames.join(', ')}`;
+      } else if (unconnectedPowerCount > 0) {
+        cablingMsg = `Power missing: ${unconnectedDevNames.join(', ')}`;
+      } else {
+        cablingMsg = `Network missing: ${unconnectedDevNames.join(', ')}`;
+      }
+    }
+
+    updateValCard(valCablingEl, cablingStatus, "🔗", "Cabling Links", cablingMsg);
   }
 
   function updateValCard(cardEl, status, icon, title, valText) {
