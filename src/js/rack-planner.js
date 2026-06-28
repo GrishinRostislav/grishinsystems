@@ -1410,6 +1410,26 @@ document.addEventListener("DOMContentLoaded", () => {
     return slot === "wall-outlet";
   }
 
+  function isRouterWanPort(devId, portIndex) {
+    const id = devId.toLowerCase();
+    if (id === "eero-poe-gateway") {
+      return portIndex === 8 || portIndex === 9;
+    }
+    if (id === "udm-pro") {
+      return portIndex === 8;
+    }
+    if (id.includes("araknis-220") || id.includes("araknis-310") || id.includes("araknis-520")) {
+      return portIndex === 0 || portIndex === 1;
+    }
+    if (id === "bell-gigahub") {
+      return portIndex === 4;
+    }
+    if (id === "rogers-xb8") {
+      return portIndex === 3;
+    }
+    return portIndex === 0;
+  }
+
   // Check if U slots are occupied
   function isSlotOccupied(slot, height, excludeInstanceId = null, incomingFraction = 1) {
     for (let i = 0; i < height; i++) {
@@ -1931,18 +1951,15 @@ document.addEventListener("DOMContentLoaded", () => {
           
           for (let i = 0; i < dev.ports; i++) {
             const isSfp = sfpPortsCount > 0 && i >= (dev.ports - sfpPortsCount);
-            const isWan = dev.type === "router" && i < wanPortsCount;
+            const isWan = dev.type === "router" && isRouterWanPort(dev.id, i);
             let label = "";
             let classPrefix = "";
             if (isSfp) {
               label = "SFP Uplink";
               classPrefix = "sfp-port";
             } else if (isWan) {
-              label = "WAN Port";
+              label = `WAN Port ${i + 1}`;
               classPrefix = "wan-port";
-              if (i === wanPortsCount - 1) {
-                classPrefix += " wan-last";
-              }
             } else {
               label = `Port ${i + 1}`;
             }
@@ -3182,14 +3199,9 @@ document.addEventListener("DOMContentLoaded", () => {
     
     state.placedDevices.forEach(dev => {
       if (dev.type === "router") {
-        const wanPortsCount = (() => {
-          const id = dev.id.toLowerCase();
-          if (id === "eero-poe-gateway") return 2;
-          if (id.includes("2wan") || id.includes("4l2w")) return 2;
-          return 1;
-        })();
-        
-        for (let w = 0; w < wanPortsCount; w++) {
+        for (let w = 0; w < dev.ports; w++) {
+          if (!isRouterWanPort(dev.id, w)) continue;
+
           const conn = state.connections.find(c => 
             (c.fromDevice === dev.instanceId && c.fromPort === w) || 
             (c.toDevice === dev.instanceId && c.toPort === w)
@@ -3197,7 +3209,6 @@ document.addEventListener("DOMContentLoaded", () => {
           if (conn) {
             const otherId = conn.fromDevice === dev.instanceId ? conn.toDevice : conn.fromDevice;
             const otherDev = state.placedDevices.find(d => d.instanceId === otherId);
-            // If the upstream device is another router, and it is NOT in bridge mode, it's Double NAT!
             if (otherDev && otherDev.type === "router" && !otherDev.bridgeMode) {
               doubleNatCount++;
               wanRouterList.push(`U${dev.slot} behind U${otherDev.slot}`);
@@ -3788,7 +3799,15 @@ document.addEventListener("DOMContentLoaded", () => {
         dev.wanSettings = [];
       }
 
-      for (let w = 0; w < wanPortsCount; w++) {
+      const wanPortIndices = [];
+      for (let i = 0; i < dev.ports; i++) {
+        if (isRouterWanPort(dev.id, i)) {
+          wanPortIndices.push(i);
+        }
+      }
+
+      for (let idx = 0; idx < wanPortIndices.length; idx++) {
+        const w = wanPortIndices[idx];
         const settings = dev.wanSettings[w] || {
           connectionType: "DHCP",
           ipAddress: "",
@@ -3800,7 +3819,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         html += `
           <div class="wan-port-settings-block" style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px; margin-top: 10px;">
-            <label style="display:block; font-size:11px; color:var(--accent-cyan); text-transform:uppercase; font-weight:bold; margin-bottom:6px;">WAN Port ${w + 1} Configuration</label>
+            <label style="display:block; font-size:11px; color:var(--accent-cyan); text-transform:uppercase; font-weight:bold; margin-bottom:6px;">Port ${w + 1} (WAN) Configuration</label>
             <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
               <div class="form-group">
                 <label style="font-size: 10px;">Connection Type</label>
@@ -4253,8 +4272,9 @@ document.addEventListener("DOMContentLoaded", () => {
         };
       });
       // Fallback for single IP display
-      if (dev.wanSettings[0]) {
-        dev.wanIpAddress = dev.wanSettings[0].connectionType === "DHCP" ? "DHCP" : dev.wanSettings[0].ipAddress;
+      const firstWanIdx = dev.wanSettings.findIndex(x => x !== undefined && x !== null);
+      if (firstWanIdx !== -1) {
+        dev.wanIpAddress = dev.wanSettings[firstWanIdx].connectionType === "DHCP" ? "DHCP" : dev.wanSettings[firstWanIdx].ipAddress;
       } else {
         dev.wanIpAddress = "";
       }
