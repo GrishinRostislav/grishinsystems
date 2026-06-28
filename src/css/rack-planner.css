@@ -865,8 +865,7 @@ body.dragging-active .placed-device * {
   display: none !important;
 }
 .port-dot.power-outlet-dot.connected {
-  background: #f97316 !important;
-  box-shadow: 0 0 5px #f97316;
+  box-shadow: 0 0 6px #f97316;
 }
 
 /* Brush strip & shelf plate */
@@ -3573,6 +3572,10 @@ body.dragging-active .placed-device * {
   bottom: 0px;
   left: 50%;
   transform: translateX(-50%);
+}
+.power-strip-socket.connected .socket-slot-mini,
+.power-strip-socket.connected .socket-ground-mini {
+  background: #f97316 !important;
 }
 /* Zero-U Side Cabinet / Non-Rack Space */
 .side-cabinet-wrapper {

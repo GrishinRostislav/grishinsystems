@@ -2074,7 +2074,15 @@ document.addEventListener("DOMContentLoaded", () => {
           (c.toDevice === dev.instanceId && c.toPort === portIndex)
         );
         const connectedClass = conn ? " connected" : "";
-        return `<span class="port-dot power-outlet-dot${connectedClass}" data-port-idx="${portIndex}" title="${getPortTooltip(portIndex)}"></span>`;
+        return `
+          <div class="port-dot power-outlet-dot${connectedClass}" data-port-idx="${portIndex}" title="${getPortTooltip(portIndex)}" style="width:14px; height:14px; border:1.5px solid #f97316; border-radius:50%; background:#1a1a1a; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:1px; cursor:pointer; position:relative; box-shadow:0 0 3px rgba(249,115,22,0.3); pointer-events:auto; flex-shrink:0;">
+            <div style="display:flex; gap:2.5px; width:100%; justify-content:center; transform:translateY(0.5px);">
+              <div style="width:1px; height:3.5px; background:${conn ? '#f97316' : '#52525b'};"></div>
+              <div style="width:1px; height:3.5px; background:${conn ? '#f97316' : '#52525b'};"></div>
+            </div>
+            <div style="width:2px; height:2px; border-radius:50%; background:${conn ? '#f97316' : '#52525b'}; transform:translateY(-0.5px);"></div>
+          </div>
+        `;
       };
 
       if (dev.id === "eero-poe-gateway") {
@@ -2563,6 +2571,58 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span style="font-size: 4.5px; color: #888; font-weight: bold;">LAN</span>
                 ${customSinglePort(0, "Ethernet (LAN)")}
               </div>
+            </div>
+          </div>
+        `;
+      } else if (dev.id === "pdu-apc-1u") {
+        faceplateOverlayHtml = `
+          <div class="apc-pdu-panel" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; box-sizing: border-box; background: #111; border: 1.5px solid #333; border-radius: 4px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-weight: 900; font-size: 11px; color: #fff; letter-spacing: 1px;">APC</span>
+              <span style="font-size: 8px; color: #666; font-weight: bold;">1U PDU RACKMOUNT</span>
+              <div class="power-strip-switch ${isDevicePowered(dev) ? 'active' : ''}" style="width: 20px; height: 12px; border-radius: 2px; background: #222; border: 1px solid #444; position: relative; cursor: pointer; pointer-events: auto;">
+                <div style="position: absolute; width: 8px; height: 8px; border-radius: 1px; background: ${isDevicePowered(dev) ? '#22c55e' : '#555'}; left: ${isDevicePowered(dev) ? '10px' : '2px'}; top: 1px; transition: all 0.2s;"></div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              ${Array.from({length: 10}, (_, i) => `
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;">
+                  <span style="font-size: 6px; color: #888; font-weight: bold;">${i+1}</span>
+                  ${customPowerOutletPort(i)}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
+      } else if (dev.id === "ups-cyberpower-2u") {
+        faceplateOverlayHtml = `
+          <div class="cyberpower-ups-panel" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-sizing: border-box; background: linear-gradient(135deg, #18181b, #27272a); border: 1.5px solid #444; border-radius: 6px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); position: relative;">
+            <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start;">
+              <span style="font-weight: bold; font-size: 13px; color: #fff; letter-spacing: 0.5px;">CyberPower</span>
+              <span style="font-size: 8px; color: #888; font-weight: 500; text-transform: uppercase;">1500VA SINE WAVE UPS</span>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <div style="width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid #555; background: ${isDevicePowered(dev) ? '#22c55e' : '#111'}; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 8px; color: #fff;" title="Power Button">⏻</div>
+                <div style="display: flex; gap: 2px;">
+                  <span style="width: 4px; height: 4px; border-radius: 50%; background: ${isDevicePowered(dev) ? '#22c55e' : '#3f3f46'};" title="Battery Normal"></span>
+                  <span style="width: 4px; height: 4px; border-radius: 50%; background: #3f3f46;" title="Fault Indicator"></span>
+                </div>
+              </div>
+            </div>
+            
+            <div style="width: 60px; height: 36px; background: #000; border: 1.5px solid #333; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #38bdf8; font-family: monospace; box-shadow: inset 0 0 5px rgba(56,189,248,0.2);">
+              <span style="font-size: 14px; font-weight: bold; text-shadow: 0 0 3px #38bdf8;">${isDevicePowered(dev) ? '120' : '000'}</span>
+              <span style="font-size: 7px; color: #64748b; text-transform: uppercase; font-family: sans-serif;">Output Volt</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px 8px; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+              ${Array.from({length: 8}, (_, i) => `
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;">
+                  <span style="font-size: 6px; color: #888; font-weight: bold;">${i+1}</span>
+                  ${customPowerOutletPort(i)}
+                </div>
+              `).join('')}
             </div>
           </div>
         `;
