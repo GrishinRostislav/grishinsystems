@@ -3293,6 +3293,166 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Automatically generate 14U print chunks
     generatePrintRacks();
+    updatePrintReportSection();
+  }
+
+  function updatePrintReportSection() {
+    const section = document.getElementById("print-report-section");
+    if (!section) return;
+
+    if (state.placedDevices.length === 0) {
+      section.innerHTML = `
+        <div style="padding: 20px; text-align: center; color: #666; font-style: italic;">
+          No hardware placed in the rack yet.
+        </div>
+      `;
+      return;
+    }
+
+    let html = `
+      <div style="page-break-before: always; padding-top: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <h2 style="font-size: 18px; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 12px; color: #000;">📊 Project Connection & Network Report</h2>
+    `;
+
+    const routers = state.placedDevices.filter(d => d.type === "router");
+    const totalConnections = state.connections.length;
+
+    html += `
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px;">
+        <div>
+          <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Hardware</div>
+          <div style="font-size: 16px; font-weight: bold; color: #0f172a; margin-top: 2px;">${state.placedDevices.length} Devices</div>
+        </div>
+        <div>
+          <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Cabling Links</div>
+          <div style="font-size: 16px; font-weight: bold; color: #10b981; margin-top: 2px;">${totalConnections} Connections</div>
+        </div>
+        <div>
+          <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Active Router</div>
+          <div style="font-size: 16px; font-weight: bold; color: #f59e0b; margin-top: 2px;">${routers.length > 0 ? routers[0].name : "None Configured"}</div>
+        </div>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 11px; color: #334155;">
+        <thead>
+          <tr style="border-bottom: 2px solid #cbd5e1; background: #f1f5f9;">
+            <th style="padding: 8px 10px; font-weight: bold;">Location</th>
+            <th style="padding: 8px 10px; font-weight: bold;">Device / Model</th>
+            <th style="padding: 8px 10px; font-weight: bold;">IP Address Configuration</th>
+            <th style="padding: 8px 10px; font-weight: bold;">Ports & Connections</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    const sorted = [...state.placedDevices].sort((a, b) => {
+      if (isSideSlot(a.slot) && !isSideSlot(b.slot)) return 1;
+      if (!isSideSlot(a.slot) && isSideSlot(b.slot)) return -1;
+      if (isSideSlot(a.slot) && isSideSlot(b.slot)) return a.slot.localeCompare(b.slot);
+      if (isWallOutletSlot(a.slot) && !isWallOutletSlot(b.slot)) return 1;
+      if (!isWallOutletSlot(a.slot) && isWallOutletSlot(b.slot)) return -1;
+      return b.slot - a.slot;
+    });
+
+    sorted.forEach(dev => {
+      const isSide = isSideSlot(dev.slot);
+      const isWall = isWallOutletSlot(dev.slot);
+      let locText = "";
+      if (isSide) {
+        locText = dev.slot === "side-left" ? "Left Side" : "Right Side";
+      } else if (isWall) {
+        locText = "Wall Outlet";
+      } else {
+        locText = `U${dev.slot}`;
+      }
+
+      let ipText = "";
+      if (dev.type === "router") {
+        const mode = dev.bridgeMode ? "Bridge Mode (Transparent)" : "Gateway Mode";
+        const lanIp = dev.ipAddress ? dev.ipAddress : "DHCP Client / Autoconf";
+        const wanIp = dev.wanIpAddress ? dev.wanIpAddress : "DHCP WAN / Dynamic";
+        ipText = `
+          <div style="font-weight: bold; color: #b45309;">${mode}</div>
+          <div style="margin-top: 2px;">LAN IP: <span style="font-family: monospace; background:#f1f5f9; padding:1px 3px; border-radius:2px;">${lanIp}</span></div>
+          <div style="margin-top: 1px;">WAN IP: <span style="font-family: monospace; background:#f1f5f9; padding:1px 3px; border-radius:2px;">${wanIp}</span></div>
+        `;
+      } else {
+        ipText = dev.ipAddress ? 
+          `<span style="font-family: monospace; background:#f1f5f9; padding:1px 3px; border-radius:2px;">${dev.ipAddress}</span>` : 
+          `<span style="color: #64748b; font-style: italic;">DHCP Client</span>`;
+      }
+
+      let connListHtml = "";
+      const devConns = state.connections.filter(c => c.fromDevice === dev.instanceId || c.toDevice === dev.instanceId);
+      if (devConns.length === 0) {
+        connListHtml = `<span style="color: #64748b; font-style: italic;">No active cabling connections</span>`;
+      } else {
+        connListHtml = `<ul style="margin: 0; padding-left: 14px; line-height: 1.3;">`;
+        devConns.forEach(c => {
+          const isFrom = c.fromDevice === dev.instanceId;
+          const localPortIdx = isFrom ? c.fromPort : c.toPort;
+          const remoteDevId = isFrom ? c.toDevice : c.fromDevice;
+          const remotePortIdx = isFrom ? c.toPort : c.fromPort;
+
+          let localPortName = "";
+          if (localPortIdx === 1000) localPortName = "Power Inlet";
+          else if (localPortIdx >= 2000) localPortName = `Outlet ${localPortIdx - 2000 + 1}`;
+          else if (dev.type === "router" && localPortIdx === 0) localPortName = "WAN Port";
+          else localPortName = getDevicePortFriendlyLabel(dev.id, localPortIdx);
+
+          let remoteName = "";
+          let remotePortName = "";
+          if (remoteDevId === "wall-drop") {
+            remoteName = "Wall RJ45 Drop";
+            remotePortName = `#${remotePortIdx}`;
+          } else if (remoteDevId === "poe-endpoint") {
+            const epParts = remotePortIdx.split("-");
+            const epId = epParts.slice(0, -1).join("-");
+            const epNum = epParts[epParts.length - 1];
+            const ep = state.endpoints.find(e => e.id === epId);
+            remoteName = ep ? ep.name : "PoE Device";
+            remotePortName = `#${epNum}`;
+          } else if (remoteDevId === "internet") {
+            remoteName = "🌐 ISP Internet / WAN Gateway";
+            remotePortName = "External WAN";
+          } else {
+            const rDev = state.placedDevices.find(d => d.instanceId === remoteDevId);
+            remoteName = rDev ? (rDev.customLabel || rDev.name) : "Unknown Device";
+            if (remotePortIdx === 1000) remotePortName = "Power Inlet";
+            else if (remotePortIdx >= 2000) remotePortName = `Outlet ${remotePortIdx - 2000 + 1}`;
+            else remotePortName = getDevicePortFriendlyLabel(rDev ? rDev.id : "", remotePortIdx);
+          }
+
+          connListHtml += `
+            <li>
+              <strong style="color: #1e3a8a;">${localPortName}</strong> ──🔗──> 
+              <span>${remoteName} (<span style="color: #047857; font-weight: 500;">${remotePortName}</span>)</span>
+            </li>
+          `;
+        });
+        connListHtml += `</ul>`;
+      }
+
+      html += `
+        <tr style="border-bottom: 1px solid #e2e8f0; vertical-align: top;">
+          <td style="padding: 8px 10px; font-weight: bold; color: #0284c7;">${locText}</td>
+          <td style="padding: 8px 10px;">
+            <div style="font-weight: bold; color: #0f172a;">${dev.customLabel || dev.name}</div>
+            <div style="font-size: 9.5px; color: #64748b; margin-top: 1px;">${dev.brand.toUpperCase()} • ${dev.u}U • Model ID: ${dev.id}</div>
+            ${dev.notes ? `<div style="font-size: 9.5px; background: #f8fafc; padding: 3px 5px; border-radius: 3px; border-left: 2px solid #0284c7; margin-top: 4px; font-style: italic;">Note: ${dev.notes}</div>` : ""}
+          </td>
+          <td style="padding: 8px 10px;">${ipText}</td>
+          <td style="padding: 8px 10px;">${connListHtml}</td>
+        </tr>
+      `;
+    });
+
+    html += `
+        </tbody>
+      </table>
+    </div>
+    `;
+
+    section.innerHTML = html;
   }
 
   function generatePrintRacks() {

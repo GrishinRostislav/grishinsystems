@@ -1909,7 +1909,8 @@ body.dragging-active .placed-device * {
 
   #print-header-bom { order: 0 !important; }
   #print-header-rack { 
-    display: none !important;
+    display: flex !important;
+    page-break-after: avoid !important;
   }
 
   .rp-canvas {
@@ -1920,12 +1921,55 @@ body.dragging-active .placed-device * {
     display: block !important;
   }
 
+  .rp-canvas-content {
+    transform: none !important;
+    zoom: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
   #cabinet-rack {
+    display: block !important;
+  }
+
+  .cabinet-wrapper {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+    gap: 16px !important;
+    margin: 10px auto !important;
+    background: white !important;
+  }
+
+  .side-cabinet-wrapper {
+    display: block !important;
+    width: 140px !important;
+    flex-shrink: 0 !important;
+    background: white !important;
+    border: 1px dashed #ccc !important;
+    padding: 6px !important;
+  }
+
+  .side-panel-empty-hint, .wall-outlet-empty-hint {
     display: none !important;
   }
 
-  .print-only {
+  #print-racks-container, .print-only {
+    display: none !important;
+  }
+
+  .print-only-report {
     display: block !important;
+    background: white !important;
+    color: black !important;
+    width: 100% !important;
+    margin-top: 30px !important;
+    page-break-before: always !important;
   }
 
   .cabinet-rack {
