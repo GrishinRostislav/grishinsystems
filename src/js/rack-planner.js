@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "savant-sipa125", name: "Savant IP Audio 125 (SIPA125)", brand: "savant", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1800 },
       { id: "savant-sipa50", name: "Savant IP Audio 50 (SIPA50)", brand: "savant", u: 1, width_fraction: 0.33, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 950 },
       { id: "savant-sipa1sm", name: "Savant IP Audio 1 (SIPA1SM)", brand: "savant", u: 1, width_fraction: 0.5, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1200 },
-      { id: "avr-anthem-mrx740", name: "Anthem MRX 740 11.2-Ch AV Receiver", brand: "anthem", u: 4, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 3099 },
+      { id: "avr-anthem-mrx740", name: "Anthem MRX 740 11.2-Ch AV Receiver", brand: "anthem", u: 4, ports: 40, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 3099 },
       { id: "avr-anthem-mrx1140", name: "Anthem MRX 1140 15.2-Ch AV Receiver", brand: "anthem", u: 4, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 4199 },
       { id: "avr-sony-az1000es", name: "Sony STR-AZ1000ES 7.2-Ch ES Receiver", brand: "sony", u: 3, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 899 },
       { id: "avr-sony-az3000es", name: "Sony STR-AZ3000ES 9.2-Ch ES Receiver", brand: "sony", u: 3, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1699 },
@@ -1697,7 +1697,7 @@ document.addEventListener("DOMContentLoaded", () => {
       devEl.draggable = true;
       
       const widthFrac = dev.width_fraction || 1;
-      const isCleanChassis = dev.id === "apple-tv-4k" || dev.id === "eero-max-7" || dev.id === "eero-pro-6e" || dev.id === "sonos-port" || dev.id === "savant-macmini-host" || dev.id === "amp-sonos" || dev.id === "nv-shield" || dev.id === "cable-box" || dev.id === "telus-nah" || dev.id === "rogers-xb8" || dev.id === "bell-gigahub" || dev.id === "wattbox-300-3" || dev.id === "wattbox-250-2" || dev.id === "wattbox-300vb-5" || dev.id === "power-strip-6" || dev.id === "ovrc-hub" || dev.id === "lutron-ra3" || dev.id === "lutron-caseta" || dev.id === "hunter-douglas-powerview" || dev.id === "savant-sipa50" || dev.id === "savant-smart-host" || dev.id === "savant-sipa1sm";
+      const isCleanChassis = dev.id === "apple-tv-4k" || dev.id === "eero-max-7" || dev.id === "eero-pro-6e" || dev.id === "sonos-port" || dev.id === "savant-macmini-host" || dev.id === "amp-sonos" || dev.id === "nv-shield" || dev.id === "cable-box" || dev.id === "telus-nah" || dev.id === "rogers-xb8" || dev.id === "bell-gigahub" || dev.id === "wattbox-300-3" || dev.id === "wattbox-250-2" || dev.id === "wattbox-300vb-5" || dev.id === "power-strip-6" || dev.id === "ovrc-hub" || dev.id === "lutron-ra3" || dev.id === "lutron-caseta" || dev.id === "hunter-douglas-powerview" || dev.id === "savant-sipa50" || dev.id === "savant-smart-host" || dev.id === "savant-sipa1sm" || dev.id === "avr-anthem-mrx740";
       
       const getPortTooltip = (portIndex, customLabel = "") => {
         const conn = state.connections.find(c => 
@@ -2138,6 +2138,162 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="lcm-glowing-dot"></div>
           </div>
         `;
+      } else if (dev.id === "avr-anthem-mrx740") {
+        const renderAvrPort = (idx, label, styleStr) => {
+          const conn = state.connections.find(c => 
+            (c.fromDevice === dev.instanceId && c.fromPort === idx) || 
+            (c.toDevice === dev.instanceId && c.toPort === idx)
+          );
+          const connectedClass = conn ? " connected" : "";
+          const activeClass = (idx === 0 && isDevicePowered(dev) && conn) ? " active" : "";
+          let extraStyle = conn ? "box-shadow: 0 0 6px #2dd4bf; border-color: #2dd4bf !important;" : "";
+          if (idx === 1000 && conn) {
+            extraStyle = "box-shadow: 0 0 6px #f97316; border-color: #f97316 !important;";
+          }
+          return `<div class="port-dot${connectedClass}${activeClass}" data-port-idx="${idx}" title="${getPortTooltip(idx, label)}" style="${styleStr} ${extraStyle}"></div>`;
+        };
+
+        faceplateOverlayHtml = `
+          <div class="mrx740-rear-panel" style="width: 100%; height: 100%; display: flex; flex-direction: column; background: #0c0a09; border: 2px solid #292524; border-radius: 6px; padding: 6px 12px; box-sizing: border-box; justify-content: space-between; font-size: 7px; color: #a8a29e; font-family: sans-serif; position: relative;">
+            
+            <!-- Brand & Model Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #292524; padding-bottom: 3px; margin-bottom: 2px;">
+              <span style="font-weight: 900; font-size: 11px; color: #fff; letter-spacing: 1px;">ANTHEM <span style="font-weight: bold; font-size: 8px; color: #f97316;">MRX 740</span></span>
+              <span style="font-size: 6px; text-transform: uppercase; color: #78716c; font-weight: bold;">11.2 Pre-Amplifier / 7-Channel Receiver - Rear Panel</span>
+            </div>
+
+            <!-- Main Ports Grid -->
+            <div style="display: flex; gap: 8px; flex: 1; min-height: 0;">
+              
+              <!-- Left Side: HDMI section, LAN, USB, RS232 -->
+              <div style="display: flex; flex-direction: column; gap: 4px; flex: 1.2;">
+                <!-- HDMI Inputs & Outputs -->
+                <div style="background: rgba(0,0,0,0.4); border: 1px solid #1c1917; padding: 4px 6px; border-radius: 4px;">
+                  <div style="font-size: 5px; color: #d6d3d1; font-weight: bold; margin-bottom: 3px; text-transform: uppercase; border-bottom: 0.5px solid #292524; padding-bottom: 1px;">HDMI 2.0b (7 Inputs / 3 Outputs eARC)</div>
+                  <div style="display: flex; flex-wrap: wrap; gap: 4px; pointer-events: auto;">
+                    ${Array.from({length: 7}, (_, i) => `
+                      <div style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
+                        <span style="font-size: 4px; color: #78716c;">IN${i+1}</span>
+                        ${renderAvrPort(i+1, `HDMI Input ${i+1}`, "width: 11px; height: 7px; border: 1px solid #71717a; background: #000; border-radius: 1.5px; cursor: pointer; flex-shrink: 0;")}
+                      </div>
+                    `).join('')}
+                    ${Array.from({length: 3}, (_, i) => `
+                      <div style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
+                        <span style="font-size: 4px; color: #f97316;">OUT${i+1}</span>
+                        ${renderAvrPort(8+i, `HDMI Output ${i+1} (eARC)`, "width: 11px; height: 7px; border: 1px solid #f97316; background: #000; border-radius: 1.5px; cursor: pointer; flex-shrink: 0;")}
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+
+                <!-- Control, RS232, IP, Triggers, Antennas -->
+                <div style="background: rgba(0,0,0,0.4); border: 1px solid #1c1917; padding: 4px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                  <div style="display: flex; align-items: center; gap: 4px; pointer-events: auto;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
+                      <span style="font-size: 4px; color: #78716c;">LAN</span>
+                      ${renderAvrPort(0, "Ethernet (LAN)", "width: 10px; height: 8px; border: 1px solid #94a3b8; background: #050810; border-radius: 1px; cursor: pointer;")}
+                    </div>
+                    <div style="width: 1px; height: 14px; background: #292524;"></div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
+                      <span style="font-size: 4px; color: #78716c;">USB</span>
+                      <div style="width: 8px; height: 4px; border: 1px solid #52525b; background: #111; border-radius: 0.5px;"></div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
+                      <span style="font-size: 4px; color: #78716c;">RS-232</span>
+                      <div style="width: 12px; height: 6px; border: 1px solid #52525b; background: #222; border-radius: 1px;"></div>
+                    </div>
+                  </div>
+                  <div style="display: flex; gap: 3px;">
+                    <div style="width: 4px; height: 4px; border-radius: 50%; background: #1c1917; border: 1px solid #d97706;" title="Wi-Fi Antenna Left"></div>
+                    <div style="width: 4px; height: 4px; border-radius: 50%; background: #1c1917; border: 1px solid #d97706;" title="Wi-Fi Antenna Right"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Side: Audio Inputs/Outputs, Pre-outs, Digital Audio -->
+              <div style="display: flex; flex-direction: column; gap: 4px; flex: 1.5;">
+                <!-- Audio RCA block -->
+                <div style="background: rgba(0,0,0,0.4); border: 1px solid #1c1917; padding: 4px 6px; border-radius: 4px; display: flex; flex-direction: column; gap: 3px;">
+                  
+                  <!-- Analog Inputs (Stereo Pairs) -->
+                  <div>
+                    <div style="font-size: 5px; color: #d6d3d1; font-weight: bold; text-transform: uppercase;">Analog Audio Inputs (RCA Stereo 1-5)</div>
+                    <div style="display: flex; gap: 6px; margin-top: 2px; pointer-events: auto;">
+                      ${Array.from({length: 5}, (_, i) => `
+                        <div style="display: flex; align-items: center; gap: 2px;">
+                          <span style="font-size: 4.5px; color: #78716c; font-weight:bold;">${i+1}</span>
+                          <div style="display: flex; flex-direction: column; gap: 1.5px;">
+                            ${renderAvrPort(17+i, `RCA Stereo In ${i+1} L`, "width: 7px; height: 7px; border: 1px solid #d97706; border-radius: 50%; background: #fff; cursor: pointer;")}
+                            ${renderAvrPort(17+i, `RCA Stereo In ${i+1} R`, "width: 7px; height: 7px; border: 1px solid #d97706; border-radius: 50%; background: #ef4444; cursor: pointer;")}
+                          </div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>
+
+                  <!-- Pre-Outs (11 Channels Pre-amplifier) -->
+                  <div style="border-top: 0.5px solid #292524; padding-top: 2px;">
+                    <div style="font-size: 5px; color: #f97316; font-weight: bold; text-transform: uppercase;">11.2 Pre-Amplifier Outputs (RCA Pre-Outs)</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; pointer-events: auto;">
+                      ${Array.from({length: 11}, (_, i) => `
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
+                          <span style="font-size: 3.5px; color: #a8a29e;">CH${i+1}</span>
+                          ${renderAvrPort(22+i, `RCA Pre-Out Channel ${i+1}`, `width: 7px; height: 7px; border: 1px solid #d97706; border-radius: 50%; background: ${i % 2 === 0 ? '#fff' : '#ef4444'}; cursor: pointer;`)}
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>
+
+                  <!-- Digital Audio (Optical & Coaxial) -->
+                  <div style="border-top: 0.5px solid #292524; padding-top: 2px; display: flex; justify-content: space-between; align-items: center; pointer-events: auto;">
+                    <div style="display: flex; gap: 4px; align-items: center;">
+                      <span style="font-size: 4px; color: #a8a29e;">COAX IN:</span>
+                      ${renderAvrPort(11, "Coaxial Input 1", "width: 6px; height: 6px; border: 1px solid #3b82f6; border-radius: 50%; background: #fbbf24; cursor: pointer;")}
+                      ${renderAvrPort(12, "Coaxial Input 2", "width: 6px; height: 6px; border: 1px solid #3b82f6; border-radius: 50%; background: #fbbf24; cursor: pointer;")}
+                    </div>
+                    <div style="display: flex; gap: 4px; align-items: center;">
+                      <span style="font-size: 4px; color: #a8a29e;">OPTICAL IN:</span>
+                      ${renderAvrPort(13, "Optical Input 1", "width: 6px; height: 6px; border: 1px solid #10b981; background: #000; border-radius: 1px; cursor: pointer;")}
+                      ${renderAvrPort(14, "Optical Input 2", "width: 6px; height: 6px; border: 1px solid #10b981; background: #000; border-radius: 1px; cursor: pointer;")}
+                      ${renderAvrPort(15, "Optical Input 3", "width: 6px; height: 6px; border: 1px solid #10b981; background: #000; border-radius: 1px; cursor: pointer;")}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Bottom Row: Speakers Binding Posts & Power Inlet -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid #292524; padding-top: 4px; margin-top: 2px;">
+              <!-- Speaker terminals (7 channels) -->
+              <div style="display: flex; flex-direction: column; gap: 1px;">
+                <span style="font-size: 5px; color: #d6d3d1; font-weight: bold; text-transform: uppercase;">7-Channel Speaker Bindings (8Ω / 4Ω compatible)</span>
+                <div style="display: flex; gap: 6px; pointer-events: auto; padding: 2px 4px; background: rgba(0,0,0,0.5); border-radius: 4px;">
+                  ${['FRONT L', 'FRONT R', 'CENTER', 'SURR L', 'SURR R', 'BACK L', 'BACK R'].map((name, i) => `
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
+                      <span style="font-size: 4px; color: #a8a29e; font-weight: 500;">${name}</span>
+                      <div style="display: flex; gap: 2px;">
+                        ${renderAvrPort(33+i, `Speaker terminal ${name} (+ RED)`, "width: 8px; height: 8px; border-radius: 50%; border: 1px solid #b45309; background: #ef4444; cursor: pointer;")}
+                        <div style="width: 8px; height: 8px; border-radius: 50%; border: 1px solid #444; background: #111;" title="Speaker terminal ${name} (- BLK)"></div>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
+              <!-- Power Input -->
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px; pointer-events: auto;">
+                <span style="font-size: 4.5px; color: #888; font-weight: bold;">AC INLET</span>
+                <div style="display: flex; align-items: center; gap: 3px;">
+                  ${renderAvrPort(1000, "⚡ Power Inlet", "width: 14px; height: 10px; border: 1.5px solid #f97316; border-radius: 2px; background: #1a1a1a; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 3px rgba(249,115,22,0.3);")}
+                </div>
+              </div>
+            </div>
+
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
       } else if (dev.brand === "denon" || dev.brand === "marantz" || dev.brand === "anthem" || dev.id.includes("avr-sony")) {
         faceplateOverlayHtml = `
           <div class="avr-front-panel">
