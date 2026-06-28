@@ -130,7 +130,8 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "sony-ps5", name: "Sony PlayStation 5 Console", brand: "sony", u: 3, width_fraction: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 499 },
       { id: "cable-box", name: "Generic Cable / Satellite Box", brand: "generic", u: 1, width_fraction: 0.5, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 99 },
       { id: "nv-shield", name: "NVIDIA Shield TV Pro Media Player", brand: "generic", u: 1, width_fraction: 0.33, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 199 },
-      { id: "sonos-port", name: "Sonos Port Audio Streamer", brand: "sonos", u: 1, width_fraction: 0.33, ports: 2, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 449 }
+      { id: "sonos-port", name: "Sonos Port Audio Streamer", brand: "sonos", u: 1, width_fraction: 0.33, ports: 2, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 449 },
+      { id: "generic-nvr", name: "Generic Network Video Recorder (NVR)", brand: "generic", u: 1, width_fraction: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 299 }
     ],
     automation: [
       { id: "savant-macmini-host", name: "Savant Mac Mini Host", brand: "savant", u: 1, width_fraction: 0.33, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 999 },
@@ -1750,7 +1751,7 @@ document.addEventListener("DOMContentLoaded", () => {
       devEl.draggable = true;
       
       const widthFrac = dev.width_fraction || 1;
-      const isCleanChassis = dev.id === "apple-tv-4k" || dev.id === "eero-max-7" || dev.id === "eero-pro-6e" || dev.id === "sonos-port" || dev.id === "savant-macmini-host" || dev.id === "amp-sonos" || dev.id === "nv-shield" || dev.id === "cable-box" || dev.id === "telus-nah" || dev.id === "rogers-xb8" || dev.id === "bell-gigahub" || dev.id === "wattbox-300-3" || dev.id === "wattbox-250-2" || dev.id === "wattbox-300vb-5" || dev.id === "power-strip-6" || dev.id === "ovrc-hub" || dev.id === "lutron-ra3" || dev.id === "lutron-caseta" || dev.id === "hunter-douglas-powerview" || dev.id === "savant-sipa50" || dev.id === "savant-smart-host" || dev.id === "savant-sipa1sm" || dev.id === "avr-anthem-mrx740";
+      const isCleanChassis = dev.id === "apple-tv-4k" || dev.id === "eero-max-7" || dev.id === "eero-pro-6e" || dev.id === "sonos-port" || dev.id === "savant-macmini-host" || dev.id === "amp-sonos" || dev.id === "nv-shield" || dev.id === "cable-box" || dev.id === "telus-nah" || dev.id === "rogers-xb8" || dev.id === "bell-gigahub" || dev.id === "wattbox-300-3" || dev.id === "wattbox-250-2" || dev.id === "wattbox-300vb-5" || dev.id === "power-strip-6" || dev.id === "ovrc-hub" || dev.id === "lutron-ra3" || dev.id === "lutron-caseta" || dev.id === "hunter-douglas-powerview" || dev.id === "savant-sipa50" || dev.id === "savant-smart-host" || dev.id === "savant-sipa1sm" || dev.id === "avr-anthem-mrx740" || dev.id === "generic-nvr";
       
       const getPortTooltip = (portIndex, customLabel = "") => {
         const conn = state.connections.find(c => 
@@ -2595,6 +2596,43 @@ document.addEventListener("DOMContentLoaded", () => {
               ${customPowerInletPort()}
               <span class="cable-box-port-label" style="font-size: 6px; font-weight: bold; color: #666;">LAN</span>
               ${customSinglePort(0, "Ethernet")}
+            </div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
+      } else if (dev.id === "generic-nvr") {
+        const isNetConnected = state.connections.some(c => 
+          (c.fromDevice === dev.instanceId && c.fromPort === 0) || 
+          (c.toDevice === dev.instanceId && c.toPort === 0)
+        );
+        faceplateOverlayHtml = `
+          <div class="nvr-chassis" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(180deg, #1e1b18 0%, #0c0a09 100%); border: 2px solid #292524; border-radius: 4px; padding: 0 16px; box-sizing: border-box; box-shadow: inset 0 1px 2px rgba(255,255,255,0.05);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <!-- Glowing Power Ring Button -->
+              <div style="width: 8px; height: 8px; border-radius: 50%; background: #0c0a09; border: 1.5px solid #ca8a04; display: flex; align-items: center; justify-content: center; position: relative;">
+                <div style="width: 4px; height: 4px; border-radius: 50%; background: ${isDevicePowered(dev) ? '#22c55e' : '#ef4444'}; box-shadow: ${isDevicePowered(dev) ? '0 0 5px #22c55e' : 'none'};"></div>
+              </div>
+              <span style="font-weight: 900; font-size: 8px; color: #f5f5f4; font-family: monospace; letter-spacing: 1.5px; text-transform: uppercase;">NVR SYSTEM</span>
+              <div style="display: flex; gap: 4px; align-items: center; margin-left: 8px;">
+                <!-- HDD status light -->
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
+                  <span style="font-size: 3.5px; color: #78716c; font-weight: bold;">HDD</span>
+                  <div style="width: 4px; height: 2px; background: ${isDevicePowered(dev) ? '#eab308' : '#292524'}; box-shadow: ${isDevicePowered(dev) ? '0 0 3px #eab308' : 'none'};" title="HDD Activity LED"></div>
+                </div>
+                <!-- Network Link status light -->
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
+                  <span style="font-size: 3.5px; color: #78716c; font-weight: bold;">NET</span>
+                  <div style="width: 4px; height: 2px; background: ${isDevicePowered(dev) && isNetConnected ? '#22c55e' : '#292524'}; box-shadow: ${isDevicePowered(dev) && isNetConnected ? '0 0 3px #22c55e' : 'none'};" title="Network Link LED"></div>
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; pointer-events: auto;">
+              ${customPowerInletPort()}
+              <div style="display: flex; align-items: center; gap: 3px;">
+                <span style="font-size: 6px; color: #78716c; font-weight: bold; text-transform: uppercase;">LAN</span>
+                ${customSinglePort(0, "Ethernet (LAN)")}
+              </div>
             </div>
           </div>
         `;
