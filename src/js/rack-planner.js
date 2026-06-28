@@ -662,205 +662,215 @@ document.addEventListener("DOMContentLoaded", () => {
     // Report modal toggle and generation
     const reportModal = document.getElementById("report-modal");
     const reportModalBody = document.getElementById("report-modal-body");
+    const btnReportToggle = document.getElementById("btn-report-toggle");
 
-    document.getElementById("btn-report-toggle").addEventListener("click", () => {
-      let html = "";
-      if (state.placedDevices.length === 0) {
-        html = `
-          <div style="text-align: center; padding: 40px; color: var(--text-muted);">
-            <p style="font-size: 1.2rem; margin-bottom: 8px;">No hardware placed in the rack yet.</p>
-            <p>Add switches, routers, or other devices first to generate a network manifest.</p>
-          </div>
-        `;
-      } else {
-        html += `<div style="display:flex; flex-direction:column; gap:24px;">`;
-        
-        const routers = state.placedDevices.filter(d => d.type === "router");
-        const totalConnections = state.connections.length;
-        
-        html += `
-          <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
-            <div>
-              <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Total Hardware</div>
-              <div style="font-size: 20px; font-weight: bold; color: var(--accent-cyan); margin-top: 4px;">${state.placedDevices.length} Devices</div>
+    if (btnReportToggle && reportModal && reportModalBody) {
+      btnReportToggle.addEventListener("click", () => {
+        let html = "";
+        if (state.placedDevices.length === 0) {
+          html = `
+            <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+              <p style="font-size: 1.2rem; margin-bottom: 8px;">No hardware placed in the rack yet.</p>
+              <p>Add switches, routers, or other devices first to generate a network manifest.</p>
             </div>
-            <div>
-              <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Cabling Links</div>
-              <div style="font-size: 20px; font-weight: bold; color: #10b981; margin-top: 4px;">${totalConnections} Connections</div>
+          `;
+        } else {
+          html += `<div style="display:flex; flex-direction:column; gap:24px;">`;
+          
+          const routers = state.placedDevices.filter(d => d.type === "router");
+          const totalConnections = state.connections.length;
+          
+          html += `
+            <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+              <div>
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Total Hardware</div>
+                <div style="font-size: 20px; font-weight: bold; color: var(--accent-cyan); margin-top: 4px;">${state.placedDevices.length} Devices</div>
+              </div>
+              <div>
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Cabling Links</div>
+                <div style="font-size: 20px; font-weight: bold; color: #10b981; margin-top: 4px;">${totalConnections} Connections</div>
+              </div>
+              <div>
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Active Router</div>
+                <div style="font-size: 20px; font-weight: bold; color: #f59e0b; margin-top: 4px;">${routers.length > 0 ? routers[0].name : "None Configured"}</div>
+              </div>
             </div>
-            <div>
-              <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Active Router</div>
-              <div style="font-size: 20px; font-weight: bold; color: #f59e0b; margin-top: 4px;">${routers.length > 0 ? routers[0].name : "None Configured"}</div>
-            </div>
-          </div>
-        `;
-
-        html += `
-          <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
-              <thead>
-                <tr style="border-bottom: 2px solid rgba(255,255,255,0.1); color: var(--accent-cyan);">
-                  <th style="padding: 10px 12px;">Location</th>
-                  <th style="padding: 10px 12px;">Device / Model</th>
-                  <th style="padding: 10px 12px;">IP Address Configuration</th>
-                  <th style="padding: 10px 12px;">Ports & Connections</th>
-                </tr>
-              </thead>
-              <tbody>
-        `;
-
-        const sorted = [...state.placedDevices].sort((a, b) => {
-          if (isSideSlot(a.slot) && !isSideSlot(b.slot)) return 1;
-          if (!isSideSlot(a.slot) && isSideSlot(b.slot)) return -1;
-          if (isSideSlot(a.slot) && isSideSlot(b.slot)) return a.slot.localeCompare(b.slot);
-          if (isWallOutletSlot(a.slot) && !isWallOutletSlot(b.slot)) return 1;
-          if (!isWallOutletSlot(a.slot) && isWallOutletSlot(b.slot)) return -1;
-          return b.slot - a.slot;
-        });
-
-        sorted.forEach(dev => {
-          const isSide = isSideSlot(dev.slot);
-          const isWall = isWallOutletSlot(dev.slot);
-          let locText = "";
-          if (isSide) {
-            locText = dev.slot === "side-left" ? "Left Side" : "Right Side";
-          } else if (isWall) {
-            locText = "Wall Outlet";
-          } else {
-            locText = `U${dev.slot}`;
-          }
-
-          let ipText = "";
-          if (dev.type === "router") {
-            const mode = dev.bridgeMode ? "Bridge Mode (Transparent)" : "Gateway Mode";
-            const lanIp = dev.ipAddress ? dev.ipAddress : "DHCP Client / Autoconf";
-            const wanIp = dev.wanIpAddress ? dev.wanIpAddress : "DHCP WAN / Dynamic";
-            ipText = `
-              <div style="font-weight: bold; color: #f59e0b;">${mode}</div>
-              <div style="margin-top: 4px;">LAN IP: <span style="font-family: monospace; background:rgba(0,0,0,0.2); padding:2px 4px; border-radius:3px;">${lanIp}</span></div>
-              <div style="margin-top: 2px;">WAN IP: <span style="font-family: monospace; background:rgba(0,0,0,0.2); padding:2px 4px; border-radius:3px;">${wanIp}</span></div>
-            `;
-          } else {
-            ipText = dev.ipAddress ? 
-              `<span style="font-family: monospace; background:rgba(0,0,0,0.2); padding:2px 4px; border-radius:3px;">${dev.ipAddress}</span>` : 
-              `<span style="color: var(--text-muted); font-style: italic;">DHCP Client</span>`;
-          }
-
-          let connListHtml = "";
-          const devConns = state.connections.filter(c => c.fromDevice === dev.instanceId || c.toDevice === dev.instanceId);
-          if (devConns.length === 0) {
-            connListHtml = `<span style="color: var(--text-muted); font-style: italic;">No active cabling connections</span>`;
-          } else {
-            connListHtml = `<ul style="margin: 0; padding-left: 18px; line-height: 1.4;">`;
-            devConns.forEach(c => {
-              const isFrom = c.fromDevice === dev.instanceId;
-              const localPortIdx = isFrom ? c.fromPort : c.toPort;
-              const remoteDevId = isFrom ? c.toDevice : c.fromDevice;
-              const remotePortIdx = isFrom ? c.toPort : c.fromPort;
-
-              let localPortName = "";
-              if (localPortIdx === 1000) localPortName = "Power Inlet";
-              else if (localPortIdx >= 2000) localPortName = `Outlet ${localPortIdx - 2000 + 1}`;
-              else if (dev.type === "router" && localPortIdx === 0) localPortName = "WAN Port";
-              else localPortName = `Port ${localPortIdx + 1}`;
-
-              let remoteName = "";
-              let remotePortName = "";
-              if (remoteDevId === "wall-drop") {
-                remoteName = "Wall RJ45 Drop";
-                remotePortName = `#${remotePortIdx}`;
-              } else if (remoteDevId === "poe-endpoint") {
-                const epParts = remotePortIdx.split("-");
-                const epId = epParts.slice(0, -1).join("-");
-                const epNum = epParts[epParts.length - 1];
-                const ep = state.endpoints.find(e => e.id === epId);
-                remoteName = ep ? ep.name : "PoE Device";
-                remotePortName = `#${epNum}`;
-              } else if (remoteDevId === "internet") {
-                remoteName = "🌐 ISP Internet / WAN Gateway";
-                remotePortName = "External WAN";
-              } else {
-                const rDev = state.placedDevices.find(d => d.instanceId === remoteDevId);
-                remoteName = rDev ? (rDev.customLabel || rDev.name) : "Unknown Device";
-                if (remotePortIdx === 1000) remotePortName = "Power Inlet";
-                else if (remotePortIdx >= 2000) remotePortName = `Outlet ${remotePortIdx - 2000 + 1}`;
-                else remotePortName = `Port ${remotePortIdx + 1}`;
-              }
-
-              connListHtml += `
-                <li>
-                  <strong style="color: #60a5fa;">${localPortName}</strong> ──🔗──> 
-                  <span>${remoteName} (<span style="color: #34d399; font-weight: 500;">${remotePortName}</span>)</span>
-                </li>
-              `;
-            });
-            connListHtml += `</ul>`;
-          }
+          `;
 
           html += `
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.06); vertical-align: top;">
-              <td style="padding: 12px; font-weight: bold; color: var(--accent-cyan);">${locText}</td>
-              <td style="padding: 12px;">
-                <div style="font-weight: bold; color: #fff;">${dev.customLabel || dev.name}</div>
-                <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${dev.brand.toUpperCase()} • ${dev.u}U • Model ID: ${dev.id}</div>
-                ${dev.notes ? `<div style="font-size: 11px; background: rgba(0,0,0,0.15); padding: 4px 6px; border-radius: 4px; border-left: 2px solid var(--accent-cyan); margin-top: 6px; font-style: italic;">Note: ${dev.notes}</div>` : ""}
-              </td>
-              <td style="padding: 12px;">${ipText}</td>
-              <td style="padding: 12px; font-size: 12px;">${connListHtml}</td>
-            </tr>
+            <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+                <thead>
+                  <tr style="border-bottom: 2px solid rgba(255,255,255,0.1); color: var(--accent-cyan);">
+                    <th style="padding: 10px 12px;">Location</th>
+                    <th style="padding: 10px 12px;">Device / Model</th>
+                    <th style="padding: 10px 12px;">IP Address Configuration</th>
+                    <th style="padding: 10px 12px;">Ports & Connections</th>
+                  </tr>
+                </thead>
+                <tbody>
           `;
-        });
 
-        html += `
-              </tbody>
-            </table>
-          </div>
-        `;
+          const sorted = [...state.placedDevices].sort((a, b) => {
+            if (isSideSlot(a.slot) && !isSideSlot(b.slot)) return 1;
+            if (!isSideSlot(a.slot) && isSideSlot(b.slot)) return -1;
+            if (isSideSlot(a.slot) && isSideSlot(b.slot)) return a.slot.localeCompare(b.slot);
+            if (isWallOutletSlot(a.slot) && !isWallOutletSlot(b.slot)) return 1;
+            if (!isWallOutletSlot(a.slot) && isWallOutletSlot(b.slot)) return -1;
+            return b.slot - a.slot;
+          });
+
+          sorted.forEach(dev => {
+            const isSide = isSideSlot(dev.slot);
+            const isWall = isWallOutletSlot(dev.slot);
+            let locText = "";
+            if (isSide) {
+              locText = dev.slot === "side-left" ? "Left Side" : "Right Side";
+            } else if (isWall) {
+              locText = "Wall Outlet";
+            } else {
+              locText = `U${dev.slot}`;
+            }
+
+            let ipText = "";
+            if (dev.type === "router") {
+              const mode = dev.bridgeMode ? "Bridge Mode (Transparent)" : "Gateway Mode";
+              const lanIp = dev.ipAddress ? dev.ipAddress : "DHCP Client / Autoconf";
+              const wanIp = dev.wanIpAddress ? dev.wanIpAddress : "DHCP WAN / Dynamic";
+              ipText = `
+                <div style="font-weight: bold; color: #f59e0b;">${mode}</div>
+                <div style="margin-top: 4px;">LAN IP: <span style="font-family: monospace; background:rgba(0,0,0,0.2); padding:2px 4px; border-radius:3px;">${lanIp}</span></div>
+                <div style="margin-top: 2px;">WAN IP: <span style="font-family: monospace; background:rgba(0,0,0,0.2); padding:2px 4px; border-radius:3px;">${wanIp}</span></div>
+              `;
+            } else {
+              ipText = dev.ipAddress ? 
+                `<span style="font-family: monospace; background:rgba(0,0,0,0.2); padding:2px 4px; border-radius:3px;">${dev.ipAddress}</span>` : 
+                `<span style="color: var(--text-muted); font-style: italic;">DHCP Client</span>`;
+            }
+
+            let connListHtml = "";
+            const devConns = state.connections.filter(c => c.fromDevice === dev.instanceId || c.toDevice === dev.instanceId);
+            if (devConns.length === 0) {
+              connListHtml = `<span style="color: var(--text-muted); font-style: italic;">No active cabling connections</span>`;
+            } else {
+              connListHtml = `<ul style="margin: 0; padding-left: 18px; line-height: 1.4;">`;
+              devConns.forEach(c => {
+                const isFrom = c.fromDevice === dev.instanceId;
+                const localPortIdx = isFrom ? c.fromPort : c.toPort;
+                const remoteDevId = isFrom ? c.toDevice : c.fromDevice;
+                const remotePortIdx = isFrom ? c.toPort : c.fromPort;
+
+                let localPortName = "";
+                if (localPortIdx === 1000) localPortName = "Power Inlet";
+                else if (localPortIdx >= 2000) localPortName = `Outlet ${localPortIdx - 2000 + 1}`;
+                else if (dev.type === "router" && localPortIdx === 0) localPortName = "WAN Port";
+                else localPortName = `Port ${localPortIdx + 1}`;
+
+                let remoteName = "";
+                let remotePortName = "";
+                if (remoteDevId === "wall-drop") {
+                  remoteName = "Wall RJ45 Drop";
+                  remotePortName = `#${remotePortIdx}`;
+                } else if (remoteDevId === "poe-endpoint") {
+                  const epParts = remotePortIdx.split("-");
+                  const epId = epParts.slice(0, -1).join("-");
+                  const epNum = epParts[epParts.length - 1];
+                  const ep = state.endpoints.find(e => e.id === epId);
+                  remoteName = ep ? ep.name : "PoE Device";
+                  remotePortName = `#${epNum}`;
+                } else if (remoteDevId === "internet") {
+                  remoteName = "🌐 ISP Internet / WAN Gateway";
+                  remotePortName = "External WAN";
+                } else {
+                  const rDev = state.placedDevices.find(d => d.instanceId === remoteDevId);
+                  remoteName = rDev ? (rDev.customLabel || rDev.name) : "Unknown Device";
+                  if (remotePortIdx === 1000) remotePortName = "Power Inlet";
+                  else if (remotePortIdx >= 2000) remotePortName = `Outlet ${remotePortIdx - 2000 + 1}`;
+                  else remotePortName = `Port ${remotePortIdx + 1}`;
+                }
+
+                connListHtml += `
+                  <li>
+                    <strong style="color: #60a5fa;">${localPortName}</strong> ──🔗──> 
+                    <span>${remoteName} (<span style="color: #34d399; font-weight: 500;">${remotePortName}</span>)</span>
+                  </li>
+                `;
+              });
+              connListHtml += `</ul>`;
+            }
+
+            html += `
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.06); vertical-align: top;">
+                <td style="padding: 12px; font-weight: bold; color: var(--accent-cyan);">${locText}</td>
+                <td style="padding: 12px;">
+                  <div style="font-weight: bold; color: #fff;">${dev.customLabel || dev.name}</div>
+                  <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${dev.brand.toUpperCase()} • ${dev.u}U • Model ID: ${dev.id}</div>
+                  ${dev.notes ? `<div style="font-size: 11px; background: rgba(0,0,0,0.15); padding: 4px 6px; border-radius: 4px; border-left: 2px solid var(--accent-cyan); margin-top: 6px; font-style: italic;">Note: ${dev.notes}</div>` : ""}
+                </td>
+                <td style="padding: 12px;">${ipText}</td>
+                <td style="padding: 12px; font-size: 12px;">${connListHtml}</td>
+              </tr>
+            `;
+          });
+
+          html += `
+                </tbody>
+              </table>
+            </div>
+          `;
+          
+          html += `</div>`;
+        }
         
-        html += `</div>`;
+        reportModalBody.innerHTML = html;
+        reportModal.classList.add("active");
+      });
+
+      const closeReport = () => {
+        reportModal.classList.remove("active");
+      };
+
+      const modalReportClose = document.getElementById("modal-report-close");
+      if (modalReportClose) modalReportClose.addEventListener("click", closeReport);
+
+      const btnReportClose = document.getElementById("btn-report-close");
+      if (btnReportClose) btnReportClose.addEventListener("click", closeReport);
+
+      const btnReportPrint = document.getElementById("btn-report-print");
+      if (btnReportPrint) {
+        btnReportPrint.addEventListener("click", () => {
+          const printWindow = window.open('', '_blank');
+          printWindow.document.write(`
+            <html>
+            <head>
+              <title>Project Connection & Network Report</title>
+              <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #1e293b; padding: 30px; }
+                h1 { color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; font-size: 24px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                th, td { border-bottom: 1px solid #e2e8f0; padding: 12px; text-align: left; vertical-align: top; }
+                th { background-color: #f8fafc; font-weight: bold; }
+                ul { margin: 0; padding-left: 20px; }
+                li { margin-bottom: 4px; }
+                .meta { font-size: 12px; color: #64748b; margin-top: 4px; }
+                .badge { display: inline-block; padding: 2px 6px; background: #e2e8f0; border-radius: 4px; font-family: monospace; font-size: 12px; }
+                .highlight { font-weight: bold; color: #0284c7; }
+              </style>
+            </head>
+            <body>
+              <h1>Project Connection & Network Report</h1>
+              <p>Generated on: ${new Date().toLocaleString()}</p>
+              ${reportModalBody.innerHTML}
+              <script>
+                setTimeout(() => { window.print(); window.close(); }, 500);
+              </script>
+            </body>
+            </html>
+          `);
+          printWindow.document.close();
+        });
       }
-      
-      reportModalBody.innerHTML = html;
-      reportModal.classList.add("active");
-    });
-
-    const closeReport = () => {
-      reportModal.classList.remove("active");
-    };
-
-    document.getElementById("modal-report-close").addEventListener("click", closeReport);
-    document.getElementById("btn-report-close").addEventListener("click", closeReport);
-    document.getElementById("btn-report-print").addEventListener("click", () => {
-      const printWindow = window.open('', '_blank');
-      printWindow.document.write(`
-        <html>
-        <head>
-          <title>Project Connection & Network Report</title>
-          <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #1e293b; padding: 30px; }
-            h1 { color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; font-size: 24px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border-bottom: 1px solid #e2e8f0; padding: 12px; text-align: left; vertical-align: top; }
-            th { background-color: #f8fafc; font-weight: bold; }
-            ul { margin: 0; padding-left: 20px; }
-            li { margin-bottom: 4px; }
-            .meta { font-size: 12px; color: #64748b; margin-top: 4px; }
-            .badge { display: inline-block; padding: 2px 6px; background: #e2e8f0; border-radius: 4px; font-family: monospace; font-size: 12px; }
-            .highlight { font-weight: bold; color: #0284c7; }
-          </style>
-        </head>
-        <body>
-          <h1>Project Connection & Network Report</h1>
-          <p>Generated on: ${new Date().toLocaleString()}</p>
-          ${reportModalBody.innerHTML}
-          <script>
-            setTimeout(() => { window.print(); window.close(); }, 500);
-          </script>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
-    });
+    }
 
     // Show Labels Toggle
     const chkShowLabelsEl = document.getElementById("chk-show-labels");
