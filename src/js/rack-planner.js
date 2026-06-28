@@ -4193,7 +4193,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
     } else {
-      configInternetGroupEl.style.display = "none";
+      if (configInternetGroupEl) configInternetGroupEl.style.display = "none";
       configWanIpGroupEl.style.display = "none";
     }
     
