@@ -1838,7 +1838,7 @@ document.addEventListener("DOMContentLoaded", () => {
       sideEl.style.height = `${state.rackSize * 72}px`;
       sideEl.style.position = "relative";
       
-      const sideDevices = state.placedDevices.filter(d => d.slot.startsWith(sideKey));
+      const sideDevices = state.placedDevices.filter(d => typeof d.slot === "string" && d.slot.startsWith(sideKey));
       if (sideDevices.length === 0) {
         const hint = document.createElement("div");
         hint.className = "side-panel-empty-hint";
