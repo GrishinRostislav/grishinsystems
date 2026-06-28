@@ -2443,7 +2443,7 @@ document.addEventListener("DOMContentLoaded", () => {
       devEl.innerHTML = `
         ${earsHtml}
         ${assetTagHtml}
-        <div class="device-faceplate-top" style="height: 100%; align-items: center;">
+        <div class="device-faceplate-top" style="height: 100%; align-items: flex-end; padding-bottom: 4px; box-sizing: border-box;">
           ${!hideDefaultLeft ? `
             <div class="device-faceplate-left" style="height: 100%;">
               ${ledsHtml}
