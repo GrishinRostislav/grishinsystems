@@ -2608,30 +2608,34 @@ document.addEventListener("DOMContentLoaded", () => {
         );
         faceplateOverlayHtml = `
           <div class="nvr-chassis" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(180deg, #1e1b18 0%, #0c0a09 100%); border: 2px solid #292524; border-radius: 4px; padding: 0 16px; box-sizing: border-box; box-shadow: inset 0 1px 2px rgba(255,255,255,0.05);">
-            <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px; height: 100%;">
               <!-- Glowing Power Ring Button -->
               <div style="width: 8px; height: 8px; border-radius: 50%; background: #0c0a09; border: 1.5px solid #ca8a04; display: flex; align-items: center; justify-content: center; position: relative;">
                 <div style="width: 4px; height: 4px; border-radius: 50%; background: ${isDevicePowered(dev) ? '#22c55e' : '#ef4444'}; box-shadow: ${isDevicePowered(dev) ? '0 0 5px #22c55e' : 'none'};"></div>
               </div>
-              <span style="font-weight: 900; font-size: 8px; color: #f5f5f4; font-family: monospace; letter-spacing: 1.5px; text-transform: uppercase;">NVR SYSTEM</span>
-              <div style="display: flex; gap: 4px; align-items: center; margin-left: 8px;">
+              <span style="font-weight: 900; font-size: 8px; color: #f5f5f4; font-family: monospace; letter-spacing: 1.5px; text-transform: uppercase; line-height: 1; display: flex; align-items: center; height: 100%;">NVR SYSTEM</span>
+              <div style="display: flex; gap: 6px; align-items: center; margin-left: 8px; height: 100%;">
                 <!-- HDD status light -->
-                <div style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
-                  <span style="font-size: 3.5px; color: #78716c; font-weight: bold;">HDD</span>
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;">
+                  <span style="font-size: 3.5px; color: #78716c; font-weight: bold; line-height: 1;">HDD</span>
                   <div style="width: 4px; height: 2px; background: ${isDevicePowered(dev) ? '#eab308' : '#292524'}; box-shadow: ${isDevicePowered(dev) ? '0 0 3px #eab308' : 'none'};" title="HDD Activity LED"></div>
                 </div>
                 <!-- Network Link status light -->
-                <div style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
-                  <span style="font-size: 3.5px; color: #78716c; font-weight: bold;">NET</span>
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;">
+                  <span style="font-size: 3.5px; color: #78716c; font-weight: bold; line-height: 1;">NET</span>
                   <div style="width: 4px; height: 2px; background: ${isDevicePowered(dev) && isNetConnected ? '#22c55e' : '#292524'}; box-shadow: ${isDevicePowered(dev) && isNetConnected ? '0 0 3px #22c55e' : 'none'};" title="Network Link LED"></div>
                 </div>
               </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 10px; pointer-events: auto;">
-              ${customPowerInletPort()}
-              <div style="display: flex; align-items: center; gap: 3px;">
-                <span style="font-size: 6px; color: #78716c; font-weight: bold; text-transform: uppercase;">LAN</span>
-                ${customSinglePort(0, "Ethernet (LAN)")}
+            <div style="display: flex; align-items: center; gap: 10px; pointer-events: auto; height: 100%;">
+              <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
+                ${customPowerInletPort()}
+              </div>
+              <div style="display: flex; align-items: center; gap: 3px; height: 100%;">
+                <span style="font-size: 6px; color: #78716c; font-weight: bold; text-transform: uppercase; line-height: 1; display: flex; align-items: center;">LAN</span>
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
+                  ${customSinglePort(0, "Ethernet (LAN)")}
+                </div>
               </div>
             </div>
           </div>
