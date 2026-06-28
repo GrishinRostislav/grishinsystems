@@ -1845,6 +1845,10 @@ body.dragging-active .placed-device * {
   display: none;
 }
 
+.footer {
+  display: none !important;
+}
+
 @media print {
   @page {
     margin: 10mm;
@@ -1887,7 +1891,8 @@ body.dragging-active .placed-device * {
   .rp-resizer,
   .device-delete-btn,
   .rp-bom-handle,
-  .rp-bom-close {
+  .rp-bom-close,
+  .wall-outlet-zone {
     display: none !important;
   }
 
@@ -3723,12 +3728,13 @@ body.dragging-active .placed-device * {
 }
 
 .side-cabinet-rack-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: block;
   flex-grow: 1;
-  min-height: 350px;
+  min-height: 400px;
   position: relative;
+  background: rgba(15, 23, 42, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .side-panel-empty-hint {

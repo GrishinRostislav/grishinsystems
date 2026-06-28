@@ -673,26 +673,80 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Setup Side Panel drag-and-drop (Left + Right)
-    function setupSidePanelDnD(wrapperEl, slotName) {
+    function setupSidePanelDnD(wrapperEl, sideKey) {
       if (!wrapperEl) return;
+      
+      let highlightIndicator = wrapperEl.querySelector('.side-rack-highlight-indicator');
+      if (!highlightIndicator) {
+        highlightIndicator = document.createElement('div');
+        highlightIndicator.className = 'side-rack-highlight-indicator';
+        highlightIndicator.style.position = 'absolute';
+        highlightIndicator.style.left = '4px';
+        highlightIndicator.style.width = 'calc(100% - 8px)';
+        highlightIndicator.style.backgroundColor = 'rgba(6, 182, 212, 0.15)';
+        highlightIndicator.style.border = '1.5px dashed var(--accent-cyan)';
+        highlightIndicator.style.borderRadius = '4px';
+        highlightIndicator.style.pointerEvents = 'none';
+        highlightIndicator.style.display = 'none';
+        highlightIndicator.style.zIndex = '10';
+        
+        const inner = wrapperEl.querySelector('.side-cabinet-rack-inner') || wrapperEl;
+        inner.style.position = 'relative';
+        inner.appendChild(highlightIndicator);
+      }
+
       wrapperEl.addEventListener("dragover", (e) => {
         e.preventDefault();
         wrapperEl.classList.add("dragover");
+        
+        const inner = wrapperEl.querySelector('.side-cabinet-rack-inner') || wrapperEl;
+        const rect = inner.getBoundingClientRect();
+        const relativeY = e.clientY - rect.top;
+        
+        const slotIdx = state.rackSize - Math.floor(relativeY / 72);
+        const targetU = Math.max(1, Math.min(state.rackSize, slotIdx));
+        
+        const topPx = (state.rackSize - targetU) * 72;
+        highlightIndicator.style.top = `${topPx + 2}px`;
+        
+        let dragU = 1;
+        if (state.draggedPresetId) {
+          for (const cat in presets) {
+            const p = presets[cat].find(x => x.id === state.draggedPresetId);
+            if (p) { dragU = p.u; break; }
+          }
+        } else if (state.draggedInstanceId) {
+          const d = state.placedDevices.find(x => x.instanceId === state.draggedInstanceId);
+          if (d) dragU = d.u;
+        }
+        
+        highlightIndicator.style.height = `${dragU * 72 - 4}px`;
+        highlightIndicator.style.display = 'block';
       });
+
       wrapperEl.addEventListener("dragleave", () => {
         wrapperEl.classList.remove("dragover");
+        highlightIndicator.style.display = 'none';
       });
+
       wrapperEl.addEventListener("drop", (e) => {
         e.preventDefault();
         wrapperEl.classList.remove("dragover");
+        highlightIndicator.style.display = 'none';
         
-        const sidePanel = wrapperEl.querySelector('.side-cabinet-rack-inner') || wrapperEl;
-        const afterElement = getDragAfterElement(sidePanel, e.clientY);
-
+        const inner = wrapperEl.querySelector('.side-cabinet-rack-inner') || wrapperEl;
+        const rect = inner.getBoundingClientRect();
+        const relativeY = e.clientY - rect.top;
+        
+        const slotIdx = state.rackSize - Math.floor(relativeY / 72);
+        const targetU = Math.max(1, Math.min(state.rackSize, slotIdx));
+        
+        const slotName = `${sideKey}-${targetU}`;
+        
         if (state.draggedPresetId) {
-          addDeviceAtPosition(state.draggedPresetId, slotName, afterElement);
+          addDevice(state.draggedPresetId, slotName);
         } else if (state.draggedInstanceId) {
-          moveDeviceToPosition(state.draggedInstanceId, slotName, afterElement);
+          moveDevice(state.draggedInstanceId, slotName);
         }
       });
     }
@@ -793,21 +847,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 <tbody>
           `;
 
-          const sorted = [...state.placedDevices].sort((a, b) => {
-            if (isSideSlot(a.slot) && !isSideSlot(b.slot)) return 1;
-            if (!isSideSlot(a.slot) && isSideSlot(b.slot)) return -1;
-            if (isSideSlot(a.slot) && isSideSlot(b.slot)) return a.slot.localeCompare(b.slot);
-            if (isWallOutletSlot(a.slot) && !isWallOutletSlot(b.slot)) return 1;
-            if (!isWallOutletSlot(a.slot) && isWallOutletSlot(b.slot)) return -1;
-            return b.slot - a.slot;
-          });
+          const sorted = [...state.placedDevices]
+            .filter(d => !isWallOutletSlot(d.slot))
+            .sort((a, b) => {
+              if (isSideSlot(a.slot) && !isSideSlot(b.slot)) return 1;
+              if (!isSideSlot(a.slot) && isSideSlot(b.slot)) return -1;
+              if (isSideSlot(a.slot) && isSideSlot(b.slot)) return String(a.slot).localeCompare(String(b.slot));
+              return b.slot - a.slot;
+            });
 
           sorted.forEach(dev => {
             const isSide = isSideSlot(dev.slot);
             const isWall = isWallOutletSlot(dev.slot);
             let locText = "";
             if (isSide) {
-              locText = dev.slot === "side-left" ? "Left Side" : "Right Side";
+              const sideInfo = parseSideSlot(dev.slot);
+              const sideName = sideInfo && sideInfo.side === "left" ? "Left Side" : "Right Side";
+              const uNum = sideInfo && sideInfo.u ? ` U${sideInfo.u}` : "";
+              locText = `${sideName}${uNum}`;
             } else if (isWall) {
               locText = "Wall Outlet";
             } else {
@@ -1498,6 +1555,23 @@ document.addEventListener("DOMContentLoaded", () => {
     return typeof slot === "string" && (slot.startsWith("side") || slot === "wall-outlet");
   }
 
+  function parseSideSlot(slot) {
+    if (typeof slot !== "string") return null;
+    if (slot.startsWith("side-left")) {
+      const parts = slot.split("-");
+      const u = parts.length > 2 ? parseInt(parts[2]) : null;
+      return { side: "left", u: u };
+    }
+    if (slot.startsWith("side-right")) {
+      const parts = slot.split("-");
+      const u = parts.length > 2 ? parseInt(parts[2]) : null;
+      return { side: "right", u: u };
+    }
+    if (slot === "side-left") return { side: "left", u: null };
+    if (slot === "side-right") return { side: "right", u: null };
+    return null;
+  }
+
   function isWallOutletSlot(slot) {
     return slot === "wall-outlet";
   }
@@ -1757,12 +1831,49 @@ document.addEventListener("DOMContentLoaded", () => {
     cabinetRackEl.innerHTML = "";
     const sideCabinetRackEl = document.getElementById("side-cabinet-rack-left");
     const sideCabinetRackRightEl = document.getElementById("side-cabinet-rack-right");
-    if (sideCabinetRackEl) {
-      sideCabinetRackEl.innerHTML = "";
-    }
-    if (sideCabinetRackRightEl) {
-      sideCabinetRackRightEl.innerHTML = "";
-    }
+    
+    const populateSideSlots = (sideEl, sideKey) => {
+      if (!sideEl) return;
+      sideEl.innerHTML = "";
+      sideEl.style.height = `${state.rackSize * 72}px`;
+      sideEl.style.position = "relative";
+      
+      const sideDevices = state.placedDevices.filter(d => d.slot.startsWith(sideKey));
+      if (sideDevices.length === 0) {
+        const hint = document.createElement("div");
+        hint.className = "side-panel-empty-hint";
+        hint.textContent = "Drag PDUs, power strips, or other equipment here for side-mount installation";
+        sideEl.appendChild(hint);
+      }
+      
+      for (let u = state.rackSize; u >= 1; u--) {
+        const slotEl = document.createElement("div");
+        slotEl.className = "side-rack-slot";
+        slotEl.dataset.u = u;
+        slotEl.style.height = "72px";
+        slotEl.style.position = "relative";
+        slotEl.style.borderBottom = "1px dashed rgba(255, 255, 255, 0.05)";
+        slotEl.style.boxSizing = "border-box";
+        
+        const label = document.createElement("div");
+        label.className = "side-slot-number";
+        label.textContent = `${u}U`;
+        label.style.position = "absolute";
+        label.style.left = "8px";
+        label.style.top = "50%";
+        label.style.transform = "translateY(-50%)";
+        label.style.fontSize = "10px";
+        label.style.color = "rgba(255, 255, 255, 0.12)";
+        label.style.fontFamily = "monospace";
+        label.style.pointerEvents = "none";
+        slotEl.appendChild(label);
+        
+        sideEl.appendChild(slotEl);
+      }
+    };
+    
+    populateSideSlots(sideCabinetRackEl, "side-left");
+    populateSideSlots(sideCabinetRackRightEl, "side-right");
     
     // Create rack container
     const container = document.createElement("div");
@@ -1943,7 +2054,16 @@ cabinetRackEl.appendChild(container);
             } else {
               targetPortName = `Port ${targetPortIdx + 1}`;
             }
-            destLabel = `U${targetDev.slot}: ${targetDev.customLabel || targetDev.name} (${targetPortName})`;
+            let slotLabel = "";
+            if (isSideSlot(targetDev.slot)) {
+              const sideInfo = parseSideSlot(targetDev.slot);
+              const sideName = sideInfo && sideInfo.side === "left" ? "Side L" : "Side R";
+              const uNum = sideInfo && sideInfo.u ? ` U${sideInfo.u}` : "";
+              slotLabel = `${sideName}${uNum}`;
+            } else {
+              slotLabel = `U${targetDev.slot}`;
+            }
+            destLabel = `${slotLabel}: ${targetDev.customLabel || targetDev.name} (${targetPortName})`;
           } else {
             destLabel = "Unknown Device";
           }
@@ -1953,12 +2073,28 @@ cabinetRackEl.appendChild(container);
       };
 
       if (isSideSlot(dev.slot)) {
+        const sideInfo = parseSideSlot(dev.slot);
+        let u = sideInfo ? sideInfo.u : null;
+        if (u === null) {
+          u = 1;
+          const baseSlotName = dev.slot.startsWith("side-left") ? "side-left" : "side-right";
+          for (let testU = state.rackSize; testU >= 1; testU--) {
+            const isOccupied = state.placedDevices.some(d => d.slot === `${baseSlotName}-${testU}`);
+            if (!isOccupied) {
+              u = testU;
+              break;
+            }
+          }
+          dev.slot = `${baseSlotName}-${u}`;
+        }
+        
         devEl.className = `placed-device side-placed-device device-brand-${dev.brand}${isCleanChassis ? ' clean-chassis' : ''}`;
-        devEl.style.position = 'relative';
-        devEl.style.height = 'auto';
-        devEl.style.left = '0';
-        devEl.style.width = '100%';
-        devEl.style.top = '0';
+        devEl.style.position = 'absolute';
+        devEl.style.height = `${dev.u * 72 - 4}px`;
+        devEl.style.left = '4px';
+        devEl.style.width = 'calc(100% - 8px)';
+        const slotsFromTop = state.rackSize - u;
+        devEl.style.top = `${slotsFromTop * 72 + 2}px`;
       } else {
         const slotEl = container.querySelector(`.rack-slot[data-u="${dev.slot}"]`);
         devEl.className = `placed-device device-brand-${dev.brand}${widthFrac === 1 ? ' has-ears' : ''}${isCleanChassis ? ' clean-chassis' : ''}`;
@@ -3102,6 +3238,9 @@ cabinetRackEl.appendChild(container);
       // Allow dropping other devices on top of this device to slide them non-destructively
       devEl.addEventListener("dragover", (e) => {
         if (state.draggedInstanceId === dev.instanceId) return; // Prevent dragover on self
+        if (isSideSlot(dev.slot)) {
+          return; // Bubble up
+        }
         e.preventDefault();
         e.stopPropagation();
         devEl.classList.add("drop-hover");
@@ -3113,35 +3252,30 @@ cabinetRackEl.appendChild(container);
 
       devEl.addEventListener("drop", (e) => {
         if (state.draggedInstanceId === dev.instanceId) return; // Prevent drop on self
+        if (isSideSlot(dev.slot)) {
+          return; // Bubble up
+        }
         e.preventDefault();
         e.stopPropagation();
         devEl.classList.remove("drop-hover");
         
-        if (isSideSlot(dev.slot)) {
-          if (state.draggedPresetId) {
-            addDeviceAtPosition(state.draggedPresetId, dev.slot, devEl);
-          } else if (state.draggedInstanceId) {
-            moveDeviceToPosition(state.draggedInstanceId, dev.slot, devEl);
-          }
-        } else {
-          if (state.draggedPresetId) {
-            addDevice(state.draggedPresetId, dev.slot);
-          } else if (state.draggedInstanceId) {
-            const draggedDev = state.placedDevices.find(d => d.instanceId === state.draggedInstanceId);
-            if (draggedDev && draggedDev.slot === dev.slot) {
-              // Reorder within the same slot/panel
-              const idxDrag = state.placedDevices.findIndex(d => d.instanceId === state.draggedInstanceId);
-              const idxTarget = state.placedDevices.findIndex(d => d.instanceId === dev.instanceId);
-              if (idxDrag !== -1 && idxTarget !== -1) {
-                state.placedDevices.splice(idxDrag, 1);
-                state.placedDevices.splice(idxTarget, 0, draggedDev);
-                saveState();
-                update();
-              }
-            } else {
-              // Move to a different slot
-              moveDevice(state.draggedInstanceId, dev.slot);
+        if (state.draggedPresetId) {
+          addDevice(state.draggedPresetId, dev.slot);
+        } else if (state.draggedInstanceId) {
+          const draggedDev = state.placedDevices.find(d => d.instanceId === state.draggedInstanceId);
+          if (draggedDev && draggedDev.slot === dev.slot) {
+            // Reorder within the same slot/panel
+            const idxDrag = state.placedDevices.findIndex(d => d.instanceId === state.draggedInstanceId);
+            const idxTarget = state.placedDevices.findIndex(d => d.instanceId === dev.instanceId);
+            if (idxDrag !== -1 && idxTarget !== -1) {
+              state.placedDevices.splice(idxDrag, 1);
+              state.placedDevices.splice(idxTarget, 0, draggedDev);
+              saveState();
+              update();
             }
+          } else {
+            // Move to a different slot
+            moveDevice(state.draggedInstanceId, dev.slot);
           }
         }
       });
@@ -3149,7 +3283,7 @@ cabinetRackEl.appendChild(container);
       if (isWallOutletSlot(dev.slot)) {
         // Will be handled separately below
       } else if (isSideSlot(dev.slot)) {
-        const targetEl = dev.slot === "side-left" ? sideCabinetRackEl : sideCabinetRackRightEl;
+        const targetEl = dev.slot.startsWith("side-left") ? sideCabinetRackEl : sideCabinetRackRightEl;
         if (targetEl) {
           targetEl.appendChild(devEl);
         }
@@ -3222,14 +3356,14 @@ cabinetRackEl.appendChild(container);
       }
     }
 
-    // Show empty hints for each side panel
+    // Redundant side hints removed
     const sideLeftDevices = state.placedDevices.filter(d => d.slot === "side-left");
     const sideRightDevices = state.placedDevices.filter(d => d.slot === "side-right");
     const emptyHint = `<div class="side-panel-empty-hint">Drag PDUs, power strips, or other equipment here for side-mount installation</div>`;
-    if (sideCabinetRackEl && sideLeftDevices.length === 0) {
+    if (false) {
       sideCabinetRackEl.innerHTML = emptyHint;
     }
-    if (sideCabinetRackRightEl && sideRightDevices.length === 0) {
+    if (false) {
       sideCabinetRackRightEl.innerHTML = emptyHint;
     }
 
@@ -3286,21 +3420,24 @@ cabinetRackEl.appendChild(container);
         <tbody>
     `;
 
-    const sorted = [...state.placedDevices].sort((a, b) => {
-      if (isSideSlot(a.slot) && !isSideSlot(b.slot)) return 1;
-      if (!isSideSlot(a.slot) && isSideSlot(b.slot)) return -1;
-      if (isSideSlot(a.slot) && isSideSlot(b.slot)) return a.slot.localeCompare(b.slot);
-      if (isWallOutletSlot(a.slot) && !isWallOutletSlot(b.slot)) return 1;
-      if (!isWallOutletSlot(a.slot) && isWallOutletSlot(b.slot)) return -1;
-      return b.slot - a.slot;
-    });
+    const sorted = [...state.placedDevices]
+      .filter(d => !isWallOutletSlot(d.slot))
+      .sort((a, b) => {
+        if (isSideSlot(a.slot) && !isSideSlot(b.slot)) return 1;
+        if (!isSideSlot(a.slot) && isSideSlot(b.slot)) return -1;
+        if (isSideSlot(a.slot) && isSideSlot(b.slot)) return String(a.slot).localeCompare(String(b.slot));
+        return b.slot - a.slot;
+      });
 
     sorted.forEach(dev => {
       const isSide = isSideSlot(dev.slot);
       const isWall = isWallOutletSlot(dev.slot);
       let locText = "";
       if (isSide) {
-        locText = dev.slot === "side-left" ? "Left Side" : "Right Side";
+        const sideInfo = parseSideSlot(dev.slot);
+        const sideName = sideInfo && sideInfo.side === "left" ? "Left Side" : "Right Side";
+        const uNum = sideInfo && sideInfo.u ? ` U${sideInfo.u}` : "";
+        locText = `${sideName}${uNum}`;
       } else if (isWall) {
         locText = "Wall Outlet";
       } else {
