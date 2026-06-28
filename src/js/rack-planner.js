@@ -2473,66 +2473,78 @@ document.addEventListener("DOMContentLoaded", () => {
         portsHtml = "";
       } else if (dev.id === "wattbox-800-12" || dev.id === "wattbox-700-12") {
         faceplateOverlayHtml = `
-          <div class="wattbox-chassis wattbox-2u">
-            <div class="wattbox-brand">
-              <span class="wattbox-logo-text">WATTBOX</span>
-              <span class="wattbox-model-tag">${dev.id.includes("800") ? "800 SERIES IP PDU" : "700 SERIES IP PDU"}</span>
+          <div class="wattbox-chassis wattbox-2u" style="display: flex; align-items: center; justify-content: space-between; padding: 0 16px; box-sizing: border-box; width: 100%; height: 100%;">
+            <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+              <div class="wattbox-brand">
+                <span class="wattbox-logo-text">WATTBOX</span>
+                <span class="wattbox-model-tag">${dev.id.includes("800") ? "800 SERIES IP PDU" : "700 SERIES IP PDU"}</span>
+              </div>
+              <div class="wattbox-status-lights" style="display: flex; gap: 4px; margin-top: 2px;">
+                <div class="wb-lightovrc ${isDevicePowered(dev) ? 'glowing' : ''}" title="OvrC Cloud Link">OvrC</div>
+                <div class="wb-lightlink ${isDevicePowered(dev) ? 'glowing' : ''}" title="Network Link">LINK</div>
+              </div>
             </div>
             <div class="wattbox-lcd" title="Voltage Monitor">
               <span class="wattbox-lcd-text">${isDevicePowered(dev) ? '120<span>V</span>' : '000<span>V</span>'}</span>
             </div>
-            <div class="wattbox-status-lights">
-              <div class="wb-lightovrc ${isDevicePowered(dev) ? 'glowing' : ''}" title="OvrC Cloud Link">OvrC</div>
-              <div class="wb-lightlink ${isDevicePowered(dev) ? 'glowing' : ''}" title="Network Link">LINK</div>
-            </div>
-            <div class="wattbox-network-ports" style="display: flex; align-items: center; gap: 4px; pointer-events: auto;">
-              <span style="font-size: 5px; color: #888; font-weight: bold;">LAN</span>
-              ${customSinglePort(0, "Ethernet (LAN)")}
-            </div>
-            <div class="wattbox-outlets-grid">
-              ${Array.from({length: 12}, (_, i) => `
-                <div class="wb-outlet-indicator" title="Outlet ${i+1} Status">
-                  <span class="wb-num">${i+1}</span>
-                  <div style="display:flex; justify-content:center; align-items:center; pointer-events:auto;">
-                    ${customPowerOutletPort(i)}
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="wattbox-outlets-grid">
+                ${Array.from({length: 12}, (_, i) => `
+                  <div class="wb-outlet-indicator" title="Outlet ${i+1} Status">
+                    <span class="wb-num">${i+1}</span>
+                    <div style="display:flex; justify-content:center; align-items:center; pointer-events:auto;">
+                      ${customPowerOutletPort(i)}
+                    </div>
                   </div>
+                `).join('')}
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px; align-items: center;">
+                <div class="wattbox-network-ports" style="display: flex; flex-direction: column; align-items: center; gap: 2px; pointer-events: auto;">
+                  <span style="font-size: 5px; color: #888; font-weight: bold; line-height: 1;">LAN</span>
+                  ${customSinglePort(0, "Ethernet (LAN)")}
                 </div>
-              `).join('')}
+                <div class="wattbox-breaker-button" title="Breaker Reset" style="margin-top: 2px;">RESET</div>
+              </div>
             </div>
-            <div class="wattbox-breaker-button" title="Breaker Reset">RESET</div>
           </div>
         `;
         hideDefaultLeft = true;
         portsHtml = "";
       } else if (dev.id === "wattbox-800-8" || dev.id === "wattbox-400-8") {
         faceplateOverlayHtml = `
-          <div class="wattbox-chassis wattbox-1u">
-            <div class="wattbox-brand">
-              <span class="wattbox-logo-text">WATTBOX</span>
-              <span class="wattbox-model-tag">${dev.id.includes("800") ? "800-8 IP PDU" : "400-8 IP PDU"}</span>
+          <div class="wattbox-chassis wattbox-1u" style="display: flex; align-items: center; justify-content: space-between; padding: 0 16px; box-sizing: border-box; width: 100%; height: 100%;">
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <div class="wattbox-brand">
+                <span class="wattbox-logo-text">WATTBOX</span>
+                <span class="wattbox-model-tag">${dev.id.includes("800") ? "800-8 IP PDU" : "400-8 IP PDU"}</span>
+              </div>
+              <div class="wattbox-status-lights" style="display: flex; gap: 3px;">
+                <div class="wb-lightovrc ${isDevicePowered(dev) ? 'glowing' : ''}" title="OvrC Cloud Link">OvrC</div>
+                <div class="wb-lightlink ${isDevicePowered(dev) ? 'glowing' : ''}" title="Network Link">LINK</div>
+              </div>
             </div>
             <div class="wattbox-lcd" title="Voltage Monitor">
               <span class="wattbox-lcd-text">${isDevicePowered(dev) ? '120<span>V</span>' : '000<span>V</span>'}</span>
             </div>
-            <div class="wattbox-status-lights">
-              <div class="wb-lightovrc ${isDevicePowered(dev) ? 'glowing' : ''}" title="OvrC Cloud Link">OvrC</div>
-              <div class="wb-lightlink ${isDevicePowered(dev) ? 'glowing' : ''}" title="Network Link">LINK</div>
-            </div>
-            <div class="wattbox-network-ports" style="display: flex; align-items: center; gap: 4px; pointer-events: auto;">
-              <span style="font-size: 5px; color: #888; font-weight: bold;">LAN</span>
-              ${customSinglePort(0, "Ethernet (LAN)")}
-            </div>
-            <div class="wattbox-outlets-row">
-              ${Array.from({length: 8}, (_, i) => `
-                <div class="wb-outlet-indicator" title="Outlet ${i+1} Status" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;">
-                  <span class="wb-num">${i+1}</span>
-                  <div style="display:flex; justify-content:center; align-items:center; pointer-events:auto;">
-                    ${customPowerOutletPort(i)}
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="wattbox-outlets-row">
+                ${Array.from({length: 8}, (_, i) => `
+                  <div class="wb-outlet-indicator" title="Outlet ${i+1} Status" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;">
+                    <span class="wb-num">${i+1}</span>
+                    <div style="display:flex; justify-content:center; align-items:center; pointer-events:auto;">
+                      ${customPowerOutletPort(i)}
+                    </div>
                   </div>
+                `).join('')}
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div class="wattbox-network-ports" style="display: flex; flex-direction: column; align-items: center; gap: 1px; pointer-events: auto;">
+                  <span style="font-size: 5px; color: #888; font-weight: bold; line-height: 1;">LAN</span>
+                  ${customSinglePort(0, "Ethernet (LAN)")}
                 </div>
-              `).join('')}
+                <div class="wattbox-breaker-button" title="Breaker Reset">RESET</div>
+              </div>
             </div>
-            <div class="wattbox-breaker-button" title="Breaker Reset">RESET</div>
           </div>
         `;
         hideDefaultLeft = true;
@@ -2540,9 +2552,9 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "wattbox-300-3") {
         faceplateOverlayHtml = `
           <div class="wattbox-compact-chassis wb-300">
-            <div class="wb-compact-header">
-              <span class="wb-logo-compact" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px; display: inline-block;">${dev.customLabel || 'WATTBOX 300'}</span>
+            <div class="wb-compact-header" style="display: flex; align-items: center; gap: 6px;">
               <div class="wb-compact-led ${isDevicePowered(dev) ? 'active' : ''}"></div>
+              <span class="wb-logo-compact" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px; display: inline-block;">${dev.customLabel || 'WATTBOX 300'}</span>
             </div>
             <div class="wb-compact-outlets-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
               <div class="wb-compact-outlets" style="display: flex; gap: 4px; pointer-events: auto; align-items: center;">
@@ -2560,9 +2572,9 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "wattbox-250-2") {
         faceplateOverlayHtml = `
           <div class="wattbox-compact-chassis wb-250">
-            <div class="wb-compact-header">
-              <span class="wb-logo-compact" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px; display: inline-block;">${dev.customLabel || 'WATTBOX 250'}</span>
+            <div class="wb-compact-header" style="display: flex; align-items: center; gap: 6px;">
               <div class="wb-compact-led ${isDevicePowered(dev) ? 'active' : ''}"></div>
+              <span class="wb-logo-compact" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px; display: inline-block;">${dev.customLabel || 'WATTBOX 250'}</span>
             </div>
             <div class="wb-compact-outlets-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
               <div class="wb-compact-outlets" style="display: flex; gap: 4px; pointer-events: auto; align-items: center;">
@@ -2580,12 +2592,12 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (dev.id === "wattbox-300vb-5") {
         faceplateOverlayHtml = `
           <div class="wattbox-compact-chassis wb-300vb" style="background: linear-gradient(135deg, #1c1917, #292524); border: 1.5px solid #444; border-radius: 4px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); padding: 8px 12px; width: 100%; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
-            <div class="wb-compact-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 2px;">
+            <div class="wb-compact-header" style="display: flex; align-items: center; gap: 6px; width: 100%; margin-bottom: 2px;">
+              <div class="wb-compact-led ${isDevicePowered(dev) ? 'active' : ''}" style="width: 4px; height: 4px; border-radius: 50%; background: ${isDevicePowered(dev) ? '#22c55e' : '#ef4444'}; box-shadow: 0 0 3px ${isDevicePowered(dev) ? '#22c55e' : '#ef4444'};"></div>
               <div style="display: flex; align-items: center; gap: 4px;">
                 <span class="wb-logo-compact" style="font-weight: 900; font-size: 8px; color: #fff; letter-spacing: 0.5px;">WATTBOX</span>
                 <span style="font-size: 6px; color: #f97316; font-weight: bold; text-transform: uppercase;">300VB-IP-5</span>
               </div>
-              <div class="wb-compact-led ${isDevicePowered(dev) ? 'active' : ''}" style="width: 4px; height: 4px; border-radius: 50%; background: ${isDevicePowered(dev) ? '#22c55e' : '#ef4444'}; box-shadow: 0 0 3px ${isDevicePowered(dev) ? '#22c55e' : '#ef4444'};"></div>
             </div>
             <div class="wb-compact-outlets-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
               <div class="wb-compact-outlets" style="display: flex; gap: 5px; pointer-events: auto; align-items: center;">
