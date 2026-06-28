@@ -3269,11 +3269,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateValCard(cardEl, status, icon, title, valText) {
+    if (!cardEl) return;
     cardEl.classList.remove("valid", "warning", "danger");
     cardEl.classList.add(status);
-    cardEl.querySelector(".validation-icon").textContent = icon;
-    cardEl.querySelector(".validation-name").textContent = title;
-    cardEl.querySelector(".validation-value").textContent = valText;
+    const iconEl = cardEl.querySelector(".validation-icon");
+    if (iconEl) iconEl.textContent = icon;
+    const nameEl = cardEl.querySelector(".validation-name");
+    if (nameEl) nameEl.textContent = title;
+    const valEl = cardEl.querySelector(".validation-value");
+    if (valEl) valEl.textContent = valText;
   }
 
   // Render BOM / Shopping List

@@ -4112,7 +4112,7 @@ body.hide-device-labels .device-asset-tag {
 .lutron-caseta-chassis,
 .hunter-douglas-chassis {
   width: calc(100% - 8px) !important;
-  height: 68px !important;
+  height: 100% !important;
   padding-bottom: 6px !important;
   padding-top: 18px !important;
   box-sizing: border-box !important;
