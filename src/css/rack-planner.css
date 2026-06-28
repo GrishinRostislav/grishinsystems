@@ -985,8 +985,8 @@ body.dragging-active .placed-device * {
 }
 
 .device-brand-anthem {
-  background: linear-gradient(135deg, #151515, #222222);
-  border-left: 4px solid #da291c;
+  background: linear-gradient(135deg, #181818, #2a2a2a);
+  border-left: 4px solid #b89753;
 }
 
 .device-brand-apple {
