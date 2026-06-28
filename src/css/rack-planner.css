@@ -985,6 +985,11 @@ body.dragging-active .placed-device * {
   border-left: 4px solid #d4af37;
 }
 
+.device-brand-anthem {
+  background: linear-gradient(135deg, #151515, #222222);
+  border-left: 4px solid #da291c;
+}
+
 .device-brand-apple {
   background: linear-gradient(135deg, #2c2d30, #3a3b3e);
   border-left: 4px solid #a3aaae;
@@ -2843,9 +2848,13 @@ body.dragging-active .placed-device * {
   background: linear-gradient(to right, #0d0b18, #18152a);
   border-left: 4px solid #5a30b5;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
   position: relative;
   border-radius: 3px;
+  padding-top: 8px;
+  box-sizing: border-box;
 }
 .savant-glossy-strip {
   width: 100%;
@@ -4082,6 +4091,7 @@ body.hide-device-labels .device-asset-tag {
 }
 
 /* Make all small/clean-chassis devices the same height as normal 1U switches, aligned to bottom */
+.placed-device.clean-chassis .savant-chassis,
 .macmini-chassis,
 .appletv-chassis,
 .sonos-amp-chassis,
