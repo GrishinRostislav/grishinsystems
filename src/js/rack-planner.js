@@ -1275,6 +1275,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function ensureDefaultWallOutlet() {
+    state.placedDevices.forEach(d => {
+      if (d.id === "wall-outlet-6" && d.slot !== "wall-outlet") {
+        d.slot = "wall-outlet";
+      }
+    });
+
     if (!state.placedDevices.some(d => d.slot === "wall-outlet")) {
       state.placedDevices.push({
         instanceId: "inst_wall_outlet_default",
@@ -1552,7 +1558,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Helper to check if a slot value is a side panel slot
   function isSideSlot(slot) {
-    return typeof slot === "string" && (slot.startsWith("side") || slot === "wall-outlet");
+    return typeof slot === "string" && slot.startsWith("side");
   }
 
   function parseSideSlot(slot) {
