@@ -86,11 +86,11 @@ document.addEventListener("DOMContentLoaded", () => {
     ],
     routers: [
       { id: "eero-poe-gateway", name: "eero PoE Gateway", brand: "eero", u: 1, width_fraction: 0.45, ports: 10, poe_ports: 8, poe_budget: 148, outlets: 0, requires_power: true, type: "router", cost: 649 },
-      { id: "udm-pro", name: "UniFi Dream Machine Pro", brand: "ubiquiti", u: 1, ports: 8, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 379 },
+      { id: "udm-pro", name: "UniFi Dream Machine Pro", brand: "ubiquiti", u: 1, ports: 9, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 379 },
       { id: "cisco-firepower", name: "Cisco Firepower 1010", brand: "cisco", u: 1, ports: 8, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 890 },
       { id: "araknis-110-rt", name: "Araknis AN-110-RT-2L1W Router", brand: "araknis", u: 1, ports: 3, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 249 },
-      { id: "araknis-220-rt", name: "Araknis AN-220-RT-2WAN Router (2.5G)", brand: "araknis", u: 1, ports: 5, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 450 },
-      { id: "araknis-310-rt", name: "Araknis AN-310-RT-4L2W Router", brand: "araknis", u: 1, ports: 6, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 399 },
+      { id: "araknis-220-rt", name: "Araknis AN-220-RT-1G/2.5G Single-WAN Router", brand: "araknis", u: 1, ports: 5, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 450 },
+      { id: "araknis-310-rt", name: "Araknis AN-310-RT-5-Port Router", brand: "araknis", u: 1, ports: 5, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 399 },
       { id: "araknis-520-rt", name: "Araknis AN-520-RT-2WAN Router", brand: "araknis", u: 1, ports: 5, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 650 },
       { id: "telus-nah", name: "TELUS Network Access Hub (NAH)", brand: "telus", u: 1, width_fraction: 0.5, ports: 6, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 150 },
       { id: "rogers-xb8", name: "Rogers Ignite WiFi Gateway (XB8)", brand: "rogers", u: 1, width_fraction: 0.5, ports: 4, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 200 },
@@ -1413,13 +1413,19 @@ document.addEventListener("DOMContentLoaded", () => {
   function isRouterWanPort(devId, portIndex) {
     const id = devId.toLowerCase();
     if (id === "eero-poe-gateway") {
-      return portIndex === 8 || portIndex === 9;
+      return portIndex === 8 || portIndex === 9; // Port 9 and 10 are WAN
     }
     if (id === "udm-pro") {
-      return portIndex === 8;
+      return portIndex === 8; // Port 9 is WAN
     }
-    if (id.includes("araknis-220") || id.includes("araknis-310") || id.includes("araknis-520")) {
-      return portIndex === 0 || portIndex === 1;
+    if (id.includes("araknis-220")) {
+      return portIndex === 0; // Single WAN: Port 1 (index 0) is WAN
+    }
+    if (id.includes("araknis-310")) {
+      return portIndex === 0 || portIndex === 4; // WAN Port 1 (index 0) and Combo WAN/LAN Port 5 (index 4)
+    }
+    if (id.includes("araknis-520")) {
+      return portIndex === 0 || portIndex === 1; // Dual WAN
     }
     if (id === "bell-gigahub") {
       return portIndex === 4;
