@@ -2211,8 +2211,14 @@ document.addEventListener("DOMContentLoaded", () => {
             
             <!-- Brand & Model Header -->
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #292524; padding-bottom: 3px; margin-bottom: 2px;">
-              <span style="font-weight: 900; font-size: 11px; color: #fff; letter-spacing: 1px;">ANTHEM <span style="font-weight: bold; font-size: 8px; color: #f97316;">MRX 740</span></span>
-              <span style="font-size: 6px; text-transform: uppercase; color: #78716c; font-weight: bold;">11.2 Pre-Amplifier / 7-Channel Receiver - Rear Panel</span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-weight: 900; font-size: 11px; color: #fff; letter-spacing: 1px;">ANTHEM <span style="font-weight: bold; font-size: 8px; color: #f97316;">MRX 740</span></span>
+                <span style="font-size: 6px; text-transform: uppercase; color: #78716c; font-weight: bold; margin-left: 10px;">11.2 Pre-Amplifier / 7-Channel Receiver - Rear Panel</span>
+              </div>
+              <div style="display: flex; gap: 4px; pointer-events: auto;">
+                <div style="width: 5px; height: 5px; border-radius: 50%; background: #fbbf24; border: 1px solid #d97706;" title="Wireless Antenna (BT/Wi-Fi Left)"></div>
+                <div style="width: 5px; height: 5px; border-radius: 50%; background: #fbbf24; border: 1px solid #d97706;" title="Wireless Antenna (BT/Wi-Fi Right)"></div>
+              </div>
             </div>
 
             <!-- Main Ports Grid -->
@@ -2224,22 +2230,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div style="background: rgba(0,0,0,0.4); border: 1px solid #1c1917; padding: 4px 6px; border-radius: 4px;">
                   <div style="font-size: 5px; color: #d6d3d1; font-weight: bold; margin-bottom: 3px; text-transform: uppercase; border-bottom: 0.5px solid #292524; padding-bottom: 1px;">HDMI 2.0b (7 Inputs / 3 Outputs eARC)</div>
                   <div style="display: flex; flex-wrap: wrap; gap: 4px; pointer-events: auto;">
+                    ${Array.from({length: 3}, (_, i) => `
+                      <div style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
+                        <span style="font-size: 4px; color: #f97316;">OUT${i+1}</span>
+                        ${renderAvrPort(8+i, `HDMI Output ${i+1}`, "width: 11px; height: 7px; border: 1px solid #f97316; background: #000; border-radius: 1.5px; cursor: pointer; flex-shrink: 0;")}
+                      </div>
+                    `).join('')}
                     ${Array.from({length: 7}, (_, i) => `
                       <div style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
                         <span style="font-size: 4px; color: #78716c;">IN${i+1}</span>
                         ${renderAvrPort(i+1, `HDMI Input ${i+1}`, "width: 11px; height: 7px; border: 1px solid #71717a; background: #000; border-radius: 1.5px; cursor: pointer; flex-shrink: 0;")}
                       </div>
                     `).join('')}
-                    ${Array.from({length: 3}, (_, i) => `
-                      <div style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
-                        <span style="font-size: 4px; color: #f97316;">OUT${i+1}</span>
-                        ${renderAvrPort(8+i, `HDMI Output ${i+1} (eARC)`, "width: 11px; height: 7px; border: 1px solid #f97316; background: #000; border-radius: 1.5px; cursor: pointer; flex-shrink: 0;")}
-                      </div>
-                    `).join('')}
                   </div>
                 </div>
 
-                <!-- Control, RS232, IP, Triggers, Antennas -->
+                <!-- Control, RS232, IP, Triggers -->
                 <div style="background: rgba(0,0,0,0.4); border: 1px solid #1c1917; padding: 4px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
                   <div style="display: flex; align-items: center; gap: 4px; pointer-events: auto;">
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
@@ -2255,10 +2261,6 @@ document.addEventListener("DOMContentLoaded", () => {
                       <span style="font-size: 4px; color: #78716c;">RS-232</span>
                       <div style="width: 12px; height: 6px; border: 1px solid #52525b; background: #222; border-radius: 1px;"></div>
                     </div>
-                  </div>
-                  <div style="display: flex; gap: 3px;">
-                    <div style="width: 4px; height: 4px; border-radius: 50%; background: #1c1917; border: 1px solid #d97706;" title="Wi-Fi Antenna Left"></div>
-                    <div style="width: 4px; height: 4px; border-radius: 50%; background: #1c1917; border: 1px solid #d97706;" title="Wi-Fi Antenna Right"></div>
                   </div>
                 </div>
               </div>
@@ -2276,22 +2278,22 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div style="display: flex; align-items: center; gap: 2px;">
                           <span style="font-size: 4.5px; color: #78716c; font-weight:bold;">${i+1}</span>
                           <div style="display: flex; flex-direction: column; gap: 1.5px;">
-                            ${renderAvrPort(17+i, `RCA Stereo In ${i+1} L`, "width: 7px; height: 7px; border: 1px solid #d97706; border-radius: 50%; background: #fff; cursor: pointer;")}
-                            ${renderAvrPort(17+i, `RCA Stereo In ${i+1} R`, "width: 7px; height: 7px; border: 1px solid #d97706; border-radius: 50%; background: #ef4444; cursor: pointer;")}
+                            ${renderAvrPort(17 + i*2, `RCA Stereo In ${i+1} L (White)`, "width: 7px; height: 7px; border: 1px solid #d97706; border-radius: 50%; background: #fff; cursor: pointer;")}
+                            ${renderAvrPort(17 + i*2 + 1, `RCA Stereo In ${i+1} R (Red)`, "width: 7px; height: 7px; border: 1px solid #d97706; border-radius: 50%; background: #ef4444; cursor: pointer;")}
                           </div>
                         </div>
                       `).join('')}
                     </div>
                   </div>
 
-                  <!-- Pre-Outs (11 Channels Pre-amplifier) -->
+                  <!-- Pre-Outs (15 Channels Pre-amplifier) -->
                   <div style="border-top: 0.5px solid #292524; padding-top: 2px;">
-                    <div style="font-size: 5px; color: #f97316; font-weight: bold; text-transform: uppercase;">11.2 Pre-Amplifier Outputs (RCA Pre-Outs)</div>
+                    <div style="font-size: 5px; color: #f97316; font-weight: bold; text-transform: uppercase;">15-Ch Main Pre-amplifier Outputs (RCA Pre-Outs)</div>
                     <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; pointer-events: auto;">
-                      ${Array.from({length: 11}, (_, i) => `
+                      ${Array.from({length: 15}, (_, i) => `
                         <div style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
-                          <span style="font-size: 3.5px; color: #a8a29e;">CH${i+1}</span>
-                          ${renderAvrPort(22+i, `RCA Pre-Out Channel ${i+1}`, `width: 7px; height: 7px; border: 1px solid #d97706; border-radius: 50%; background: ${i % 2 === 0 ? '#fff' : '#ef4444'}; cursor: pointer;`)}
+                          <span style="font-size: 3.5px; color: #a8a29e;">P${i+1}</span>
+                          ${renderAvrPort(27+i, `RCA Pre-Out ${i+1}`, `width: 7px; height: 7px; border: 1px solid #d97706; border-radius: 50%; background: ${i % 2 === 0 ? '#fff' : '#ef4444'}; cursor: pointer;`)}
                         </div>
                       `).join('')}
                     </div>
@@ -2309,6 +2311,7 @@ document.addEventListener("DOMContentLoaded", () => {
                       ${renderAvrPort(13, "Optical Input 1", "width: 6px; height: 6px; border: 1px solid #10b981; background: #000; border-radius: 1px; cursor: pointer;")}
                       ${renderAvrPort(14, "Optical Input 2", "width: 6px; height: 6px; border: 1px solid #10b981; background: #000; border-radius: 1px; cursor: pointer;")}
                       ${renderAvrPort(15, "Optical Input 3", "width: 6px; height: 6px; border: 1px solid #10b981; background: #000; border-radius: 1px; cursor: pointer;")}
+                      ${renderAvrPort(16, "Optical Output", "width: 6px; height: 6px; border: 1px solid #ef4444; background: #000; border-radius: 1px; cursor: pointer;")}
                     </div>
                   </div>
                 </div>
@@ -2318,26 +2321,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <!-- Bottom Row: Speakers Binding Posts & Power Inlet -->
             <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid #292524; padding-top: 4px; margin-top: 2px;">
-              <!-- Speaker terminals (7 channels) -->
+              <!-- Speaker terminals (11 channels) -->
               <div style="display: flex; flex-direction: column; gap: 1px;">
-                <span style="font-size: 5px; color: #d6d3d1; font-weight: bold; text-transform: uppercase;">7-Channel Speaker Bindings (8Ω / 4Ω compatible)</span>
-                <div style="display: flex; gap: 6px; pointer-events: auto; padding: 2px 4px; background: rgba(0,0,0,0.5); border-radius: 4px;">
-                  ${['FRONT L', 'FRONT R', 'CENTER', 'SURR L', 'SURR R', 'BACK L', 'BACK R'].map((name, i) => `
+                <span style="font-size: 5px; color: #d6d3d1; font-weight: bold; text-transform: uppercase;">11-Channel Speaker Bindings (Assignable Speaker Outputs)</span>
+                <div style="display: flex; gap: 5.5px; pointer-events: auto; padding: 2px 4px; background: rgba(0,0,0,0.5); border-radius: 4px;">
+                  ${['SURR R', 'SURR L', 'CENTER', 'FRONT R', 'FRONT L', 'BACK R', 'BACK L', 'HEIGHT1 R', 'HEIGHT1 L', 'HEIGHT2 R', 'HEIGHT2 L'].map((name, i) => `
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
-                      <span style="font-size: 4px; color: #a8a29e; font-weight: 500;">${name}</span>
-                      <div style="display: flex; gap: 2px;">
-                        ${renderAvrPort(33+i, `Speaker terminal ${name} (+ RED)`, "width: 8px; height: 8px; border-radius: 50%; border: 1px solid #b45309; background: #ef4444; cursor: pointer;")}
-                        <div style="width: 8px; height: 8px; border-radius: 50%; border: 1px solid #444; background: #111;" title="Speaker terminal ${name} (- BLK)"></div>
+                      <span style="font-size: 3.5px; color: #a8a29e; font-weight: bold; text-transform: uppercase;">${name.replace('HEIGHT', 'HT')}</span>
+                      <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                        ${renderAvrPort(42+i, `Speaker ${name} (+ RED)`, "width: 8px; height: 8px; border-radius: 50%; border: 1px solid #b45309; background: #ef4444; cursor: pointer;")}
+                        <div style="width: 8px; height: 8px; border-radius: 50%; border: 1px solid #27272a; background: #18181b;" title="Speaker ${name} (- BLK)"></div>
                       </div>
                     </div>
                   `).join('')}
                 </div>
               </div>
 
-              <!-- Power Input -->
-              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px; pointer-events: auto;">
-                <span style="font-size: 4.5px; color: #888; font-weight: bold;">AC INLET</span>
-                <div style="display: flex; align-items: center; gap: 3px;">
+              <!-- Power Input & Fan -->
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 24px; height: 24px; border: 1px solid #292524; border-radius: 50%; background: radial-gradient(circle, #292524 20%, #1c1917 80%); display: flex; align-items: center; justify-content: center;" title="Cooling Fan Intake">
+                  <div style="width: 14px; height: 1.5px; background: #000; transform: rotate(45deg); position: relative;"></div>
+                  <div style="width: 14px; height: 1.5px; background: #000; transform: rotate(-45deg); position: relative;"></div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px; pointer-events: auto;">
+                  <span style="font-size: 4.5px; color: #888; font-weight: bold;">AC INPUT</span>
                   ${renderAvrPort(1000, "⚡ Power Inlet", "width: 14px; height: 10px; border: 1.5px solid #f97316; border-radius: 2px; background: #1a1a1a; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 3px rgba(249,115,22,0.3);")}
                 </div>
               </div>
