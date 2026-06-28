@@ -424,7 +424,7 @@
   border: 8px solid #1e293b;
   border-top: 16px solid #1e293b;
   border-bottom: 20px solid #1e293b;
-  width: 560px;
+  width: 680px;
   min-height: 400px;
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.9);
   padding: 0 4px;
@@ -3640,7 +3640,7 @@ body.dragging-active .placed-device * {
 .wall-outlet-zone {
   margin-top: 24px;
   width: 100%;
-  max-width: 560px;
+  max-width: 680px;
   align-self: center;
 }
 
@@ -4099,6 +4099,7 @@ body.hide-device-labels .device-asset-tag {
 .lutron-ra3-chassis,
 .lutron-caseta-chassis,
 .hunter-douglas-chassis {
+  width: calc(100% - 8px) !important;
   height: 68px !important;
   padding-bottom: 6px !important;
   padding-top: 18px !important;
