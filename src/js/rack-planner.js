@@ -3296,12 +3296,30 @@ cabinetRackEl.appendChild(container);
     const wallOutletContent = document.getElementById("wall-outlet-zone-content");
     if (wallOutletContent) {
       wallOutletContent.innerHTML = "";
-      const wallOutletDevices = state.placedDevices.filter(d => isWallOutletSlot(d.slot));
+      let wallOutletDevices = state.placedDevices.filter(d => isWallOutletSlot(d.slot));
       
       if (wallOutletDevices.length === 0) {
-        wallOutletContent.innerHTML = `<div class="wall-outlet-empty-hint">Wall Outlet is pre-installed on the wall</div>`;
-      } else {
-        wallOutletDevices.forEach(dev => {
+        const defaultWallOutlet = {
+          instanceId: "inst_wall_outlet_default",
+          id: "wall-outlet-6",
+          name: "Wall Outlet (6 Sockets) – Power Source",
+          brand: "generic",
+          u: 1,
+          ports: 0,
+          poe_ports: 0,
+          poe_budget: 0,
+          outlets: 6,
+          requires_power: false,
+          type: "power",
+          cost: 0,
+          slot: "wall-outlet"
+        };
+        state.placedDevices.push(defaultWallOutlet);
+        wallOutletDevices = [defaultWallOutlet];
+        saveState();
+      }
+      
+      wallOutletDevices.forEach(dev => {
           const outletEl = document.createElement("div");
           outletEl.className = "wall-outlet-device";
           outletEl.dataset.instanceId = dev.instanceId;
@@ -3353,7 +3371,6 @@ cabinetRackEl.appendChild(container);
           
           wallOutletContent.appendChild(outletEl);
         });
-      }
     }
 
     // Redundant side hints removed
