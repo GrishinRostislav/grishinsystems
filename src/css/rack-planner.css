@@ -1946,7 +1946,8 @@ body.dragging-active .placed-device * {
   .cabinet-wrapper {
     display: flex !important;
     flex-direction: row !important;
-    justify-content: center !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
     align-items: flex-start !important;
     width: 100% !important;
     gap: 16px !important;
@@ -1956,11 +1957,14 @@ body.dragging-active .placed-device * {
 
   .side-cabinet-wrapper {
     display: block !important;
-    width: 140px !important;
+    width: 47% !important;
+    max-width: 47% !important;
+    flex: 0 0 47% !important;
     flex-shrink: 0 !important;
     background: white !important;
-    border: 1px dashed #ccc !important;
+    border: 1px dashed #000000 !important;
     padding: 6px !important;
+    order: 2 !important;
   }
 
   .side-panel-empty-hint, .wall-outlet-empty-hint {
@@ -1981,12 +1985,14 @@ body.dragging-active .placed-device * {
   }
 
   .cabinet-rack {
-    margin: 0 auto !important;
+    width: 75% !important;
+    max-width: 75% !important;
+    flex: 0 0 75% !important;
+    order: 1 !important;
+    margin: 0 auto 20px auto !important;
     page-break-inside: avoid;
-    background: #fff !important;
-    border: 2px solid #ccc !important;
-    border-top: 2px solid #ccc !important;
-    border-bottom: 2px solid #ccc !important;
+    background: #ffffff !important;
+    border: 2px solid #000000 !important;
     box-shadow: none !important;
   }
   .cabinet-rack::before,
@@ -2007,23 +2013,75 @@ body.dragging-active .placed-device * {
     border-right: 1px solid #ddd !important;
   }
 
-  .placed-device {
-    background: #f8fafc !important;
-    border: 1px solid #ccc !important;
+  /* Make all devices white/transparent with black outlines for printing (toner saving) */
+  .placed-device,
+  div.placed-device[class*="device-brand-"],
+  div.placed-device.clean-chassis {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    border: 1.5px solid #000000 !important;
     box-shadow: none !important;
+    color: #000000 !important;
   }
-  
+
+  /* Force all internal divs, spans, text and elements inside placed devices to be transparent/white and black border */
+  .placed-device *,
+  .placed-device div,
+  .placed-device span {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    color: #000000 !important;
+    border-color: #000000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Make LCD screen display backgrounds white with black text on print */
+  .avr-display-panel,
+  .unifi-lcm-screen {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    border: 1px solid #000000 !important;
+  }
+
+  .avr-display-text {
+    color: #000000 !important;
+    text-shadow: none !important;
+  }
+
+  /* Port dots should be white/grey and black outlines on print */
+  .port-dot,
+  .power-outlet-dot,
+  .power-inlet-dot,
+  .power-strip-socket,
+  .wall-socket {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    border: 1px solid #000000 !important;
+  }
+
+  .port-dot.connected,
+  .power-outlet-dot.connected,
+  .power-inlet-dot.connected,
+  .wall-socket.connected {
+    background: #f1f5f9 !important;
+    background-color: #f1f5f9 !important;
+    border-color: #000000 !important;
+  }
+
   .device-faceplate-top {
-    background: #e2e8f0 !important;
-    border-bottom: 1px solid #ccc !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid #000000 !important;
   }
-  
+
   .device-faceplate-bottom {
-    background: #fff !important;
+    background: #ffffff !important;
   }
-  
+
   .device-faceplate-label, .device-logo {
-    color: #000 !important;
+    color: #000000 !important;
   }
 
   .rp-bom-drawer {
