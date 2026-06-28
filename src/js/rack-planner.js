@@ -3945,7 +3945,7 @@ document.addEventListener("DOMContentLoaded", () => {
       })();
 
       for (let i = 0; i < dev.ports; i++) {
-        const isWan = i < wanPortsCount;
+        const isWan = isRouterWanPort(dev.id, i);
         let portLabel = `Port ${i + 1}`;
         if (isWan) {
           portLabel = `Port ${i + 1} (WAN)`;
