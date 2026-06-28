@@ -3780,9 +3780,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (dev.type === "router") {
-      configInternetGroupEl.style.display = "block";
-      configInternetActiveEl.checked = !!dev.internetActive;
-      configWanIpGroupEl.style.display = "block";
+      if (configInternetGroupEl) configInternetGroupEl.style.display = "none";
+      if (configWanIpGroupEl) configWanIpGroupEl.style.display = "block";
       
       const wanPortsCount = (() => {
         const id = dev.id.toLowerCase();
@@ -3792,13 +3791,13 @@ document.addEventListener("DOMContentLoaded", () => {
       })();
 
       let html = "";
-      // Add Bridge Mode checkbox
+      // Add Bridge Mode checkbox (Compact Layout)
       html += `
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px; border-radius: 6px; margin-bottom: 12px;">
-          <label class="rp-toolbar-checkbox-label" style="margin-left: 0; font-weight: bold; color: var(--accent-cyan); display: flex; align-items: center; gap: 6px; pointer-events: auto; cursor: pointer;">
-            <input type="checkbox" id="config-bridge-mode" ${dev.bridgeMode ? 'checked' : ''}> Enable Bridge Mode (Modem Passthrough)
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 11px;">
+          <label style="font-weight: bold; color: var(--accent-cyan); display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 0;">
+            <input type="checkbox" id="config-bridge-mode" ${dev.bridgeMode ? 'checked' : ''} style="margin: 0; cursor: pointer;"> Enable Bridge Mode (Modem Passthrough)
           </label>
-          <span style="font-size: 10px; color: var(--text-muted); display: block; margin-top: 4px;">Transparently bridges WAN traffic to downstream router. NAT/DHCP will be bypassed.</span>
+          <div style="font-size: 10px; color: var(--text-muted); margin-top: 3px; margin-left: 20px; line-height: 1.3;">Bypasses NAT/DHCP and transparently forwards WAN traffic.</div>
         </div>
       `;
 
@@ -4260,7 +4259,7 @@ document.addEventListener("DOMContentLoaded", () => {
     dev.ipAddress = configIpAddressEl.value.trim();
     dev.notes = configDeviceNotesEl.value.trim();
     if (dev.type === "router") {
-      dev.internetActive = configInternetActiveEl.checked;
+      dev.internetActive = configInternetActiveEl ? configInternetActiveEl.checked : false;
       dev.bridgeMode = document.getElementById("config-bridge-mode") ? document.getElementById("config-bridge-mode").checked : false;
 
       // Save each WAN port settings
