@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "araknis-110-rt", name: "Araknis AN-110-RT-2L1W Router", brand: "araknis", u: 1, ports: 3, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 249 },
       { id: "araknis-220-rt", name: "Araknis AN-220-RT-1G/2.5G Single-WAN Router", brand: "araknis", u: 1, ports: 5, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 450 },
       { id: "araknis-310-rt", name: "Araknis AN-310-RT-5-Port Router", brand: "araknis", u: 1, ports: 5, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 399 },
-      { id: "araknis-520-rt", name: "Araknis AN-520-RT-2WAN Router", brand: "araknis", u: 1, ports: 5, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 650 },
+      { id: "araknis-520-rt", name: "Araknis AN-520-RT Router (2.5G)", brand: "araknis", u: 1, ports: 3, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 650 },
       { id: "telus-nah", name: "TELUS Network Access Hub (NAH)", brand: "telus", u: 1, width_fraction: 0.5, ports: 6, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 150 },
       { id: "rogers-xb8", name: "Rogers Ignite WiFi Gateway (XB8)", brand: "rogers", u: 1, width_fraction: 0.5, ports: 4, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 200 },
       { id: "bell-gigahub", name: "Bell Giga Hub Fibe Gateway", brand: "bell", u: 1, width_fraction: 0.5, ports: 5, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "router", cost: 250 }
@@ -1425,7 +1425,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return portIndex === 0 || portIndex === 4; // WAN Port 1 (index 0) and Combo WAN/LAN Port 5 (index 4)
     }
     if (id.includes("araknis-520")) {
-      return portIndex === 0 || portIndex === 1; // Dual WAN
+      return portIndex === 0 || portIndex === 2; // WAN Port 1 (index 0) and Combo WAN/LAN Port 3 (index 2)
     }
     if (id === "bell-gigahub") {
       return portIndex === 4;
