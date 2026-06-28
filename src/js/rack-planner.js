@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "savant-sipa125", name: "Savant IP Audio 125 (SIPA125)", brand: "savant", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1800 },
       { id: "savant-sipa50", name: "Savant IP Audio 50 (SIPA50)", brand: "savant", u: 1, width_fraction: 0.33, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 950 },
       { id: "savant-sipa1sm", name: "Savant IP Audio 1 (SIPA1SM)", brand: "savant", u: 1, width_fraction: 0.5, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1200 },
-      { id: "avr-anthem-mrx740", name: "Anthem MRX 740 11.2-Ch AV Receiver", brand: "anthem", u: 4, ports: 40, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 3099 },
+      { id: "avr-anthem-mrx740", name: "Anthem MRX 740 11.2-Ch AV Receiver", brand: "anthem", u: 4, ports: 53, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 3099 },
       { id: "avr-anthem-mrx1140", name: "Anthem MRX 1140 15.2-Ch AV Receiver", brand: "anthem", u: 4, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 4199 },
       { id: "avr-sony-az1000es", name: "Sony STR-AZ1000ES 7.2-Ch ES Receiver", brand: "sony", u: 3, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 899 },
       { id: "avr-sony-az3000es", name: "Sony STR-AZ3000ES 9.2-Ch ES Receiver", brand: "sony", u: 3, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1699 },
@@ -1435,6 +1435,59 @@ document.addEventListener("DOMContentLoaded", () => {
       return portIndex === 3;
     }
     return portIndex === 0;
+  }
+
+  function getDevicePortFriendlyLabel(devId, portIndex) {
+    const id = devId.toLowerCase();
+    if (id === "avr-anthem-mrx740") {
+      if (portIndex === 0) return "Ethernet (LAN)";
+      if (portIndex >= 1 && portIndex <= 7) return `HDMI Input ${portIndex}`;
+      if (portIndex === 8) return "HDMI Output 1 (eARC)";
+      if (portIndex === 9) return "HDMI Output 2";
+      if (portIndex === 10) return "HDMI Zone 2 Output";
+      if (portIndex === 11) return "Digital Coaxial Input 1";
+      if (portIndex === 12) return "Digital Coaxial Input 2";
+      if (portIndex === 13) return "Digital Optical Input 1";
+      if (portIndex === 14) return "Digital Optical Input 2";
+      if (portIndex === 15) return "Digital Optical Input 3";
+      if (portIndex === 16) return "Digital Optical Output";
+      
+      // RCA Stereo In 1-5 (white/red pairs) -> total 10 ports (indices 17-26)
+      if (portIndex >= 17 && portIndex <= 26) {
+        const pair = Math.floor((portIndex - 17) / 2) + 1;
+        const channel = (portIndex - 17) % 2 === 0 ? "L (White)" : "R (Red)";
+        return `RCA Stereo In ${pair} ${channel}`;
+      }
+      
+      // RCA Pre-Outs -> 15 outputs (indices 27-41)
+      const preOutLabels = [
+        "Pre-Out FRONT L", "Pre-Out FRONT R", "Pre-Out CENTER",
+        "Pre-Out SURROUND L", "Pre-Out SURROUND R",
+        "Pre-Out SURR-BACK L", "Pre-Out SURR-BACK R",
+        "Pre-Out HEIGHT 1 L", "Pre-Out HEIGHT 1 R",
+        "Pre-Out HEIGHT 2 L", "Pre-Out HEIGHT 2 R",
+        "Pre-Out HEIGHT 3 L", "Pre-Out HEIGHT 3 R",
+        "Pre-Out SUBWOOFER 1", "Pre-Out SUBWOOFER 2"
+      ];
+      if (portIndex >= 27 && portIndex <= 41) {
+        return preOutLabels[portIndex - 27];
+      }
+      
+      // Speakers terminals -> 11 outputs (indices 42-52)
+      const speakerLabels = [
+        "Speaker SURROUND R (+)", "Speaker SURROUND L (+)",
+        "Speaker CENTER (+)",
+        "Speaker FRONT R (+)", "Speaker FRONT L (+)",
+        "Speaker SURR-BACK R (+)", "Speaker SURR-BACK L (+)",
+        "Speaker HEIGHT 1 R (+)", "Speaker HEIGHT 1 L (+)",
+        "Speaker HEIGHT 2 R (+)", "Speaker HEIGHT 2 L (+)"
+      ];
+      if (portIndex >= 42 && portIndex <= 52) {
+        return speakerLabels[portIndex - 42];
+      }
+    }
+    // Default fallback
+    return `Port ${portIndex + 1}`;
   }
 
   // Check if U slots are occupied
@@ -4202,9 +4255,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       for (let i = 0; i < dev.ports; i++) {
         const isWan = isRouterWanPort(dev.id, i);
-        let portLabel = `Port ${i + 1}`;
+        let portLabel = getDevicePortFriendlyLabel(dev.id, i);
         if (isWan) {
-          portLabel = `Port ${i + 1} (WAN)`;
+          portLabel = `${portLabel} (WAN)`;
         }
         logicalPorts.push({ index: i, type: "network", label: portLabel, isWan });
       }
@@ -4403,7 +4456,7 @@ document.addEventListener("DOMContentLoaded", () => {
             for (let p = 0; p < targetDev.ports; p++) {
               const opt = document.createElement("option");
               opt.value = p;
-              opt.textContent = `Port ${p + 1}`;
+              opt.textContent = getDevicePortFriendlyLabel(targetDev.id, p);
               
               const targetConn = state.connections.find(c => 
                 (c.fromDevice === targetDev.instanceId && c.fromPort === p) || 
