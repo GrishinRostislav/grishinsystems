@@ -1821,9 +1821,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             if (classPrefix.includes("wan-port")) {
               classStr += " wan-port";
-              if (dev.internetActive) {
-                classStr += " connected internet-active";
-              }
             } else if (classPrefix.includes("sfp-port")) {
               classStr += " sfp-port";
             }
@@ -1841,7 +1838,9 @@ document.addEventListener("DOMContentLoaded", () => {
               const targetDev = state.placedDevices.find(d => d.instanceId === targetInstanceId);
               const isUplinkConnection = targetDev && (targetDev.type === "switch" || targetDev.type === "router");
 
-              if (classPrefix.includes("wan-port")) {
+              if (targetInstanceId === "internet") {
+                classStr += " internet-active";
+              } else if (classPrefix.includes("wan-port")) {
                 // keep WAN styling
               } else if (isUplinkConnection) {
                 classStr += " uplink";
@@ -1997,9 +1996,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (classPrefix.includes("wan-port")) {
           classStr += " wan-port";
-          if (dev.internetActive) {
-            classStr += " connected internet-active";
-          }
         } else if (classPrefix.includes("sfp-port")) {
           classStr += " sfp-port";
         }
@@ -2017,7 +2013,9 @@ document.addEventListener("DOMContentLoaded", () => {
           const targetDev = state.placedDevices.find(d => d.instanceId === targetInstanceId);
           const isUplinkConnection = targetDev && (targetDev.type === "switch" || targetDev.type === "router");
 
-          if (classPrefix.includes("wan-port")) {
+          if (targetInstanceId === "internet") {
+            classStr += " internet-active";
+          } else if (classPrefix.includes("wan-port")) {
             // keep WAN styling
           } else if (isUplinkConnection) {
             classStr += " uplink";
@@ -4007,9 +4005,8 @@ document.addEventListener("DOMContentLoaded", () => {
           const isPoe = dev.poe_ports > 0 && i < dev.poe_ports;
           if (isPoe) specialLabel = " <span style='font-size:9px;color:#eab308;'>⚡ PoE</span>";
         } else if (dev.type === "router") {
-          const numWan = dev.name.includes("2WAN") || dev.name.includes("4L2W") ? 2 : 1;
-          if (i < numWan) specialLabel = " <span style='font-size:9px;color:#ef4444;'>WAN</span>";
-          else specialLabel = " <span style='font-size:9px;color:#22c55e;'>LAN</span>";
+          if (pInfo.isWan) specialLabel = " <span style='font-size:9px;color:#ef4444;font-weight:bold;margin-left:6px;'>WAN</span>";
+          else specialLabel = " <span style='font-size:9px;color:#22c55e;font-weight:bold;margin-left:6px;'>LAN</span>";
         }
       }
       tdPort.innerHTML = `${pInfo.label}${specialLabel}`;
