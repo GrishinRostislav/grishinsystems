@@ -3791,13 +3791,16 @@ document.addEventListener("DOMContentLoaded", () => {
       })();
 
       let html = "";
-      // Add Bridge Mode checkbox (Compact Layout)
+      // Add Bridge Mode checkbox (Text Left, Checkbox Right)
       html += `
-        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 11px;">
-          <label style="font-weight: bold; color: var(--accent-cyan); display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 0;">
-            <input type="checkbox" id="config-bridge-mode" ${dev.bridgeMode ? 'checked' : ''} style="margin: 0; cursor: pointer;"> Enable Bridge Mode (Modem Passthrough)
-          </label>
-          <div style="font-size: 10px; color: var(--text-muted); margin-top: 3px; margin-left: 20px; line-height: 1.3;">Bypasses NAT/DHCP and transparently forwards WAN traffic.</div>
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 11px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%;">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <span style="font-weight: bold; color: var(--accent-cyan);">Bridge Mode (Modem Passthrough)</span>
+              <span style="font-size: 9.5px; color: var(--text-muted); line-height: 1.3;">Bypasses NAT/DHCP and transparently forwards WAN traffic.</span>
+            </div>
+            <input type="checkbox" id="config-bridge-mode" ${dev.bridgeMode ? 'checked' : ''} style="margin: 0; cursor: pointer; width: 16px; height: 16px; flex-shrink: 0;">
+          </div>
         </div>
       `;
 
