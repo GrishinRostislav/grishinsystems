@@ -523,8 +523,12 @@ document.addEventListener("DOMContentLoaded", () => {
       
       // Deep clone devices so we don't mutate state on failure
       const sorted = JSON.parse(JSON.stringify(state.placedDevices)).sort((a, b) => a.slot - b.slot);
-      
       sorted.forEach(dev => {
+        if (isSideSlot(dev.slot)) {
+          adjustedDevices.push(dev);
+          return;
+        }
+
         // Calculate preferred slot relative to the top of the cabinet
         const offsetFromTop = state.rackSize - dev.slot;
         const preferredSlot = newSize - offsetFromTop;
@@ -842,6 +846,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (btnReportPrint) {
         btnReportPrint.addEventListener("click", () => {
           const printWindow = window.open('', '_blank');
+          if (!printWindow) {
+            // Fallback: print the current window
+            window.print();
+            return;
+          }
           printWindow.document.write(`
             <html>
             <head>
