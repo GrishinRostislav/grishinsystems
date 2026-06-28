@@ -105,6 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "wattbox-400-8", name: "WattBox 400 Series IP PDU (8 Outlets, 1U)", brand: "wattbox", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 8, requires_power: true, type: "power", cost: 449 },
       { id: "wattbox-300-3", name: "WattBox 300 Series IP PDU (3 Outlets, Compact)", brand: "wattbox", u: 1, width_fraction: 0.33, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 3, requires_power: true, type: "power", cost: 299 },
       { id: "wattbox-250-2", name: "WattBox 250 Series Smart PDU (2 Outlets, Compact)", brand: "wattbox", u: 1, width_fraction: 0.33, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 2, requires_power: true, type: "power", cost: 189 },
+      { id: "wattbox-300vb-5", name: "WattBox WB-300VB-IP-5 IP Power Conditioner", brand: "wattbox", u: 1, width_fraction: 0.5, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 5, requires_power: true, type: "power", cost: 349 },
       { id: "power-strip-6", name: "Standard 6-Outlet Power Strip (Shelf)", brand: "generic", u: 1, width_fraction: 0.5, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 6, requires_power: true, type: "power", cost: 25 },
       { id: "wall-outlet-6", name: "Wall Outlet (6 Sockets) – Power Source", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 6, requires_power: false, type: "power", cost: 0 }
     ],
@@ -1696,7 +1697,7 @@ document.addEventListener("DOMContentLoaded", () => {
       devEl.draggable = true;
       
       const widthFrac = dev.width_fraction || 1;
-      const isCleanChassis = dev.id === "apple-tv-4k" || dev.id === "eero-max-7" || dev.id === "eero-pro-6e" || dev.id === "sonos-port" || dev.id === "savant-macmini-host" || dev.id === "amp-sonos" || dev.id === "nv-shield" || dev.id === "cable-box" || dev.id === "telus-nah" || dev.id === "rogers-xb8" || dev.id === "bell-gigahub" || dev.id === "wattbox-300-3" || dev.id === "wattbox-250-2" || dev.id === "power-strip-6" || dev.id === "ovrc-hub" || dev.id === "lutron-ra3" || dev.id === "lutron-caseta" || dev.id === "hunter-douglas-powerview" || dev.id === "savant-sipa50" || dev.id === "savant-smart-host" || dev.id === "savant-sipa1sm";
+      const isCleanChassis = dev.id === "apple-tv-4k" || dev.id === "eero-max-7" || dev.id === "eero-pro-6e" || dev.id === "sonos-port" || dev.id === "savant-macmini-host" || dev.id === "amp-sonos" || dev.id === "nv-shield" || dev.id === "cable-box" || dev.id === "telus-nah" || dev.id === "rogers-xb8" || dev.id === "bell-gigahub" || dev.id === "wattbox-300-3" || dev.id === "wattbox-250-2" || dev.id === "wattbox-300vb-5" || dev.id === "power-strip-6" || dev.id === "ovrc-hub" || dev.id === "lutron-ra3" || dev.id === "lutron-caseta" || dev.id === "hunter-douglas-powerview" || dev.id === "savant-sipa50" || dev.id === "savant-smart-host" || dev.id === "savant-sipa1sm";
       
       const getPortTooltip = (portIndex, customLabel = "") => {
         const conn = state.connections.find(c => 
@@ -2574,6 +2575,31 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
           </div>
         `;
+        hideDefaultLeft = true;
+        portsHtml = "";
+      } else if (dev.id === "wattbox-300vb-5") {
+        faceplateOverlayHtml = `
+          <div class="wattbox-compact-chassis wb-300vb" style="background: linear-gradient(135deg, #1c1917, #292524); border: 1.5px solid #444; border-radius: 4px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); padding: 8px 12px; width: 100%; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+            <div class="wb-compact-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 2px;">
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span class="wb-logo-compact" style="font-weight: 900; font-size: 8px; color: #fff; letter-spacing: 0.5px;">WATTBOX</span>
+                <span style="font-size: 6px; color: #f97316; font-weight: bold; text-transform: uppercase;">300VB-IP-5</span>
+              </div>
+              <div class="wb-compact-led ${isDevicePowered(dev) ? 'active' : ''}" style="width: 4px; height: 4px; border-radius: 50%; background: ${isDevicePowered(dev) ? '#22c55e' : '#ef4444'}; box-shadow: 0 0 3px ${isDevicePowered(dev) ? '#22c55e' : '#ef4444'};"></div>
+            </div>
+            <div class="wb-compact-outlets-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <div class="wb-compact-outlets" style="display: flex; gap: 5px; pointer-events: auto; align-items: center;">
+                ${Array.from({length: 5}, (_, i) => customPowerOutletPort(i)).join('')}
+              </div>
+              <div class="wb-compact-network" style="display: flex; align-items: center; gap: 2px; pointer-events: auto;">
+                <span style="font-size: 4.5px; color: #888; font-weight: bold; line-height: 1;">LAN</span>
+                ${customSinglePort(0, "Ethernet (LAN)")}
+              </div>
+            </div>
+          </div>
+        `;
+        hideDefaultLeft = true;
+        portsHtml = "";
       } else if (dev.id === "pdu-apc-1u") {
         faceplateOverlayHtml = `
           <div class="apc-pdu-panel" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; box-sizing: border-box; background: #111; border: 1.5px solid #333; border-radius: 4px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);">
