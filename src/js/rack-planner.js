@@ -834,6 +834,19 @@ document.addEventListener("DOMContentLoaded", () => {
         state.dropPoints = parsed.dropPoints !== undefined ? parsed.dropPoints : 12;
         state.localLines = parsed.localLines !== undefined ? parsed.localLines : 2;
         state.placedDevices = parsed.placedDevices || [];
+        state.placedDevices.forEach(d => {
+          let foundPreset = null;
+          for (const category in presets) {
+            const found = presets[category].find(p => p.id === d.id);
+            if (found) {
+              foundPreset = found;
+              break;
+            }
+          }
+          if (foundPreset && foundPreset.width_fraction !== undefined) {
+            d.width_fraction = foundPreset.width_fraction;
+          }
+        });
         if (!state.placedDevices.some(d => d.slot === "wall-outlet")) {
           state.placedDevices.push({
             instanceId: "inst_wall_outlet_default",
