@@ -1593,6 +1593,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function isRouterWanPort(devId, portIndex) {
     const id = devId.toLowerCase();
+    let isRouterOrModem = false;
+    for (const cat in presets) {
+      const p = presets[cat].find(x => x.id === devId);
+      if (p) {
+        if (p.type === "router" || p.type === "modem" || id === "bell-gigahub" || id === "rogers-xb8" || id === "telus-nah") {
+          isRouterOrModem = true;
+        }
+        break;
+      }
+    }
+    if (!isRouterOrModem) return false;
+
     if (id === "eero-poe-gateway") {
       return portIndex === 8 || portIndex === 9; // Port 9 and 10 are WAN
     }
@@ -1719,6 +1731,91 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     // Default fallback
     return `Port ${portIndex + 1}`;
+  }
+
+  // Helper to classify port categories based on device type and friendly label
+  function classifyPort(devId, portIndex) {
+    if (portIndex === 1000) return "power-inlet";
+    if (portIndex >= 2000) return "power-outlet";
+
+    let devType = "";
+    for (const cat in presets) {
+      const p = presets[cat].find(x => x.id === devId);
+      if (p) {
+        devType = p.type;
+        break;
+      }
+    }
+
+    const label = getDevicePortFriendlyLabel(devId, portIndex).toLowerCase();
+
+    if (label.includes("hdmi")) {
+      return "hdmi";
+    }
+    if (label.includes("ir output") || label.includes("ir out") || label.includes("ir control")) {
+      return "ir-out";
+    }
+    if (label.includes("ir input") || label.includes("ir in")) {
+      return "ir-in";
+    }
+    if (label.includes("rs-232") || label.includes("serial")) {
+      return "serial";
+    }
+    if (label.includes("trigger")) {
+      return "trigger";
+    }
+    if (label.includes("speaker")) {
+      if (label.includes("input") || label.includes("in")) {
+        return "speaker-in";
+      }
+      return "speaker-out";
+    }
+    if (label.includes("pre-amp out") || label.includes("pre-out") || label.includes("subwoofer out") || label.includes("digital coaxial out") || label.includes("optical output") || label.includes("toslink pre-amp out")) {
+      if (label.includes("digital") || label.includes("coaxial") || label.includes("optical") || label.includes("toslink")) {
+        return "audio-digital-out";
+      }
+      return "audio-analog-out";
+    }
+    if (label.includes("analog in") || label.includes("analog stereo in") || label.includes("rca stereo in") || label.includes("digital coaxial input") || label.includes("digital optical input") || label.includes("optical input") || label.includes("coaxial input")) {
+      if (label.includes("digital") || label.includes("coaxial") || label.includes("optical") || label.includes("toslink")) {
+        return "audio-digital-in";
+      }
+      return "audio-analog-in";
+    }
+    if (label.includes("audio in") || label.includes("audio input")) {
+      return "audio-analog-in";
+    }
+    if (label.includes("audio out") || label.includes("audio output")) {
+      return "audio-analog-out";
+    }
+
+    if (devType === "switch" || devType === "router" || devType === "patch-panel" ||
+        label.includes("ethernet") || label.includes("lan") || label.includes("wan") || label.includes("port") || label.includes("rj45")) {
+      return "network";
+    }
+
+    return "network";
+  }
+
+  // Returns the matching target port type for connection validation
+  function getCompatiblePortType(type) {
+    switch (type) {
+      case "network": return "network";
+      case "hdmi": return "hdmi";
+      case "ir-out": return "ir-in";
+      case "ir-in": return "ir-out";
+      case "serial": return "serial";
+      case "trigger": return "trigger";
+      case "speaker-out": return "speaker-in";
+      case "speaker-in": return "speaker-out";
+      case "audio-analog-out": return "audio-analog-in";
+      case "audio-analog-in": return "audio-analog-out";
+      case "audio-digital-out": return "audio-digital-in";
+      case "audio-digital-in": return "audio-digital-out";
+      case "power-inlet": return "power-outlet";
+      case "power-outlet": return "power-inlet";
+      default: return "none";
+    }
   }
 
   // Check if U slots are occupied
@@ -4627,21 +4724,14 @@ cabinetRackEl.appendChild(container);
     
     const logicalPorts = [];
     if (dev.ports > 0) {
-      const wanPortsCount = (() => {
-        if (dev.type !== "router") return 0;
-        const id = dev.id.toLowerCase();
-        if (id === "eero-poe-gateway") return 2;
-        if (id.includes("2wan") || id.includes("4l2w")) return 2;
-        return 1;
-      })();
-
       for (let i = 0; i < dev.ports; i++) {
         const isWan = isRouterWanPort(dev.id, i);
         let portLabel = getDevicePortFriendlyLabel(dev.id, i);
         if (isWan) {
           portLabel = `${portLabel} (WAN)`;
         }
-        logicalPorts.push({ index: i, type: "network", label: portLabel, isWan });
+        const portType = classifyPort(dev.id, i);
+        logicalPorts.push({ index: i, type: portType, label: portLabel, isWan });
       }
     }
     if (dev.requires_power) {
@@ -4753,18 +4843,28 @@ cabinetRackEl.appendChild(container);
       
       const targetSelect = document.createElement("select");
       targetSelect.style.display = (destType === "none" || destType === "internet") ? "none" : "";
+      let otherDevices = [];
+      const compatibleType = getCompatiblePortType(pInfo.type);
+      if (compatibleType !== "none") {
+        otherDevices = state.placedDevices.filter(d => {
+          if (d.instanceId === dev.instanceId) return false;
+          if (compatibleType === "power-inlet") {
+            return d.requires_power;
+          }
+          if (compatibleType === "power-outlet") {
+            return d.outlets > 0;
+          }
+          for (let p = 0; p < d.ports; p++) {
+            if (classifyPort(d.id, p) === compatibleType) {
+              return true;
+            }
+          }
+          return false;
+        });
+      }
       
       const portSelect = document.createElement("select");
       portSelect.style.display = destType === "device" ? "" : "none";
-      
-      let otherDevices = [];
-      if (pInfo.type === "network") {
-        otherDevices = state.placedDevices.filter(d => d.instanceId !== dev.instanceId && d.ports > 0);
-      } else if (pInfo.type === "power-inlet") {
-        otherDevices = state.placedDevices.filter(d => d.instanceId !== dev.instanceId && d.outlets > 0);
-      } else if (pInfo.type === "power-outlet") {
-        otherDevices = state.placedDevices.filter(d => d.instanceId !== dev.instanceId && d.requires_power);
-      }
       
       const updateTargets = () => {
         const type = typeSelect.value;
@@ -4834,32 +4934,34 @@ cabinetRackEl.appendChild(container);
         portSelect.innerHTML = "";
         
         if (targetDev) {
-          if (pInfo.type === "network") {
+          if (pInfo.type !== "power-inlet" && pInfo.type !== "power-outlet") {
             for (let p = 0; p < targetDev.ports; p++) {
-              const opt = document.createElement("option");
-              opt.value = p;
-              opt.textContent = getDevicePortFriendlyLabel(targetDev.id, p);
-              
-              const targetConn = state.connections.find(c => 
-                (c.fromDevice === targetDev.instanceId && c.fromPort === p) || 
-                (c.toDevice === targetDev.instanceId && c.toPort === p)
-              );
-              
-              if (targetConn) {
-                const isCurrentConn = conn && (
-                  (targetConn.fromDevice === dev.instanceId && targetConn.fromPort === i) ||
-                  (targetConn.toDevice === dev.instanceId && targetConn.toPort === i)
+              if (classifyPort(targetDev.id, p) === compatibleType) {
+                const opt = document.createElement("option");
+                opt.value = p;
+                opt.textContent = getDevicePortFriendlyLabel(targetDev.id, p);
+                
+                const targetConn = state.connections.find(c => 
+                  (c.fromDevice === targetDev.instanceId && c.fromPort === p) || 
+                  (c.toDevice === targetDev.instanceId && c.toPort === p)
                 );
-                if (!isCurrentConn) {
-                  opt.textContent += " (occupied)";
-                  opt.style.color = "#dc2626";
+                
+                if (targetConn) {
+                  const isCurrentConn = conn && (
+                    (targetConn.fromDevice === dev.instanceId && targetConn.fromPort === i) ||
+                    (targetConn.toDevice === dev.instanceId && targetConn.toPort === i)
+                  );
+                  if (!isCurrentConn) {
+                    opt.textContent += " (occupied)";
+                    opt.style.color = "#dc2626";
+                  }
                 }
+                
+                if (destType === "device" && destDeviceId === targetId && destPortIdx === p) {
+                  opt.selected = true;
+                }
+                portSelect.appendChild(opt);
               }
-              
-              if (destType === "device" && destDeviceId === targetId && destPortIdx === p) {
-                opt.selected = true;
-              }
-              portSelect.appendChild(opt);
             }
           } else if (pInfo.type === "power-inlet") {
             for (let p = 0; p < targetDev.outlets; p++) {
