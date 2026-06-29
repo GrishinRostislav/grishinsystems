@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
     theater: [
       { id: "savant-sipa125", name: "Savant IP Audio 125 (SIPA125)", brand: "savant", u: 1, ports: 20, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1800 },
       { id: "savant-sipa50", name: "Savant IP Audio 50 (SIPA50)", brand: "savant", u: 1, width_fraction: 0.33, ports: 20, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 950 },
-      { id: "savant-sipa1sm", name: "Savant IP Audio 1 (SIPA1SM)", brand: "savant", u: 1, width_fraction: 0.5, ports: 10, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1200 },
+      { id: "savant-sipa1sm", name: "Savant IP Audio 1 (SIPA1SM)", brand: "savant", u: 1, width_fraction: 0.5, ports: 12, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1200 },
       { id: "avr-anthem-mrx740", name: "Anthem MRX 740 11.2-Ch AV Receiver", brand: "anthem", u: 4, ports: 53, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 3099 },
       { id: "avr-anthem-mrx1140", name: "Anthem MRX 1140 15.2-Ch AV Receiver", brand: "anthem", u: 4, ports: 53, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 4199 },
       { id: "avr-sony-az1000es", name: "Sony STR-AZ1000ES 7.2-Ch ES Receiver", brand: "sony", u: 3, ports: 53, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 899 },
@@ -123,14 +123,14 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "avr-marantz-c50", name: "Marantz Cinema 50 9.4-Ch (3 Zones)", brand: "marantz", u: 4, ports: 53, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 2500 },
       { id: "avr-marantz-c60", name: "Marantz Cinema 60 7.2-Ch AV Receiver", brand: "marantz", u: 3, ports: 53, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1700 },
       { id: "avr-marantz-c40", name: "Marantz Cinema 40 9.4-Ch AV Receiver", brand: "marantz", u: 4, ports: 53, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 3500 },
-      { id: "amp-sonos", name: "Sonos Amp 125W (2-Ch Stereo Zone)", brand: "sonos", u: 1, width_fraction: 0.5, ports: 7, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 699 }
+      { id: "amp-sonos", name: "Sonos Amp 125W (2-Ch Stereo Zone)", brand: "sonos", u: 1, width_fraction: 0.5, ports: 8, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 699 }
     ],
     sources: [
-      { id: "apple-tv-4k", name: "Apple TV 4K", brand: "apple", u: 1, width_fraction: 0.33, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 149 },
-      { id: "sony-ps5", name: "Sony PlayStation 5 Console", brand: "sony", u: 3, width_fraction: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 499 },
-      { id: "cable-box", name: "Generic Cable / Satellite Box", brand: "generic", u: 1, width_fraction: 0.5, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 99 },
-      { id: "nv-shield", name: "NVIDIA Shield TV Pro Media Player", brand: "generic", u: 1, width_fraction: 0.33, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 199 },
-      { id: "sonos-port", name: "Sonos Port Audio Streamer", brand: "sonos", u: 1, width_fraction: 0.33, ports: 6, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 449 },
+      { id: "apple-tv-4k", name: "Apple TV 4K", brand: "apple", u: 1, width_fraction: 0.33, ports: 2, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 149 },
+      { id: "sony-ps5", name: "Sony PlayStation 5 Console", brand: "sony", u: 3, width_fraction: 1, ports: 2, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 499 },
+      { id: "cable-box", name: "Generic Cable / Satellite Box", brand: "generic", u: 1, width_fraction: 0.5, ports: 2, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 99 },
+      { id: "nv-shield", name: "NVIDIA Shield TV Pro Media Player", brand: "generic", u: 1, width_fraction: 0.33, ports: 2, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 199 },
+      { id: "sonos-port", name: "Sonos Port Audio Streamer", brand: "sonos", u: 1, width_fraction: 0.33, ports: 8, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 449 },
       { id: "generic-nvr", name: "Generic Network Video Recorder (NVR)", brand: "generic", u: 1, width_fraction: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 299 }
     ],
     automation: [
@@ -1631,6 +1631,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function getDevicePortFriendlyLabel(devId, portIndex) {
     const id = devId.toLowerCase();
+    if (id === "apple-tv-4k" || id === "sony-ps5" || id === "cable-box" || id === "nv-shield") {
+      if (portIndex === 0) return "Ethernet (LAN)";
+      if (portIndex === 1) return "HDMI Output";
+    }
     if (id.includes("sipa125") || id.includes("sipa50")) {
       if (portIndex === 0) return "Ethernet (LAN)";
       if (portIndex === 1) return "Analog In 1 L (White)";
@@ -1655,32 +1659,37 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (id.includes("sipa1sm")) {
       if (portIndex === 0) return "Ethernet (LAN)";
-      if (portIndex === 1) return "Analog Stereo In (RCA L/R)";
-      if (portIndex === 2) return "Digital TosLink In";
-      if (portIndex === 3) return "Speaker Output Zone 1 L (+/-)";
-      if (portIndex === 4) return "Speaker Output Zone 1 R (+/-)";
-      if (portIndex === 5) return "Pre-Amp Output (RCA L/R)";
-      if (portIndex === 6) return "IR Output 1";
-      if (portIndex === 7) return "IR Output 2";
-      if (portIndex === 8) return "IR Output 3";
-      if (portIndex === 9) return "RS-232 Serial Port";
+      if (portIndex === 1) return "Analog In L (White)";
+      if (portIndex === 2) return "Analog In R (Red)";
+      if (portIndex === 3) return "Digital TosLink In";
+      if (portIndex === 4) return "Speaker Output Zone 1 L (+/-)";
+      if (portIndex === 5) return "Speaker Output Zone 1 R (+/-)";
+      if (portIndex === 6) return "Pre-Amp Out L (White)";
+      if (portIndex === 7) return "Pre-Amp Out R (Red)";
+      if (portIndex === 8) return "IR Output 1";
+      if (portIndex === 9) return "IR Output 2";
+      if (portIndex === 10) return "IR Output 3";
+      if (portIndex === 11) return "RS-232 Serial Port";
     }
     if (id.includes("amp-sonos")) {
       if (portIndex === 0) return "Ethernet LAN 1";
       if (portIndex === 1) return "Ethernet LAN 2";
       if (portIndex === 2) return "HDMI ARC Input";
-      if (portIndex === 3) return "Analog Audio In (RCA L/R)";
-      if (portIndex === 4) return "Subwoofer Out (RCA)";
-      if (portIndex === 5) return "Speaker Output Left (+/-)";
-      if (portIndex === 6) return "Speaker Output Right (+/-)";
+      if (portIndex === 3) return "Analog Audio In L (White)";
+      if (portIndex === 4) return "Analog Audio In R (Red)";
+      if (portIndex === 5) return "Subwoofer Out (RCA)";
+      if (portIndex === 6) return "Speaker Output Left (+/-)";
+      if (portIndex === 7) return "Speaker Output Right (+/-)";
     }
     if (id.includes("sonos-port")) {
       if (portIndex === 0) return "Ethernet LAN 1";
       if (portIndex === 1) return "Ethernet LAN 2";
-      if (portIndex === 2) return "Analog Stereo Audio In (RCA L/R)";
-      if (portIndex === 3) return "Analog Stereo Audio Out (RCA L/R)";
-      if (portIndex === 4) return "Digital Coaxial Out";
-      if (portIndex === 5) return "12V Trigger Out (3.5mm)";
+      if (portIndex === 2) return "Analog Audio In L (White)";
+      if (portIndex === 3) return "Analog Audio In R (Red)";
+      if (portIndex === 4) return "Analog Audio Out L (White)";
+      if (portIndex === 5) return "Analog Audio Out R (Red)";
+      if (portIndex === 6) return "Digital Coaxial Out";
+      if (portIndex === 7) return "12V Trigger Out (3.5mm)";
     }
     if (id.startsWith("avr-")) {
       if (portIndex === 0) return "Ethernet (LAN)";
@@ -2640,6 +2649,8 @@ cabinetRackEl.appendChild(container);
                 ${customPowerInletPort()}
                 <span class="custom-port-mini-label" style="font-size: 6px; font-weight: bold; color: var(--text-muted);">LAN</span>
                 ${customSinglePort(0, "Ethernet (LAN)")}
+                <span class="custom-port-mini-label" style="font-size: 6px; font-weight: bold; color: var(--text-muted);">HDMI</span>
+                ${customSinglePort(1, "HDMI Output")}
               </div>
             </div>
             <div class="ps5-wing ps5-wing-bottom"></div>
@@ -2766,6 +2777,10 @@ cabinetRackEl.appendChild(container);
                 <span class="appletv-port-label" style="font-size: 5px; font-weight: bold; color: #555;">LAN</span>
                 ${customSinglePort(0, "Ethernet (LAN)")}
               </div>
+              <div style="display: flex; align-items: center; gap: 1px;">
+                <span class="appletv-port-label" style="font-size: 5px; font-weight: bold; color: #555;">HDMI</span>
+                ${customSinglePort(1, "HDMI Output")}
+              </div>
             </div>
           </div>
         `;
@@ -2784,7 +2799,9 @@ cabinetRackEl.appendChild(container);
             <div class="cable-box-ports" style="display: flex; align-items: center; gap: 6px; margin-left: auto; pointer-events: auto; padding-right: 6px;">
               ${customPowerInletPort()}
               <span class="cable-box-port-label" style="font-size: 6px; font-weight: bold; color: #666;">LAN</span>
-              ${customSinglePort(0, "Ethernet")}
+              ${customSinglePort(0, "Ethernet (LAN)")}
+              <span class="cable-box-port-label" style="font-size: 6px; font-weight: bold; color: #666;">HDMI</span>
+              ${customSinglePort(1, "HDMI Output")}
             </div>
           </div>
         `;
@@ -2843,6 +2860,10 @@ cabinetRackEl.appendChild(container);
               <div style="display: flex; align-items: center; gap: 1px;">
                 <span class="nvshield-port-label" style="font-size: 5px; font-weight: bold; color: #555;">LAN</span>
                 ${customSinglePort(0, "Ethernet (LAN)")}
+              </div>
+              <div style="display: flex; align-items: center; gap: 1px;">
+                <span class="nvshield-port-label" style="font-size: 5px; font-weight: bold; color: #555;">HDMI</span>
+                ${customSinglePort(1, "HDMI Output")}
               </div>
             </div>
           </div>
