@@ -1275,13 +1275,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function ensureDefaultWallOutlet() {
+    // 1. Force slot back to wall-outlet for any wall outlet devices
     state.placedDevices.forEach(d => {
       if (d.id === "wall-outlet-6" && d.slot !== "wall-outlet") {
         d.slot = "wall-outlet";
       }
     });
 
-    if (!state.placedDevices.some(d => d.slot === "wall-outlet")) {
+    // 2. Collect all wall outlet devices
+    const wallOutletDevices = state.placedDevices.filter(d => d.slot === "wall-outlet");
+    
+    if (wallOutletDevices.length === 0) {
+      // Create the default one if missing
       state.placedDevices.push({
         instanceId: "inst_wall_outlet_default",
         id: "wall-outlet-6",
@@ -1297,6 +1302,10 @@ document.addEventListener("DOMContentLoaded", () => {
         cost: 0,
         slot: "wall-outlet"
       });
+    } else if (wallOutletDevices.length > 1) {
+      // If there are duplicates, keep only the first one and remove the rest from state
+      const first = wallOutletDevices[0];
+      state.placedDevices = state.placedDevices.filter(d => d.slot !== "wall-outlet" || d.instanceId === first.instanceId);
     }
   }
 
