@@ -524,7 +524,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Deep clone devices so we don't mutate state on failure
       const sorted = JSON.parse(JSON.stringify(state.placedDevices)).sort((a, b) => a.slot - b.slot);
       sorted.forEach(dev => {
-        if (isSideSlot(dev.slot)) {
+        if (isSideSlot(dev.slot) || isWallOutletSlot(dev.slot)) {
           adjustedDevices.push(dev);
           return;
         }
