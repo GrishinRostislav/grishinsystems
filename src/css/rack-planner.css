@@ -1947,6 +1947,8 @@ body.dragging-active .placed-device * {
 
   #cabinet-rack {
     display: block !important;
+    order: 1 !important;
+    margin: 0 auto !important;
   }
 
   .cabinet-wrapper {
@@ -1959,6 +1961,7 @@ body.dragging-active .placed-device * {
     gap: 16px !important;
     margin: 10px auto !important;
     background: white !important;
+    position: relative !important;
   }
 
   .side-cabinet-wrapper {
@@ -2194,9 +2197,12 @@ body.dragging-active .placed-device * {
     display: none !important;
   }
 }
+.cable-path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 
-/* Cable SVG visualization is disabled */
-.rack-cables-svg { display: none; }
 
 /* Interactive port highlights on faceplate */
 .port-dot {

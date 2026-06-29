@@ -3531,6 +3531,7 @@ cabinetRackEl.appendChild(container);
     // Automatically generate 14U print chunks
     generatePrintRacks();
     updatePrintReportSection();
+    drawRackCables();
   }
 
   function updatePrintReportSection() {
@@ -3856,7 +3857,7 @@ cabinetRackEl.appendChild(container);
         }
       }
       if (slotFound === null) {
-        for (let u = dev.u; u <= state.rackSize; u++) {
+        for (let u = dev.slot; u <= state.rackSize; u++) {
           if (fits(u, dev.u, frac)) {
             slotFound = u;
             break;
@@ -3880,7 +3881,7 @@ cabinetRackEl.appendChild(container);
         }
       }
       if (slotFound === null) {
-        for (let u = state.rackSize; u >= dev.u; u--) {
+        for (let u = dev.slot; u >= dev.u; u--) {
           if (fits(u, dev.u, frac)) {
             slotFound = u;
             break;
@@ -5203,13 +5204,6 @@ cabinetRackEl.appendChild(container);
   }
   
   function drawRackCables() {
-    // Cable visualization removed – connections are managed via the config modal only
-    const svg = document.getElementById("rack-cables-svg");
-    if (svg) svg.innerHTML = "";
-    return;
-  }
-
-  function _drawRackCables_disabled() {
     let svg = document.getElementById("rack-cables-svg");
     if (!svg) {
       svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
