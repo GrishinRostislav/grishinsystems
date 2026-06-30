@@ -538,8 +538,8 @@
   left: 37px;
   right: 6px;
   z-index: 5;
-  background: #0d0e12 !important;
-  border: 1.5px solid #202430 !important;
+  background: rgb(53,53,53) !important;
+  border: 1.5px solid #1a1a1a !important;
   border-radius: 6px !important;
   padding: 4px 8px 3px;
   display: flex;
@@ -832,8 +832,7 @@ body.dragging-active .placed-device * {
   height: 9px;
   border-radius: 50%;
   background: #18181b;
-  border: 1.5px solid #f97316 !important;
-  box-shadow: 0 0 3px rgba(249, 115, 22, 0.4);
+  border: 1.2px solid #a25822 !important;
   box-sizing: border-box;
 }
 .port-dot.power-inlet-dot::after {
@@ -841,23 +840,57 @@ body.dragging-active .placed-device * {
 }
 .port-dot.power-inlet-dot.connected {
   background: #f97316 !important;
-  box-shadow: 0 0 5px #f97316;
+  border-color: #ff9d43 !important;
+  box-shadow: 0 0 5px #f97316 !important;
 }
 
 .port-dot.power-outlet-dot {
-  width: 8px;
-  height: 8px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background: #18181b;
-  border: 1.5px solid #f97316 !important;
-  box-shadow: 0 0 3px rgba(249, 115, 22, 0.4);
+  background: #111113;
+  border: 1.2px solid #a25822 !important;
+  position: relative;
+  box-sizing: border-box;
+  display: inline-block;
+  transition: var(--transition);
+}
+
+.port-dot.power-outlet-dot::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3.5px;
+  width: 5px;
+  height: 3px;
+  border-left: 1.2px solid #8a5d3d;
+  border-right: 1.2px solid #8a5d3d;
   box-sizing: border-box;
 }
+
 .port-dot.power-outlet-dot::after {
-  display: none !important;
+  content: '' !important;
+  position: absolute;
+  bottom: 2.5px;
+  left: 4.5px;
+  width: 2.5px;
+  height: 2.5px;
+  border-radius: 50%;
+  background: #8a5d3d;
+  box-sizing: border-box;
+  display: block !important;
 }
+
 .port-dot.power-outlet-dot.connected {
-  box-shadow: 0 0 6px #f97316;
+  border-color: #f97316 !important;
+  box-shadow: 0 0 6px rgba(249, 115, 22, 0.5) !important;
+}
+.port-dot.power-outlet-dot.connected::before {
+  border-left-color: #f97316 !important;
+  border-right-color: #f97316 !important;
+}
+.port-dot.power-outlet-dot.connected::after {
+  background: #f97316 !important;
 }
 
 /* Brush strip & shelf plate */
