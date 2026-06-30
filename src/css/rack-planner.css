@@ -580,8 +580,11 @@ body.dragging-active .placed-device * {
 
 .device-faceplate-left {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 8px;
+  height: 100%;
+  box-sizing: border-box;
+  padding-bottom: 4px;
 }
 
 .device-faceplate-bottom {

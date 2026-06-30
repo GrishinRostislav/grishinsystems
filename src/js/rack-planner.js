@@ -2296,8 +2296,9 @@ cabinetRackEl.appendChild(container);
             return `<span class="port-dot power-outlet-dot${connectedClass}" data-port-idx="${portIndex}" title="${dev.customLabel || dev.name} - Outlet ${outletIdx + 1}"></span>`;
           };
           
-          const cols = Math.ceil(dev.outlets / 2);
-          portsHtml += `<div class="device-ports power-outlets-area" style="grid-template-columns: repeat(${cols}, auto); gap: 4px 8px; align-items: center; justify-content: center; height: 100%; padding-right: 12px; pointer-events: auto;">`;
+          const useSingleRow = dev.u === 1;
+          const cols = useSingleRow ? dev.outlets : Math.ceil(dev.outlets / 2);
+          portsHtml += `<div class="device-ports power-outlets-area" style="grid-template-columns: repeat(${cols}, auto); grid-template-rows: ${useSingleRow ? '1fr' : 'repeat(2, auto)'}; gap: 4px 8px; align-items: center; justify-content: center; height: 100%; padding-right: 12px; pointer-events: auto;">`;
           for (let i = 0; i < dev.outlets; i++) {
             portsHtml += `
               <div style="display:flex; align-items:center; gap:2px;">
