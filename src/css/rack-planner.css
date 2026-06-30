@@ -538,22 +538,22 @@
   left: 37px;
   right: 6px;
   z-index: 5;
-  background: #1e293b;
-  border: 1.5px solid #475569;
-  border-radius: 3px;
+  background: #0d0e12 !important;
+  border: 1.5px solid #202430 !important;
+  border-radius: 6px !important;
   padding: 4px 8px 3px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
   transition: var(--transition);
   cursor: grab;
   overflow: hidden;
 }
 
 .placed-device:hover {
-  border-color: var(--accent-cyan);
-  box-shadow: 0 6px 15px rgba(6, 182, 212, 0.15);
+  border-color: var(--accent-cyan) !important;
+  box-shadow: 0 6px 15px rgba(6, 182, 212, 0.15), 0 4px 10px rgba(0, 0, 0, 0.5) !important;
 }
 
 .placed-device.drop-hover {
@@ -574,13 +574,13 @@ body.dragging-active .placed-device * {
 .device-faceplate-top {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
   width: 100%;
 }
 
 .device-faceplate-left {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 8px;
 }
 
@@ -684,125 +684,123 @@ body.dragging-active .placed-device * {
 }
 
 /* Realistic RJ45 Ports */
+/* Flat Vector RJ45 Ports */
 .port-dot {
   width: 12px;
-  height: 10px;
-  border-radius: 1.5px;
-  background: #050810;
-  border: 1px solid #94a3b8; /* silver metallic shield */
-  border-bottom: 2px solid #94a3b8; /* thicker bottom */
+  height: 9px;
+  border-radius: 1px;
+  background: #18191d;
+  border: 1px solid #33363f;
   position: relative;
   transition: var(--transition);
+  box-sizing: border-box;
 }
 
-/* Simulate the little clip notch at the top */
+/* Simulate the flat clip notch at the bottom */
 .port-dot::after {
   content: '';
   position: absolute;
-  top: -1px;
-  left: 3px;
-  width: 4px;
-  height: 2px;
-  background: #050810;
-  border-left: 1px solid #94a3b8;
-  border-right: 1px solid #94a3b8;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  bottom: 0px;
+  left: 3.5px;
+  width: 3px;
+  height: 1.5px;
+  background: #090a0c;
+  border-radius: 0.5px 0.5px 0 0;
+  border: none !important;
 }
 
-/* RJ45 active state glow inside the hole and border */
-.port-dot.active {
-  background: rgba(16, 185, 129, 0.15);
-  border-color: var(--success);
+/* RJ45 active/connected state */
+.port-dot.active,
+.port-dot.connected {
+  background: #0284c7 !important;
+  border-color: #38bdf8 !important;
 }
-.port-dot.active::after {
-  background: rgba(16, 185, 129, 0.15);
-  border-color: var(--success);
+.port-dot.active::after,
+.port-dot.connected::after {
+  background: #090a0c !important;
 }
 
 .port-dot.poe-capable {
   display: flex;
   align-items: center;
   justify-content: center;
+  border-color: #4b5160;
 }
 .port-dot.poe-capable::before {
   content: "⚡";
-  font-size: 7px;
+  font-size: 6px;
   line-height: 1;
-  opacity: 0.3;
-  color: #fff;
+  opacity: 0.4;
+  color: #fbbf24;
   z-index: 2;
-  margin-top: 1px;
 }
 
 .port-dot.poe {
-  background: rgba(245, 158, 11, 0.15);
-  border-color: var(--warning);
+  background: #d97706 !important; /* amber/orange active PoE */
+  border-color: #f59e0b !important;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .port-dot.poe::before {
   content: "⚡";
-  font-size: 7px;
+  font-size: 6px;
   line-height: 1;
   opacity: 1;
   color: #fff;
   z-index: 2;
-  margin-top: 1px;
 }
 .port-dot.poe::after {
-  background: rgba(245, 158, 11, 0.15);
-  border-color: var(--warning);
+  background: #090a0c !important;
 }
 
 .port-dot.uplink {
-  background: rgba(59, 130, 246, 0.15);
-  border-color: var(--accent);
+  background: #0284c7 !important;
+  border-color: #38bdf8 !important;
 }
 .port-dot.uplink::after {
-  background: rgba(59, 130, 246, 0.15);
-  border-color: var(--accent);
+  background: #090a0c !important;
 }
 
+/* SFP Port - Flat Teal Vector */
 .port-dot.sfp-port {
-  width: 10px;
-  height: 10px;
-  border: 1px solid #3b82f6; /* Blue metallic outline */
-  border-radius: 1.5px;
-  background: #060e1c; /* Dark blue inner cavity */
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.9), 0 0 3px rgba(59, 130, 246, 0.4);
+  width: 12px;
+  height: 9px;
+  border: 1px solid #14b8a6; /* teal border */
+  border-radius: 1px;
+  background: #0c2d2c; /* dark teal cavity */
   position: relative;
   display: inline-block;
+  box-shadow: none;
 }
 .port-dot.sfp-port::after {
   content: '';
   position: absolute;
-  top: 3px;
-  left: 1px;
+  bottom: 1.5px;
+  left: 2px;
   width: 6px;
-  height: 2.5px;
-  background: #2563eb; /* Blue release lever */
+  height: 1.5px;
+  background: #14b8a6; /* flat teal release lever */
   border-radius: 0.5px;
   border: none !important;
-  box-shadow: 0 0 1px rgba(0,0,0,0.5);
-}
-.port-dot.sfp-port.connected::after {
-  background: #00f0ff !important; /* Cyan-blue glow when fiber link is connected */
-  box-shadow: 0 0 6px #00f0ff, 0 0 10px #00f0ff;
+  box-shadow: none;
 }
 .port-dot.sfp-port.connected {
-  border-color: #00f0ff;
-  box-shadow: 0 0 5px rgba(0, 240, 255, 0.4);
+  background: #14b8a6 !important;
+  border-color: #2dd4bf !important;
+}
+.port-dot.sfp-port.connected::after {
+  background: #00ffff !important; /* cyan release lever */
 }
 
+/* WAN Port - Flat Green/Emerald Vector */
 .port-dot.wan-port {
-  background: rgba(239, 68, 68, 0.15);
-  border-color: #ef4444;
+  background: #065f46;
+  border-color: #059669;
   position: relative;
 }
 .port-dot.wan-port::after {
-  background: rgba(239, 68, 68, 0.15);
-  border-color: #ef4444;
+  background: #090a0c !important;
 }
 .port-dot.wan-port::before {
   display: none !important;
@@ -812,13 +810,7 @@ body.dragging-active .placed-device * {
 .port-dot.wan-port.internet-active {
   background: #10b981 !important;
   border-color: #34d399 !important;
-  box-shadow: 0 0 6px #10b981, inset 0 1px 0 rgba(255,255,255,0.2) !important;
-}
-.port-dot.wan-port.connected::after,
-.port-dot.wan-port.internet-active::after {
-  background: #10b981 !important;
-  border-color: #34d399 !important;
-  box-shadow: 0 0 3px #10b981 !important;
+  box-shadow: none !important;
 }
 
 .port-dot.wan-last {
@@ -945,91 +937,67 @@ body.dragging-active .placed-device * {
    8. BRAND COLORS
    ---------------------------------------------------------- */
 .device-brand-ubiquiti {
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  border-left: 4px solid var(--accent);
+  border-left: 4px solid var(--accent) !important;
 }
 
 .device-brand-cisco {
-  background: linear-gradient(135deg, #062016, #112a1f);
-  border-left: 4px solid var(--success);
+  border-left: 4px solid var(--success) !important;
 }
 
 .device-brand-mikrotik {
-  background: linear-gradient(135deg, #2d1b10, #382415);
-  border-left: 4px solid var(--warning);
+  border-left: 4px solid var(--warning) !important;
 }
 
 .device-brand-tplink {
-  background: linear-gradient(135deg, #0f2b3e, #183e58);
-  border-left: 4px solid #00a4e4;
+  border-left: 4px solid #00a4e4 !important;
 }
 
 .device-brand-araknis {
-  background: linear-gradient(135deg, #111e25, #1f2d37);
-  border-left: 4px solid #005691;
+  border-left: 4px solid #005691 !important;
 }
 
 .device-brand-cyberpower {
-  background: linear-gradient(135deg, #111827, #1f2937);
-  border-left: 4px solid #facc15;
+  border-left: 4px solid #facc15 !important;
 }
 
 .device-brand-denon {
-  background: linear-gradient(180deg, #34373c 0%, #1e2022 100%) !important;
   border-left: 4px solid #b89753 !important;
-  border-top: 1.5px solid #52565e !important;
-  border-bottom: 1.5px solid #111214 !important;
 }
 
 .device-brand-marantz {
-  background: linear-gradient(180deg, #34373c 0%, #1e2022 100%) !important;
   border-left: 4px solid #d4af37 !important;
-  border-top: 1.5px solid #52565e !important;
-  border-bottom: 1.5px solid #111214 !important;
 }
 
 .device-brand-anthem {
-  background: linear-gradient(180deg, #34373c 0%, #1e2022 100%) !important;
   border-left: 4px solid #da291c !important;
-  border-top: 1.5px solid #52565e !important;
-  border-bottom: 1.5px solid #111214 !important;
 }
 
 .device-brand-apple {
-  background: linear-gradient(135deg, #2c2d30, #3a3b3e);
-  border-left: 4px solid #a3aaae;
+  border-left: 4px solid #a3aaae !important;
 }
 
 .device-brand-sony {
-  background: linear-gradient(180deg, #34373c 0%, #1e2022 100%) !important;
   border-left: 4px solid #0096d6 !important;
-  border-top: 1.5px solid #52565e !important;
-  border-bottom: 1.5px solid #111214 !important;
 }
 
 .device-brand-sonos {
-  background: linear-gradient(135deg, #111111, #252525);
-  border-left: 4px solid #e1a12c;
+  border-left: 4px solid #e1a12c !important;
 }
 
 .device-brand-generic {
-  background: linear-gradient(135deg, #1f2937, #374151);
-  border-left: 4px solid var(--text-secondary);
+  border-left: 4px solid var(--text-secondary) !important;
 }
 
 .device-brand-eero {
-  background: linear-gradient(135deg, #131722, #202634);
-  border-left: 4px solid #ff5a00;
+  border-left: 4px solid #ff5a00 !important;
 }
 
 .device-brand-savant {
-  background: linear-gradient(135deg, #120e25, #221a3e);
-  border-left: 4px solid #5a30b5;
+  border-left: 4px solid #5a30b5 !important;
 }
 
 .device-brand-control4 {
-  background: linear-gradient(135deg, #18191b, #2c2d30);
-  border-left: 4px solid #cc0000;
+  border-left: 4px solid #cc0000 !important;
 }
 
 /* ----------------------------------------------------------
@@ -2497,9 +2465,8 @@ body.dragging-active .placed-device * {
   bottom: 0;
   left: 0;
   width: 14px;
-  background: linear-gradient(to right, #475569, #1e293b);
-  border-right: 1px solid #0f172a;
-  border-left: 1px solid #64748b;
+  background: #14151a;
+  border-right: 1.5px solid #202430;
   z-index: 10;
   display: flex;
   flex-direction: column;
@@ -2507,7 +2474,7 @@ body.dragging-active .placed-device * {
   align-items: center;
   padding: 8px 0;
   box-sizing: border-box;
-  border-radius: 2px 0 0 2px;
+  border-radius: 6px 0 0 6px;
 }
 
 .rack-ear-right {
@@ -2516,9 +2483,8 @@ body.dragging-active .placed-device * {
   bottom: 0;
   right: 0;
   width: 14px;
-  background: linear-gradient(to left, #475569, #1e293b);
-  border-left: 1px solid #0f172a;
-  border-right: 1px solid #64748b;
+  background: #14151a;
+  border-left: 1.5px solid #202430;
   z-index: 10;
   display: flex;
   flex-direction: column;
@@ -2526,7 +2492,7 @@ body.dragging-active .placed-device * {
   align-items: center;
   padding: 8px 0;
   box-sizing: border-box;
-  border-radius: 0 2px 2px 0;
+  border-radius: 0 6px 6px 0;
 }
 
 .rack-ear-left::before, .rack-ear-left::after,
@@ -2535,9 +2501,8 @@ body.dragging-active .placed-device * {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: radial-gradient(circle, #cbd5e1 20%, #475569 80%);
-  border: 1px solid #1e293b;
-  box-shadow: inset 0 1px 1px rgba(255,255,255,0.3);
+  background: #2e313c;
+  border: 1px solid #14151a;
 }
 
 .unifi-lcm-screen {
