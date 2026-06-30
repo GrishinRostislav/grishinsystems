@@ -2282,7 +2282,7 @@ cabinetRackEl.appendChild(container);
       let portsHtml = "";
       if (dev.id === "organizer-1u" || dev.name.toLowerCase().includes("brush") || dev.name.toLowerCase().includes("organizer")) {
         portsHtml = `<div class="device-brush-strip" title="Brush Cable Pass-Through"></div>`;
-      } else if (dev.id === "shelf-1u" || dev.name.toLowerCase().includes("shelf")) {
+      } else if (dev.id === "shelf-1u" || (dev.name.toLowerCase().includes("shelf") && dev.type !== "power")) {
         portsHtml = `<div class="device-shelf-plate" title="Equipment Shelf Tray"></div>`;
       } else if (dev.ports > 0 || (dev.type === "power" && dev.outlets > 0)) {
         if (dev.type === "power") {
