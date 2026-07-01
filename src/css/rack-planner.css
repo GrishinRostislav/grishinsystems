@@ -918,13 +918,10 @@ body.dragging-active .placed-device * {
 .device-shelf-plate {
   width: 100%;
   height: 100%;
-  background: repeating-linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.06) 0px,
-    rgba(255, 255, 255, 0.06) 12px,
-    rgba(255, 255, 255, 0.02) 12px,
-    rgba(255, 255, 255, 0.02) 24px
-  );
+  background: #16171c;
+  border-top: 1.5px solid #2e303c;
+  border-bottom: 1.5px solid #0d0e12;
+  box-sizing: border-box;
   border-radius: 2px;
 }
 
