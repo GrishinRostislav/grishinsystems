@@ -705,24 +705,27 @@ document.addEventListener("DOMContentLoaded", () => {
         const relativeY = e.clientY - rect.top;
         
         const slotIdx = state.rackSize - Math.floor(relativeY / 72);
-        const targetU = Math.max(1, Math.min(state.rackSize, slotIdx));
-        
-        const topPx = (state.rackSize - targetU) * 72;
-        highlightIndicator.style.top = `${topPx + 2}px`;
         
         let dragU = 1;
         if (state.draggedPresetId) {
-          for (const cat in presets) {
-            const p = presets[cat].find(x => x.id === state.draggedPresetId);
-            if (p) { dragU = p.u; break; }
-          }
+          const p = findPreset(state.draggedPresetId);
+          if (p) dragU = p.u;
         } else if (state.draggedInstanceId) {
           const d = state.placedDevices.find(x => x.instanceId === state.draggedInstanceId);
           if (d) dragU = d.u;
         }
         
+        const resolvedU = getResolvedSideSlotU(state.draggedInstanceId, state.draggedPresetId, sideKey, slotIdx);
+        const topPx = (state.rackSize - resolvedU) * 72;
+        
+        highlightIndicator.style.top = `${topPx + 2}px`;
         highlightIndicator.style.height = `${dragU * 72 - 4}px`;
         highlightIndicator.style.display = 'block';
+        highlightIndicator.innerHTML = `
+          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #06b6d4; font-size: 9px; font-weight: bold; font-family: sans-serif; white-space: nowrap; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0,0,0,0.8); z-index: 11;">
+            ${dragU}U Drop Slot
+          </div>
+        `;
       });
 
       wrapperEl.addEventListener("dragleave", () => {
@@ -740,9 +743,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const relativeY = e.clientY - rect.top;
         
         const slotIdx = state.rackSize - Math.floor(relativeY / 72);
-        const targetU = Math.max(1, Math.min(state.rackSize, slotIdx));
+        const resolvedU = getResolvedSideSlotU(state.draggedInstanceId, state.draggedPresetId, sideKey, slotIdx);
         
-        const slotName = `${sideKey}-${targetU}`;
+        const slotName = `${sideKey}-${resolvedU}`;
         
         if (state.draggedPresetId) {
           addDevice(state.draggedPresetId, slotName);
@@ -1569,6 +1572,58 @@ document.addEventListener("DOMContentLoaded", () => {
   // Helper to check if a slot value is a side panel slot
   function isSideSlot(slot) {
     return typeof slot === "string" && slot.startsWith("side");
+  }
+
+  // Helper to find final U position for side slots after collision resolution
+  function getResolvedSideSlotU(instanceId, presetId, sideKey, targetU) {
+    let dragU = 1;
+    if (presetId) {
+      const p = findPreset(presetId);
+      if (p) dragU = p.u;
+    } else if (instanceId) {
+      const d = state.placedDevices.find(x => x.instanceId === instanceId);
+      if (d) dragU = d.u;
+    }
+    
+    // Cap targetU so it fits
+    targetU = Math.max(dragU, Math.min(state.rackSize, targetU));
+    
+    // Find all other devices on the same side panel
+    const otherDevs = state.placedDevices.filter(d => 
+      d.instanceId !== instanceId && 
+      typeof d.slot === "string" && 
+      d.slot.startsWith(sideKey)
+    );
+    
+    // Check if there is an overlap at targetU
+    const isOverlap = (uVal) => {
+      const rangeStart = uVal;
+      const rangeEnd = uVal - dragU + 1;
+      
+      return otherDevs.some(od => {
+        const odInfo = parseSideSlot(od.slot);
+        if (!odInfo) return false;
+        const odStart = odInfo.u;
+        const odEnd = odStart - od.u + 1;
+        return !(rangeEnd > odStart || rangeStart < odEnd);
+      });
+    };
+    
+    // If there is an overlap, find the nearest available slot above or below
+    if (isOverlap(targetU)) {
+      for (let offset = 1; offset < state.rackSize; offset++) {
+        const upU = targetU + offset;
+        if (upU <= state.rackSize && !isOverlap(upU)) {
+          return upU;
+        }
+        const downU = targetU - offset;
+        if (downU >= dragU && !isOverlap(downU)) {
+          return downU;
+        }
+      }
+    }
+    
+    return targetU;
   }
 
   // Helper to find a preset by ID
