@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "wattbox-400-8", name: "WattBox 400 Series IP PDU (8 Outlets, 1U)", brand: "wattbox", u: 1, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 8, requires_power: true, type: "power", cost: 449 },
       { id: "wattbox-300-3", name: "WattBox 300 Series IP PDU (3 Outlets, Compact)", brand: "wattbox", u: 1, width_fraction: 0.33, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 3, requires_power: true, type: "power", cost: 299 },
       { id: "wattbox-250-2", name: "WattBox 250 Series Smart PDU (2 Outlets, Compact)", brand: "wattbox", u: 1, width_fraction: 0.33, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 2, requires_power: true, type: "power", cost: 189 },
-      { id: "wattbox-300vb-5", name: "WattBox WB-300VB-IP-5 IP Power Conditioner", brand: "wattbox", u: 1, width_fraction: 0.5, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 5, requires_power: true, type: "power", cost: 349 },
+      { id: "wattbox-300vb-5", name: "WattBox WB-300VB-IP-5 IP Power Conditioner", brand: "wattbox", u: 2, width_fraction: 0.5, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 5, requires_power: true, type: "power", cost: 349 },
       { id: "power-strip-6", name: "Standard 6-Outlet Power Strip (Shelf)", brand: "generic", u: 1, width_fraction: 0.5, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 6, requires_power: true, type: "power", cost: 25 },
       { id: "wall-outlet-6", name: "Wall Outlet (6 Sockets) – Power Source", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 6, requires_power: false, type: "power", cost: 0 }
     ],
