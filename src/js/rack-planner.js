@@ -147,7 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ],
     misc: [
       { id: "organizer-1u", name: "1U Brush Cable Organizer", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: false, type: "misc", cost: 20 },
-      { id: "shelf-1u", name: "1U Cantilever Rack Shelf", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: false, type: "misc", cost: 35 },
+      { id: "shelf-1u", name: "1U Blank Cover Panel", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: false, type: "misc", cost: 35 },
       { id: "generic-1u", name: "Custom Generic 1U Device", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 100 },
       { id: "generic-2u", name: "Custom Generic 2U Device", brand: "generic", u: 2, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 150 }
     ]
@@ -2375,7 +2375,9 @@ cabinetRackEl.appendChild(container);
       let portsHtml = "";
       if (dev.id === "organizer-1u" || dev.name.toLowerCase().includes("brush") || dev.name.toLowerCase().includes("organizer")) {
         portsHtml = `<div class="device-brush-strip" title="Brush Cable Pass-Through"></div>`;
-      } else if (dev.id === "shelf-1u" || (dev.name.toLowerCase().includes("shelf") && dev.type !== "power")) {
+      } else if (dev.id === "shelf-1u" || dev.name.toLowerCase().includes("blank panel") || dev.name.toLowerCase().includes("cover panel")) {
+        portsHtml = ""; // Renders as a solid flat blank cover panel of the equipment color
+      } else if (dev.name.toLowerCase().includes("shelf") && dev.type !== "power") {
         portsHtml = `<div class="device-shelf-plate" title="Equipment Shelf Tray"></div>`;
       } else if (dev.ports > 0 || (dev.type === "power" && dev.outlets > 0)) {
         if (dev.type === "power") {
