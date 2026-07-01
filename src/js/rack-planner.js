@@ -1585,6 +1585,64 @@ document.addEventListener("DOMContentLoaded", () => {
     return dev.ports > 0 ? 1 : 0;
   }
 
+  // Helper to get a clean, concise Brand + Model name label for device faceplate
+  function getDeviceBrandModelLabel(dev) {
+    let brand = dev.brand || "generic";
+    const brandMap = {
+      ubiquiti: "UniFi",
+      araknis: "Araknis",
+      cisco: "Cisco",
+      mikrotik: "MikroTik",
+      cyberpower: "CyberPower",
+      tplink: "TP-Link",
+      netgear: "NETGEAR",
+      denon: "Denon",
+      marantz: "Marantz",
+      apple: "Apple",
+      sony: "Sony",
+      sonos: "Sonos",
+      control4: "Control4",
+      eero: "eero",
+      savant: "Savant",
+      wattbox: "WattBox",
+      telus: "TELUS",
+      rogers: "Rogers",
+      bell: "Bell",
+      lutron: "Lutron",
+      generic: ""
+    };
+    let brandName = brandMap[brand.toLowerCase()];
+    if (brandName === undefined) {
+      brandName = brand.charAt(0).toUpperCase() + brand.slice(1);
+    }
+    
+    let name = dev.name;
+    // Remove brand prefix if exists
+    if (brandName) {
+      const brandPrefixPattern = new RegExp("^" + brandName + "\\s+", "i");
+      name = name.replace(brandPrefixPattern, "");
+    }
+    if (brand === "ubiquiti") {
+      name = name.replace(/^UniFi\s+/i, "");
+    }
+    
+    // Strip parenthetical items and redundant terms
+    name = name.replace(/\s*\(.*?\)/g, "");
+    name = name.replace(/\s+Rackmount/i, "");
+    name = name.replace(/\s+Series\s+IP\s+PDU/i, "");
+    name = name.replace(/\s+Smart\s+PDU/i, "");
+    name = name.replace(/\s+Power\s+Strip/i, "");
+    name = name.replace(/\s+IP\s+Power\s+Conditioner/i, "");
+    name = name.replace(/\s+Fibe\s+Gateway/i, "");
+    name = name.replace(/\s+Ignite\s+WiFi\s+Gateway/i, "");
+    name = name.replace(/\s+Network\s+Access\s+Hub/i, "");
+    
+    if (brandName) {
+      return brandName + " " + name;
+    }
+    return name;
+  }
+
   function parseSideSlot(slot) {
     if (typeof slot !== "string") return null;
     if (slot.startsWith("side-left")) {
@@ -2460,25 +2518,9 @@ cabinetRackEl.appendChild(container);
         `;
       }
 
-      // Brand logo text (omitted on switches to save horizontal space for ports)
-      let logoText = "";
-      if (dev.type !== "switch") {
-        if (dev.brand === "ubiquiti") logoText = "U";
-        else if (dev.brand === "cisco") logoText = "Cisco";
-        else if (dev.brand === "mikrotik") logoText = "MikroTik";
-        else if (dev.brand === "cyberpower") logoText = "CP";
-        else if (dev.brand === "tplink") logoText = "TP-Link";
-        else if (dev.brand === "araknis") logoText = "Araknis";
-        else if (dev.brand === "netgear") logoText = "NETGEAR";
-        else if (dev.brand === "denon") logoText = "Denon";
-        else if (dev.brand === "marantz") logoText = "Marantz";
-        else if (dev.brand === "apple") logoText = "";
-        else if (dev.brand === "sony") logoText = "Sony";
-        else if (dev.brand === "sonos") logoText = "Sonos";
-        else if (dev.brand === "control4") logoText = "C4";
-        else if (dev.brand === "eero") logoText = "eero";
-        else if (dev.brand === "savant") logoText = "Savant";
-      }
+      // Brand & Model text label for the faceplate
+      const brandLabelMaxW = widthFrac < 0.4 ? "80px" : (widthFrac < 0.6 ? "130px" : "240px");
+      const brandModelLabelHtml = `<span class="device-brand-model-label" style="max-width: ${brandLabelMaxW};" title="${getDeviceBrandModelLabel(dev)}">${getDeviceBrandModelLabel(dev)}</span>`;
 
       // Determine if custom physical front panel graphics should be rendered
       let faceplateOverlayHtml = "";
@@ -2531,7 +2573,7 @@ cabinetRackEl.appendChild(container);
             <div class="device-faceplate-left" style="height: 100%;">
               ${ledsHtml}
               ${faceplateOverlayHtml}
-              ${logoText ? `<span class="device-logo">${logoText}</span>` : ""}
+              ${brandModelLabelHtml}
               ${renderPowerInlet()}
             </div>
           ` : faceplateOverlayHtml}

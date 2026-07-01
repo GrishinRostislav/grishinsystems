@@ -629,14 +629,19 @@ body.dragging-active .placed-device * {
   line-height: 1.2;
 }
 
-.device-logo {
-  font-family: monospace;
-  font-size: 8px;
-  font-weight: 800;
-  color: rgba(255, 255, 255, 0.25);
+.device-brand-model-label {
+  font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
+  font-size: 7.5px;
+  font-weight: 700;
+  color: #cbd5e1;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  user-select: none;
+  pointer-events: none;
+  line-height: 1.2;
 }
 
 /* LED indicators */
@@ -2093,7 +2098,7 @@ body.dragging-active .placed-device * {
     background: #ffffff !important;
   }
 
-  .device-faceplate-label, .device-logo {
+  .device-faceplate-label, .device-brand-model-label {
     color: #000000 !important;
   }
 
@@ -2452,7 +2457,7 @@ body.dragging-active .placed-device * {
 .device-faceplate-left,
 .device-faceplate-bottom,
 .device-faceplate-label,
-.device-logo,
+.device-brand-model-label,
 .device-leds,
 .led,
 .unifi-lcm-screen,
