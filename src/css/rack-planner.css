@@ -848,11 +848,11 @@ body.dragging-active .placed-device * {
 }
 
 .port-dot.power-outlet-dot {
-  width: 14px;
-  height: 14px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: #111113;
-  border: 1.2px solid #a25822 !important;
+  border: 1.5px solid #a25822 !important;
   position: relative;
   box-sizing: border-box;
   display: inline-block;
@@ -862,22 +862,22 @@ body.dragging-active .placed-device * {
 .port-dot.power-outlet-dot::before {
   content: '';
   position: absolute;
-  top: 3px;
-  left: 3.5px;
-  width: 5px;
-  height: 3px;
-  border-left: 1.2px solid #8a5d3d;
-  border-right: 1.2px solid #8a5d3d;
+  top: 6px;
+  left: 7.5px;
+  width: 11px;
+  height: 6px;
+  border-left: 2px solid #8a5d3d;
+  border-right: 2px solid #8a5d3d;
   box-sizing: border-box;
 }
 
 .port-dot.power-outlet-dot::after {
   content: '' !important;
   position: absolute;
-  bottom: 2.5px;
-  left: 4.5px;
-  width: 2.5px;
-  height: 2.5px;
+  bottom: 5px;
+  left: 11px;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
   background: #8a5d3d;
   box-sizing: border-box;
