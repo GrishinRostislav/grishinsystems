@@ -1973,10 +1973,8 @@ document.addEventListener("DOMContentLoaded", () => {
     state.placedDevices.push(newDevice);
     state.lastAddedInstanceId = newDevice.instanceId; // Set last added ID to trigger pulse animation
     
-    // Resolve collisions so other gear slides out of the way (skip for side panels)
-    if (!isSideSlot(slot)) {
-      resolveCollisions(newDevice.instanceId, slot);
-    }
+    // Resolve collisions so other gear slides out of the way (handles side panels automatically)
+    resolveCollisions(newDevice.instanceId, slot);
 
     saveState();
     update();
@@ -3004,13 +3002,69 @@ cabinetRackEl.appendChild(container);
     }
   }
 
+  // Helper to resolve collisions and prevent overlapping on the side panels
+  function resolveSideCollisions(instanceId, newSlot) {
+    const dev = state.placedDevices.find(x => x.instanceId === instanceId);
+    if (!dev) return;
+    
+    const sideInfo = parseSideSlot(newSlot);
+    if (!sideInfo) return;
+    const sideKey = sideInfo.side === "left" ? "side-left" : "side-right";
+    let targetU = sideInfo.u;
+    
+    // Ensure targetU is within valid rack bounds
+    targetU = Math.max(dev.u, Math.min(state.rackSize, targetU));
+    
+    // Find all other devices on the same side panel
+    const otherDevs = state.placedDevices.filter(d => 
+      d.instanceId !== instanceId && 
+      typeof d.slot === "string" && 
+      d.slot.startsWith(sideKey)
+    );
+    
+    // Check if there is an overlap at targetU
+    const isOverlap = (uVal) => {
+      const rangeStart = uVal;
+      const rangeEnd = uVal - dev.u + 1;
+      
+      return otherDevs.some(od => {
+        const odInfo = parseSideSlot(od.slot);
+        if (!odInfo) return false;
+        const odStart = odInfo.u;
+        const odEnd = odStart - od.u + 1;
+        return !(rangeEnd > odStart || rangeStart < odEnd);
+      });
+    };
+    
+    // If there is an overlap, find the nearest available slot above or below
+    if (isOverlap(targetU)) {
+      let foundSlot = false;
+      for (let offset = 1; offset < state.rackSize; offset++) {
+        const upU = targetU + offset;
+        if (upU <= state.rackSize && !isOverlap(upU)) {
+          targetU = upU;
+          foundSlot = true;
+          break;
+        }
+        const downU = targetU - offset;
+        if (downU >= dev.u && !isOverlap(downU)) {
+          targetU = downU;
+          foundSlot = true;
+          break;
+        }
+      }
+    }
+    
+    dev.slot = `${sideKey}-${targetU}`;
+  }
+
   // Resolve collisions by sliding other devices out of the way non-destructively
   function resolveCollisions(insertedInstanceId, targetSlot) {
     const targetDev = state.placedDevices.find(d => d.instanceId === insertedInstanceId);
     if (!targetDev) return;
 
     if (isSideSlot(targetSlot)) {
-      targetDev.slot = targetSlot;
+      resolveSideCollisions(insertedInstanceId, targetSlot);
       return;
     }
 
@@ -3144,7 +3198,7 @@ cabinetRackEl.appendChild(container);
     if (!dev) return;
 
     if (isSideSlot(newSlot)) {
-      dev.slot = newSlot;
+      resolveSideCollisions(instanceId, newSlot);
       saveState();
       update();
       return;
