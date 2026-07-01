@@ -1570,6 +1570,28 @@ document.addEventListener("DOMContentLoaded", () => {
     return typeof slot === "string" && slot.startsWith("side");
   }
 
+  // Helper to find a preset by ID
+  function findPreset(presetId) {
+    for (const cat in presets) {
+      const p = presets[cat].find(x => x.id === presetId);
+      if (p) return p;
+    }
+    return null;
+  }
+
+  // Helper to calculate drop left offset fraction based on clientX
+  function getDropLeftOffset(clientX, widthFrac) {
+    const cabinetRackEl = document.getElementById("cabinet-rack");
+    if (!cabinetRackEl) return 0;
+    const rect = cabinetRackEl.getBoundingClientRect();
+    const activeLeft = rect.left + 37;
+    const activeWidth = rect.width - 43;
+    const relativeX = clientX - activeLeft;
+    const dropXFrac = relativeX / activeWidth;
+    const leftOffset = dropXFrac - widthFrac / 2;
+    return Math.max(0, Math.min(1 - widthFrac, leftOffset));
+  }
+
   // Helper to get number of network ports to render on front faceplate
   function getNetworkPortsCount(dev) {
     if (dev.type === "switch" || dev.type === "router" || dev.type === "patch-panel") {
@@ -1946,7 +1968,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Add Device
-  function addDevice(presetId, slot) {
+  function addDevice(presetId, slot, leftOffset) {
     // Find preset in all categories
     let foundPreset = null;
     for (const cat in presets) {
@@ -1967,7 +1989,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const newDevice = {
       instanceId: "inst_" + Math.random().toString(36).substr(2, 9),
       ...foundPreset,
-      slot: slot
+      slot: slot,
+      leftOffset: leftOffset
     };
 
     state.placedDevices.push(newDevice);
@@ -2095,11 +2118,22 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         slotEl.classList.remove("drop-hover");
         
+        let widthFrac = 1;
         if (state.draggedPresetId) {
-          addDevice(state.draggedPresetId, u);
+          const p = findPreset(state.draggedPresetId);
+          if (p) widthFrac = p.width_fraction || 1;
+        } else if (state.draggedInstanceId) {
+          const d = state.placedDevices.find(x => x.instanceId === state.draggedInstanceId);
+          if (d) widthFrac = d.width_fraction || 1;
+        }
+        
+        const leftOffset = getDropLeftOffset(e.clientX, widthFrac);
+        
+        if (state.draggedPresetId) {
+          addDevice(state.draggedPresetId, u, leftOffset);
         } else if (state.draggedInstanceId) {
           // Re-ordering placed device
-          moveDevice(state.draggedInstanceId, u);
+          moveDevice(state.draggedInstanceId, u, leftOffset);
         }
       });
 
@@ -2291,11 +2325,14 @@ cabinetRackEl.appendChild(container);
         devEl.className = `placed-device device-brand-${dev.brand}${widthFrac === 1 ? ' has-ears' : ''}${isCleanChassis ? ' clean-chassis' : ''}`;
         devEl.style.height = `${dev.u * 72 - 4}px`; // 1U = 72px. Subtract a little padding
         
-        if (slotLeftOffsets[dev.slot] === undefined) {
-          const totalFrac = Math.min(1, slotTotalFraction[dev.slot] || 1);
-          slotLeftOffsets[dev.slot] = (1 - totalFrac) / 2;
+        let currentLeft = dev.leftOffset;
+        if (currentLeft === undefined) {
+          if (slotLeftOffsets[dev.slot] === undefined) {
+            const totalFrac = Math.min(1, slotTotalFraction[dev.slot] || 1);
+            slotLeftOffsets[dev.slot] = (1 - totalFrac) / 2;
+          }
+          currentLeft = slotLeftOffsets[dev.slot];
         }
-        const currentLeft = slotLeftOffsets[dev.slot];
         
         for (let i = 0; i < dev.u; i++) {
           const u = dev.slot - i;
@@ -2642,23 +2679,29 @@ cabinetRackEl.appendChild(container);
         e.stopPropagation();
         devEl.classList.remove("drop-hover");
         
+        let widthFrac = 1;
         if (state.draggedPresetId) {
-          addDevice(state.draggedPresetId, dev.slot);
+          const p = findPreset(state.draggedPresetId);
+          if (p) widthFrac = p.width_fraction || 1;
+        } else if (state.draggedInstanceId) {
+          const d = state.placedDevices.find(x => x.instanceId === state.draggedInstanceId);
+          if (d) widthFrac = d.width_fraction || 1;
+        }
+        
+        const leftOffset = getDropLeftOffset(e.clientX, widthFrac);
+        
+        if (state.draggedPresetId) {
+          addDevice(state.draggedPresetId, dev.slot, leftOffset);
         } else if (state.draggedInstanceId) {
           const draggedDev = state.placedDevices.find(d => d.instanceId === state.draggedInstanceId);
           if (draggedDev && draggedDev.slot === dev.slot) {
-            // Reorder within the same slot/panel
-            const idxDrag = state.placedDevices.findIndex(d => d.instanceId === state.draggedInstanceId);
-            const idxTarget = state.placedDevices.findIndex(d => d.instanceId === dev.instanceId);
-            if (idxDrag !== -1 && idxTarget !== -1) {
-              state.placedDevices.splice(idxDrag, 1);
-              state.placedDevices.splice(idxTarget, 0, draggedDev);
-              saveState();
-              update();
-            }
+            // Reposition horizontally in the same slot
+            draggedDev.leftOffset = leftOffset;
+            saveState();
+            update();
           } else {
-            // Move to a different slot
-            moveDevice(state.draggedInstanceId, dev.slot);
+            // Move to a different slot with horizontal positioning
+            moveDevice(state.draggedInstanceId, dev.slot, leftOffset);
           }
         }
       });
@@ -3193,7 +3236,7 @@ cabinetRackEl.appendChild(container);
   }
 
   // Move device to new slot with cascading shift
-  function moveDevice(instanceId, newSlot) {
+  function moveDevice(instanceId, newSlot, leftOffset) {
     const dev = state.placedDevices.find(x => x.instanceId === instanceId);
     if (!dev) return;
 
@@ -3205,6 +3248,9 @@ cabinetRackEl.appendChild(container);
     }
 
     dev._originalSlot = dev.slot;
+    if (leftOffset !== undefined) {
+      dev.leftOffset = leftOffset;
+    }
 
     resolveCollisions(instanceId, newSlot);
 
