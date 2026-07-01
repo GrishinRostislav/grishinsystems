@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "wall-outlet-6", name: "Wall Outlet (6 Sockets) – Power Source", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 6, requires_power: false, type: "power", cost: 0 }
     ],
     theater: [
-      { id: "savant-sipa125", name: "Savant IP Audio 125 (SIPA125)", brand: "savant", u: 1, ports: 13, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1800 },
+      { id: "savant-sipa125", name: "Savant IP Audio 125 (SIPA125)", brand: "savant", u: 2, ports: 13, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1800 },
       { id: "savant-sipa50", name: "Savant IP Audio 50 (SIPA50)", brand: "savant", u: 1, width_fraction: 0.33, ports: 13, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 950 },
       { id: "savant-sipa1sm", name: "Savant IP Audio 1 (SIPA1SM)", brand: "savant", u: 1, width_fraction: 0.5, ports: 9, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1200 },
       { id: "avr-anthem-mrx740", name: "Anthem MRX 740 11.2-Ch AV Receiver", brand: "anthem", u: 4, ports: 38, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 3099 },
