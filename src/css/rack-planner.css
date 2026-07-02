@@ -2237,7 +2237,7 @@ body.dragging-active .placed-device * {
 /* IP address tag on physical device in rack */
 .device-ip-badge {
   position: absolute;
-  top: 1px;
+  bottom: 2px;
   right: 22px; /* Next to the delete button */
   background: rgba(15, 23, 42, 0.9);
   border: 1px solid rgba(45, 212, 191, 0.4);
