@@ -2473,7 +2473,7 @@ cabinetRackEl.appendChild(container);
           
           const useSingleRow = dev.u === 1;
           const cols = useSingleRow ? dev.outlets : Math.ceil(dev.outlets / 2);
-          portsHtml += `<div class="device-ports power-outlets-area" style="grid-template-columns: repeat(${cols}, auto); grid-template-rows: ${useSingleRow ? '1fr' : 'repeat(2, auto)'}; gap: 4px 8px; align-items: center; justify-content: center; height: 100%; padding-right: 12px; pointer-events: auto;">`;
+          portsHtml += `<div class="device-ports power-outlets-area" style="grid-template-columns: repeat(${cols}, auto); grid-template-rows: ${useSingleRow ? '1fr' : 'repeat(2, auto)'}; gap: 6px 12px; align-items: center; justify-content: center; align-content: center; height: 100%; width: 100%; pointer-events: auto;">`;
           for (let i = 0; i < dev.outlets; i++) {
             portsHtml += `
               <div style="display:flex; align-items:center; gap:2px;">
