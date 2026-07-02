@@ -204,6 +204,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 3. Application State
   let state = {
+    activeProjectId: null,
+    projectsIndex: [],
     rackSize: 18,
     dropPoints: 12,
     localLines: 2,
@@ -348,8 +350,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Initialize
-  function init() {
+  let appInitialized = false;
+  function initRackPlannerApp() {
+    if (appInitialized) return;
+    appInitialized = true;
     initCustomTooltip();
     loadState();
     
@@ -812,6 +816,23 @@ document.addEventListener("DOMContentLoaded", () => {
       window.print();
     });
 
+    const btnExportExcel = document.getElementById("btn-export-excel");
+    if (btnExportExcel) {
+      btnExportExcel.addEventListener("click", () => {
+        exportToExcel();
+      });
+    }
+
+    const btnExportJson = document.getElementById("btn-export-json");
+    if (btnExportJson) {
+      btnExportJson.addEventListener("click", () => {
+        if (state.activeProjectId) {
+          saveState();
+          exportProjectJSON(state.activeProjectId);
+        }
+      });
+    }
+
     // Report modal toggle and generation
     const reportModal = document.getElementById("report-modal");
     const reportModalBody = document.getElementById("report-modal-body");
@@ -1190,48 +1211,322 @@ document.addEventListener("DOMContentLoaded", () => {
     update();
   }
 
-  // Load / Save State
-  function saveState() {
-    localStorage.setItem("grishinsystems_rack_state", JSON.stringify({
-      rackSize: state.rackSize,
-      dropPoints: state.dropPoints,
-      localLines: state.localLines,
-      endpoints: state.endpoints,
-      placedDevices: state.placedDevices,
-      connections: state.connections,
-      showCables: state.showCables,
-      bomSortColumn: state.bomSortColumn,
-      bomSortOrder: state.bomSortOrder,
-      zoomLevel: state.zoomLevel,
-      panX: state.panX,
-      panY: state.panY
-    }));
+  function init() {
+    initCustomTooltip();
+    checkAuthentication();
   }
 
-  function loadState() {
-    const saved = localStorage.getItem("grishinsystems_rack_state");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        state.rackSize = parsed.rackSize || 18;
-        state.dropPoints = parsed.dropPoints !== undefined ? parsed.dropPoints : 12;
-        state.localLines = parsed.localLines !== undefined ? parsed.localLines : 2;
-        state.placedDevices = parsed.placedDevices || [];
-        state.placedDevices.forEach(d => {
-          let foundPreset = null;
-          for (const category in presets) {
-            const found = presets[category].find(p => p.id === d.id);
-            if (found) {
-              foundPreset = found;
-              break;
+  function saveState() {
+    if (!state.activeProjectId) return;
+      
+      const projectState = {
+        rackSize: state.rackSize,
+        dropPoints: state.dropPoints,
+        localLines: state.localLines,
+        endpoints: state.endpoints,
+        placedDevices: state.placedDevices,
+        connections: state.connections,
+        showCables: state.showCables,
+        bomSortColumn: state.bomSortColumn,
+        bomSortOrder: state.bomSortOrder,
+        zoomLevel: state.zoomLevel,
+        panX: state.panX,
+        panY: state.panY
+      };
+      
+      localStorage.setItem(`rp_project_${state.activeProjectId}`, JSON.stringify(projectState));
+      
+      // Update index metadata
+      const projIdx = state.projectsIndex.findIndex(p => p.id === state.activeProjectId);
+      if (projIdx !== -1) {
+        state.projectsIndex[projIdx].updatedAt = new Date().toISOString();
+        state.projectsIndex[projIdx].rackSize = state.rackSize;
+        state.projectsIndex[projIdx].deviceCount = state.placedDevices.filter(d => d.slot !== "wall-outlet").length;
+        saveProjectsIndex();
+      }
+    }
+
+    function saveProjectsIndex() {
+      localStorage.setItem("rp_projects_index", JSON.stringify(state.projectsIndex));
+    }
+
+    function loadState() {
+      if (!state.activeProjectId) return;
+      const saved = localStorage.getItem(`rp_project_${state.activeProjectId}`);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          state.rackSize = parsed.rackSize || 18;
+          state.dropPoints = parsed.dropPoints !== undefined ? parsed.dropPoints : 12;
+          state.localLines = parsed.localLines !== undefined ? parsed.localLines : 2;
+          state.placedDevices = parsed.placedDevices || [];
+          state.placedDevices.forEach(d => {
+            let foundPreset = null;
+            for (const category in presets) {
+              const found = presets[category].find(p => p.id === d.id);
+              if (found) {
+                foundPreset = found;
+                break;
+              }
             }
+            if (foundPreset && foundPreset.width_fraction !== undefined) {
+              d.width_fraction = foundPreset.width_fraction;
+            }
+          });
+          state.connections = parsed.connections || [];
+          state.showCables = parsed.showCables !== undefined ? parsed.showCables : true;
+          state.bomSortColumn = parsed.bomSortColumn !== undefined ? parsed.bomSortColumn : null;
+          state.bomSortOrder = parsed.bomSortOrder !== undefined ? parsed.bomSortOrder : "asc";
+          state.zoomLevel = parsed.zoomLevel || 1.0;
+          state.panX = parsed.panX !== undefined ? parsed.panX : 0;
+          state.panY = parsed.panY !== undefined ? parsed.panY : 0;
+          
+          if (parsed.endpoints) {
+            state.endpoints = parsed.endpoints;
+          } else if (parsed.cameras) {
+            state.endpoints = parsed.cameras.map(c => ({
+              ...c,
+              category: c.category || "cctv"
+            }));
+          } else {
+            state.endpoints = [];
           }
-          if (foundPreset && foundPreset.width_fraction !== undefined) {
-            d.width_fraction = foundPreset.width_fraction;
+        } catch (e) {
+          console.error("Error parsing saved project state", e);
+        }
+      } else {
+        state.placedDevices = [];
+        state.connections = [];
+        state.endpoints = [];
+        state.dropPoints = 12;
+        state.localLines = 2;
+      }
+      ensureDefaultWallOutlet();
+    }
+
+    // State migration from old rack-planner version
+    function checkStateMigration() {
+      const indexSaved = localStorage.getItem("rp_projects_index");
+      if (indexSaved) {
+        try {
+          state.projectsIndex = JSON.parse(indexSaved);
+        } catch(e) {
+          state.projectsIndex = [];
+        }
+      } else {
+        state.projectsIndex = [];
+      }
+
+      const legacyState = localStorage.getItem("grishinsystems_rack_state");
+      if (legacyState && state.projectsIndex.length === 0) {
+        try {
+          const parsed = JSON.parse(legacyState);
+          const legacyId = "proj_migrated";
+          const newProj = {
+            id: legacyId,
+            name: "My First Project",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            rackSize: parsed.rackSize || 18,
+            deviceCount: (parsed.placedDevices || []).filter(d => d.slot !== "wall-outlet").length
+          };
+          state.projectsIndex.push(newProj);
+          localStorage.setItem(`rp_project_${legacyId}`, legacyState);
+          saveProjectsIndex();
+          localStorage.removeItem("grishinsystems_rack_state");
+        } catch(e) {
+          console.error("Error migrating legacy state", e);
+        }
+      }
+    }
+
+    // ═══════════════ AUTHENTICATION SYSTEM ═══════════════
+    const loginScreen = document.getElementById("rp-login-screen");
+    const dashboardScreen = document.getElementById("rp-dashboard");
+    const appScreen = document.getElementById("rp-app");
+    
+    const passwordInput = document.getElementById("login-password");
+    const loginBtn = document.getElementById("login-btn");
+    const loginError = document.getElementById("login-error");
+
+    const btnBackProjects = document.getElementById("btn-back-projects");
+    const toolbarProjectName = document.getElementById("toolbar-project-name");
+
+    function checkAuthentication() {
+      if (sessionStorage.getItem("rp_authenticated") === "true") {
+        loginScreen.classList.add("hidden");
+        showDashboard();
+      } else {
+        loginScreen.classList.remove("hidden");
+        dashboardScreen.classList.add("hidden");
+        appScreen.classList.add("hidden");
+        passwordInput.focus();
+      }
+    }
+
+    if (passwordInput) {
+      passwordInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          handleLogin();
+        }
+      });
+    }
+
+    if (loginBtn) {
+      loginBtn.addEventListener("click", handleLogin);
+    }
+
+    function handleLogin() {
+      const password = passwordInput.value;
+      if (password === "SuReInnovations!") {
+        sessionStorage.setItem("rp_authenticated", "true");
+        loginScreen.classList.add("hidden");
+        loginError.textContent = "";
+        passwordInput.value = "";
+        showDashboard();
+      } else {
+        passwordInput.classList.add("error");
+        loginError.textContent = "Incorrect password.";
+        setTimeout(() => {
+          passwordInput.classList.remove("error");
+        }, 400);
+      }
+    }
+
+    const dashLogoutBtn = document.getElementById("dash-logout-btn");
+    if (dashLogoutBtn) {
+      dashLogoutBtn.addEventListener("click", () => {
+        sessionStorage.removeItem("rp_authenticated");
+        checkAuthentication();
+      });
+    }
+
+    // ═══════════════ PROJECT DASHBOARD ═══════════════
+    const dashNewBtn = document.getElementById("dash-new-btn");
+    const dashImportBtn = document.getElementById("dash-import-btn");
+    const dashImportFile = document.getElementById("dash-import-file");
+    
+    const newProjectModal = document.getElementById("new-project-modal");
+    const newProjectNameInput = document.getElementById("new-project-name");
+    const newProjectSizeSelect = document.getElementById("new-project-size");
+    const newProjectCreateBtn = document.getElementById("new-project-create");
+    const newProjectCancelBtn = document.getElementById("new-project-cancel");
+
+    function showDashboard() {
+      appScreen.classList.add("hidden");
+      dashboardScreen.classList.remove("hidden");
+      checkStateMigration();
+      renderProjectsList();
+    }
+
+    function renderProjectsList() {
+      const container = document.getElementById("dash-projects-container");
+      if (!container) return;
+
+      if (state.projectsIndex.length === 0) {
+        container.innerHTML = `
+          <div class="rp-projects-empty">
+            <div class="rp-projects-empty-icon">⬡</div>
+            <p>No projects created yet.</p>
+            <p style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">Click "+ New Project" or "Import JSON" to get started.</p>
+          </div>
+        `;
+        return;
+      }
+
+      let gridHtml = `<div class="rp-projects-grid">`;
+      state.projectsIndex.forEach(proj => {
+        const formattedDate = new Date(proj.updatedAt || proj.createdAt).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        gridHtml += `
+          <div class="rp-project-card" data-proj-id="${proj.id}">
+            <div class="rp-project-card-name">${proj.name}</div>
+            <div class="rp-project-card-meta">
+              <span>Cabinet: <strong>${proj.rackSize}U</strong></span>
+              <span>Devices: <strong>${proj.deviceCount || 0}</strong></span>
+              <span>Updated: <strong>${formattedDate}</strong></span>
+            </div>
+            <div class="rp-project-card-actions">
+              <button class="rp-dash-btn rp-dash-btn--primary btn-open-proj" data-id="${proj.id}">Open</button>
+              <button class="rp-dash-btn btn-export-proj" data-id="${proj.id}">Export</button>
+              <button class="rp-dash-btn rp-dash-btn--danger btn-delete-proj" data-id="${proj.id}">Delete</button>
+            </div>
+          </div>
+        `;
+      });
+      gridHtml += `</div>`;
+      container.innerHTML = gridHtml;
+
+      container.querySelectorAll(".btn-open-proj").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          openProject(e.target.getAttribute("data-id"));
+        });
+      });
+
+      container.querySelectorAll(".btn-export-proj").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          exportProjectJSON(e.target.getAttribute("data-id"));
+        });
+      });
+
+      container.querySelectorAll(".btn-delete-proj").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const id = e.target.getAttribute("data-id");
+          const proj = state.projectsIndex.find(p => p.id === id);
+          if (confirm(`Are you sure you want to delete "${proj.name}"? This action cannot be undone.`)) {
+            deleteProject(id);
           }
         });
-        if (!state.placedDevices.some(d => d.slot === "wall-outlet")) {
-          state.placedDevices.push({
+      });
+    }
+
+    if (dashNewBtn) {
+      dashNewBtn.addEventListener("click", () => {
+        newProjectModal.classList.remove("hidden");
+        newProjectNameInput.value = "";
+        newProjectNameInput.focus();
+      });
+    }
+
+    if (newProjectCancelBtn) {
+      newProjectCancelBtn.addEventListener("click", () => {
+        newProjectModal.classList.add("hidden");
+      });
+    }
+
+    if (newProjectCreateBtn) {
+      newProjectCreateBtn.addEventListener("click", () => {
+        const name = newProjectNameInput.value.trim();
+        if (!name) {
+          alert("Please enter a project name.");
+          return;
+        }
+        const size = parseInt(newProjectSizeSelect.value) || 18;
+        const newId = "proj_" + Math.random().toString(36).substr(2, 9);
+        
+        const newProj = {
+          id: newId,
+          name: name,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          rackSize: size,
+          deviceCount: 0
+        };
+
+        state.projectsIndex.push(newProj);
+        saveProjectsIndex();
+
+        const cleanState = {
+          rackSize: size,
+          dropPoints: 12,
+          localLines: 2,
+          endpoints: [],
+          placedDevices: [{
             instanceId: "inst_wall_outlet_default",
             id: "wall-outlet-6",
             name: "Wall Outlet (6 Sockets) – Power Source",
@@ -1245,51 +1540,236 @@ document.addEventListener("DOMContentLoaded", () => {
             type: "power",
             cost: 0,
             slot: "wall-outlet"
-          });
-        }
-        state.connections = parsed.connections || [];
-        state.showCables = parsed.showCables !== undefined ? parsed.showCables : true;
-        state.bomSortColumn = parsed.bomSortColumn !== undefined ? parsed.bomSortColumn : null;
-        state.bomSortOrder = parsed.bomSortOrder !== undefined ? parsed.bomSortOrder : "asc";
-        state.zoomLevel = parsed.zoomLevel || 1.0;
-        state.panX = parsed.panX !== undefined ? parsed.panX : 0;
-        state.panY = parsed.panY !== undefined ? parsed.panY : 0;
+          }],
+          connections: [],
+          showCables: true,
+          zoomLevel: 1.0,
+          panX: 0,
+          panY: 0
+        };
         
-        if (parsed.endpoints) {
-          state.endpoints = parsed.endpoints;
-        } else if (parsed.cameras) {
-          // Migrate old camera structure to endpoints
-          state.endpoints = parsed.cameras.map(c => ({
-            ...c,
-            category: c.category || "cctv"
-          }));
-        } else {
-          state.endpoints = [];
-          // Legacy migration
-          const legacyAf = parsed.poeAfDevices !== undefined ? parsed.poeAfDevices : (parsed.poeDevices || 0);
-          const legacyAt = parsed.poeAtDevices || 0;
-          const legacyBt3 = parsed.poeBt3Devices || 0;
-          const legacyBt4 = parsed.poeBt4Devices || 0;
-          
-          if (legacyAf > 0) {
-            state.endpoints.push({ id: "legacy-af", name: "Generic PoE Camera (af)", brand: "generic", qty: legacyAf, wattage: 15.4, poeClass: "af", cost: 100, category: "cctv" });
-          }
-          if (legacyAt > 0) {
-            state.endpoints.push({ id: "legacy-at", name: "Generic PoE+ Camera (at)", brand: "generic", qty: legacyAt, wattage: 30.0, poeClass: "at", cost: 150, category: "cctv" });
-          }
-          if (legacyBt3 > 0) {
-            state.endpoints.push({ id: "legacy-bt3", name: "Generic PoE++ PTZ (bt3)", brand: "generic", qty: legacyBt3, wattage: 60.0, poeClass: "bt", cost: 350, category: "cctv" });
-          }
-          if (legacyBt4 > 0) {
-            state.endpoints.push({ id: "legacy-bt4", name: "Generic PoE++ Speed (bt4)", brand: "generic", qty: legacyBt4, wattage: 90.0, poeClass: "bt", cost: 500, category: "cctv" });
-          }
-        }
-      } catch (e) {
-        console.error("Error parsing saved state", e);
-      }
+        localStorage.setItem(`rp_project_${newId}`, JSON.stringify(cleanState));
+        newProjectModal.classList.add("hidden");
+        openProject(newId);
+      });
     }
-    ensureDefaultWallOutlet();
-  }
+
+    if (dashImportBtn) {
+      dashImportBtn.addEventListener("click", () => {
+        dashImportFile.click();
+      });
+    }
+
+    if (dashImportFile) {
+      dashImportFile.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          try {
+            const imported = JSON.parse(evt.target.result);
+            if (!imported.meta || !imported.state) {
+              alert("Invalid file format. Must be a JSON exported project.");
+              return;
+            }
+
+            const newId = "proj_" + Math.random().toString(36).substr(2, 9);
+            const newProj = {
+              ...imported.meta,
+              id: newId,
+              updatedAt: new Date().toISOString()
+            };
+
+            state.projectsIndex.push(newProj);
+            saveProjectsIndex();
+            localStorage.setItem(`rp_project_${newId}`, JSON.stringify(imported.state));
+
+            renderProjectsList();
+          } catch(ex) {
+            alert("Error reading project JSON file.");
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = "";
+      });
+    }
+
+    function openProject(id) {
+      const proj = state.projectsIndex.find(p => p.id === id);
+      if (!proj) return;
+
+      state.activeProjectId = id;
+      localStorage.setItem("rp_active_project", id);
+      
+      loadState();
+      initRackPlannerApp();
+      
+      dropsInputEl.value = state.dropPoints;
+      localLinksInputEl.value = state.localLines;
+      rackSizeSelectEl.value = state.rackSize;
+      populateEndpointDropdown();
+      renderEndpointList();
+
+      if (toolbarProjectName) {
+        toolbarProjectName.textContent = `— ${proj.name}`;
+      }
+
+      dashboardScreen.classList.add("hidden");
+      appScreen.classList.remove("hidden");
+      
+      update();
+      setTimeout(() => {
+        fitToView();
+        drawRackCables();
+      }, 50);
+    }
+
+    function deleteProject(id) {
+      state.projectsIndex = state.projectsIndex.filter(p => p.id !== id);
+      saveProjectsIndex();
+      localStorage.removeItem(`rp_project_${id}`);
+      
+      if (state.activeProjectId === id) {
+        state.activeProjectId = null;
+        localStorage.removeItem("rp_active_project");
+      }
+      
+      renderProjectsList();
+    }
+
+    if (btnBackProjects) {
+      btnBackProjects.addEventListener("click", () => {
+        saveState();
+        showDashboard();
+      });
+    }
+
+    function exportProjectJSON(projectId) {
+      const projMeta = state.projectsIndex.find(p => p.id === projectId);
+      const projData = localStorage.getItem(`rp_project_${projectId}`);
+      if (!projMeta || !projData) return;
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+        meta: projMeta,
+        state: JSON.parse(projData)
+      }, null, 2));
+      
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `${projMeta.name.replace(/\s+/g, '_')}_project.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    // ═══════════════ EXCEL EXPORT ═══════════════
+    function exportToExcel() {
+      if (!state.activeProjectId) return;
+      const proj = state.projectsIndex.find(p => p.id === state.activeProjectId);
+      const projName = proj ? proj.name : "Rack_Project";
+
+      const equipmentData = state.placedDevices
+        .filter(d => d.slot !== "wall-outlet")
+        .map(d => ({
+          "Name": d.customLabel || d.name,
+          "Brand": (d.brand || "").toUpperCase(),
+          "Type/Category": d.category || d.type || "Other",
+          "U Size": `${d.u}U`,
+          "Slot Position": isSideSlot(d.slot) 
+            ? `Side ${d.slot.replace("side-", "").toUpperCase()}` 
+            : `U${d.slot}`,
+          "IP Address": d.ipAddress || (d.wanIpAddress ? `WAN: ${d.wanIpAddress}` : "-"),
+          "Cost ($)": d.cost || 0
+        }));
+
+      const connectionsData = state.connections.map(c => {
+        const fromDev = state.placedDevices.find(d => d.instanceId === c.fromDevice);
+        const toDev = state.placedDevices.find(d => d.instanceId === c.toDevice);
+        const fromName = fromDev ? (fromDev.customLabel || fromDev.name) : (c.fromDevice === "internet" ? "Internet" : c.fromDevice);
+        const toName = toDev ? (toDev.customLabel || toDev.name) : (c.toDevice === "internet" ? "Internet" : c.toDevice);
+        
+        const getPortLabel = (dev, portIdx) => {
+          if (!dev) return portIdx;
+          if (portIdx === 1000) return "Power Inlet";
+          if (portIdx >= 2000) return `Outlet ${portIdx - 2000 + 1}`;
+          return `Port ${portIdx + 1}`;
+        };
+
+        return {
+          "From Device": fromName,
+          "From Port": getPortLabel(fromDev, c.fromPort),
+          "To Device": toName,
+          "To Port": getPortLabel(toDev, c.toPort),
+          "Cable Type": c.type || "LAN"
+        };
+      });
+
+      const poeData = state.placedDevices
+        .filter(d => d.poe_budget > 0)
+        .map(sw => {
+          const switchConns = state.connections.filter(c => c.fromDevice === sw.instanceId || c.toDevice === sw.instanceId);
+          let usedWattage = 0;
+          let endpointCount = 0;
+          
+          switchConns.forEach(c => {
+            const targetId = c.fromDevice === sw.instanceId ? c.toDevice : c.fromDevice;
+            const targetDev = state.placedDevices.find(d => d.instanceId === targetId);
+            if (targetDev && targetDev.type !== "switch" && targetDev.type !== "router") {
+              const switchPortIdx = c.fromDevice === sw.instanceId ? c.fromPort : c.toPort;
+              if (switchPortIdx < sw.poe_ports) {
+                const epWattage = targetDev.wattage || 0;
+                usedWattage += epWattage;
+                endpointCount++;
+              }
+            }
+          });
+
+          return {
+            "Switch Name": sw.customLabel || sw.name,
+            "Total PoE Budget (W)": sw.poe_budget,
+            "PoE Wattage Used (W)": parseFloat(usedWattage.toFixed(1)),
+            "Remaining Budget (W)": parseFloat((sw.poe_budget - usedWattage).toFixed(1)),
+            "Active PoE Devices": endpointCount
+          };
+        });
+
+      const bomGroups = {};
+      state.placedDevices.forEach(d => {
+        if (d.slot === "wall-outlet") return;
+        const key = `${d.brand || 'generic'}_${d.id}`;
+        if (!bomGroups[key]) {
+          bomGroups[key] = {
+            "Brand": (d.brand || "generic").toUpperCase(),
+            "Model/Name": d.name,
+            "Type": d.type || "Other",
+            "Quantity": 0,
+            "Unit Cost ($)": d.cost || 0,
+            "Total Cost ($)": 0
+          };
+        }
+        bomGroups[key].Quantity++;
+        bomGroups[key]["Total Cost ($)"] = bomGroups[key].Quantity * bomGroups[key]["Unit Cost ($)"];
+      });
+      const bomData = Object.values(bomGroups);
+
+      const wb = XLSX.utils.book_new();
+
+      const wsEquipment = XLSX.utils.json_to_sheet(equipmentData);
+      XLSX.utils.book_append_sheet(wb, wsEquipment, "Equipment List");
+
+      const wsConnections = XLSX.utils.json_to_sheet(connectionsData);
+      XLSX.utils.book_append_sheet(wb, wsConnections, "Connections");
+
+      const wsPoE = XLSX.utils.json_to_sheet(poeData);
+      XLSX.utils.book_append_sheet(wb, wsPoE, "PoE Budget");
+
+      const wsBOM = XLSX.utils.json_to_sheet(bomData);
+      XLSX.utils.book_append_sheet(wb, wsBOM, "BOM Summary");
+
+      const dateStr = new Date().toISOString().slice(0, 10);
+      XLSX.writeFile(wb, `${projName.replace(/\s+/g, '_')}_rack_${dateStr}.xlsx`);
+    }
 
   function ensureDefaultWallOutlet() {
     // 1. Force slot back to wall-outlet for any wall outlet devices

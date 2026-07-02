@@ -4,10 +4,60 @@ title: Server Rack Planner - GrishinSystems
 description: Interactive 2D server rack planner. Lay out switches, patch panels, power supplies, and routers, and validate ports, power, and space.
 ---
 
-<link rel="stylesheet" href="/css/rack-planner.css?v=3">
+<link rel="stylesheet" href="/css/rack-planner.css?v=4">
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+<!-- ═══════════════ LOGIN SCREEN ═══════════════ -->
+<div class="rp-login-screen" id="rp-login-screen">
+  <div class="rp-login-card">
+    <div class="rp-login-logo">Grishin<span>Systems</span></div>
+    <div class="rp-login-subtitle">Server Rack Planner — Enter password to continue</div>
+    <div class="rp-login-input-wrap">
+      <input type="password" class="rp-login-input" id="login-password" placeholder="Password" autocomplete="off">
+    </div>
+    <div class="rp-login-error" id="login-error"></div>
+    <button class="rp-login-btn" id="login-btn">Enter</button>
+  </div>
+</div>
+
+<!-- ═══════════════ PROJECT DASHBOARD ═══════════════ -->
+<div class="rp-dashboard hidden" id="rp-dashboard">
+  <div class="rp-dashboard-header">
+    <div class="rp-dashboard-title">⬡ My <span>Projects</span></div>
+    <div class="rp-dashboard-actions">
+      <button class="rp-dash-btn" id="dash-import-btn">📂 Import JSON</button>
+      <button class="rp-dash-btn rp-dash-btn--primary" id="dash-new-btn">+ New Project</button>
+      <button class="rp-dash-btn rp-dash-btn--danger" id="dash-logout-btn">Logout</button>
+    </div>
+  </div>
+  <div id="dash-projects-container"></div>
+  <input type="file" id="dash-import-file" accept=".json" style="display:none">
+</div>
+
+<!-- ═══════════════ NEW PROJECT MODAL ═══════════════ -->
+<div class="rp-new-project-modal hidden" id="new-project-modal">
+  <div class="rp-new-project-card">
+    <h3>Create New Project</h3>
+    <label for="new-project-name">Project Name</label>
+    <input type="text" id="new-project-name" placeholder="e.g. Client Home Theater Rack" autocomplete="off">
+    <label for="new-project-size">Cabinet Size</label>
+    <select id="new-project-size">
+      <option value="9">9U</option>
+      <option value="12">12U</option>
+      <option value="18" selected>18U</option>
+      <option value="24">24U</option>
+      <option value="27">27U</option>
+      <option value="42">42U</option>
+    </select>
+    <div class="rp-new-project-card-actions">
+      <button class="rp-dash-btn" id="new-project-cancel">Cancel</button>
+      <button class="rp-dash-btn rp-dash-btn--primary" id="new-project-create">Create</button>
+    </div>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
-<div class="rp-app" id="rp-app">
+<div class="rp-app hidden" id="rp-app">
   <!-- Printable Header 1 (BOM) -->
   <div class="rp-print-header" id="print-header-bom">
     <div class="rp-print-header-left">
@@ -23,9 +73,11 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
   <!-- ─── App Toolbar ─────────────────────────────────────── -->
   <div class="rp-toolbar">
     <div class="rp-toolbar-left">
+      <button class="rp-toolbar-btn--back" id="btn-back-projects" title="Back to Projects">← Projects</button>
       <span class="rp-toolbar-icon">⬡</span>
       <span class="rp-toolbar-title">Rack Planner</span>
       <span class="rp-toolbar-badge">2D</span>
+      <span class="rp-toolbar-project-name" id="toolbar-project-name"></span>
     </div>
     <div class="rp-toolbar-center">
       <label class="rp-toolbar-select-label" for="input-rack-size">Cabinet</label>
@@ -49,6 +101,8 @@ description: Interactive 2D server rack planner. Lay out switches, patch panels,
       </label>
     </div>
     <div class="rp-toolbar-right">
+      <button class="rp-toolbar-btn" id="btn-export-excel" title="Export to Excel">📥 <span class="rp-btn-label">Excel</span></button>
+      <button class="rp-toolbar-btn" id="btn-export-json" title="Export Project JSON">💾 <span class="rp-btn-label">Save</span></button>
       <button class="rp-toolbar-btn" id="btn-bom-toggle" title="Bill of Materials">📋 <span class="rp-btn-label">BOM</span></button>
       <button class="rp-toolbar-btn" id="btn-print" title="Print / Export PDF">🖨️ <span class="rp-btn-label">Print</span></button>
       <button class="rp-toolbar-btn rp-toolbar-btn--danger" id="btn-clear" title="Clear Rack">✕ <span class="rp-btn-label">Clear</span></button>
