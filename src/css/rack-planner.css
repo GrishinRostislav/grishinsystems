@@ -576,6 +576,7 @@ body.dragging-active .placed-device * {
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  flex-grow: 1;
 }
 
 .device-faceplate-left {
