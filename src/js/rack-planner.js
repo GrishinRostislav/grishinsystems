@@ -2559,7 +2559,7 @@ cabinetRackEl.appendChild(container);
                 // keep WAN styling
               } else if (isUplinkConnection) {
                 classStr += " uplink";
-              } else if (isPoeCapable) {
+              } else if (isPoeCapable && targetInstanceId === "poe-endpoint") {
                 classStr += " poe";
               } else {
                 classStr += " active";

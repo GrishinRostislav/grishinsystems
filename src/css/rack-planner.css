@@ -584,6 +584,7 @@ body.dragging-active .placed-device * {
   align-items: flex-end;
   gap: 8px;
   height: 100%;
+  align-self: stretch;
   box-sizing: border-box;
   padding-bottom: 4px;
 }
