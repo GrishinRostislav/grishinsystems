@@ -581,12 +581,13 @@ body.dragging-active .placed-device * {
 
 .device-faceplate-left {
   display: flex;
-  align-items: flex-end;
-  gap: 8px;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 4px;
   height: 100%;
   align-self: stretch;
   box-sizing: border-box;
-  padding-bottom: 4px;
+  padding-bottom: 2px;
 }
 
 .device-faceplate-bottom {
@@ -719,14 +720,23 @@ body.dragging-active .placed-device * {
   border: none !important;
 }
 
-/* RJ45 active/connected state */
-.port-dot.active,
+/* RJ45 connected state (base - teal indicator, no glow) */
 .port-dot.connected {
-  background: #0284c7 !important;
-  border-color: #38bdf8 !important;
+  background: #0f766e !important;
+  border-color: #14b8a6 !important;
+  box-shadow: none !important;
 }
-.port-dot.active::after,
 .port-dot.connected::after {
+  background: #090a0c !important;
+}
+
+/* RJ45 active state (green for standard LAN connections) */
+.port-dot.active {
+  background: #059669 !important;
+  border-color: #10b981 !important;
+  box-shadow: none !important;
+}
+.port-dot.active::after {
   background: #090a0c !important;
 }
 
@@ -748,6 +758,7 @@ body.dragging-active .placed-device * {
 .port-dot.poe {
   background: #d97706 !important; /* amber/orange active PoE */
   border-color: #f59e0b !important;
+  box-shadow: none !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -767,6 +778,7 @@ body.dragging-active .placed-device * {
 .port-dot.uplink {
   background: #0284c7 !important;
   border-color: #38bdf8 !important;
+  box-shadow: none !important;
 }
 .port-dot.uplink::after {
   background: #090a0c !important;
@@ -817,9 +829,10 @@ body.dragging-active .placed-device * {
 }
 
 .port-dot.wan-port.connected,
-.port-dot.wan-port.internet-active {
-  background: #10b981 !important;
-  border-color: #34d399 !important;
+.port-dot.wan-port.internet-active,
+.port-dot.wan-port.wan-active {
+  background: #e11d48 !important;
+  border-color: #f43f5e !important;
   box-shadow: none !important;
 }
 
@@ -851,7 +864,7 @@ body.dragging-active .placed-device * {
 .port-dot.power-inlet-dot.connected {
   background: #f97316 !important;
   border-color: #ff9d43 !important;
-  box-shadow: 0 0 5px #f97316 !important;
+  box-shadow: none !important;
 }
 
 .port-dot.power-outlet-dot {
@@ -893,7 +906,7 @@ body.dragging-active .placed-device * {
 
 .port-dot.power-outlet-dot.connected {
   border-color: #f97316 !important;
-  box-shadow: 0 0 6px rgba(249, 115, 22, 0.5) !important;
+  box-shadow: none !important;
 }
 .port-dot.power-outlet-dot.connected::before {
   border-left-color: #f97316 !important;
@@ -2216,24 +2229,17 @@ body.dragging-active .placed-device * {
 .port-dot {
   cursor: pointer;
   pointer-events: auto;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s;
 }
 
 .port-dot:hover {
   transform: scale(1.35) !important;
-  box-shadow: 0 0 10px #3b82f6, 0 0 4px #3b82f6 !important;
-  border-color: #3b82f6 !important;
   z-index: 50;
 }
 
 .port-dot.power-inlet-dot:hover,
 .port-dot.power-outlet-dot:hover {
-  box-shadow: 0 0 10px #f97316, 0 0 4px #f97316 !important;
   border-color: #f97316 !important;
-}
-
-.port-dot.connected {
-  box-shadow: 0 0 4px #2dd4bf;
 }
 
 /* IP address tag on physical device in rack */

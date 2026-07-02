@@ -2567,16 +2567,16 @@ cabinetRackEl.appendChild(container);
               const targetDev = state.placedDevices.find(d => d.instanceId === targetInstanceId);
               const isUplinkConnection = targetDev && (targetDev.type === "switch" || targetDev.type === "router");
 
-              if (targetInstanceId === "internet") {
+              if (classPrefix.includes("wan-port")) {
+                classStr += " wan-active"; // WAN always red
+              } else if (targetInstanceId === "internet") {
                 classStr += " internet-active";
-              } else if (classPrefix.includes("wan-port")) {
-                // keep WAN styling
               } else if (isUplinkConnection) {
-                classStr += " uplink";
-              } else if (isPoeCapable && targetInstanceId === "poe-endpoint") {
-                classStr += " poe";
+                classStr += " uplink"; // blue for switch/router links
+              } else if (isPoeCapable && targetDev && targetDev.type !== "switch" && targetDev.type !== "router") {
+                classStr += " poe"; // orange for PoE endpoints
               } else {
-                classStr += " active";
+                classStr += " active"; // green for standard LAN
               }
             }
             return `<span class="${classStr} ${classPrefix}" data-port-idx="${portIndex}" title="${getPortTooltip(portIndex, label)}"></span>`;
