@@ -2468,7 +2468,7 @@ cabinetRackEl.appendChild(container);
               (c.toDevice === dev.instanceId && c.toPort === portIndex)
             );
             const connectedClass = conn ? " connected" : "";
-            return `<span class="port-dot power-outlet-dot${connectedClass}" data-port-idx="${portIndex}" title="${dev.customLabel || dev.name} - Outlet ${outletIdx + 1}"></span>`;
+            return `<span class="port-dot power-outlet-dot${connectedClass}" data-port-idx="${portIndex}" title="${getPortTooltip(portIndex)}"></span>`;
           };
           
           const useSingleRow = dev.u === 1;
