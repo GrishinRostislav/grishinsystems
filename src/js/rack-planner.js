@@ -2037,11 +2037,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!foundPreset) return;
 
-    if (!isSideSlot(slot) && findFirstAvailableSlot(foundPreset.u, foundPreset.width_fraction || 1) === null) {
-      alert(`Not enough space in the rack cabinet to add ${foundPreset.name} (${foundPreset.u}U).`);
-      return;
-    }
-
     const newDevice = {
       instanceId: "inst_" + Math.random().toString(36).substr(2, 9),
       ...foundPreset,
@@ -2049,11 +2044,39 @@ document.addEventListener("DOMContentLoaded", () => {
       leftOffset: leftOffset
     };
 
+    const backupState = state.placedDevices.map(d => ({
+      instanceId: d.instanceId,
+      slot: d.slot,
+      leftOffset: d.leftOffset
+    }));
+
     state.placedDevices.push(newDevice);
     state.lastAddedInstanceId = newDevice.instanceId; // Set last added ID to trigger pulse animation
     
-    // Resolve collisions so other gear slides out of the way (handles side panels automatically)
-    resolveCollisions(newDevice.instanceId, slot);
+    const success = resolveCollisions(newDevice.instanceId, slot);
+    
+    // Verify total rack limits
+    const uniqueOccupiedUs = new Set();
+    state.placedDevices.forEach(d => {
+       if (isSideSlot(d.slot)) return;
+       for (let i = 0; i < d.u; i++) uniqueOccupiedUs.add(d.slot - i);
+    });
+
+    if (!success || uniqueOccupiedUs.size > state.rackSize) {
+      // Revert addition
+      state.placedDevices = state.placedDevices.filter(d => d.instanceId !== newDevice.instanceId);
+      backupState.forEach(b => {
+        const d = state.placedDevices.find(x => x.instanceId === b.instanceId);
+        if (d) {
+          d.slot = b.slot;
+          d.leftOffset = b.leftOffset;
+        }
+      });
+      alert(`Not enough space in the rack cabinet to add ${foundPreset.name} (${foundPreset.u}U).`);
+      saveState();
+      update();
+      return;
+    }
 
     saveState();
     update();
@@ -3160,13 +3183,14 @@ cabinetRackEl.appendChild(container);
   }
 
   // Resolve collisions by sliding other devices out of the way non-destructively
+  // Returns true if successful, false if there was no space and it needs to bounce back
   function resolveCollisions(insertedInstanceId, targetSlot) {
     const targetDev = state.placedDevices.find(d => d.instanceId === insertedInstanceId);
-    if (!targetDev) return;
+    if (!targetDev) return true;
 
     if (isSideSlot(targetSlot)) {
       resolveSideCollisions(insertedInstanceId, targetSlot);
-      return;
+      return true;
     }
 
     // Cap targetSlot so the device fits inside the rack
@@ -3223,38 +3247,68 @@ cabinetRackEl.appendChild(container);
     below.sort((a, b) => b.slot - a.slot);
     above.sort((a, b) => a.slot - b.slot);
 
-    // Initialize occupied slots map
-    const occupied = new Map();
-    function addOccupied(s, u, fraction) {
+    // Initialize occupied intervals map for exact horizontal overlap collision checks
+    const occupiedIntervals = new Map();
+    
+    function getDevIntervalForSlot(s, dev, activeIntervalsInSlot) {
+      const frac = dev.width_fraction || 1;
+      let left = dev.leftOffset;
+      if (left === undefined) {
+        let maxRight = 0;
+        activeIntervalsInSlot.forEach(inter => {
+          if (inter.right > maxRight) maxRight = inter.right;
+        });
+        left = maxRight;
+      }
+      return { left: left, right: left + frac };
+    }
+
+    function addOccupied(s, u, dev) {
       for (let i = 0; i < u; i++) {
         const checkU = s - i;
-        occupied.set(checkU, (occupied.get(checkU) || 0) + fraction);
+        if (!occupiedIntervals.has(checkU)) {
+          occupiedIntervals.set(checkU, []);
+        }
+        const existing = occupiedIntervals.get(checkU);
+        const thisInterval = getDevIntervalForSlot(checkU, dev, existing);
+        if (dev.leftOffset === undefined) {
+          dev.leftOffset = thisInterval.left;
+        }
+        existing.push(thisInterval);
       }
     }
-    function fits(s, u, fraction) {
+
+    function fits(s, u, dev) {
       for (let i = 0; i < u; i++) {
         const checkU = s - i;
         if (checkU <= 0 || checkU > state.rackSize) return false;
-        if ((occupied.get(checkU) || 0) + fraction > 1.01) return false;
+        const existing = occupiedIntervals.get(checkU) || [];
+        const thisInterval = getDevIntervalForSlot(checkU, dev, existing);
+        if (thisInterval.right > 1.01) return false;
+        const overlaps = existing.some(inter => {
+          return !(thisInterval.left >= inter.right - 0.01 || thisInterval.right <= inter.left + 0.01);
+        });
+        if (overlaps) return false;
       }
       return true;
     }
 
-    addOccupied(targetSlot, targetDev.u, targetDev.width_fraction || 1);
+    addOccupied(targetSlot, targetDev.u, targetDev);
+
+    let success = true;
 
     // Process below group (push down)
     below.forEach(dev => {
-      const frac = dev.width_fraction || 1;
       let slotFound = null;
       for (let u = dev.slot; u >= dev.u; u--) {
-        if (fits(u, dev.u, frac)) {
+        if (fits(u, dev.u, dev)) {
           slotFound = u;
           break;
         }
       }
       if (slotFound === null) {
         for (let u = dev.slot; u <= state.rackSize; u++) {
-          if (fits(u, dev.u, frac)) {
+          if (fits(u, dev.u, dev)) {
             slotFound = u;
             break;
           }
@@ -3262,23 +3316,24 @@ cabinetRackEl.appendChild(container);
       }
       if (slotFound !== null) {
         dev.slot = slotFound;
-        addOccupied(slotFound, dev.u, frac);
+        addOccupied(slotFound, dev.u, dev);
+      } else {
+        success = false;
       }
     });
 
     // Process above group (push up)
     above.forEach(dev => {
-      const frac = dev.width_fraction || 1;
       let slotFound = null;
       for (let u = dev.slot; u <= state.rackSize; u++) {
-        if (fits(u, dev.u, frac)) {
+        if (fits(u, dev.u, dev)) {
           slotFound = u;
           break;
         }
       }
       if (slotFound === null) {
         for (let u = dev.slot; u >= dev.u; u--) {
-          if (fits(u, dev.u, frac)) {
+          if (fits(u, dev.u, dev)) {
             slotFound = u;
             break;
           }
@@ -3286,11 +3341,14 @@ cabinetRackEl.appendChild(container);
       }
       if (slotFound !== null) {
         dev.slot = slotFound;
-        addOccupied(slotFound, dev.u, frac);
+        addOccupied(slotFound, dev.u, dev);
+      } else {
+        success = false;
       }
     });
 
     delete targetDev._originalSlot;
+    return success;
   }
 
   // Move device to new slot with cascading shift
@@ -3305,12 +3363,40 @@ cabinetRackEl.appendChild(container);
       return;
     }
 
+    const backupState = state.placedDevices.map(d => ({
+      instanceId: d.instanceId,
+      slot: d.slot,
+      leftOffset: d.leftOffset
+    }));
+
     dev._originalSlot = dev.slot;
     if (leftOffset !== undefined) {
       dev.leftOffset = leftOffset;
     }
 
-    resolveCollisions(instanceId, newSlot);
+    const success = resolveCollisions(instanceId, newSlot);
+
+    // Verify total rack limits
+    const uniqueOccupiedUs = new Set();
+    state.placedDevices.forEach(d => {
+       if (isSideSlot(d.slot)) return;
+       for (let i = 0; i < d.u; i++) uniqueOccupiedUs.add(d.slot - i);
+    });
+
+    if (!success || uniqueOccupiedUs.size > state.rackSize) {
+      // Revert move
+      backupState.forEach(b => {
+        const d = state.placedDevices.find(x => x.instanceId === b.instanceId);
+        if (d) {
+          d.slot = b.slot;
+          d.leftOffset = b.leftOffset;
+        }
+      });
+      alert(`Not enough space in the rack cabinet to position the device here.`);
+      saveState();
+      update();
+      return;
+    }
 
     saveState();
     update();
