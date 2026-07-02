@@ -1669,6 +1669,113 @@ document.addEventListener("DOMContentLoaded", () => {
       const proj = state.projectsIndex.find(p => p.id === state.activeProjectId);
       const projName = proj ? proj.name : "Rack_Project";
 
+      // Helper to auto-fit columns
+      function autoFitColumns(ws, data) {
+        if (!data || data.length === 0) return;
+        const max_len = {};
+        data.forEach(row => {
+          Object.keys(row).forEach(key => {
+            const val = row[key];
+            const valStr = val !== undefined && val !== null ? String(val) : "";
+            const lines = valStr.split('\n');
+            const longestLine = Math.max(...lines.map(l => l.length));
+            const keyLen = key.length;
+            const currentMax = max_len[key] || keyLen;
+            max_len[key] = Math.max(currentMax, longestLine);
+          });
+        });
+        ws['!cols'] = Object.keys(max_len).map(key => ({
+          wch: Math.min(65, Math.max(12, max_len[key] + 4))
+        }));
+      }
+
+      // 1. Network Manifest (Print Report style)
+      const sortedDevices = [...state.placedDevices]
+        .filter(d => !isWallOutletSlot(d.slot))
+        .sort((a, b) => {
+          if (isSideSlot(a.slot) && !isSideSlot(b.slot)) return 1;
+          if (!isSideSlot(a.slot) && isSideSlot(b.slot)) return -1;
+          if (isSideSlot(a.slot) && isSideSlot(b.slot)) return String(a.slot).localeCompare(String(b.slot));
+          return b.slot - a.slot;
+        });
+
+      const manifestData = sortedDevices.map(dev => {
+        let locText = "";
+        if (isSideSlot(dev.slot)) {
+          const sideInfo = parseSideSlot(dev.slot);
+          const sideName = sideInfo && sideInfo.side === "left" ? "Left Side" : "Right Side";
+          const uNum = sideInfo && sideInfo.u ? ` U${sideInfo.u}` : "";
+          locText = `${sideName}${uNum}`;
+        } else {
+          locText = `U${dev.slot}`;
+        }
+
+        const modelText = `${dev.customLabel || dev.name}\n[${dev.brand.toUpperCase()} • ${dev.u}U • ID: ${dev.id}]` + 
+          (dev.notes ? `\nNote: ${dev.notes}` : "");
+
+        let ipText = "";
+        if (dev.type === "router") {
+          const mode = dev.bridgeMode ? "Bridge Mode" : "Gateway Mode";
+          const lanIp = dev.ipAddress ? dev.ipAddress : "DHCP Client";
+          const wanIp = dev.wanIpAddress ? dev.wanIpAddress : "DHCP WAN";
+          ipText = `${mode}\nLAN IP: ${lanIp}\nWAN IP: ${wanIp}`;
+        } else {
+          ipText = dev.ipAddress ? dev.ipAddress : "DHCP Client";
+        }
+
+        let connLines = [];
+        const devConns = state.connections.filter(c => c.fromDevice === dev.instanceId || c.toDevice === dev.instanceId);
+        if (devConns.length === 0) {
+          connLines.push("No active cabling connections");
+        } else {
+          devConns.forEach(c => {
+            const isFrom = c.fromDevice === dev.instanceId;
+            const localPortIdx = isFrom ? c.fromPort : c.toPort;
+            const remoteDevId = isFrom ? c.toDevice : c.fromDevice;
+            const remotePortIdx = isFrom ? c.toPort : c.fromPort;
+
+            let localPortName = "";
+            if (localPortIdx === 1000) localPortName = "Power Inlet";
+            else if (localPortIdx >= 2000) localPortName = `Outlet ${localPortIdx - 2000 + 1}`;
+            else if (dev.type === "router" && localPortIdx === 0) localPortName = "WAN Port";
+            else localPortName = getDevicePortFriendlyLabel(dev.id, localPortIdx);
+
+            let remoteName = "";
+            let remotePortName = "";
+            if (remoteDevId === "wall-drop") {
+              remoteName = "Wall RJ45 Drop";
+              remotePortName = `#${remotePortIdx}`;
+            } else if (remoteDevId === "poe-endpoint") {
+              const epParts = String(remotePortIdx).split("-");
+              const epId = epParts.slice(0, -1).join("-");
+              const epNum = epParts[epParts.length - 1];
+              const ep = state.endpoints.find(e => e.id === epId);
+              remoteName = ep ? ep.name : "PoE Device";
+              remotePortName = `#${epNum}`;
+            } else if (remoteDevId === "internet") {
+              remoteName = "ISP Internet / WAN Gateway";
+              remotePortName = "External WAN";
+            } else {
+              const rDev = state.placedDevices.find(d => d.instanceId === remoteDevId);
+              remoteName = rDev ? (rDev.customLabel || rDev.name) : "Unknown Device";
+              if (remotePortIdx === 1000) remotePortName = "Power Inlet";
+              else if (remotePortIdx >= 2000) remotePortName = `Outlet ${remotePortIdx - 2000 + 1}`;
+              else remotePortName = getDevicePortFriendlyLabel(rDev ? rDev.id : "", remotePortIdx);
+            }
+
+            connLines.push(`${localPortName} ──🔗──> ${remoteName} (${remotePortName})`);
+          });
+        }
+
+        return {
+          "Location": locText,
+          "Device / Model": modelText,
+          "IP Address Configuration": ipText,
+          "Ports & Connections": connLines.join("\n")
+        };
+      });
+
+      // 2. Equipment List
       const equipmentData = state.placedDevices
         .filter(d => d.slot !== "wall-outlet")
         .map(d => ({
@@ -1683,28 +1790,7 @@ document.addEventListener("DOMContentLoaded", () => {
           "Cost ($)": d.cost || 0
         }));
 
-      const connectionsData = state.connections.map(c => {
-        const fromDev = state.placedDevices.find(d => d.instanceId === c.fromDevice);
-        const toDev = state.placedDevices.find(d => d.instanceId === c.toDevice);
-        const fromName = fromDev ? (fromDev.customLabel || fromDev.name) : (c.fromDevice === "internet" ? "Internet" : c.fromDevice);
-        const toName = toDev ? (toDev.customLabel || toDev.name) : (c.toDevice === "internet" ? "Internet" : c.toDevice);
-        
-        const getPortLabel = (dev, portIdx) => {
-          if (!dev) return portIdx;
-          if (portIdx === 1000) return "Power Inlet";
-          if (portIdx >= 2000) return `Outlet ${portIdx - 2000 + 1}`;
-          return `Port ${portIdx + 1}`;
-        };
-
-        return {
-          "From Device": fromName,
-          "From Port": getPortLabel(fromDev, c.fromPort),
-          "To Device": toName,
-          "To Port": getPortLabel(toDev, c.toPort),
-          "Cable Type": c.type || "LAN"
-        };
-      });
-
+      // 3. PoE Budget
       const poeData = state.placedDevices
         .filter(d => d.poe_budget > 0)
         .map(sw => {
@@ -1734,6 +1820,7 @@ document.addEventListener("DOMContentLoaded", () => {
           };
         });
 
+      // 4. BOM Summary
       const bomGroups = {};
       state.placedDevices.forEach(d => {
         if (d.slot === "wall-outlet") return;
@@ -1753,18 +1840,50 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       const bomData = Object.values(bomGroups);
 
+      // 5. Connections list
+      const connectionsData = state.connections.map(c => {
+        const fromDev = state.placedDevices.find(d => d.instanceId === c.fromDevice);
+        const toDev = state.placedDevices.find(d => d.instanceId === c.toDevice);
+        const fromName = fromDev ? (fromDev.customLabel || fromDev.name) : (c.fromDevice === "internet" ? "Internet" : c.fromDevice);
+        const toName = toDev ? (toDev.customLabel || toDev.name) : (c.toDevice === "internet" ? "Internet" : c.toDevice);
+        
+        const getPortLabel = (dev, portIdx) => {
+          if (!dev) return portIdx;
+          if (portIdx === 1000) return "Power Inlet";
+          if (portIdx >= 2000) return `Outlet ${portIdx - 2000 + 1}`;
+          return `Port ${portIdx + 1}`;
+        };
+
+        return {
+          "From Device": fromName,
+          "From Port": getPortLabel(fromDev, c.fromPort),
+          "To Device": toName,
+          "To Port": getPortLabel(toDev, c.toPort),
+          "Cable Type": c.type || "LAN"
+        };
+      });
+
       const wb = XLSX.utils.book_new();
 
+      // Create sheets & auto-fit columns
+      const wsManifest = XLSX.utils.json_to_sheet(manifestData);
+      autoFitColumns(wsManifest, manifestData);
+      XLSX.utils.book_append_sheet(wb, wsManifest, "Network Manifest");
+
       const wsEquipment = XLSX.utils.json_to_sheet(equipmentData);
+      autoFitColumns(wsEquipment, equipmentData);
       XLSX.utils.book_append_sheet(wb, wsEquipment, "Equipment List");
 
       const wsConnections = XLSX.utils.json_to_sheet(connectionsData);
+      autoFitColumns(wsConnections, connectionsData);
       XLSX.utils.book_append_sheet(wb, wsConnections, "Connections");
 
       const wsPoE = XLSX.utils.json_to_sheet(poeData);
+      autoFitColumns(wsPoE, poeData);
       XLSX.utils.book_append_sheet(wb, wsPoE, "PoE Budget");
 
       const wsBOM = XLSX.utils.json_to_sheet(bomData);
+      autoFitColumns(wsBOM, bomData);
       XLSX.utils.book_append_sheet(wb, wsBOM, "BOM Summary");
 
       const dateStr = new Date().toISOString().slice(0, 10);
