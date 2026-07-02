@@ -1575,6 +1575,49 @@ document.addEventListener("DOMContentLoaded", () => {
     return typeof slot === "string" && slot.startsWith("side");
   }
 
+  // Helper to dynamically calculate the premium cable color for connections
+  function getCableColor(conn) {
+    const fromDev = state.placedDevices.find(d => d.instanceId === conn.fromDevice);
+    const toDev = state.placedDevices.find(d => d.instanceId === conn.toDevice);
+    
+    const isPowerPort = (conn.fromPort === 1000 || conn.fromPort >= 2000 || conn.toPort === 1000 || conn.toPort >= 2000);
+    if (isPowerPort) {
+      // Power connections: premium slate gray
+      return "#475569";
+    }
+    
+    // Check WAN connections (Internet Gateway or WAN ports)
+    const isWan = conn.toDevice === "internet" || 
+                  (fromDev && fromDev.type === "router" && (fromDev.id.includes("dream-machine") ? conn.fromPort === 0 || conn.fromPort === 9 : conn.fromPort === 0)) ||
+                  (toDev && toDev.type === "router" && (toDev.id.includes("dream-machine") ? conn.toPort === 0 || conn.toPort === 9 : conn.toPort === 0));
+    if (isWan) {
+      // WAN connection: Rose Crimson Red
+      return "#f43f5e";
+    }
+    
+    // Check Switch-to-Router or Switch-to-Switch (Core Uplinks)
+    const isCoreLink = fromDev && toDev && 
+                       ((fromDev.type === "router" && toDev.type === "switch") ||
+                        (fromDev.type === "switch" && toDev.type === "router") ||
+                        (fromDev.type === "switch" && toDev.type === "switch"));
+    if (isCoreLink) {
+      // Switch to switch/router: Sky Blue
+      return "#0ea5e9";
+    }
+    
+    // Check PoE endpoints or PoE ports
+    const isPoe = conn.toDevice === "poe-endpoint" || 
+                  (fromDev && fromDev.type === "switch" && conn.fromPort < fromDev.poe_ports) ||
+                  (toDev && toDev.type === "switch" && conn.toPort < toDev.poe_ports);
+    if (isPoe) {
+      // PoE connection: Warm Orange
+      return "#f97316";
+    }
+    
+    // Default standard LAN: Emerald Green
+    return "#10b981";
+  }
+
   // Helper to find final U position for side slots after collision resolution
   function getResolvedSideSlotU(instanceId, presetId, sideKey, targetU) {
     let dragU = 1;
@@ -4614,7 +4657,6 @@ cabinetRackEl.appendChild(container);
         (c.toDevice === dev.instanceId && c.toPort === portIdx)
       );
       const isPower = (portIdx === 1000 || portIdx >= 2000);
-      const color = isPower ? "#f97316" : (existingConn ? (existingConn.cableColor || getRandomHueColor()) : getRandomHueColor());
       const category = isPower ? "Power" : "Cat6";
       const label = "";
       
@@ -4648,16 +4690,18 @@ cabinetRackEl.appendChild(container);
           destPortIdx = 0;
         }
         
-        state.connections.push({
+        const newConn = {
           id: `conn-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           fromDevice: dev.instanceId,
           fromPort: portIdx,
           toDevice: destDevId,
           toPort: destPortIdx,
-          cableColor: color,
+          cableColor: "#2563eb",
           cableType: category,
           label: label
-        });
+        };
+        newConn.cableColor = getCableColor(newConn);
+        state.connections.push(newConn);
       }
     });
     
@@ -4728,6 +4772,7 @@ cabinetRackEl.appendChild(container);
       else if (conn.cableColor === "#f8fafc") colorClass = "cable-white";
       else if (conn.cableColor === "#f97316") colorClass = "cable-orange";
       
+      const dynamicColor = getCableColor(conn);
       if (conn.toDevice === "wall-drop" || conn.toDevice === "poe-endpoint") {
         const rackWidth = rackRect.width / zoom;
         const exitLeft = x1 < (rackWidth / 2);
@@ -4744,9 +4789,7 @@ cabinetRackEl.appendChild(container);
         path.setAttribute("data-to-dev", conn.toDevice);
         path.setAttribute("data-to-port", conn.toPort);
         path.setAttribute("stroke-width", "2");
-        if (conn.cableColor) {
-          path.setAttribute("stroke", conn.cableColor);
-        }
+        path.setAttribute("stroke", dynamicColor);
         path.setAttribute("title", `${conn.cableType || ''} ${conn.label ? '| ' + conn.label : ''}`);
         svg.appendChild(path);
         
@@ -4791,9 +4834,7 @@ cabinetRackEl.appendChild(container);
         path.setAttribute("data-to-dev", conn.toDevice);
         path.setAttribute("data-to-port", conn.toPort);
         path.setAttribute("stroke-width", "2");
-        if (conn.cableColor) {
-          path.setAttribute("stroke", conn.cableColor);
-        }
+        path.setAttribute("stroke", dynamicColor);
         path.setAttribute("title", `${conn.cableType || ''} ${conn.label ? '| ' + conn.label : ''}`);
         svg.appendChild(path);
       }
@@ -4829,8 +4870,8 @@ cabinetRackEl.appendChild(container);
       const sourceName = `${fromDev.customLabel || fromDev.name} (U${fromDev.slot})`;
       const sourceIp = fromDev.ipAddress ? ` [${fromDev.ipAddress}]` : "";
       
-      let badgeBg = conn.cableColor || "#2563eb";
-      let badgeText = conn.cableColor === "#f8fafc" ? "#0f172a" : "#ffffff";
+      let badgeBg = getCableColor(conn);
+      let badgeText = "#ffffff";
       const cableBadge = `<span class="cable-badge" style="background: ${badgeBg}; color: ${badgeText};">${conn.cableType}</span>`;
       
       let destHtml = "";
