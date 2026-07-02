@@ -1689,7 +1689,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }));
       }
 
-      // 1. Network Manifest (Print Report style)
+      // 1. Connection Manifest (Print Report style)
       const sortedDevices = [...state.placedDevices]
         .filter(d => !isWallOutletSlot(d.slot))
         .sort((a, b) => {
@@ -1868,7 +1868,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Create sheets & auto-fit columns
       const wsManifest = XLSX.utils.json_to_sheet(manifestData);
       autoFitColumns(wsManifest, manifestData);
-      XLSX.utils.book_append_sheet(wb, wsManifest, "Network Manifest");
+      XLSX.utils.book_append_sheet(wb, wsManifest, "Connection Manifest");
 
       const wsEquipment = XLSX.utils.json_to_sheet(equipmentData);
       autoFitColumns(wsEquipment, equipmentData);
