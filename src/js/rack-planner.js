@@ -791,8 +791,20 @@ document.addEventListener("DOMContentLoaded", () => {
       if (confirm("Are you sure you want to clear the entire rack configuration?")) {
         state.placedDevices = [];
         state.connections = [];
+        state.endpoints = [];
+        state.dropPoints = 12;
+        state.localLines = 2;
+        state.rackSize = 18;
+        
+        // Sync UI inputs
+        if (dropsInputEl) dropsInputEl.value = 12;
+        if (localLinksInputEl) localLinksInputEl.value = 2;
+        const sizeSelect = document.getElementById("select-rack-size");
+        if (sizeSelect) sizeSelect.value = "18";
+        
         saveState();
         update();
+        renderEndpointList();
       }
     });
 
@@ -2728,9 +2740,9 @@ cabinetRackEl.appendChild(container);
       devEl.innerHTML = `
         ${earsHtml}
         ${assetTagHtml}
-        <div class="device-faceplate-top" style="height: 100%; align-items: flex-end; padding-bottom: 4px; box-sizing: border-box;">
+        <div class="device-faceplate-top" style="flex-grow: 1; display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 4px; box-sizing: border-box;">
           ${!hideDefaultLeft ? `
-            <div class="device-faceplate-left" style="height: 100%;">
+            <div class="device-faceplate-left">
               ${ledsHtml}
               ${faceplateOverlayHtml}
               ${brandModelLabelHtml}
