@@ -2571,8 +2571,8 @@ cabinetRackEl.appendChild(container);
                 classStr += " wan-active"; // WAN always red
               } else if (targetInstanceId === "internet") {
                 classStr += " internet-active";
-              } else if (isUplinkConnection) {
-                classStr += " uplink"; // blue for switch/router links
+              } else if (isUplinkConnection && (dev.type === "switch" || dev.type === "router")) {
+                classStr += " uplink"; // blue only when both sides are switch/router
               } else if (isPoeCapable && targetDev && targetDev.type !== "switch" && targetDev.type !== "router") {
                 classStr += " poe"; // orange for PoE endpoints
               } else {
@@ -2742,7 +2742,7 @@ cabinetRackEl.appendChild(container);
       devEl.innerHTML = `
         ${earsHtml}
         ${assetTagHtml}
-        <div class="device-faceplate-top" style="flex-grow: 1; display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 4px; box-sizing: border-box;">
+        <div class="device-faceplate-top" style="flex-grow: 1; display: flex; justify-content: space-between; align-items: stretch; padding-bottom: 0; box-sizing: border-box;">
           ${!hideDefaultLeft ? `
             <div class="device-faceplate-left">
               ${ledsHtml}
