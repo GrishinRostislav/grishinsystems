@@ -2041,6 +2041,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       const occupyingDevices = state.placedDevices.filter(dev => {
         if (isSideSlot(dev.slot)) return false;
+        if (dev.slot === "wall-outlet") return false;
         if (excludeInstanceId && dev.instanceId === excludeInstanceId) return false;
         // Device occupies slots from dev.slot down to dev.slot - dev.u + 1
         const devStart = dev.slot;
@@ -2057,6 +2058,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Check if slot U is occupied in a custom list of devices
   function isSlotOccupiedInList(u, list, incomingFraction = 1) {
     const occupyingDevices = list.filter(dev => {
+      if (dev.slot === "wall-outlet" || isSideSlot(dev.slot)) return false;
       const start = dev.slot;
       const end = dev.slot - dev.u + 1;
       return u <= start && u >= end;
@@ -3244,6 +3246,10 @@ cabinetRackEl.appendChild(container);
     const targetDev = state.placedDevices.find(d => d.instanceId === insertedInstanceId);
     if (!targetDev) return true;
 
+    if (targetSlot === "wall-outlet") {
+      return true;
+    }
+
     if (isSideSlot(targetSlot)) {
       resolveSideCollisions(insertedInstanceId, targetSlot);
       return true;
@@ -3253,8 +3259,8 @@ cabinetRackEl.appendChild(container);
     targetSlot = Math.min(state.rackSize, Math.max(targetDev.u, targetSlot));
     targetDev.slot = targetSlot;
 
-    // Collect all other devices, excluding side panel ones
-    const otherDevices = state.placedDevices.filter(d => d.instanceId !== insertedInstanceId && !isSideSlot(d.slot));
+    // Collect all other devices, excluding side panel ones and wall outlet
+    const otherDevices = state.placedDevices.filter(d => d.instanceId !== insertedInstanceId && !isSideSlot(d.slot) && d.slot !== "wall-outlet");
 
     // Partition based on preferred shift direction to create a natural slide cascade
     const above = [];
