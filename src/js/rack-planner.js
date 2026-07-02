@@ -1453,6 +1453,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
             <div class="rp-project-card-actions">
               <button class="rp-dash-btn rp-dash-btn--primary btn-open-proj" data-id="${proj.id}">Open</button>
+              <button class="rp-dash-btn btn-rename-proj" data-id="${proj.id}">Rename</button>
               <button class="rp-dash-btn btn-export-proj" data-id="${proj.id}">Export</button>
               <button class="rp-dash-btn rp-dash-btn--danger btn-delete-proj" data-id="${proj.id}">Delete</button>
             </div>
@@ -1465,6 +1466,21 @@ document.addEventListener("DOMContentLoaded", () => {
       container.querySelectorAll(".btn-open-proj").forEach(btn => {
         btn.addEventListener("click", (e) => {
           openProject(e.target.getAttribute("data-id"));
+        });
+      });
+
+      container.querySelectorAll(".btn-rename-proj").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const id = e.target.getAttribute("data-id");
+          const proj = state.projectsIndex.find(p => p.id === id);
+          if (!proj) return;
+          const newName = prompt("Enter new project name:", proj.name);
+          if (newName !== null && newName.trim() !== "") {
+            proj.name = newName.trim();
+            proj.updatedAt = new Date().toISOString();
+            saveProjectsIndex();
+            renderProjectsList();
+          }
         });
       });
 
@@ -1642,6 +1658,21 @@ document.addEventListener("DOMContentLoaded", () => {
       btnBackProjects.addEventListener("click", () => {
         saveState();
         showDashboard();
+      });
+    }
+
+    if (toolbarProjectName) {
+      toolbarProjectName.addEventListener("click", () => {
+        if (!state.activeProjectId) return;
+        const proj = state.projectsIndex.find(p => p.id === state.activeProjectId);
+        if (!proj) return;
+        const newName = prompt("Enter new project name:", proj.name);
+        if (newName !== null && newName.trim() !== "") {
+          proj.name = newName.trim();
+          proj.updatedAt = new Date().toISOString();
+          saveProjectsIndex();
+          toolbarProjectName.textContent = `— ${proj.name}`;
+        }
       });
     }
 
