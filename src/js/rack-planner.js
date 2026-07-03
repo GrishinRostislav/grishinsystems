@@ -1758,17 +1758,19 @@ document.addEventListener("DOMContentLoaded", () => {
       function applyStylesAndHeights(ws, data) {
         if (!data || data.length === 0) return;
 
-        // 1. Style cells (Header: light slate bg, bold text, centered. Data: top aligned, wrap text)
+        // 1. Style cells (Header: light blue/slate bg, bold text, centered. Data: center vertically, wrap text)
         for (const cellId in ws) {
           if (cellId.startsWith('!')) continue;
           const cell = ws[cellId];
           if (!cell.s) cell.s = {};
           
-          const isHeader = /^[A-Z]1$/.test(cellId);
+          const rowNum = parseInt(cellId.replace(/^[A-Z]+/g, ''));
+          const isHeader = (rowNum === 1);
+          
           if (isHeader) {
             cell.s.fill = {
               patternType: "solid",
-              fgColor: { rgb: "F1F5F9" } // slate-100 background
+              fgColor: { rgb: "D9E6F7" } // Soft pleasant blue background for headers
             };
             cell.s.font = {
               bold: true,
@@ -1782,11 +1784,21 @@ document.addEventListener("DOMContentLoaded", () => {
               wrapText: true
             };
             cell.s.border = {
-              bottom: { style: "medium", color: { rgb: "CBD5E1" } } // Border under header
+              top: { style: "thin", color: { rgb: "94A3B8" } },
+              bottom: { style: "medium", color: { rgb: "475569" } }, // Border under header
+              left: { style: "thin", color: { rgb: "94A3B8" } },
+              right: { style: "thin", color: { rgb: "94A3B8" } }
             };
           } else {
+            // Alternating zebra backgrounds: even rows get soft ice-blue, odd rows get white
+            const bgHex = (rowNum % 2 === 0) ? "F4F8FD" : "FFFFFF"; 
+            
+            cell.s.fill = {
+              patternType: "solid",
+              fgColor: { rgb: bgHex }
+            };
             cell.s.alignment = {
-              vertical: "top",
+              vertical: "center", // Vertically center align!
               wrapText: true
             };
             cell.s.font = {
@@ -1795,7 +1807,10 @@ document.addEventListener("DOMContentLoaded", () => {
               color: { rgb: "334155" } // slate-700 text
             };
             cell.s.border = {
-              bottom: { style: "thin", color: { rgb: "F1F5F9" } } // Subtle cell separator
+              top: { style: "thin", color: { rgb: "D0DFEE" } },
+              bottom: { style: "thin", color: { rgb: "D0DFEE" } },
+              left: { style: "thin", color: { rgb: "D0DFEE" } },
+              right: { style: "thin", color: { rgb: "D0DFEE" } } // Clean light blue grid lines
             };
           }
         }
@@ -1813,8 +1828,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           });
           
-          // Calculate height: 24pt for 1 line (lots of padding), or (lines * 14) + 12pt padding for multi-line
-          const height = maxLines === 1 ? 24 : (maxLines * 14) + 12;
+          // Calculate height: 26pt for 1 line (comfortably padded), or (lines * 14) + 14pt padding for multi-line
+          const height = maxLines === 1 ? 26 : (maxLines * 14) + 14;
           rows.push({ hpt: height });
         });
         
