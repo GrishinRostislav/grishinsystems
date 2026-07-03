@@ -109,7 +109,8 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "wattbox-400-ce-10", name: "WattBox WB-400-CE-10 IP Power Conditioner (10 Outlets, 2U)", brand: "wattbox", u: 2, ports: 1, poe_ports: 0, poe_budget: 0, outlets: 10, requires_power: true, type: "power", cost: 499 },
       { id: "wattbox-400-vce-12", name: "WattBox WB-400-VCE-12 Power Conditioner (12 Outlets, 2U)", brand: "wattbox", u: 2, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 12, requires_power: true, type: "power", cost: 399 },
       { id: "power-strip-6", name: "Standard 6-Outlet Power Strip (Shelf)", brand: "generic", u: 1, width_fraction: 0.5, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 6, requires_power: true, type: "power", cost: 25 },
-      { id: "wall-outlet-6", name: "Wall Outlet (6 Sockets) – Power Source", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 6, requires_power: false, type: "power", cost: 0 }
+      { id: "wall-outlet-6", name: "Wall Outlet (6 Sockets) – Power Source", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 6, requires_power: false, type: "power", cost: 0 },
+      { id: "cabinet-fan", name: "Cabinet Cooling Fans", brand: "generic", u: 1, ports: 0, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 0 }
     ],
     theater: [
       { id: "savant-sipa125", name: "Savant IP Audio 125 (SIPA125)", brand: "savant", u: 2, ports: 13, poe_ports: 0, poe_budget: 0, outlets: 0, requires_power: true, type: "misc", cost: 1800 },
@@ -1241,7 +1242,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (projIdx !== -1) {
         state.projectsIndex[projIdx].updatedAt = new Date().toISOString();
         state.projectsIndex[projIdx].rackSize = state.rackSize;
-        state.projectsIndex[projIdx].deviceCount = state.placedDevices.filter(d => d.slot !== "wall-outlet").length;
+        state.projectsIndex[projIdx].deviceCount = state.placedDevices.filter(d => d.slot !== "wall-outlet" && d.slot !== "cabinet-fan").length;
         saveProjectsIndex();
       }
     }
@@ -1301,7 +1302,7 @@ document.addEventListener("DOMContentLoaded", () => {
         state.dropPoints = 12;
         state.localLines = 2;
       }
-      ensureDefaultWallOutlet();
+      ensureDefaultCabinetDevices();
     }
 
     // State migration from old rack-planner version
@@ -1328,7 +1329,7 @@ document.addEventListener("DOMContentLoaded", () => {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             rackSize: parsed.rackSize || 18,
-            deviceCount: (parsed.placedDevices || []).filter(d => d.slot !== "wall-outlet").length
+            deviceCount: (parsed.placedDevices || []).filter(d => d.slot !== "wall-outlet" && d.slot !== "cabinet-fan").length
           };
           state.projectsIndex.push(newProj);
           localStorage.setItem(`rp_project_${legacyId}`, legacyState);
@@ -1542,21 +1543,38 @@ document.addEventListener("DOMContentLoaded", () => {
           dropPoints: 12,
           localLines: 2,
           endpoints: [],
-          placedDevices: [{
-            instanceId: "inst_wall_outlet_default",
-            id: "wall-outlet-6",
-            name: "Wall Outlet (6 Sockets) – Power Source",
-            brand: "generic",
-            u: 1,
-            ports: 0,
-            poe_ports: 0,
-            poe_budget: 0,
-            outlets: 6,
-            requires_power: false,
-            type: "power",
-            cost: 0,
-            slot: "wall-outlet"
-          }],
+          placedDevices: [
+            {
+              instanceId: "inst_wall_outlet_default",
+              id: "wall-outlet-6",
+              name: "Wall Outlet (6 Sockets) – Power Source",
+              brand: "generic",
+              u: 1,
+              ports: 0,
+              poe_ports: 0,
+              poe_budget: 0,
+              outlets: 6,
+              requires_power: false,
+              type: "power",
+              cost: 0,
+              slot: "wall-outlet"
+            },
+            {
+              instanceId: "inst_cabinet_fans_default",
+              id: "cabinet-fan",
+              name: "Cabinet Cooling Fans",
+              brand: "generic",
+              u: 1,
+              ports: 0,
+              poe_ports: 0,
+              poe_budget: 0,
+              outlets: 0,
+              requires_power: true,
+              type: "misc",
+              cost: 0,
+              slot: "cabinet-fan"
+            }
+          ],
           connections: [],
           showCables: true,
           zoomLevel: 1.0,
@@ -1737,6 +1755,8 @@ document.addEventListener("DOMContentLoaded", () => {
           const sideName = sideInfo && sideInfo.side === "left" ? "Left Side" : "Right Side";
           const uNum = sideInfo && sideInfo.u ? ` U${sideInfo.u}` : "";
           locText = `${sideName}${uNum}`;
+        } else if (dev.slot === "cabinet-fan") {
+          locText = "Cabinet Built-in";
         } else {
           locText = `U${dev.slot}`;
         }
@@ -1808,7 +1828,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // 2. Equipment List
       const equipmentData = state.placedDevices
-        .filter(d => d.slot !== "wall-outlet")
+        .filter(d => d.slot !== "wall-outlet" && d.slot !== "cabinet-fan")
         .map(d => ({
           "Name": d.customLabel || d.name,
           "Brand": (d.brand || "").toUpperCase(),
@@ -1854,7 +1874,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // 4. BOM Summary
       const bomGroups = {};
       state.placedDevices.forEach(d => {
-        if (d.slot === "wall-outlet") return;
+        if (d.slot === "wall-outlet" || d.slot === "cabinet-fan") return;
         const key = `${d.brand || 'generic'}_${d.id}`;
         if (!bomGroups[key]) {
           bomGroups[key] = {
@@ -1921,11 +1941,14 @@ document.addEventListener("DOMContentLoaded", () => {
       XLSX.writeFile(wb, `${projName.replace(/\s+/g, '_')}_rack_${dateStr}.xlsx`);
     }
 
-  function ensureDefaultWallOutlet() {
-    // 1. Force slot back to wall-outlet for any wall outlet devices
+  function ensureDefaultCabinetDevices() {
+    // 1. Force slot back for default virtual devices
     state.placedDevices.forEach(d => {
       if (d.id === "wall-outlet-6" && d.slot !== "wall-outlet") {
         d.slot = "wall-outlet";
+      }
+      if (d.id === "cabinet-fan" && d.slot !== "cabinet-fan") {
+        d.slot = "cabinet-fan";
       }
     });
 
@@ -1933,7 +1956,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const wallOutletDevices = state.placedDevices.filter(d => d.slot === "wall-outlet");
     
     if (wallOutletDevices.length === 0) {
-      // Create the default one if missing
       state.placedDevices.push({
         instanceId: "inst_wall_outlet_default",
         id: "wall-outlet-6",
@@ -1950,9 +1972,31 @@ document.addEventListener("DOMContentLoaded", () => {
         slot: "wall-outlet"
       });
     } else if (wallOutletDevices.length > 1) {
-      // If there are duplicates, keep only the first one and remove the rest from state
       const first = wallOutletDevices[0];
       state.placedDevices = state.placedDevices.filter(d => d.slot !== "wall-outlet" || d.instanceId === first.instanceId);
+    }
+
+    // 3. Collect all cabinet fan devices
+    const fanDevices = state.placedDevices.filter(d => d.slot === "cabinet-fan");
+    if (fanDevices.length === 0) {
+      state.placedDevices.push({
+        instanceId: "inst_cabinet_fans_default",
+        id: "cabinet-fan",
+        name: "Cabinet Cooling Fans",
+        brand: "generic",
+        u: 1,
+        ports: 0,
+        poe_ports: 0,
+        poe_budget: 0,
+        outlets: 0,
+        requires_power: true,
+        type: "misc",
+        cost: 0,
+        slot: "cabinet-fan"
+      });
+    } else if (fanDevices.length > 1) {
+      const first = fanDevices[0];
+      state.placedDevices = state.placedDevices.filter(d => d.slot !== "cabinet-fan" || d.instanceId === first.instanceId);
     }
   }
 
@@ -2125,7 +2169,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     
     const filteredItems = items.filter(item => {
-      if (item.id === "wall-outlet-6") return false; // Wall Outlet is pre-installed on the wall by default
+      if (item.id === "wall-outlet-6" || item.id === "cabinet-fan") return false; // Default pre-installed devices
       if (!query) return true;
       return item.name.toLowerCase().includes(query) || item.brand.toLowerCase().includes(query);
     });
@@ -2782,7 +2826,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Visual Update Loop
   function update() {
-    ensureDefaultWallOutlet();
+    ensureDefaultCabinetDevices();
     renderCabinet();
     renderEndpointList();
     runValidations();
@@ -3610,7 +3654,7 @@ cabinetRackEl.appendChild(container);
       <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px;">
         <div>
           <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Hardware</div>
-          <div style="font-size: 16px; font-weight: bold; color: #0f172a; margin-top: 2px;">${state.placedDevices.length} Devices</div>
+          <div style="font-size: 16px; font-weight: bold; color: #0f172a; margin-top: 2px;">${state.placedDevices.filter(d => d.slot !== "wall-outlet" && d.slot !== "cabinet-fan").length} Devices</div>
         </div>
         <div>
           <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Cabling Links</div>
@@ -3653,6 +3697,8 @@ cabinetRackEl.appendChild(container);
         locText = `${sideName}${uNum}`;
       } else if (isWall) {
         locText = "Wall Outlet";
+      } else if (dev.slot === "cabinet-fan") {
+        locText = "Cabinet Built-in";
       } else {
         locText = `U${dev.slot}`;
       }
