@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import styles from './page.module.css';
 import ScheduledTransactionModal from '@/components/ScheduledTransactionModal';
+import ConfirmPaymentModal from '@/components/ConfirmPaymentModal';
 import { formatCurrency, formatDate } from '@/utils/format';
 import { Suspense } from 'react';
 
@@ -17,6 +18,9 @@ function PlanningContent() {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSched, setEditingSched] = useState<any | null>(null);
+
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [confirmingSched, setConfirmingSched] = useState<any | null>(null);
   
   const [loading, setLoading] = useState(true);
 
@@ -84,12 +88,19 @@ function PlanningContent() {
     }
   };
 
-  const handleApprove = async (id: string) => {
-    const res = await fetch(`/cashFlow/api/scheduled/${id}/approve`, { method: 'POST' });
+  const handleConfirmPayment = async (data: any) => {
+    if (!confirmingSched) return;
+    const res = await fetch(`/cashFlow/api/scheduled/${confirmingSched.id}/approve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
     if (res.ok) {
       await fetchData();
+      setIsConfirmModalOpen(false);
+      setConfirmingSched(null);
     } else {
-      alert("Failed to approve transaction.");
+      alert("Failed to process payment.");
     }
   };
 
@@ -175,7 +186,7 @@ function PlanningContent() {
                   Frequency: {s.frequency}
                 </div>
                 <div className={styles.actions}>
-                  <button className={`${styles.btn} ${styles.btnApprove}`} onClick={() => handleApprove(s.id)}>Approve</button>
+                  <button className={`${styles.btn} ${styles.btnApprove}`} onClick={() => { setConfirmingSched(s); setIsConfirmModalOpen(true); }}>Pay Now</button>
                   <button className={`${styles.btn} ${styles.btnSkip}`} onClick={() => handleSkip(s.id)}>Skip</button>
                 </div>
               </div>
@@ -234,6 +245,7 @@ function PlanningContent() {
                   Mode: {s.autoApprove ? 'Auto' : 'Manual'}
                 </div>
                 <div className={styles.actions}>
+                  <button className={`${styles.btn} ${styles.btnApprove}`} onClick={() => { setConfirmingSched(s); setIsConfirmModalOpen(true); }}>Pay Now</button>
                   <button className={`${styles.btn} ${styles.btnEdit}`} onClick={() => { setEditingSched(s); setIsModalOpen(true); }}>Edit</button>
                   <button className={`${styles.btn} ${styles.btnDelete}`} onClick={() => handleDelete(s.id)}>Delete</button>
                 </div>
@@ -250,6 +262,14 @@ function PlanningContent() {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSave}
         transaction={editingSched}
+        accounts={accounts}
+        categories={categories}
+      />
+      <ConfirmPaymentModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={handleConfirmPayment}
+        transaction={confirmingSched}
         accounts={accounts}
         categories={categories}
       />

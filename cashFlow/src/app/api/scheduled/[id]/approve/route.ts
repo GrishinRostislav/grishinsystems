@@ -37,68 +37,79 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Scheduled transaction not found" }, { status: 404 });
     }
 
+    let body: any = {};
+    try {
+      body = await request.json();
+    } catch (e) {
+      // ignore
+    }
+
+    const finalAmount = body.amount !== undefined ? Number(body.amount) : sched.amount;
+    const finalDate = body.date ? new Date(body.date) : new Date();
+    const finalMerchant = body.merchant !== undefined ? body.merchant : sched.merchant;
+    const finalAccountId = body.accountId || sched.accountId;
+    const finalToAccountId = body.toAccountId !== undefined ? body.toAccountId : sched.toAccountId;
+    const finalCategoryId = body.categoryId !== undefined ? body.categoryId : sched.categoryId;
+    const finalNotes = body.notes !== undefined ? body.notes : sched.notes;
+
     const runDate = new Date(sched.nextRunDate);
     
     // 1. Create the transaction(s)
-    if (sched.type === 'transfer' && sched.toAccountId) {
+    if (sched.type === 'transfer' && finalToAccountId) {
       // OUT transaction
       await prisma.transaction.create({
         data: {
-          amount: -Math.abs(sched.amount),
-          date: new Date(),
-          merchant: sched.merchant || "Transfer Out",
+          amount: -Math.abs(finalAmount),
+          date: finalDate,
+          merchant: finalMerchant || "Transfer Out",
           payeeId: sched.payeeId,
-          notes: sched.notes ? `[Manual Approve] ${sched.notes}` : '[Manual Approve Transfer]',
-          accountId: sched.accountId,
+          notes: finalNotes ? `[Manual Approve] ${finalNotes}` : '[Manual Approve Transfer]',
+          accountId: finalAccountId,
           paymentMethod: sched.paymentMethod || 'Manual-Scheduled'
         }
       });
       // IN transaction
       await prisma.transaction.create({
         data: {
-          amount: Math.abs(sched.amount),
-          date: new Date(),
-          merchant: sched.merchant || "Transfer In",
+          amount: Math.abs(finalAmount),
+          date: finalDate,
+          merchant: finalMerchant || "Transfer In",
           payeeId: sched.payeeId,
-          notes: sched.notes ? `[Manual Approve] ${sched.notes}` : '[Manual Approve Transfer]',
-          accountId: sched.toAccountId,
+          notes: finalNotes ? `[Manual Approve] ${finalNotes}` : '[Manual Approve Transfer]',
+          accountId: finalToAccountId,
           paymentMethod: sched.paymentMethod || 'Manual-Scheduled'
         }
       });
 
       // Update balances
       await prisma.account.update({
-        where: { id: sched.accountId },
-        data: { balance: sched.account.balance - Math.abs(sched.amount) }
+        where: { id: finalAccountId },
+        data: { balance: { increment: -Math.abs(finalAmount) } }
       });
 
-      const toAccount = await prisma.account.findUnique({ where: { id: sched.toAccountId }});
-      if (toAccount) {
-        await prisma.account.update({
-          where: { id: sched.toAccountId },
-          data: { balance: toAccount.balance + Math.abs(sched.amount) }
-        });
-      }
+      await prisma.account.update({
+        where: { id: finalToAccountId },
+        data: { balance: { increment: Math.abs(finalAmount) } }
+      });
 
     } else {
       await prisma.transaction.create({
         data: {
-          amount: sched.amount,
-          date: new Date(),
-          merchant: sched.merchant,
+          amount: finalAmount,
+          date: finalDate,
+          merchant: finalMerchant,
           payeeId: sched.payeeId,
-          notes: sched.notes ? `[Manual Approve] ${sched.notes}` : '[Manual Approve]',
-          accountId: sched.accountId,
-          categoryId: sched.categoryId,
+          notes: finalNotes ? `[Manual Approve] ${finalNotes}` : '[Manual Approve]',
+          accountId: finalAccountId,
+          categoryId: finalCategoryId,
           paymentMethod: sched.paymentMethod || 'Manual-Scheduled'
         }
       });
 
       // 2. Update balance
-      const newBalance = sched.account.balance + sched.amount;
       await prisma.account.update({
-        where: { id: sched.accountId },
-        data: { balance: newBalance }
+        where: { id: finalAccountId },
+        data: { balance: { increment: finalAmount } }
       });
     }
     // 3. Advance to next date
