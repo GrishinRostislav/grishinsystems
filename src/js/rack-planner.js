@@ -1918,17 +1918,30 @@ document.addEventListener("DOMContentLoaded", () => {
       // 2. Equipment List
       const equipmentData = state.placedDevices
         .filter(d => d.slot !== "wall-outlet" && d.slot !== "cabinet-fan")
-        .map(d => ({
-          "Name": d.customLabel || d.name,
-          "Brand": (d.brand || "").toUpperCase(),
-          "Type/Category": d.category || d.type || "Other",
-          "U Size": `${d.u}U`,
-          "Slot Position": isSideSlot(d.slot) 
-            ? `Side ${d.slot.replace("side-", "").toUpperCase()}` 
-            : `U${d.slot}`,
-          "IP Address": d.ipAddress || (d.wanIpAddress ? `WAN: ${d.wanIpAddress}` : "-"),
-          "Cost ($)": d.cost || 0
-        }));
+        .map(d => {
+          let ipVal = "-";
+          if (hasIpAddressCapability(d)) {
+            if (d.ipAddress) {
+              ipVal = d.ipAddress;
+            } else if (d.wanIpAddress) {
+              ipVal = `WAN: ${d.wanIpAddress}`;
+            } else {
+              ipVal = "DHCP";
+            }
+          }
+
+          return {
+            "Name": d.customLabel || d.name,
+            "Brand": (d.brand || "").toUpperCase(),
+            "Type/Category": d.category || d.type || "Other",
+            "U Size": `${d.u}U`,
+            "Slot Position": isSideSlot(d.slot) 
+              ? `Side ${d.slot.replace("side-", "").toUpperCase()}` 
+              : `U${d.slot}`,
+            "IP Address": ipVal,
+            "Notes / Documentation": d.notes || ""
+          };
+        });
 
       const wb = XLSX.utils.book_new();
 
