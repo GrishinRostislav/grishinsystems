@@ -1745,9 +1745,25 @@ document.addEventListener("DOMContentLoaded", () => {
             max_len[key] = Math.max(currentMax, longestLine);
           });
         });
-        ws['!cols'] = Object.keys(max_len).map(key => ({
-          wch: Math.min(65, Math.max(12, max_len[key] + 4))
-        }));
+        ws['!cols'] = Object.keys(max_len).map(key => {
+          let extra = 4;
+          if (key === "Location") extra = 1;
+          let w = Math.max(10, max_len[key] + extra);
+          if (key === "Location") w = Math.min(18, w);
+          return { wch: w };
+        });
+      }
+
+      // Helper to align cell content to the top and wrap text
+      function applyStyles(ws) {
+        for (const cellId in ws) {
+          if (cellId.startsWith('!')) continue;
+          const cell = ws[cellId];
+          if (!cell.s) cell.s = {};
+          if (!cell.s.alignment) cell.s.alignment = {};
+          cell.s.alignment.vertical = "top";
+          cell.s.alignment.wrapText = true;
+        }
       }
 
       // 1. Connection Manifest (Print Report style)
@@ -1863,10 +1879,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Create sheets & auto-fit columns
       const wsManifest = XLSX.utils.json_to_sheet(manifestData);
+      applyStyles(wsManifest);
       autoFitColumns(wsManifest, manifestData);
       XLSX.utils.book_append_sheet(wb, wsManifest, "Connection Manifest");
 
       const wsEquipment = XLSX.utils.json_to_sheet(equipmentData);
+      applyStyles(wsEquipment);
       autoFitColumns(wsEquipment, equipmentData);
       XLSX.utils.book_append_sheet(wb, wsEquipment, "Equipment List");
 
