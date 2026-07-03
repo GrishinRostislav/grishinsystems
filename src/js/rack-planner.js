@@ -1754,16 +1754,71 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
 
-      // Helper to align cell content to the top and wrap text
-      function applyStyles(ws) {
+      // Helper to align cell content, add margins/padding and clean borders
+      function applyStylesAndHeights(ws, data) {
+        if (!data || data.length === 0) return;
+
+        // 1. Style cells (Header: light slate bg, bold text, centered. Data: top aligned, wrap text)
         for (const cellId in ws) {
           if (cellId.startsWith('!')) continue;
           const cell = ws[cellId];
           if (!cell.s) cell.s = {};
-          if (!cell.s.alignment) cell.s.alignment = {};
-          cell.s.alignment.vertical = "top";
-          cell.s.alignment.wrapText = true;
+          
+          const isHeader = /^[A-Z]1$/.test(cellId);
+          if (isHeader) {
+            cell.s.fill = {
+              patternType: "solid",
+              fgColor: { rgb: "F1F5F9" } // slate-100 background
+            };
+            cell.s.font = {
+              bold: true,
+              color: { rgb: "0F172A" }, // slate-900 text
+              name: "Segoe UI",
+              sz: 10
+            };
+            cell.s.alignment = {
+              vertical: "center",
+              horizontal: "left",
+              wrapText: true
+            };
+            cell.s.border = {
+              bottom: { style: "medium", color: { rgb: "CBD5E1" } } // Border under header
+            };
+          } else {
+            cell.s.alignment = {
+              vertical: "top",
+              wrapText: true
+            };
+            cell.s.font = {
+              name: "Segoe UI",
+              sz: 9.5,
+              color: { rgb: "334155" } // slate-700 text
+            };
+            cell.s.border = {
+              bottom: { style: "thin", color: { rgb: "F1F5F9" } } // Subtle cell separator
+            };
+          }
         }
+
+        // 2. Calculate heights of each row for top/bottom padding
+        const rows = [{ hpt: 28 }]; // Header row is 28pt high
+        data.forEach(row => {
+          let maxLines = 1;
+          Object.keys(row).forEach(key => {
+            const val = row[key];
+            const valStr = val !== undefined && val !== null ? String(val) : "";
+            const linesCount = valStr.split('\n').length;
+            if (linesCount > maxLines) {
+              maxLines = linesCount;
+            }
+          });
+          
+          // Calculate height: 24pt for 1 line (lots of padding), or (lines * 14) + 12pt padding for multi-line
+          const height = maxLines === 1 ? 24 : (maxLines * 14) + 12;
+          rows.push({ hpt: height });
+        });
+        
+        ws['!rows'] = rows;
       }
 
       // 1. Connection Manifest (Print Report style)
@@ -1879,12 +1934,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Create sheets & auto-fit columns
       const wsManifest = XLSX.utils.json_to_sheet(manifestData);
-      applyStyles(wsManifest);
+      applyStylesAndHeights(wsManifest, manifestData);
       autoFitColumns(wsManifest, manifestData);
       XLSX.utils.book_append_sheet(wb, wsManifest, "Connection Manifest");
 
       const wsEquipment = XLSX.utils.json_to_sheet(equipmentData);
-      applyStyles(wsEquipment);
+      applyStylesAndHeights(wsEquipment, equipmentData);
       autoFitColumns(wsEquipment, equipmentData);
       XLSX.utils.book_append_sheet(wb, wsEquipment, "Equipment List");
 
