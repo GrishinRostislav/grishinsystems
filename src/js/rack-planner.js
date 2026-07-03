@@ -959,6 +959,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else if (remoteDevId === "internet") {
                   remoteName = "🌐 ISP Internet / WAN Gateway";
                   remotePortName = "External WAN";
+                } else if (remoteDevId === "manual") {
+                  remoteName = "Custom Destination";
+                  remotePortName = remotePortIdx;
                 } else {
                   const rDev = state.placedDevices.find(d => d.instanceId === remoteDevId);
                   remoteName = rDev ? (rDev.customLabel || rDev.name) : "Unknown Device";
@@ -1806,6 +1809,9 @@ document.addEventListener("DOMContentLoaded", () => {
             } else if (remoteDevId === "internet") {
               remoteName = "ISP Internet / WAN Gateway";
               remotePortName = "External WAN";
+            } else if (remoteDevId === "manual") {
+              remoteName = "Custom Destination";
+              remotePortName = remotePortIdx;
             } else {
               const rDev = state.placedDevices.find(d => d.instanceId === remoteDevId);
               remoteName = rDev ? (rDev.customLabel || rDev.name) : "Unknown Device";
@@ -1896,7 +1902,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const fromDev = state.placedDevices.find(d => d.instanceId === c.fromDevice);
         const toDev = state.placedDevices.find(d => d.instanceId === c.toDevice);
         const fromName = fromDev ? (fromDev.customLabel || fromDev.name) : (c.fromDevice === "internet" ? "Internet" : c.fromDevice);
-        const toName = toDev ? (toDev.customLabel || toDev.name) : (c.toDevice === "internet" ? "Internet" : c.toDevice);
+        const toName = toDev ? (toDev.customLabel || toDev.name) : (c.toDevice === "internet" ? "Internet" : (c.toDevice === "manual" ? "Custom Destination" : c.toDevice));
         
         const getPortLabel = (dev, portIdx) => {
           if (!dev) return portIdx;
@@ -3752,6 +3758,9 @@ cabinetRackEl.appendChild(container);
           } else if (remoteDevId === "internet") {
             remoteName = "🌐 ISP Internet / WAN Gateway";
             remotePortName = "External WAN";
+          } else if (remoteDevId === "manual") {
+            remoteName = "Custom Destination";
+            remotePortName = remotePortIdx;
           } else {
             const rDev = state.placedDevices.find(d => d.instanceId === remoteDevId);
             remoteName = rDev ? (rDev.customLabel || rDev.name) : "Unknown Device";
@@ -5085,6 +5094,7 @@ cabinetRackEl.appendChild(container);
           <option value="device" ${destType === "device" ? "selected" : ""}>Device in Rack</option>
           <option value="drop" ${destType === "drop" ? "selected" : ""}>Wall Drop</option>
           <option value="endpoint" ${destType === "endpoint" ? "selected" : ""}>PoE Endpoint</option>
+          <option value="manual" ${destType === "manual" ? "selected" : ""}>Custom Destination</option>
         `;
         if (pInfo.isWan) {
           optHtml += `<option value="internet" ${destType === "internet" ? "selected" : ""}>🌐 ISP Internet (WAN)</option>`;
@@ -5094,6 +5104,7 @@ cabinetRackEl.appendChild(container);
         typeSelect.innerHTML = `
           <option value="none" ${destType === "none" ? "selected" : ""}>[Not Connected]</option>
           <option value="device" ${destType === "device" ? "selected" : ""}>Device in Rack</option>
+          <option value="manual" ${destType === "manual" ? "selected" : ""}>Custom Destination</option>
         `;
       }
       
@@ -5122,6 +5133,22 @@ cabinetRackEl.appendChild(container);
       const portSelect = document.createElement("select");
       portSelect.style.display = destType === "device" ? "" : "none";
       
+      const manualInput = document.createElement("input");
+      manualInput.type = "text";
+      manualInput.placeholder = "e.g. Living Room Speakers";
+      manualInput.style.display = destType === "manual" ? "" : "none";
+      manualInput.className = "manual-dest-input";
+      manualInput.style.fontSize = "11px";
+      manualInput.style.padding = "4px 8px";
+      manualInput.style.borderRadius = "4px";
+      manualInput.style.border = "1px solid rgba(255, 255, 255, 0.15)";
+      manualInput.style.background = "rgba(15, 23, 42, 0.8)";
+      manualInput.style.color = "#fff";
+      manualInput.style.width = "180px";
+      if (destType === "manual") {
+        manualInput.value = destPortIdx;
+      }
+      
       const updateTargets = () => {
         const type = typeSelect.value;
         targetSelect.innerHTML = "";
@@ -5130,9 +5157,11 @@ cabinetRackEl.appendChild(container);
         if (type === "none" || type === "internet") {
           targetSelect.style.display = "none";
           portSelect.style.display = "none";
+          manualInput.style.display = "none";
         } else if (type === "device") {
           targetSelect.style.display = "";
           portSelect.style.display = "";
+          manualInput.style.display = "none";
           
           otherDevices.forEach(d => {
             const opt = document.createElement("option");
@@ -5153,6 +5182,7 @@ cabinetRackEl.appendChild(container);
         } else if (type === "drop") {
           targetSelect.style.display = "";
           portSelect.style.display = "none";
+          manualInput.style.display = "none";
           
           for (let d = 1; d <= state.dropPoints; d++) {
             const opt = document.createElement("option");
@@ -5164,6 +5194,7 @@ cabinetRackEl.appendChild(container);
         } else if (type === "endpoint") {
           targetSelect.style.display = "";
           portSelect.style.display = "none";
+          manualInput.style.display = "none";
           
           if (state.endpoints.length === 0) {
             const opt = document.createElement("option");
@@ -5181,6 +5212,10 @@ cabinetRackEl.appendChild(container);
               }
             });
           }
+        } else if (type === "manual") {
+          targetSelect.style.display = "none";
+          portSelect.style.display = "none";
+          manualInput.style.display = "";
         }
       };
       
@@ -5281,12 +5316,14 @@ cabinetRackEl.appendChild(container);
       selectsGroup.appendChild(typeSelect);
       selectsGroup.appendChild(targetSelect);
       selectsGroup.appendChild(portSelect);
+      selectsGroup.appendChild(manualInput);
       tdDest.appendChild(selectsGroup);
       
       tr.portIndex = i;
       tr.typeSelect = typeSelect;
       tr.targetSelect = targetSelect;
       tr.portSelect = portSelect;
+      tr.manualInput = manualInput;
       
       tr.appendChild(tdPort);
       tr.appendChild(tdDest);
@@ -5344,6 +5381,7 @@ cabinetRackEl.appendChild(container);
       const type = tr.typeSelect.value;
       const targetId = tr.targetSelect.value;
       const targetPort = parseInt(tr.portSelect.value);
+      const manualText = tr.manualInput.value.trim();
 
       // Find existing connection to reuse properties like color if it exists
       const existingConn = state.connections.find(c => 
@@ -5382,6 +5420,9 @@ cabinetRackEl.appendChild(container);
         } else if (type === "internet") {
           destDevId = "internet";
           destPortIdx = 0;
+        } else if (type === "manual") {
+          destDevId = "manual";
+          destPortIdx = manualText || "Custom Destination";
         }
         
         const newConn = {
@@ -5418,7 +5459,7 @@ cabinetRackEl.appendChild(container);
         const epNum = parseInt(epParts[epParts.length - 1]);
         const ep = state.endpoints.find(e => e.id === epId);
         return ep && epNum <= ep.qty;
-      } else if (conn.toDevice === "internet") {
+      } else if (conn.toDevice === "internet" || conn.toDevice === "manual") {
         return true;
       } else {
         const toDevExists = state.placedDevices.some(d => d.instanceId === conn.toDevice);
@@ -5467,7 +5508,7 @@ cabinetRackEl.appendChild(container);
       else if (conn.cableColor === "#f97316") colorClass = "cable-orange";
       
       const dynamicColor = getCableColor(conn);
-      if (conn.toDevice === "wall-drop" || conn.toDevice === "poe-endpoint") {
+      if (conn.toDevice === "wall-drop" || conn.toDevice === "poe-endpoint" || conn.toDevice === "manual") {
         const rackWidth = rackRect.width / zoom;
         const exitLeft = x1 < (rackWidth / 2);
         const x2 = exitLeft ? 15 : (rackWidth - 15);
@@ -5496,6 +5537,8 @@ cabinetRackEl.appendChild(container);
           const epNum = epParts[epParts.length - 1];
           const ep = state.endpoints.find(e => e.id === epId);
           labelText = ep ? `${ep.name.replace("UniFi ", "").replace("Araknis ", "")} #${epNum}` : `AP #${epNum}`;
+        } else if (conn.toDevice === "manual") {
+          labelText = conn.toPort;
         }
         
         if (labelText.length > 20) labelText = labelText.substring(0, 17) + "...";
@@ -5582,6 +5625,9 @@ cabinetRackEl.appendChild(container);
         const epName = ep ? ep.name : "PoE Device";
         destHtml = `<span class="connection-tag">📡 ${epName} #${epNum}</span>`;
         destPortHtml = `<span class="connection-tag-port">PoE</span>`;
+      } else if (conn.toDevice === "manual") {
+        destHtml = `<span class="connection-tag">✏️ Custom Destination</span>`;
+        destPortHtml = `<span class="connection-tag-port">${conn.toPort}</span>`;
       } else {
         const toDev = state.placedDevices.find(d => d.instanceId === conn.toDevice);
         if (toDev) {
