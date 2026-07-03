@@ -3247,7 +3247,7 @@ cabinetRackEl.appendChild(container);
                 classStr += " internet-active";
               } else if (isUplinkConnection && (dev.type === "switch" || dev.type === "router")) {
                 classStr += " uplink"; // blue only when both sides are switch/router
-              } else if (isPoeCapable && (targetInstanceId === "poe-endpoint" || (targetDev && targetDev.type !== "switch" && targetDev.type !== "router"))) {
+              } else if (isPoeCapable && targetInstanceId === "poe-endpoint") {
                 classStr += " poe"; // orange for PoE endpoints
               } else {
                 classStr += " active"; // green for standard LAN
