@@ -1850,80 +1850,6 @@ document.addEventListener("DOMContentLoaded", () => {
           "Cost ($)": d.cost || 0
         }));
 
-      // 3. PoE Budget
-      const poeData = state.placedDevices
-        .filter(d => d.poe_budget > 0)
-        .map(sw => {
-          const switchConns = state.connections.filter(c => c.fromDevice === sw.instanceId || c.toDevice === sw.instanceId);
-          let usedWattage = 0;
-          let endpointCount = 0;
-          
-          switchConns.forEach(c => {
-            const targetId = c.fromDevice === sw.instanceId ? c.toDevice : c.fromDevice;
-            const targetDev = state.placedDevices.find(d => d.instanceId === targetId);
-            if (targetDev && targetDev.type !== "switch" && targetDev.type !== "router") {
-              const switchPortIdx = c.fromDevice === sw.instanceId ? c.fromPort : c.toPort;
-              if (switchPortIdx < sw.poe_ports) {
-                const epWattage = targetDev.wattage || 0;
-                usedWattage += epWattage;
-                endpointCount++;
-              }
-            }
-          });
-
-          return {
-            "Switch Name": sw.customLabel || sw.name,
-            "Total PoE Budget (W)": sw.poe_budget,
-            "PoE Wattage Used (W)": parseFloat(usedWattage.toFixed(1)),
-            "Remaining Budget (W)": parseFloat((sw.poe_budget - usedWattage).toFixed(1)),
-            "Active PoE Devices": endpointCount
-          };
-        });
-
-      // 4. BOM Summary
-      const bomGroups = {};
-      state.placedDevices.forEach(d => {
-        if (d.slot === "wall-outlet" || d.slot === "cabinet-fan") return;
-        const key = `${d.brand || 'generic'}_${d.id}`;
-        if (!bomGroups[key]) {
-          bomGroups[key] = {
-            "Brand": (d.brand || "generic").toUpperCase(),
-            "Model/Name": d.name,
-            "Type": d.type || "Other",
-            "Quantity": 0,
-            "Unit Cost ($)": d.cost || 0,
-            "Total Cost ($)": 0
-          };
-        }
-        bomGroups[key].Quantity++;
-        bomGroups[key]["Total Cost ($)"] = bomGroups[key].Quantity * bomGroups[key]["Unit Cost ($)"];
-      });
-      const bomData = Object.values(bomGroups);
-
-      // 5. Connections list
-      const connectionsData = state.connections.map(c => {
-        const fromDev = state.placedDevices.find(d => d.instanceId === c.fromDevice);
-        const toDev = state.placedDevices.find(d => d.instanceId === c.toDevice);
-        const fromName = fromDev ? (fromDev.customLabel || fromDev.name) : (c.fromDevice === "internet" ? "Internet" : c.fromDevice);
-        const toName = toDev ? (toDev.customLabel || toDev.name) : (c.toDevice === "internet" ? "Internet" : (c.toDevice === "manual" ? "Custom Destination" : c.toDevice));
-        
-        const getPortLabel = (dev, portIdx) => {
-          if (!dev) return portIdx;
-          if (portIdx === 1000) return "Power Inlet";
-          if (portIdx >= 2000) return `Outlet ${portIdx - 2000 + 1}`;
-          return `Port ${portIdx + 1}`;
-        };
-
-        return {
-          "From Device": fromName,
-          "From Port": getPortLabel(fromDev, c.fromPort),
-          "To Device": toName,
-          "To Port": getPortLabel(toDev, c.toPort),
-          "Cable Type": c.type || "LAN",
-          "Custom Label / Name": c.label || ""
-        };
-      });
-
       const wb = XLSX.utils.book_new();
 
       // Create sheets & auto-fit columns
@@ -1934,18 +1860,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const wsEquipment = XLSX.utils.json_to_sheet(equipmentData);
       autoFitColumns(wsEquipment, equipmentData);
       XLSX.utils.book_append_sheet(wb, wsEquipment, "Equipment List");
-
-      const wsConnections = XLSX.utils.json_to_sheet(connectionsData);
-      autoFitColumns(wsConnections, connectionsData);
-      XLSX.utils.book_append_sheet(wb, wsConnections, "Connections");
-
-      const wsPoE = XLSX.utils.json_to_sheet(poeData);
-      autoFitColumns(wsPoE, poeData);
-      XLSX.utils.book_append_sheet(wb, wsPoE, "PoE Budget");
-
-      const wsBOM = XLSX.utils.json_to_sheet(bomData);
-      autoFitColumns(wsBOM, bomData);
-      XLSX.utils.book_append_sheet(wb, wsBOM, "BOM Summary");
 
       const dateStr = new Date().toISOString().slice(0, 10);
       XLSX.writeFile(wb, `${projName.replace(/\s+/g, '_')}_rack_${dateStr}.xlsx`);
