@@ -1768,7 +1768,9 @@ document.addEventListener("DOMContentLoaded", () => {
           (dev.notes ? `\nNote: ${dev.notes}` : "");
 
         let ipText = "";
-        if (dev.type === "router") {
+        if (!hasIpAddressCapability(dev)) {
+          ipText = "-";
+        } else if (dev.type === "router") {
           const mode = dev.bridgeMode ? "Bridge Mode" : "Gateway Mode";
           const lanIp = dev.ipAddress ? dev.ipAddress : "DHCP Client";
           const wanIp = dev.wanIpAddress ? dev.wanIpAddress : "DHCP WAN";
@@ -1780,7 +1782,8 @@ document.addEventListener("DOMContentLoaded", () => {
         let connLines = [];
         const devConns = state.connections.filter(c => c.fromDevice === dev.instanceId || c.toDevice === dev.instanceId);
         if (devConns.length === 0) {
-          connLines.push("No active cabling connections");
+          const hasPortsOrPower = dev.ports > 0 || dev.outlets > 0 || dev.requires_power;
+          connLines.push(hasPortsOrPower ? "No active cabling connections" : "-");
         } else {
           devConns.forEach(c => {
             const isFrom = c.fromDevice === dev.instanceId;
@@ -2477,6 +2480,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function isWallOutletSlot(slot) {
     return slot === "wall-outlet";
+  }
+
+  function hasIpAddressCapability(dev) {
+    if (!dev) return false;
+    const passiveIds = ["organizer-1u", "shelf-1u", "wall-outlet-6", "power-strip-6", "pdu-apc-1u", "ups-cyberpower-2u"];
+    if (passiveIds.includes(dev.id)) return false;
+    if (dev.type === "patch-panel") return false;
+    if (dev.type === "switch" || dev.type === "router" || dev.type === "misc" || dev.type === "automation" || dev.brand === "wattbox") {
+      return true;
+    }
+    if (dev.ports > 0 && dev.requires_power) return true;
+    return false;
   }
 
   function isRouterWanPort(devId, portIndex) {
@@ -3711,7 +3726,9 @@ cabinetRackEl.appendChild(container);
       }
 
       let ipText = "";
-      if (dev.type === "router") {
+      if (!hasIpAddressCapability(dev)) {
+        ipText = `<span style="color: #64748b; font-style: italic;">-</span>`;
+      } else if (dev.type === "router") {
         const mode = dev.bridgeMode ? "Bridge Mode (Transparent)" : "Gateway Mode";
         const lanIp = dev.ipAddress ? dev.ipAddress : "DHCP Client / Autoconf";
         const wanIp = dev.wanIpAddress ? dev.wanIpAddress : "DHCP WAN / Dynamic";
@@ -3729,7 +3746,8 @@ cabinetRackEl.appendChild(container);
       let connListHtml = "";
       const devConns = state.connections.filter(c => c.fromDevice === dev.instanceId || c.toDevice === dev.instanceId);
       if (devConns.length === 0) {
-        connListHtml = `<span style="color: #64748b; font-style: italic;">No active cabling connections</span>`;
+        const hasPortsOrPower = dev.ports > 0 || dev.outlets > 0 || dev.requires_power;
+        connListHtml = `<span style="color: #64748b; font-style: italic;">${hasPortsOrPower ? "No active cabling connections" : "-"}</span>`;
       } else {
         connListHtml = `<ul style="margin: 0; padding-left: 14px; line-height: 1.3;">`;
         devConns.forEach(c => {
