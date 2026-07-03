@@ -1916,7 +1916,8 @@ document.addEventListener("DOMContentLoaded", () => {
           "From Port": getPortLabel(fromDev, c.fromPort),
           "To Device": toName,
           "To Port": getPortLabel(toDev, c.toPort),
-          "Cable Type": c.type || "LAN"
+          "Cable Type": c.type || "LAN",
+          "Custom Label / Name": c.label || ""
         };
       });
 
@@ -5149,10 +5150,34 @@ cabinetRackEl.appendChild(container);
         manualInput.value = destPortIdx;
       }
       
+      const tdLabel = document.createElement("td");
+      const labelInput = document.createElement("input");
+      labelInput.type = "text";
+      labelInput.placeholder = "e.g. Garage AP, Front Door";
+      labelInput.className = "port-cable-label-input";
+      labelInput.style.fontSize = "11px";
+      labelInput.style.padding = "4px 8px";
+      labelInput.style.borderRadius = "4px";
+      labelInput.style.border = "1px solid rgba(255, 255, 255, 0.15)";
+      labelInput.style.background = "rgba(15, 23, 42, 0.8)";
+      labelInput.style.color = "#fff";
+      labelInput.style.width = "100%";
+      labelInput.style.boxSizing = "border-box";
+      labelInput.value = cableLabel;
+      labelInput.disabled = (destType === "none");
+      tdLabel.appendChild(labelInput);
+      
       const updateTargets = () => {
         const type = typeSelect.value;
         targetSelect.innerHTML = "";
         portSelect.innerHTML = "";
+        
+        if (type === "none") {
+          labelInput.disabled = true;
+          labelInput.value = "";
+        } else {
+          labelInput.disabled = false;
+        }
         
         if (type === "none" || type === "internet") {
           targetSelect.style.display = "none";
@@ -5324,9 +5349,11 @@ cabinetRackEl.appendChild(container);
       tr.targetSelect = targetSelect;
       tr.portSelect = portSelect;
       tr.manualInput = manualInput;
+      tr.labelInput = labelInput;
       
       tr.appendChild(tdPort);
       tr.appendChild(tdDest);
+      tr.appendChild(tdLabel);
       patchTableBodyEl.appendChild(tr);
       
       updateTargets();
@@ -5390,7 +5417,7 @@ cabinetRackEl.appendChild(container);
       );
       const isPower = (portIdx === 1000 || portIdx >= 2000);
       const category = isPower ? "Power" : "Cat6";
-      const label = "";
+      const label = tr.labelInput ? tr.labelInput.value.trim() : "";
       
       // Remove old mappings
       state.connections = state.connections.filter(c => 
