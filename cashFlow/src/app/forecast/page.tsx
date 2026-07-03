@@ -21,6 +21,16 @@ export default function ForecastPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [months, setMonths] = useState(60); // Default 5 years
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const [availableAccounts, setAvailableAccounts] = useState<any[]>([]);
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
@@ -175,6 +185,9 @@ export default function ForecastPage() {
       if (accountsFilter.length > 0) {
         url += `&accountIds=${accountsFilter.join(',')}`;
       }
+      if (isMobile) {
+        url += `&pastMonths=2`;
+      }
       const res = await fetch(url);
       const json = await res.json();
       setData(json);
@@ -231,7 +244,7 @@ export default function ForecastPage() {
       localStorage.setItem("forecast_accounts", JSON.stringify(selectedAccounts));
       fetchForecast(months, selectedAccounts);
     }
-  }, [months, selectedAccounts, isInitialized]);
+  }, [months, selectedAccounts, isInitialized, isMobile]);
 
   const handleToggleScenario = async (id: string, currentActive: boolean) => {
     try {

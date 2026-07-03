@@ -188,12 +188,13 @@ export default function Home() {
     if (index === 0) {
       acc.push(curr);
     } else {
+      const prev = acc[index - 1];
       acc.push({
         name: curr.name,
-        income: acc[index - 1].income + curr.income,
-        expenses: acc[index - 1].expenses + curr.expenses,
-        prevIncome: acc[index - 1].prevIncome + curr.prevIncome,
-        prevExpenses: acc[index - 1].prevExpenses + curr.prevExpenses
+        income: curr.income === null ? null : (prev.income || 0) + curr.income,
+        expenses: curr.expenses === null ? null : (prev.expenses || 0) + curr.expenses,
+        prevIncome: curr.prevIncome === null ? null : (prev.prevIncome || 0) + curr.prevIncome,
+        prevExpenses: curr.prevExpenses === null ? null : (prev.prevExpenses || 0) + curr.prevExpenses
       });
     }
     return acc;

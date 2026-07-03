@@ -45,15 +45,12 @@ export async function GET(request: Request) {
     const prevMetricsStart = new Date(metricsStart.getTime() - offset);
     const prevMetricsEnd = new Date(metricsEnd.getTime() - offset);
 
-    // Chart Timeframe anchored to today
-    const paddingDays = diffDays <= 35 ? 2 : 0;
-    const chartEnd = new Date();
-    chartEnd.setHours(23, 59, 59, 999);
-    chartEnd.setDate(chartEnd.getDate() + paddingDays);
-    
-    const chartStart = new Date(chartEnd);
-    chartStart.setDate(chartStart.getDate() - diffDays - paddingDays);
+    // Chart Timeframe matches the selected period
+    const chartStart = new Date(startDate);
     chartStart.setHours(0, 0, 0, 0);
+
+    const chartEnd = new Date(endDate);
+    chartEnd.setHours(23, 59, 59, 999);
 
     const prevChartStart = new Date(chartStart.getTime() - offset);
     const prevChartEnd = new Date(chartEnd.getTime() - offset);
