@@ -1697,6 +1697,14 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
+    function getDateTimeString() {
+      const now = new Date();
+      const pad = num => String(num).padStart(2, '0');
+      const datePart = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+      const timePart = `${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+      return `${datePart}_${timePart}`;
+    }
+
     function exportProjectJSON(projectId) {
       const projMeta = state.projectsIndex.find(p => p.id === projectId);
       const projData = localStorage.getItem(`rp_project_${projectId}`);
@@ -1709,7 +1717,8 @@ document.addEventListener("DOMContentLoaded", () => {
       
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `${projMeta.name.replace(/\s+/g, '_')}_project.json`);
+      const dateTimeStr = getDateTimeString();
+      downloadAnchor.setAttribute("download", `${projMeta.name.replace(/\s+/g, '_')}_project_${dateTimeStr}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
@@ -1861,8 +1870,8 @@ document.addEventListener("DOMContentLoaded", () => {
       autoFitColumns(wsEquipment, equipmentData);
       XLSX.utils.book_append_sheet(wb, wsEquipment, "Equipment List");
 
-      const dateStr = new Date().toISOString().slice(0, 10);
-      XLSX.writeFile(wb, `${projName.replace(/\s+/g, '_')}_rack_${dateStr}.xlsx`);
+      const dateTimeStr = getDateTimeString();
+      XLSX.writeFile(wb, `${projName.replace(/\s+/g, '_')}_rack_${dateTimeStr}.xlsx`);
     }
 
   function ensureDefaultCabinetDevices() {
