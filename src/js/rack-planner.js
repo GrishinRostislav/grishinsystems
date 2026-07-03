@@ -2407,7 +2407,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function hasIpAddressCapability(dev) {
     if (!dev) return false;
-    const passiveIds = ["organizer-1u", "shelf-1u", "wall-outlet-6", "power-strip-6", "pdu-apc-1u", "ups-cyberpower-2u"];
+    const passiveIds = ["organizer-1u", "shelf-1u", "wall-outlet-6", "power-strip-6", "pdu-apc-1u", "ups-cyberpower-2u", "cabinet-fan"];
     if (passiveIds.includes(dev.id)) return false;
     if (dev.type === "patch-panel") return false;
     if (dev.type === "switch" || dev.type === "router" || dev.type === "misc" || dev.type === "automation" || dev.brand === "wattbox") {
