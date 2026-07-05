@@ -1,4 +1,7 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 function getLocalYMD(d: Date) {
   const year = d.getFullYear();
@@ -51,26 +54,30 @@ function computeDates(val: string): { startStr: string, endStr: string } {
 }
 
 export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProps) {
+  const pathname = usePathname() || "default";
+  
+  const getStorageKey = (baseKey: string) => `${baseKey}_${pathname.replace(/\//g, '_')}`;
+
   const [interval, setIntervalState] = useState(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("global_date_interval") || "month";
+      return localStorage.getItem(getStorageKey("date_interval")) || localStorage.getItem("global_date_interval") || "month";
     }
     return "month";
   });
 
   const [startDate, setStartDate] = useState(() => {
-    const intv = typeof window !== "undefined" ? (localStorage.getItem("global_date_interval") || "month") : "month";
+    const intv = typeof window !== "undefined" ? (localStorage.getItem(getStorageKey("date_interval")) || localStorage.getItem("global_date_interval") || "month") : "month";
     if (intv === "custom" && typeof window !== "undefined") {
-      const stored = localStorage.getItem("global_start_date");
+      const stored = localStorage.getItem(getStorageKey("start_date")) || localStorage.getItem("global_start_date");
       if (stored) return stored;
     }
     return computeDates(intv).startStr;
   });
 
   const [endDate, setEndDate] = useState(() => {
-    const intv = typeof window !== "undefined" ? (localStorage.getItem("global_date_interval") || "month") : "month";
+    const intv = typeof window !== "undefined" ? (localStorage.getItem(getStorageKey("date_interval")) || localStorage.getItem("global_date_interval") || "month") : "month";
     if (intv === "custom" && typeof window !== "undefined") {
-      const stored = localStorage.getItem("global_end_date");
+      const stored = localStorage.getItem(getStorageKey("end_date")) || localStorage.getItem("global_end_date");
       if (stored) return stored;
     }
     return computeDates(intv).endStr;
@@ -83,24 +90,24 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
 
   const handleIntervalChange = (val: string) => {
     setIntervalState(val);
-    if (typeof window !== "undefined") localStorage.setItem("global_date_interval", val);
+    if (typeof window !== "undefined") localStorage.setItem(getStorageKey("date_interval"), val);
     if (val !== "custom") {
       const { startStr, endStr } = computeDates(val);
       setEndDate(endStr);
-      if (typeof window !== "undefined") localStorage.setItem("global_end_date", endStr);
+      if (typeof window !== "undefined") localStorage.setItem(getStorageKey("end_date"), endStr);
       setStartDate(startStr);
-      if (typeof window !== "undefined") localStorage.setItem("global_start_date", startStr);
+      if (typeof window !== "undefined") localStorage.setItem(getStorageKey("start_date"), startStr);
     }
   };
 
   const handleStartDateChange = (val: string) => {
     setStartDate(val);
-    if (typeof window !== "undefined") localStorage.setItem("global_start_date", val);
+    if (typeof window !== "undefined") localStorage.setItem(getStorageKey("start_date"), val);
   };
 
   const handleEndDateChange = (val: string) => {
     setEndDate(val);
-    if (typeof window !== "undefined") localStorage.setItem("global_end_date", val);
+    if (typeof window !== "undefined") localStorage.setItem(getStorageKey("end_date"), val);
   };
 
   return (
