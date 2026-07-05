@@ -272,6 +272,7 @@ export default function AccountDetail({ params }: { params: Promise<{ id: string
       <TransactionList
         transactions={transactions || []}
         onTransactionClick={(txn) => openTransactionModal(txn)}
+        onTransactionsUpdated={fetchAccountData}
         emptyMessage="No transactions found in this date range."
         totalLabel="Total for Period:"
       />

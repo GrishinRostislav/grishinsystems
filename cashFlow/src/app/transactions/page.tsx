@@ -7,7 +7,6 @@ import GlobalDateFilter from "@/components/GlobalDateFilter";
 import TransactionModal from "@/components/TransactionModal";
 import TransactionList from "@/components/TransactionList";
 import ReceiptPreviewModal from "@/components/ReceiptPreviewModal";
-import BulkEditModal from "@/components/BulkEditModal";
 import { formatCurrency, formatDate } from "@/utils/format";
 
 type Transaction = {
@@ -66,24 +65,6 @@ export default function TransactionsPage() {
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
   const [scanData, setScanData] = useState<any | null>(null);
   const [scanning, setScanning] = useState(false);
-
-  // Bulk Edit State
-  const [isBulkEditOpen, setIsBulkEditOpen] = useState(false);
-  const [bulkEditTransactions, setBulkEditTransactions] = useState<any[]>([]);
-
-  const handleBulkEditSave = async (transactionIds: string[], data: any) => {
-    const res = await fetch("/cashFlow/api/transactions/bulk-update", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ transactionIds, data })
-    });
-    if (res.ok) {
-      await fetchData();
-    } else {
-      const err = await res.json();
-      alert("Bulk update failed: " + err.error);
-    }
-  };
 
   const openCreateModal = () => {
     setSelectedTransaction(null);
@@ -237,10 +218,7 @@ export default function TransactionsPage() {
         <TransactionList
           transactions={filteredTransactions}
           onTransactionClick={(txn) => openEditModal(txn)}
-          onEditGroupClick={(txns) => {
-            setBulkEditTransactions(txns);
-            setIsBulkEditOpen(true);
-          }}
+          onTransactionsUpdated={fetchData}
           emptyMessage="No transactions match your search query."
           totalLabel="Total for Period:"
         />
@@ -258,13 +236,6 @@ export default function TransactionsPage() {
         onClose={() => setIsScanModalOpen(false)}
         scanData={scanData}
         onSave={fetchData}
-      />
-
-      <BulkEditModal
-        isOpen={isBulkEditOpen}
-        onClose={() => setIsBulkEditOpen(false)}
-        onSave={handleBulkEditSave}
-        transactions={bulkEditTransactions}
       />
     </div>
   );

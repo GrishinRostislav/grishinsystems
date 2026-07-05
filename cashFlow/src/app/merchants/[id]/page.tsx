@@ -171,7 +171,11 @@ export default function MerchantDetailsPage() {
           
           <TransactionList
             transactions={merchant.transactions}
-            onTransactionClick={(tx) => openTxnModal(tx)}
+            onTransactionClick={(tx) => {
+              setSelectedTxn(tx);
+              setIsTxnModalOpen(true);
+            }}
+            onTransactionsUpdated={fetchMerchantData}
             emptyMessage="No transactions found for this merchant."
             totalLabel="Total for Period:"
           />

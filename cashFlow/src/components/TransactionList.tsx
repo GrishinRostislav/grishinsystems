@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { formatCurrency, formatDate } from "@/utils/format";
+import BulkEditModal from "@/components/BulkEditModal";
 import styles from "./TransactionList.module.css";
 
 function getCategoryColor(name?: string) {
@@ -17,7 +18,7 @@ function getCategoryColor(name?: string) {
 interface TransactionListProps {
   transactions: any[];
   onTransactionClick?: (txn: any) => void;
-  onEditGroupClick?: (txns: any[]) => void;
+  onTransactionsUpdated?: () => void;
   emptyMessage?: string;
   showTotal?: boolean;
   totalLabel?: string;
@@ -26,12 +27,29 @@ interface TransactionListProps {
 export default function TransactionList({ 
   transactions, 
   onTransactionClick, 
-  onEditGroupClick,
+  onTransactionsUpdated,
   emptyMessage = "No transactions found.",
   showTotal = true,
   totalLabel = "Total:"
 }: TransactionListProps) {
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isBulkEditOpen, setIsBulkEditOpen] = useState(false);
+  const [bulkEditTransactions, setBulkEditTransactions] = useState<any[]>([]);
+
+  const handleBulkEditSave = async (transactionIds: string[], data: any) => {
+    const res = await fetch("/cashFlow/api/transactions/bulk-update", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ transactionIds, data })
+    });
+    if (res.ok) {
+      if (onTransactionsUpdated) onTransactionsUpdated();
+    } else {
+      const err = await res.json();
+      alert("Bulk update failed: " + err.error);
+    }
+  };
 
   if (!transactions || transactions.length === 0) {
     return <div className={styles.emptyState}>{emptyMessage}</div>;
@@ -56,6 +74,33 @@ export default function TransactionList({
 
   return (
     <div className={styles.listContainer}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', paddingBottom: '12px', borderBottom: '1px solid var(--border-color)', marginBottom: '16px' }}>
+        <button
+          onClick={() => setIsEditMode(!isEditMode)}
+          style={{
+            background: isEditMode ? 'var(--sporty-teal)' : 'transparent',
+            border: '1px solid',
+            borderColor: isEditMode ? 'var(--sporty-teal)' : 'var(--border-color)',
+            color: isEditMode ? 'white' : 'var(--text-secondary)',
+            padding: '6px 12px',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '0.85rem',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            transition: 'all 0.2s'
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+          </svg>
+          {isEditMode ? 'Done Editing' : 'Edit Groups'}
+        </button>
+      </div>
+
       {Object.keys(grouped).map(dateStr => {
         const dateTxns = grouped[dateStr];
         
@@ -171,25 +216,35 @@ export default function TransactionList({
                           </div>
                         </div>
                         <div className={styles.groupRight}>
-                          {onEditGroupClick && (
+                          {isEditMode && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                onEditGroupClick(item.transactions);
+                                setBulkEditTransactions(item.transactions);
+                                setIsBulkEditOpen(true);
                               }}
                               style={{
-                                background: 'transparent',
-                                border: 'none',
-                                color: 'var(--text-muted)',
+                                background: 'var(--bg-hover)',
+                                border: '1px solid var(--border-color)',
+                                color: 'var(--text-secondary)',
                                 cursor: 'pointer',
-                                padding: '4px',
-                                marginRight: '8px',
+                                padding: '6px 12px',
+                                marginRight: '12px',
                                 display: 'flex',
-                                alignItems: 'center'
+                                alignItems: 'center',
+                                borderRadius: '8px',
+                                fontSize: '0.8rem',
+                                fontWeight: 500,
+                                gap: '6px',
+                                transition: 'all 0.2s'
                               }}
                               title="Edit Group"
                             >
-                              ✏️
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                              </svg>
+                              Edit
                             </button>
                           )}
                           <div className={totalIsIncome ? styles.amountIncome : styles.amountExpense}>
@@ -305,13 +360,20 @@ export default function TransactionList({
       })}
 
       {showTotal && (
-        <div className={styles.totalBar}>
-          <span className={styles.totalLabel}>{totalLabel}</span>
-          <span className={total >= 0 ? styles.amountIncome : styles.amountExpense} style={{ fontSize: '14px' }}>
-            {total >= 0 ? "+" : ""}{formatCurrency(total)}
+        <div className={styles.totalRow}>
+          <span>{totalLabel}</span>
+          <span className={total >= 0 ? styles.amountIncome : styles.amountExpense}>
+            {total >= 0 ? "+" : ""}{formatCurrency(total, transactions[0]?.account?.currency)}
           </span>
         </div>
       )}
+
+      <BulkEditModal
+        isOpen={isBulkEditOpen}
+        onClose={() => setIsBulkEditOpen(false)}
+        onSave={handleBulkEditSave}
+        transactions={bulkEditTransactions}
+      />
     </div>
   );
 }

@@ -129,8 +129,9 @@ export default function BudgetDetail({ params }: { params: Promise<{ id: string 
           <div>
             <h2 style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>Budget Transactions</h2>
             <TransactionList
-              transactions={transactions || []}
+              transactions={transactions}
               onTransactionClick={(txn) => openTxnEditModal(txn)}
+              onTransactionsUpdated={fetchBudgetData}
               emptyMessage="No transactions found for this budget."
               totalLabel="Total Spent:"
             />

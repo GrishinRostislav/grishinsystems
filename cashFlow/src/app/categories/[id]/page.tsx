@@ -154,6 +154,7 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
             <TransactionList
               transactions={transactions || []}
               onTransactionClick={(txn) => { setSelectedTxn(txn); setIsTxnModalOpen(true); }}
+              onTransactionsUpdated={fetchCategoryData}
               emptyMessage="No transactions found for this category."
               totalLabel="Total for Category:"
             />
