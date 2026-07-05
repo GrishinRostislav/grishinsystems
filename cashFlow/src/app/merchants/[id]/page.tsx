@@ -26,13 +26,7 @@ export default function MerchantDetailsPage() {
   const handleTxnSave = () => {
     setIsTxnModalOpen(false);
     setSelectedTxn(null);
-    // Re-fetch merchant data
-    if (id && startDate && endDate) {
-      fetch(`/cashFlow/api/merchants/${id}?startDate=${startDate}&endDate=${endDate}`)
-        .then(res => res.json())
-        .then(data => setMerchant(data))
-        .catch(console.error);
-    }
+    fetchMerchantData();
   };
   
   const [startDate, setStartDate] = useState("");
@@ -47,24 +41,25 @@ export default function MerchantDetailsPage() {
   const [newName, setNewName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
+  const fetchMerchantData = async () => {
     if (id && startDate && endDate) {
       setLoading(true);
-      fetch(`/cashFlow/api/merchants/${id}?startDate=${startDate}&endDate=${endDate}`)
-        .then(res => {
-          if (!res.ok) throw new Error('Not found');
-          return res.json();
-        })
-        .then(data => {
-          setMerchant(data);
-          setNewName(data.name);
-          setLoading(false);
-        })
-        .catch(err => {
-          console.error(err);
-          setLoading(false);
-        });
+      try {
+        const res = await fetch(`/cashFlow/api/merchants/${id}?startDate=${startDate}&endDate=${endDate}`);
+        if (!res.ok) throw new Error('Not found');
+        const data = await res.json();
+        setMerchant(data);
+        setNewName(data.name);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
+  };
+
+  useEffect(() => {
+    fetchMerchantData();
   }, [id, startDate, endDate]);
 
   const totalAmount = merchant?.transactions 
