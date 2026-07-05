@@ -17,6 +17,7 @@ function getCategoryColor(name?: string) {
 interface TransactionListProps {
   transactions: any[];
   onTransactionClick?: (txn: any) => void;
+  onEditGroupClick?: (txns: any[]) => void;
   emptyMessage?: string;
   showTotal?: boolean;
   totalLabel?: string;
@@ -25,6 +26,7 @@ interface TransactionListProps {
 export default function TransactionList({ 
   transactions, 
   onTransactionClick, 
+  onEditGroupClick,
   emptyMessage = "No transactions found.",
   showTotal = true,
   totalLabel = "Total:"
@@ -169,6 +171,27 @@ export default function TransactionList({
                           </div>
                         </div>
                         <div className={styles.groupRight}>
+                          {onEditGroupClick && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onEditGroupClick(item.transactions);
+                              }}
+                              style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: 'var(--text-muted)',
+                                cursor: 'pointer',
+                                padding: '4px',
+                                marginRight: '8px',
+                                display: 'flex',
+                                alignItems: 'center'
+                              }}
+                              title="Edit Group"
+                            >
+                              ✏️
+                            </button>
+                          )}
                           <div className={totalIsIncome ? styles.amountIncome : styles.amountExpense}>
                             {totalIsIncome ? "+" : ""}{formatCurrency(item.totalAmount, currency)}
                           </div>
