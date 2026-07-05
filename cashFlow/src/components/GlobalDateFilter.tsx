@@ -84,6 +84,30 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
   });
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    
+    const savedInterval = localStorage.getItem(getStorageKey("date_interval")) || localStorage.getItem("global_date_interval") || "month";
+    setIntervalState(savedInterval);
+
+    let newStart = startDate;
+    let newEnd = endDate;
+
+    if (savedInterval === "custom") {
+      const storedStart = localStorage.getItem(getStorageKey("start_date")) || localStorage.getItem("global_start_date");
+      const storedEnd = localStorage.getItem(getStorageKey("end_date")) || localStorage.getItem("global_end_date");
+      if (storedStart) newStart = storedStart;
+      if (storedEnd) newEnd = storedEnd;
+    } else {
+      const { startStr, endStr } = computeDates(savedInterval);
+      newStart = startStr;
+      newEnd = endStr;
+    }
+
+    setStartDate(newStart);
+    setEndDate(newEnd);
+  }, [pathname]);
+
+  useEffect(() => {
     // Notify parent immediately
     onDatesChange(startDate, endDate);
   }, [startDate, endDate]);
