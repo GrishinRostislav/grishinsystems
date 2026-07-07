@@ -44,7 +44,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       // ignore
     }
 
-    const finalAmount = body.amount !== undefined ? Number(body.amount) : sched.amount;
+    const amountRaw = body.amount !== undefined ? Math.abs(Number(body.amount)) : Math.abs(sched.amount);
+    const finalType = body.type || sched.type;
     const finalDate = body.date ? new Date(body.date) : new Date();
     const finalMerchant = body.merchant !== undefined ? body.merchant : sched.merchant;
     const finalAccountId = body.accountId || sched.accountId;
@@ -55,11 +56,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const runDate = new Date(sched.nextRunDate);
     
     // 1. Create the transaction(s)
-    if (sched.type === 'transfer' && finalToAccountId) {
+    if (finalType === 'transfer' && finalToAccountId) {
       // OUT transaction
       await prisma.transaction.create({
         data: {
-          amount: -Math.abs(finalAmount),
+          amount: -amountRaw,
           date: finalDate,
           merchant: finalMerchant || "Transfer Out",
           payeeId: sched.payeeId,
@@ -71,7 +72,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       // IN transaction
       await prisma.transaction.create({
         data: {
-          amount: Math.abs(finalAmount),
+          amount: amountRaw,
           date: finalDate,
           merchant: finalMerchant || "Transfer In",
           payeeId: sched.payeeId,
@@ -84,15 +85,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       // Update balances
       await prisma.account.update({
         where: { id: finalAccountId },
-        data: { balance: { increment: -Math.abs(finalAmount) } }
+        data: { balance: { increment: -amountRaw } }
       });
 
       await prisma.account.update({
         where: { id: finalToAccountId },
-        data: { balance: { increment: Math.abs(finalAmount) } }
+        data: { balance: { increment: amountRaw } }
       });
 
     } else {
+      const finalAmount = finalType === 'expense' ? -amountRaw : amountRaw;
+
       await prisma.transaction.create({
         data: {
           amount: finalAmount,
