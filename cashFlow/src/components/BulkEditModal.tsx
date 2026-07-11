@@ -11,26 +11,18 @@ interface BulkEditModalProps {
 
 export default function BulkEditModal({ isOpen, onClose, onSave, transactions }: BulkEditModalProps) {
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<any[]>([]);
   
   const [formData, setFormData] = useState({
     date: '',
-    merchant: '',
-    categoryId: ''
+    merchant: ''
   });
 
   useEffect(() => {
     if (isOpen) {
-      fetch("/cashFlow/api/categories")
-        .then(res => res.json())
-        .then(data => setCategories(data))
-        .catch(console.error);
-
       if (transactions.length > 0) {
         setFormData({
           date: transactions[0].date ? new Date(transactions[0].date).toISOString().split('T')[0] : '',
-          merchant: transactions[0].merchant || '',
-          categoryId: transactions[0].categoryId || ''
+          merchant: transactions[0].merchant || ''
         });
       }
     }
@@ -120,27 +112,6 @@ export default function BulkEditModal({ isOpen, onClose, onSave, transactions }:
             />
           </div>
 
-          <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: 'var(--text-secondary)' }}>Category</label>
-            <select
-              value={formData.categoryId}
-              onChange={e => setFormData({ ...formData, categoryId: e.target.value })}
-              style={{
-                width: '100%',
-                padding: '12px',
-                borderRadius: '8px',
-                border: '1px solid var(--border-color)',
-                background: 'var(--bg-secondary)',
-                color: 'var(--text-main)',
-                fontSize: '1rem'
-              }}
-            >
-              <option value="">No Category</option>
-              {categories.map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
-            </select>
-          </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
             <button
