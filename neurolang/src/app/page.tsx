@@ -110,6 +110,7 @@ export default function Home() {
   const [editNameValue, setEditNameValue] = useState("");
   const [srsBaseMinutes, setSrsBaseMinutes] = useState(120);
   const [srsComplexity, setSrsComplexity] = useState(5.0);
+  const [importStatus, setImportStatus] = useState("");
 
   // Category view sorting & filters
   const [sortOption, setSortOption] = useState<"name" | "points" | "due">("name");
@@ -233,6 +234,35 @@ export default function Home() {
     if (res.ok) {
       setIsEditingName(false);
       fetchProfile();
+    }
+  };
+
+  const handleImportDB = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImportStatus("Importing database...");
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/import-db", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setImportStatus(data.message);
+        fetchProfile();
+        fetchWords();
+        fetchLanguages();
+        fetchQuests();
+        fetchDecks();
+      } else {
+        setImportStatus(`Error: ${data.error}`);
+      }
+    } catch (err: any) {
+      setImportStatus(`Error: ${err.message}`);
     }
   };
 
@@ -1532,6 +1562,26 @@ export default function Home() {
                     className="w-full h-1 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-indigo-500"
                   />
                 </div>
+              </div>
+            </div>
+
+            {/* Database Migration Section */}
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 flex flex-col gap-6">
+              <h4 className="font-black text-lg text-slate-200">Database Migration (SwiftData)</h4>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Restore your learned words, XP progress, streaks, and custom settings directly from your SwiftUI app. Upload your backup <span className="font-mono text-indigo-400 font-bold bg-slate-950 px-2 py-1 rounded">default.store</span> file below.
+              </p>
+              
+              <div className="flex flex-col gap-3">
+                <input 
+                  type="file"
+                  accept=".store"
+                  onChange={handleImportDB}
+                  className="text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-indigo-500 file:text-white hover:file:bg-indigo-400 file:cursor-pointer transition-all"
+                />
+                {importStatus && (
+                  <p className="text-xs font-bold text-teal-400 animate-pulse">{importStatus}</p>
+                )}
               </div>
             </div>
 
