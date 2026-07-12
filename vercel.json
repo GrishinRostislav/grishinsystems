@@ -10,11 +10,11 @@
     },
     {
       "source": "/neurolang",
-      "destination": "https://grishinsystems-neurolang-rostislav-grishins-projects.vercel.app/neurolang"
+      "destination": "https://grishinsystems-3ees.vercel.app/neurolang"
     },
     {
       "source": "/neurolang/:match*",
-      "destination": "https://grishinsystems-neurolang-rostislav-grishins-projects.vercel.app/neurolang/:match*"
+      "destination": "https://grishinsystems-3ees.vercel.app/neurolang/:match*"
     }
   ]
 }
