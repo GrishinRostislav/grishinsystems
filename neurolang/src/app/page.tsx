@@ -9,6 +9,7 @@ interface Profile {
   totalXP: number;
   streakCount: number;
   lastPracticeDate?: string;
+  createdAt: string;
 }
 
 interface LanguagePair {
