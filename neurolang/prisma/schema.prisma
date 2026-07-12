@@ -1,22 +1,26 @@
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
+// ─── User Profile ───────────────────────────────────────────
 model UserProfile {
   id               String         @id @default(uuid()) @db.Uuid
   name             String         @default("New student")
-  profileImage     Bytes?         // binary data for image cache
+  profileImageUrl  String?
   createdAt        DateTime       @default(now())
   totalXP          Int            @default(0)
   streakCount      Int            @default(0)
   lastPracticeDate DateTime?
+  nativeLanguage   String         @default("English")
+  targetLanguage   String         @default("Russian")
   languagePairs    LanguagePair[]
 }
 
+// ─── Language Pair ──────────────────────────────────────────
 model LanguagePair {
   id               String      @id @default(uuid()) @db.Uuid
   userId           String      @db.Uuid
@@ -30,13 +34,27 @@ model LanguagePair {
   decks            Deck[]
 }
 
+// ─── Category ───────────────────────────────────────────────
+model Category {
+  id               String    @id @default(uuid()) @db.Uuid
+  name             String
+  sortOrder        Int       @default(0)
+  isHidden         Boolean   @default(false)
+  imageUrl         String?
+  fallbackIcon     String?   // system icon name
+  createdAt        DateTime  @default(now())
+
+  @@unique([name])
+}
+
+// ─── Vocabulary Word ────────────────────────────────────────
 model Word {
   id              String        @id @default(uuid()) @db.Uuid
   languagePairId  String        @db.Uuid
   languagePair    LanguagePair  @relation(fields: [languagePairId], references: [id], onDelete: Cascade)
   origin          String
   translate       String
-  image           String?       // optional image url or base64
+  image           String?
   whenRepeat      DateTime?
   whenAdded       DateTime      @default(now())
   lastRepeat      DateTime?
@@ -47,7 +65,7 @@ model Word {
   category        String        @default("General")
   reviewAttempts  Int           @default(0)
   reviewSuccesses Int           @default(0)
-  lastInterval    Float?        // in minutes
+  lastInterval    Float?
   audioPath       String?
   audioVoiceID    String?
   
@@ -55,7 +73,7 @@ model Word {
   fsrsStability   Float?
   fsrsDifficulty  Float?
   fsrsLastReview  DateTime?
-  fsrsState       Int           @default(0)
+  fsrsState       Int           @default(0) // 0=New, 1=Learning, 2=Review, 3=Relearning
 
   // Flip Card SRS (Target -> Native)
   flipTNWhenRepeat   DateTime?
@@ -78,6 +96,7 @@ model Word {
   flashcards      Flashcard[]
 }
 
+// ─── Deck (Anki-style) ──────────────────────────────────────
 model Deck {
   id             String       @id @default(uuid()) @db.Uuid
   languagePairId String       @db.Uuid
@@ -87,6 +106,7 @@ model Deck {
   flashcards     Flashcard[]
 }
 
+// ─── Flashcard ──────────────────────────────────────────────
 model Flashcard {
   id             String    @id @default(uuid()) @db.Uuid
   deckId         String    @db.Uuid
@@ -102,4 +122,35 @@ model Flashcard {
   easinessFactor Float     @default(2.5)
   difficulty     Float     @default(5.0)
   lastReviewDate DateTime?
+}
+
+// ─── Daily Quest ────────────────────────────────────────────
+model Quest {
+  id            String    @id @default(uuid()) @db.Uuid
+  questTypeKey  String    // reviewAllWords, learnNewWords, earnXP, etc.
+  title         String
+  description   String    @default("")
+  icon          String    @default("📋")
+  xpReward      Int       @default(0)
+  targetAmount  Int       @default(0)
+  currentAmount Int       @default(0)
+  isClaimed     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  questDate     DateTime  @default(now()) // date this quest is for
+
+  @@index([questDate])
+}
+
+// ─── Daily Stat (Activity Tracking) ─────────────────────────
+model DailyStat {
+  id              String    @id @default(uuid()) @db.Uuid
+  date            DateTime  @default(now())
+  xpEarned        Int       @default(0)
+  wordsMastered   Int       @default(0)
+  wordsReviewed   Int       @default(0)
+  wordsLearned    Int       @default(0)
+  practiceMinutes Int       @default(0)
+
+  @@unique([date])
+  @@index([date])
 }

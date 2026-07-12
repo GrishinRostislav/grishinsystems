@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { FSRSScheduler, FSRSRating } from "@/lib/fsrs";
+import { ensureInitialized } from "@/lib/initializer";
 
 export async function GET(req: Request) {
   try {
@@ -8,9 +9,7 @@ export async function GET(req: Request) {
     const category = searchParams.get("category");
     const dueOnly = searchParams.get("due") === "true";
 
-    const activePair = await prisma.languagePair.findFirst({
-      where: { isActive: true },
-    });
+    const { activePair } = await ensureInitialized();
     if (!activePair) {
       return NextResponse.json([]);
     }
@@ -46,17 +45,13 @@ export async function POST(req: Request) {
   try {
     const { origin, translate, category } = await req.json();
 
-    const activePair = await prisma.languagePair.findFirst({
-      where: { isActive: true },
-    });
+    const { activePair } = await ensureInitialized();
     if (!activePair) {
       return NextResponse.json({ error: "No active language pair" }, { status: 400 });
     }
 
     let finalTranslate = translate;
     if (!finalTranslate) {
-      // Custom basic translator / OpenAI call can go here if needed.
-      // For now, we will default to an empty string or basic message.
       finalTranslate = `[Translation of ${origin}]`;
     }
 

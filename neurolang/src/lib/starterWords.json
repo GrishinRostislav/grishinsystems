@@ -1,0 +1,5238 @@
+{
+  "survivalWords": [
+    {
+      "origin": "I",
+      "translate": "Я"
+    },
+    {
+      "origin": "You",
+      "translate": "Ты / Вы"
+    },
+    {
+      "origin": "Want",
+      "translate": "Хотеть"
+    },
+    {
+      "origin": "To",
+      "translate": "частица для действия (хочу сделать)"
+    },
+    {
+      "origin": "This",
+      "translate": "Это"
+    },
+    {
+      "origin": "I want this.",
+      "translate": "Я хочу это."
+    },
+    {
+      "origin": "Do you want this?",
+      "translate": "Ты хочешь это?"
+    },
+    {
+      "origin": "I want to.",
+      "translate": "Я хочу (сделать)."
+    },
+    {
+      "origin": "This?",
+      "translate": "Это?"
+    },
+    {
+      "origin": "I want you.",
+      "translate": "Ты мне нужен"
+    },
+    {
+      "origin": "Need",
+      "translate": "Нуждаться / Нужно"
+    },
+    {
+      "origin": "Coffee",
+      "translate": "Кофе"
+    },
+    {
+      "origin": "Water",
+      "translate": "Вода"
+    },
+    {
+      "origin": "Please",
+      "translate": "Пожалуйста"
+    },
+    {
+      "origin": "No",
+      "translate": "Нет"
+    },
+    {
+      "origin": "Yes",
+      "translate": "Да"
+    },
+    {
+      "origin": "I need coffee.",
+      "translate": "Мне нужен кофе."
+    },
+    {
+      "origin": "Water, please.",
+      "translate": "Воды, пожалуйста."
+    },
+    {
+      "origin": "No, I want coffee.",
+      "translate": "Нет, я хочу кофе."
+    },
+    {
+      "origin": "Do you need this?",
+      "translate": "Тебе это нужно?"
+    },
+    {
+      "origin": "Yes, please.",
+      "translate": "Да, пожалуйста."
+    },
+    {
+      "origin": "Don’t",
+      "translate": "Не"
+    },
+    {
+      "origin": "Know",
+      "translate": "Знать"
+    },
+    {
+      "origin": "Understand",
+      "translate": "Понимать"
+    },
+    {
+      "origin": "Speak",
+      "translate": "Говорить"
+    },
+    {
+      "origin": "English",
+      "translate": "Английский"
+    },
+    {
+      "origin": "I don’t know.",
+      "translate": "Я не знаю."
+    },
+    {
+      "origin": "I don’t understand you.",
+      "translate": "Я тебя не понимаю."
+    },
+    {
+      "origin": "Do you speak English?",
+      "translate": "Вы говорите по-английски?"
+    },
+    {
+      "origin": "No, I don’t speak.",
+      "translate": "Нет, я не говорю."
+    },
+    {
+      "origin": "I understand English.",
+      "translate": "Я понимаю по-английски."
+    },
+    {
+      "origin": "Where",
+      "translate": "Где"
+    },
+    {
+      "origin": "Is",
+      "translate": "Находится / Есть"
+    },
+    {
+      "origin": "Here",
+      "translate": "Здесь"
+    },
+    {
+      "origin": "There",
+      "translate": "Там"
+    },
+    {
+      "origin": "Washroom",
+      "translate": "Туалет"
+    },
+    {
+      "origin": "Where is the washroom?",
+      "translate": "Где туалет?"
+    },
+    {
+      "origin": "Is it here?",
+      "translate": "Это здесь?"
+    },
+    {
+      "origin": "No, it is there.",
+      "translate": "Нет, это там."
+    },
+    {
+      "origin": "Where is the coffee?",
+      "translate": "Где кофе?"
+    },
+    {
+      "origin": "English is here.",
+      "translate": "Английский здесь."
+    },
+    {
+      "origin": "Hi",
+      "translate": "Привет"
+    },
+    {
+      "origin": "Good",
+      "translate": "Хорошо / Хороший"
+    },
+    {
+      "origin": "Thanks",
+      "translate": "Спасибо"
+    },
+    {
+      "origin": "Sorry",
+      "translate": "Извини / Прости"
+    },
+    {
+      "origin": "Help",
+      "translate": "Помощь / Помогать"
+    },
+    {
+      "origin": "Hi, help please!",
+      "translate": "Привет, помоги пожалуйста!"
+    },
+    {
+      "origin": "Sorry, I don't know.",
+      "translate": "Извини, я не знаю."
+    },
+    {
+      "origin": "Is this good?",
+      "translate": "Это хорошо?"
+    },
+    {
+      "origin": "Yes, thanks.",
+      "translate": "Да, спасибо."
+    },
+    {
+      "origin": "I need help.",
+      "translate": "Мне нужна помощь."
+    },
+    {
+      "origin": "Go",
+      "translate": "Идти / Ехать"
+    },
+    {
+      "origin": "Stop",
+      "translate": "Стоп / Остановиться"
+    },
+    {
+      "origin": "Now",
+      "translate": "Сейчас"
+    },
+    {
+      "origin": "Later",
+      "translate": "Позже"
+    },
+    {
+      "origin": "Let’s",
+      "translate": "Давай (сделаем)"
+    },
+    {
+      "origin": "Let’s go.",
+      "translate": "Пошли / Поехали."
+    },
+    {
+      "origin": "Stop here, please.",
+      "translate": "Остановите здесь, пожалуйста."
+    },
+    {
+      "origin": "Not now, later.",
+      "translate": "Не сейчас, позже."
+    },
+    {
+      "origin": "I want to go.",
+      "translate": "Я хочу пойти."
+    },
+    {
+      "origin": "Go there.",
+      "translate": "Иди туда."
+    },
+    {
+      "origin": "How much",
+      "translate": "Сколько (стоит)"
+    },
+    {
+      "origin": "Cost",
+      "translate": "Стоить"
+    },
+    {
+      "origin": "Money",
+      "translate": "Деньги"
+    },
+    {
+      "origin": "Card",
+      "translate": "Карта"
+    },
+    {
+      "origin": "Cash",
+      "translate": "Наличные"
+    },
+    {
+      "origin": "How much is this?",
+      "translate": "Сколько это стоит?"
+    },
+    {
+      "origin": "Card or cash?",
+      "translate": "Карта или наличные?"
+    },
+    {
+      "origin": "I have no money.",
+      "translate": "У меня нет денег."
+    },
+    {
+      "origin": "Here is cash.",
+      "translate": "Вот наличные."
+    },
+    {
+      "origin": "How much?",
+      "translate": "Сколько?"
+    },
+    {
+      "origin": "Like",
+      "translate": "Нравится"
+    },
+    {
+      "origin": "Have",
+      "translate": "Иметь (у меня есть)"
+    },
+    {
+      "origin": "Work",
+      "translate": "Работа / Работать"
+    },
+    {
+      "origin": "Problem",
+      "translate": "Проблема"
+    },
+    {
+      "origin": "Okay",
+      "translate": "Окей / Ладно"
+    },
+    {
+      "origin": "I like coffee.",
+      "translate": "Мне нравится кофе."
+    },
+    {
+      "origin": "I have a problem.",
+      "translate": "У меня проблема."
+    },
+    {
+      "origin": "No problem.",
+      "translate": "Без проблем."
+    },
+    {
+      "origin": "I want to work.",
+      "translate": "Я хочу работать."
+    },
+    {
+      "origin": "Okay, let's go.",
+      "translate": "Ладно, пошли."
+    },
+    {
+      "origin": "We",
+      "translate": "Мы"
+    },
+    {
+      "origin": "My",
+      "translate": "Мой"
+    },
+    {
+      "origin": "Your",
+      "translate": "Твой"
+    },
+    {
+      "origin": "Friend",
+      "translate": "Друг"
+    },
+    {
+      "origin": "Family",
+      "translate": "Семья"
+    },
+    {
+      "origin": "We are friends.",
+      "translate": "Мы друзья."
+    },
+    {
+      "origin": "This is my family.",
+      "translate": "Это моя семья."
+    },
+    {
+      "origin": "Where is your friend?",
+      "translate": "Где твой друг?"
+    },
+    {
+      "origin": "My work is good.",
+      "translate": "Моя работа хорошая."
+    },
+    {
+      "origin": "We need water.",
+      "translate": "Нам нужна вода."
+    },
+    {
+      "origin": "Eat",
+      "translate": "Кушать"
+    },
+    {
+      "origin": "Hungry",
+      "translate": "Голодный"
+    },
+    {
+      "origin": "Tired",
+      "translate": "Уставший"
+    },
+    {
+      "origin": "Busy",
+      "translate": "Занят"
+    },
+    {
+      "origin": "Ready",
+      "translate": "Готов"
+    },
+    {
+      "origin": "Are you hungry?",
+      "translate": "Ты голоден?"
+    },
+    {
+      "origin": "I want to eat.",
+      "translate": "Я хочу есть."
+    },
+    {
+      "origin": "Sorry, I am busy.",
+      "translate": "Извини, я занят."
+    },
+    {
+      "origin": "I am tired.",
+      "translate": "Я устал."
+    },
+    {
+      "origin": "Ready to go?",
+      "translate": "Готов идти?"
+    },
+    {
+      "origin": "What",
+      "translate": "Что"
+    },
+    {
+      "origin": "Big",
+      "translate": "Большой"
+    },
+    {
+      "origin": "Small",
+      "translate": "Маленький"
+    },
+    {
+      "origin": "Hot",
+      "translate": "Горячий"
+    },
+    {
+      "origin": "Cold",
+      "translate": "Холодный"
+    },
+    {
+      "origin": "What is this?",
+      "translate": "Что это?"
+    },
+    {
+      "origin": "This coffee is cold.",
+      "translate": "Этот кофе холодный."
+    },
+    {
+      "origin": "I want hot water.",
+      "translate": "Я хочу горячей воды."
+    },
+    {
+      "origin": "It is too big.",
+      "translate": "Это слишком большое."
+    },
+    {
+      "origin": "Small problem.",
+      "translate": "Маленькая проблема."
+    },
+    {
+      "origin": "When",
+      "translate": "Когда"
+    },
+    {
+      "origin": "Today",
+      "translate": "Сегодня"
+    },
+    {
+      "origin": "Tomorrow",
+      "translate": "Завтра"
+    },
+    {
+      "origin": "Home",
+      "translate": "Дом (домой)"
+    },
+    {
+      "origin": "Car",
+      "translate": "Машина"
+    },
+    {
+      "origin": "When do we go?",
+      "translate": "Когда мы едем?"
+    },
+    {
+      "origin": "Let’s go home.",
+      "translate": "Поехали домой."
+    },
+    {
+      "origin": "My car is here.",
+      "translate": "Моя машина здесь."
+    },
+    {
+      "origin": "Not today, tomorrow.",
+      "translate": "Не сегодня, завтра."
+    },
+    {
+      "origin": "When is work?",
+      "translate": "Когда работа?"
+    },
+    {
+      "origin": "And",
+      "translate": "И"
+    },
+    {
+      "origin": "But",
+      "translate": "Но"
+    },
+    {
+      "origin": "Or",
+      "translate": "Или"
+    },
+    {
+      "origin": "So",
+      "translate": "Так / Поэтому"
+    },
+    {
+      "origin": "Maybe",
+      "translate": "Может быть"
+    },
+    {
+      "origin": "Coffee or water?",
+      "translate": "Кофе или вода?"
+    },
+    {
+      "origin": "I want this, but no money.",
+      "translate": "Я хочу это, но нет денег."
+    },
+    {
+      "origin": "Maybe tomorrow.",
+      "translate": "Может быть завтра."
+    },
+    {
+      "origin": "So, let's go?",
+      "translate": "Ну так что, пошли?"
+    },
+    {
+      "origin": "You and I.",
+      "translate": "Ты и я."
+    },
+    {
+      "origin": "Man",
+      "translate": "Мужчина"
+    },
+    {
+      "origin": "Woman",
+      "translate": "Женщина"
+    },
+    {
+      "origin": "Guy",
+      "translate": "Парень / Guys - Ребята"
+    },
+    {
+      "origin": "Who",
+      "translate": "Кто"
+    },
+    {
+      "origin": "Everyone",
+      "translate": "Все (каждый)"
+    },
+    {
+      "origin": "Hi guys!",
+      "translate": "Привет, ребята!"
+    },
+    {
+      "origin": "Who is this man?",
+      "translate": "Кто этот мужчина?"
+    },
+    {
+      "origin": "Everyone is here.",
+      "translate": "Все здесь."
+    },
+    {
+      "origin": "Who wants coffee?",
+      "translate": "Кто хочет кофе?"
+    },
+    {
+      "origin": "This woman is my friend.",
+      "translate": "Эта женщина — мой друг."
+    },
+    {
+      "origin": "Give",
+      "translate": "Дать / Давать"
+    },
+    {
+      "origin": "Take",
+      "translate": "Брать"
+    },
+    {
+      "origin": "Open",
+      "translate": "Открыть"
+    },
+    {
+      "origin": "Close",
+      "translate": "Закрыть"
+    },
+    {
+      "origin": "Phone",
+      "translate": "Телефон"
+    },
+    {
+      "origin": "Give me my phone.",
+      "translate": "Дай мне мой телефон."
+    },
+    {
+      "origin": "Take this money.",
+      "translate": "Возьми эти деньги."
+    },
+    {
+      "origin": "Open the door, please.",
+      "translate": "Открой дверь, пожалуйста."
+    },
+    {
+      "origin": "Close your car.",
+      "translate": "Закрой свою машину."
+    },
+    {
+      "origin": "Who has my phone?",
+      "translate": "У кого мой телефон?"
+    },
+    {
+      "origin": "Very",
+      "translate": "Очень"
+    },
+    {
+      "origin": "Too",
+      "translate": "Слишком / Тоже"
+    },
+    {
+      "origin": "Just",
+      "translate": "Просто / Только"
+    },
+    {
+      "origin": "Little",
+      "translate": "Мало / Маленький"
+    },
+    {
+      "origin": "Lot",
+      "translate": "Много"
+    },
+    {
+      "origin": "Thank you very much.",
+      "translate": "Спасибо большое."
+    },
+    {
+      "origin": "It is too hot.",
+      "translate": "Слишком горячо."
+    },
+    {
+      "origin": "Just a little.",
+      "translate": "Чуть-чуть."
+    },
+    {
+      "origin": "I have a lot of work.",
+      "translate": "У меня много работы."
+    },
+    {
+      "origin": "Just give me water.",
+      "translate": "Просто дай мне воды."
+    },
+    {
+      "origin": "Me too.",
+      "translate": "Я тоже."
+    },
+    {
+      "origin": "Time",
+      "translate": "Время"
+    },
+    {
+      "origin": "Morning",
+      "translate": "Утро"
+    },
+    {
+      "origin": "Night",
+      "translate": "Ночь / Вечер"
+    },
+    {
+      "origin": "Day",
+      "translate": "День"
+    },
+    {
+      "origin": "Week",
+      "translate": "Неделя"
+    },
+    {
+      "origin": "Good morning!",
+      "translate": "Доброе утро!"
+    },
+    {
+      "origin": "Good night.",
+      "translate": "Спокойной ночи."
+    },
+    {
+      "origin": "What time is it?",
+      "translate": "Который час?"
+    },
+    {
+      "origin": "Have a good day.",
+      "translate": "Хорошего дня."
+    },
+    {
+      "origin": "I have no time.",
+      "translate": "У меня нет времени."
+    },
+    {
+      "origin": "See you next week.",
+      "translate": "Увидимся на следующей неделе."
+    },
+    {
+      "origin": "Why",
+      "translate": "Почему"
+    },
+    {
+      "origin": "Because",
+      "translate": "Потому что"
+    },
+    {
+      "origin": "Think",
+      "translate": "Думать"
+    },
+    {
+      "origin": "Sure",
+      "translate": "Уверен / Конечно"
+    },
+    {
+      "origin": "If",
+      "translate": "Если"
+    },
+    {
+      "origin": "Why are you here?",
+      "translate": "Почему ты здесь?"
+    },
+    {
+      "origin": "Because I want to.",
+      "translate": "Потому что я хочу."
+    },
+    {
+      "origin": "I think so.",
+      "translate": "Я думаю, да."
+    },
+    {
+      "origin": "Are you sure?",
+      "translate": "Ты уверен?"
+    },
+    {
+      "origin": "Sure, no problem.",
+      "translate": "Конечно, без проблем."
+    },
+    {
+      "origin": "If you go, I go.",
+      "translate": "Если ты идешь, я иду."
+    },
+    {
+      "origin": "Happy",
+      "translate": "Счастливый / Довольный"
+    },
+    {
+      "origin": "Sad",
+      "translate": "Грустный"
+    },
+    {
+      "origin": "Sick",
+      "translate": "Больной"
+    },
+    {
+      "origin": "Late",
+      "translate": "Поздно / Опоздал"
+    },
+    {
+      "origin": "Early",
+      "translate": "Рано"
+    },
+    {
+      "origin": "I am late, sorry.",
+      "translate": "Я опаздываю, извини."
+    },
+    {
+      "origin": "Why are you sad?",
+      "translate": "Почему ты грустный?"
+    },
+    {
+      "origin": "I am very happy!",
+      "translate": "Я очень счастлив!"
+    },
+    {
+      "origin": "It is too early.",
+      "translate": "Слишком рано."
+    },
+    {
+      "origin": "I am sick today.",
+      "translate": "Я сегодня болею."
+    },
+    {
+      "origin": "Look",
+      "translate": "Смотреть"
+    },
+    {
+      "origin": "Listen",
+      "translate": "Слушать"
+    },
+    {
+      "origin": "Wait",
+      "translate": "Ждать"
+    },
+    {
+      "origin": "Tell",
+      "translate": "Рассказывать"
+    },
+    {
+      "origin": "Say",
+      "translate": "Сказать (что-то)"
+    },
+    {
+      "origin": "Look at this!",
+      "translate": "Посмотри на это!"
+    },
+    {
+      "origin": "Listen to me.",
+      "translate": "Послушай меня."
+    },
+    {
+      "origin": "Wait here, please.",
+      "translate": "Жди здесь, пожалуйста."
+    },
+    {
+      "origin": "Tell me why.",
+      "translate": "Скажи мне, почему."
+    },
+    {
+      "origin": "Say something.",
+      "translate": "Скажи что-нибудь."
+    },
+    {
+      "origin": "Wait a little.",
+      "translate": "Подожди немного."
+    },
+    {
+      "origin": "Job",
+      "translate": "Работа (должность/вакансия)"
+    },
+    {
+      "origin": "Make",
+      "translate": "Делать (создавать руками)"
+    },
+    {
+      "origin": "Do",
+      "translate": "Делать (заниматься чем-то)"
+    },
+    {
+      "origin": "Fix",
+      "translate": "Чинить / Исправлять"
+    },
+    {
+      "origin": "Broken",
+      "translate": "Сломанный"
+    },
+    {
+      "origin": "Can you fix this?",
+      "translate": "Ты можешь это починить?"
+    },
+    {
+      "origin": "My car is broken.",
+      "translate": "Моя машина сломана."
+    },
+    {
+      "origin": "I need a job.",
+      "translate": "Мне нужна работа."
+    },
+    {
+      "origin": "What do you do?",
+      "translate": "Чем ты занимаешься? / Кем работаешь?"
+    },
+    {
+      "origin": "I can make this work.",
+      "translate": "Я могу заставить это работать."
+    },
+    {
+      "origin": "Wife",
+      "translate": "Жена"
+    },
+    {
+      "origin": "Husband",
+      "translate": "Муж"
+    },
+    {
+      "origin": "Son",
+      "translate": "Сын"
+    },
+    {
+      "origin": "Daughter",
+      "translate": "Дочь"
+    },
+    {
+      "origin": "Kid / Kids",
+      "translate": "Ребенок / Дети"
+    },
+    {
+      "origin": "My wife is at home.",
+      "translate": "Моя жена дома."
+    },
+    {
+      "origin": "I have two kids.",
+      "translate": "У меня двое детей."
+    },
+    {
+      "origin": "This is my son.",
+      "translate": "Это мой сын."
+    },
+    {
+      "origin": "Where are your kids?",
+      "translate": "Где твои дети?"
+    },
+    {
+      "origin": "My daughter is sick.",
+      "translate": "Моя дочь болеет."
+    },
+    {
+      "origin": "Left",
+      "translate": "Налево / Левый"
+    },
+    {
+      "origin": "Right",
+      "translate": "Направо / Правый / Правильно"
+    },
+    {
+      "origin": "Straight",
+      "translate": "Прямо"
+    },
+    {
+      "origin": "Street",
+      "translate": "Улица"
+    },
+    {
+      "origin": "Way",
+      "translate": "Путь / Дорога / Способ"
+    },
+    {
+      "origin": "Go straight, then left.",
+      "translate": "Езжай прямо, потом налево."
+    },
+    {
+      "origin": "Is this the right way?",
+      "translate": "Это правильная дорога?"
+    },
+    {
+      "origin": "Turn right.",
+      "translate": "Поверни направо."
+    },
+    {
+      "origin": "What street is this?",
+      "translate": "Какая это улица?"
+    },
+    {
+      "origin": "No way!",
+      "translate": "Не может быть! / Ни за что!"
+    },
+    {
+      "origin": "Minute",
+      "translate": "Минута"
+    },
+    {
+      "origin": "Hour",
+      "translate": "Час"
+    },
+    {
+      "origin": "Month",
+      "translate": "Месяц"
+    },
+    {
+      "origin": "Year",
+      "translate": "Год"
+    },
+    {
+      "origin": "Long",
+      "translate": "Долго / Длинный"
+    },
+    {
+      "origin": "Wait one minute.",
+      "translate": "Подожди одну минуту."
+    },
+    {
+      "origin": "How long?",
+      "translate": "Как долго?"
+    },
+    {
+      "origin": "One hour later.",
+      "translate": "Через час."
+    },
+    {
+      "origin": "See you next month.",
+      "translate": "Увидимся в следующем месяце."
+    },
+    {
+      "origin": "It is a long way.",
+      "translate": "Это долгий путь."
+    },
+    {
+      "origin": "New",
+      "translate": "Новый"
+    },
+    {
+      "origin": "Old",
+      "translate": "Старый"
+    },
+    {
+      "origin": "Easy",
+      "translate": "Легкий (простой)"
+    },
+    {
+      "origin": "Hard",
+      "translate": "Тяжелый / Трудный / Твердый"
+    },
+    {
+      "origin": "Same",
+      "translate": "Такой же / То же самое"
+    },
+    {
+      "origin": "This job is easy.",
+      "translate": "Эта работа простая."
+    },
+    {
+      "origin": "It is very hard.",
+      "translate": "Это очень сложно."
+    },
+    {
+      "origin": "I want the same.",
+      "translate": "Я хочу то же самое."
+    },
+    {
+      "origin": "My car is old.",
+      "translate": "Моя машина старая."
+    },
+    {
+      "origin": "Is this new?",
+      "translate": "Это новое?"
+    },
+    {
+      "origin": "Room",
+      "translate": "Комната"
+    },
+    {
+      "origin": "Kitchen",
+      "translate": "Кухня"
+    },
+    {
+      "origin": "Office",
+      "translate": "Офис"
+    },
+    {
+      "origin": "Place",
+      "translate": "Место"
+    },
+    {
+      "origin": "House",
+      "translate": "Дом (здание)"
+    },
+    {
+      "origin": "Nice place!",
+      "translate": "Классное место!"
+    },
+    {
+      "origin": "Where is your office?",
+      "translate": "Где твой офис?"
+    },
+    {
+      "origin": "I am in the kitchen.",
+      "translate": "Я на кухне."
+    },
+    {
+      "origin": "This house is big.",
+      "translate": "Этот дом большой."
+    },
+    {
+      "origin": "My room is small.",
+      "translate": "Моя комната маленькая."
+    },
+    {
+      "origin": "Live",
+      "translate": "Жить"
+    },
+    {
+      "origin": "Stay",
+      "translate": "Оставаться"
+    },
+    {
+      "origin": "Leave",
+      "translate": "Уходить / Покидать"
+    },
+    {
+      "origin": "Come",
+      "translate": "Приходить / Приезжать"
+    },
+    {
+      "origin": "Back",
+      "translate": "Назад / Обратно"
+    },
+    {
+      "origin": "Where do you live?",
+      "translate": "Где ты живешь?"
+    },
+    {
+      "origin": "Stay here, please.",
+      "translate": "Оставайся здесь, пожалуйста."
+    },
+    {
+      "origin": "I need to leave.",
+      "translate": "Мне нужно уйти."
+    },
+    {
+      "origin": "Come here!",
+      "translate": "Иди сюда!"
+    },
+    {
+      "origin": "I will be back.",
+      "translate": "Я вернусь."
+    },
+    {
+      "origin": "Go back.",
+      "translate": "Иди назад."
+    },
+    {
+      "origin": "Thing",
+      "translate": "Вещь / Штука"
+    },
+    {
+      "origin": "Bag",
+      "translate": "Сумка / Пакет"
+    },
+    {
+      "origin": "Key",
+      "translate": "Ключ"
+    },
+    {
+      "origin": "Door",
+      "translate": "Дверь"
+    },
+    {
+      "origin": "Window",
+      "translate": "Окно"
+    },
+    {
+      "origin": "What is this thing?",
+      "translate": "Что это за штука?"
+    },
+    {
+      "origin": "Where are my keys?",
+      "translate": "Где мои ключи?"
+    },
+    {
+      "origin": "Open the window.",
+      "translate": "Открой окно."
+    },
+    {
+      "origin": "I have a bag.",
+      "translate": "У меня есть сумка."
+    },
+    {
+      "origin": "Close the door.",
+      "translate": "Закрой дверь."
+    },
+    {
+      "origin": "More",
+      "translate": "Больше / Еще"
+    },
+    {
+      "origin": "Less",
+      "translate": "Меньше"
+    },
+    {
+      "origin": "Other",
+      "translate": "Другой (еще один)"
+    },
+    {
+      "origin": "Different",
+      "translate": "Другой (отличающийся)"
+    },
+    {
+      "origin": "All",
+      "translate": "Всё / Все"
+    },
+    {
+      "origin": "I want more.",
+      "translate": "Я хочу еще."
+    },
+    {
+      "origin": "Give me the other one.",
+      "translate": "Дай мне другой."
+    },
+    {
+      "origin": "It is completely different.",
+      "translate": "Это совсем другое."
+    },
+    {
+      "origin": "That's all.",
+      "translate": "Это всё."
+    },
+    {
+      "origin": "More or less?",
+      "translate": "Больше или меньше?"
+    },
+    {
+      "origin": "Call",
+      "translate": "Звонить"
+    },
+    {
+      "origin": "Number",
+      "translate": "Номер"
+    },
+    {
+      "origin": "Message",
+      "translate": "Сообщение"
+    },
+    {
+      "origin": "Send",
+      "translate": "Отправить"
+    },
+    {
+      "origin": "Ask",
+      "translate": "Спросить / Попросить"
+    },
+    {
+      "origin": "Call me later.",
+      "translate": "Позвони мне позже."
+    },
+    {
+      "origin": "What is your number?",
+      "translate": "Какой у тебя номер?"
+    },
+    {
+      "origin": "Send me a message.",
+      "translate": "Отправь мне сообщение."
+    },
+    {
+      "origin": "Don't ask me.",
+      "translate": "Не спрашивай меня."
+    },
+    {
+      "origin": "Can I ask you?",
+      "translate": "Могу я тебя спросить?"
+    },
+    {
+      "origin": "Chicken",
+      "translate": "Курица"
+    },
+    {
+      "origin": "Meat",
+      "translate": "Мясо"
+    },
+    {
+      "origin": "Bread",
+      "translate": "Хлеб"
+    },
+    {
+      "origin": "Milk",
+      "translate": "Молоко"
+    },
+    {
+      "origin": "Sugar",
+      "translate": "Сахар"
+    },
+    {
+      "origin": "Chicken or meat?",
+      "translate": "Курица или мясо?"
+    },
+    {
+      "origin": "Coffee with milk.",
+      "translate": "Кофе с молоком."
+    },
+    {
+      "origin": "No sugar, please.",
+      "translate": "Без сахара, пожалуйста."
+    },
+    {
+      "origin": "I need bread.",
+      "translate": "Мне нужен хлеб."
+    },
+    {
+      "origin": "Safe",
+      "translate": "Безопасный"
+    },
+    {
+      "origin": "Dangerous",
+      "translate": "Опасный"
+    },
+    {
+      "origin": "Careful",
+      "translate": "Осторожный"
+    },
+    {
+      "origin": "Fast",
+      "translate": "Быстрый / Быстро"
+    },
+    {
+      "origin": "Slow",
+      "translate": "Медленный / Медленно"
+    },
+    {
+      "origin": "Be careful!",
+      "translate": "Будь осторожен!"
+    },
+    {
+      "origin": "It is dangerous.",
+      "translate": "Это опасно."
+    },
+    {
+      "origin": "Is it safe?",
+      "translate": "Это безопасно?"
+    },
+    {
+      "origin": "Go slow.",
+      "translate": "Езжай медленно."
+    },
+    {
+      "origin": "Too fast!",
+      "translate": "Слишком быстро!"
+    },
+    {
+      "origin": "Run",
+      "translate": "Бежать"
+    },
+    {
+      "origin": "Walk",
+      "translate": "Идти пешком / Гулять"
+    },
+    {
+      "origin": "Drive",
+      "translate": "Водить (машину)"
+    },
+    {
+      "origin": "Sleep",
+      "translate": "Спать"
+    },
+    {
+      "origin": "Wake up",
+      "translate": "Просыпаться"
+    },
+    {
+      "origin": "I want to sleep.",
+      "translate": "Я хочу спать."
+    },
+    {
+      "origin": "Do you drive?",
+      "translate": "Ты водишь машину?"
+    },
+    {
+      "origin": "Let's walk.",
+      "translate": "Давай прогуляемся."
+    },
+    {
+      "origin": "Wake up!",
+      "translate": "Просыпайся!"
+    },
+    {
+      "origin": "Run fast!",
+      "translate": "Беги быстро!"
+    },
+    {
+      "origin": "Wear",
+      "translate": "Носить (одежду)"
+    },
+    {
+      "origin": "Shoes",
+      "translate": "Обувь"
+    },
+    {
+      "origin": "Coat / Jacket",
+      "translate": "Куртка / Пальто"
+    },
+    {
+      "origin": "Pants",
+      "translate": "Штаны / Брюки"
+    },
+    {
+      "origin": "Shirt",
+      "translate": "Рубашка / Футболка"
+    },
+    {
+      "origin": "Nice shoes.",
+      "translate": "Классные ботинки."
+    },
+    {
+      "origin": "Put on your jacket.",
+      "translate": "Надень куртку."
+    },
+    {
+      "origin": "Where are my pants?",
+      "translate": "Где мои штаны?"
+    },
+    {
+      "origin": "I wear this to work.",
+      "translate": "Я ношу это на работу."
+    },
+    {
+      "origin": "Love",
+      "translate": "Любить"
+    },
+    {
+      "origin": "Hate",
+      "translate": "Ненавидет"
+    },
+    {
+      "origin": "Angry",
+      "translate": "Злой"
+    },
+    {
+      "origin": "Funny",
+      "translate": "Смешной"
+    },
+    {
+      "origin": "Scared",
+      "translate": "Испуганный"
+    },
+    {
+      "origin": "I love this place.",
+      "translate": "Я люблю это место."
+    },
+    {
+      "origin": "Why are you angry?",
+      "translate": "Почему ты злой?"
+    },
+    {
+      "origin": "It's not funny.",
+      "translate": "Это не смешно."
+    },
+    {
+      "origin": "I hate traffic.",
+      "translate": "Я ненавижу пробки."
+    },
+    {
+      "origin": "Don't be scared.",
+      "translate": "Не бойся."
+    },
+    {
+      "origin": "Monday",
+      "translate": "Понедельник"
+    },
+    {
+      "origin": "Friday",
+      "translate": "Пятница"
+    },
+    {
+      "origin": "Weekend",
+      "translate": "Выходные"
+    },
+    {
+      "origin": "Yesterday",
+      "translate": "Вчера"
+    },
+    {
+      "origin": "Never",
+      "translate": "Никогда"
+    },
+    {
+      "origin": "See you on Monday.",
+      "translate": "Увидимся в понедельник."
+    },
+    {
+      "origin": "Have a good weekend.",
+      "translate": "Хороших выходных."
+    },
+    {
+      "origin": "I was here yesterday.",
+      "translate": "Я был здесь вчера."
+    },
+    {
+      "origin": "Never say never.",
+      "translate": "Никогда не говори никогда."
+    },
+    {
+      "origin": "Friday is happy day.",
+      "translate": "Пятница — счастливый день."
+    },
+    {
+      "origin": "Him",
+      "translate": "Ему / Его"
+    },
+    {
+      "origin": "Her",
+      "translate": "Ей / Её"
+    },
+    {
+      "origin": "Them",
+      "translate": "Им / Их"
+    },
+    {
+      "origin": "Us",
+      "translate": "Нам / Нас"
+    },
+    {
+      "origin": "Our",
+      "translate": "Наш"
+    },
+    {
+      "origin": "Give it to him.",
+      "translate": "Дай это ему."
+    },
+    {
+      "origin": "Tell her.",
+      "translate": "Скажи ей."
+    },
+    {
+      "origin": "This is our car.",
+      "translate": "Это наша машина."
+    },
+    {
+      "origin": "Come with us.",
+      "translate": "Пойдем с нами."
+    },
+    {
+      "origin": "I don't know them.",
+      "translate": "Я их не знаю."
+    },
+    {
+      "origin": "Black",
+      "translate": "Черный"
+    },
+    {
+      "origin": "White",
+      "translate": "Белый"
+    },
+    {
+      "origin": "Red",
+      "translate": "Красный"
+    },
+    {
+      "origin": "Blue",
+      "translate": "Синий"
+    },
+    {
+      "origin": "Green",
+      "translate": "Зеленый"
+    },
+    {
+      "origin": "I like black coffee.",
+      "translate": "Я люблю черный кофе."
+    },
+    {
+      "origin": "The red car.",
+      "translate": "Красная машина."
+    },
+    {
+      "origin": "Green light.",
+      "translate": "Зеленый свет."
+    },
+    {
+      "origin": "White shirt.",
+      "translate": "Белая рубашка."
+    },
+    {
+      "origin": "Just regular coffee.",
+      "translate": "Просто обычный кофе."
+    },
+    {
+      "origin": "Size",
+      "translate": "Размер"
+    },
+    {
+      "origin": "Try",
+      "translate": "Пробовать / Мерить"
+    },
+    {
+      "origin": "Cheap",
+      "translate": "Дешевый"
+    },
+    {
+      "origin": "Sell",
+      "translate": "Продавать"
+    },
+    {
+      "origin": "Return",
+      "translate": "Вернуть"
+    },
+    {
+      "origin": "What size is this?",
+      "translate": "Какой это размер?"
+    },
+    {
+      "origin": "Can I try?",
+      "translate": "Могу я попробовать?"
+    },
+    {
+      "origin": "I want to return this.",
+      "translate": "Я хочу это вернуть."
+    },
+    {
+      "origin": "Do you sell water?",
+      "translate": "Вы продаете воду?"
+    },
+    {
+      "origin": "It is very cheap.",
+      "translate": "Это очень дешево."
+    },
+    {
+      "origin": "Start",
+      "translate": "Начинать"
+    },
+    {
+      "origin": "Finish",
+      "translate": "Заканчивать"
+    },
+    {
+      "origin": "Best",
+      "translate": "Лучший"
+    },
+    {
+      "origin": "Worst",
+      "translate": "Худший"
+    },
+    {
+      "origin": "Enough",
+      "translate": "Достаточно / Хватит"
+    },
+    {
+      "origin": "Let's start.",
+      "translate": "Давайте начнем."
+    },
+    {
+      "origin": "When do you finish?",
+      "translate": "Когда ты заканчиваешь?"
+    },
+    {
+      "origin": "You are the best.",
+      "translate": "Ты лучший."
+    },
+    {
+      "origin": "That's enough.",
+      "translate": "Этого достаточно."
+    },
+    {
+      "origin": "Start now.",
+      "translate": "Начинай сейчас."
+    }
+  ],
+  "carRoadWords": [
+    {
+      "origin": "Drive",
+      "translate": "Водить / Ехать (за рулем)"
+    },
+    {
+      "origin": "Park",
+      "translate": "Парковаться"
+    },
+    {
+      "origin": "Ride",
+      "translate": "Поездка"
+    },
+    {
+      "origin": "Turn",
+      "translate": "Повернуть / Поворот"
+    },
+    {
+      "origin": "Light",
+      "translate": "Светофор (или свет)"
+    },
+    {
+      "origin": "Can you drive?",
+      "translate": "Ты умеешь водить?"
+    },
+    {
+      "origin": "Park here, please.",
+      "translate": "Паркуйся здесь, пожалуйста."
+    },
+    {
+      "origin": "Turn left at the light.",
+      "translate": "Поверни налево на светофоре."
+    },
+    {
+      "origin": "Thanks for the ride.",
+      "translate": "Спасибо, что подвез."
+    },
+    {
+      "origin": "The light is red.",
+      "translate": "Светофор красный."
+    },
+    {
+      "origin": "Gas",
+      "translate": "Бензин"
+    },
+    {
+      "origin": "Fill",
+      "translate": "Заполнить / Наполнить"
+    },
+    {
+      "origin": "Full",
+      "translate": "Полный"
+    },
+    {
+      "origin": "Empty",
+      "translate": "Пустой"
+    },
+    {
+      "origin": "Tank",
+      "translate": "Бак"
+    },
+    {
+      "origin": "I need gas.",
+      "translate": "Мне нужен бензин."
+    },
+    {
+      "origin": "Fill it up, please.",
+      "translate": "Заправьте полный, пожалуйста."
+    },
+    {
+      "origin": "My tank is empty.",
+      "translate": "Мой бак пуст."
+    },
+    {
+      "origin": "Is it full?",
+      "translate": "Он полный?"
+    },
+    {
+      "origin": "Gas is expensive today.",
+      "translate": "Бензин сегодня дорогой."
+    },
+    {
+      "origin": "Snow",
+      "translate": "Снег"
+    },
+    {
+      "origin": "Ice",
+      "translate": "Лед"
+    },
+    {
+      "origin": "Clean",
+      "translate": "Чистить / Чистый"
+    },
+    {
+      "origin": "Brush",
+      "translate": "Щетка (для снега)"
+    },
+    {
+      "origin": "Warm",
+      "translate": "Теплый / Греть"
+    },
+    {
+      "origin": "Clean the snow, please.",
+      "translate": "Почисти снег, пожалуйста."
+    },
+    {
+      "origin": "There is ice on the road.",
+      "translate": "На дороге лед."
+    },
+    {
+      "origin": "Where is my brush?",
+      "translate": "Где моя щетка?"
+    },
+    {
+      "origin": "I need to warm up the car.",
+      "translate": "Мне нужно прогреть машину."
+    },
+    {
+      "origin": "Snow is coming.",
+      "translate": "Идет снег / Снег приближается."
+    },
+    {
+      "origin": "Tire",
+      "translate": "Шина / Колесо (резина)"
+    },
+    {
+      "origin": "Wheel",
+      "translate": "Колесо (диск или руль)"
+    },
+    {
+      "origin": "Flat",
+      "translate": "Спущенный (плоский)"
+    },
+    {
+      "origin": "Air",
+      "translate": "Воздух"
+    },
+    {
+      "origin": "Change",
+      "translate": "Менять / Сдача"
+    },
+    {
+      "origin": "I have a flat tire.",
+      "translate": "У меня спустило колесо."
+    },
+    {
+      "origin": "I need air.",
+      "translate": "Мне нужен воздух."
+    },
+    {
+      "origin": "Can you change the tire?",
+      "translate": "Ты можешь поменять колесо?"
+    },
+    {
+      "origin": "Check the wheel.",
+      "translate": "Проверь колесо."
+    },
+    {
+      "origin": "Keep the change.",
+      "translate": "Сдачи не надо."
+    },
+    {
+      "origin": "License",
+      "translate": "Права (водительские)"
+    },
+    {
+      "origin": "Insurance",
+      "translate": "Страховка"
+    },
+    {
+      "origin": "Paper",
+      "translate": "Бумага / Документ"
+    },
+    {
+      "origin": "Police",
+      "translate": "Полиция"
+    },
+    {
+      "origin": "Sign",
+      "translate": "Знак (дорожный) / Подписать"
+    },
+    {
+      "origin": "Show me your license.",
+      "translate": "Покажите ваши права."
+    },
+    {
+      "origin": "Where is the insurance?",
+      "translate": "Где страховка?"
+    },
+    {
+      "origin": "Look at the sign.",
+      "translate": "Посмотри на знак."
+    },
+    {
+      "origin": "Sign this paper.",
+      "translate": "Подпишите эту бумагу."
+    },
+    {
+      "origin": "Call the police.",
+      "translate": "Вызови полицию."
+    },
+    {
+      "origin": "Map",
+      "translate": "Карта"
+    },
+    {
+      "origin": "Lost",
+      "translate": "Потерялся"
+    },
+    {
+      "origin": "Find",
+      "translate": "Найти"
+    },
+    {
+      "origin": "Near",
+      "translate": "Рядом / Близко"
+    },
+    {
+      "origin": "Far",
+      "translate": "Далеко"
+    },
+    {
+      "origin": "I am lost.",
+      "translate": "Я потерялся."
+    },
+    {
+      "origin": "Is it far?",
+      "translate": "Это далеко?"
+    },
+    {
+      "origin": "No, it is near.",
+      "translate": "Нет, это рядом."
+    },
+    {
+      "origin": "Help me find this street.",
+      "translate": "Помоги мне найти эту улицу."
+    },
+    {
+      "origin": "Look at the map.",
+      "translate": "Посмотри на карту."
+    },
+    {
+      "origin": "Sound",
+      "translate": "Звук"
+    },
+    {
+      "origin": "Noise",
+      "translate": "Шум"
+    },
+    {
+      "origin": "Check",
+      "translate": "Проверить"
+    },
+    {
+      "origin": "Oil",
+      "translate": "Масло"
+    },
+    {
+      "origin": "Engine",
+      "translate": "Двигатель / Мотор"
+    },
+    {
+      "origin": "What is that noise?",
+      "translate": "Что это за шум?"
+    },
+    {
+      "origin": "Check the oil, please.",
+      "translate": "Проверь масло, пожалуйста."
+    },
+    {
+      "origin": "Funny sound.",
+      "translate": "Странный звук."
+    },
+    {
+      "origin": "The engine is hot.",
+      "translate": "Двигатель горячий."
+    },
+    {
+      "origin": "Can you check this?",
+      "translate": "Можешь проверить это?"
+    },
+    {
+      "origin": "Spot",
+      "translate": "Место (парковочное)"
+    },
+    {
+      "origin": "Lot",
+      "translate": "Площадка (Парковка)"
+    },
+    {
+      "origin": "Ticket",
+      "translate": "Штраф / Билет"
+    },
+    {
+      "origin": "Pay",
+      "translate": "Платить"
+    },
+    {
+      "origin": "Free",
+      "translate": "Бесплатно / Свободно"
+    },
+    {
+      "origin": "Is this spot free?",
+      "translate": "Это место свободно?"
+    },
+    {
+      "origin": "The lot is full.",
+      "translate": "Парковка полная."
+    },
+    {
+      "origin": "I got a ticket.",
+      "translate": "Я получил штраф."
+    },
+    {
+      "origin": "Pay here.",
+      "translate": "Плати здесь."
+    },
+    {
+      "origin": "Nice spot!",
+      "translate": "Хорошее местечко!"
+    },
+    {
+      "origin": "Door",
+      "translate": "Дверь"
+    },
+    {
+      "origin": "Seat",
+      "translate": "Сиденье"
+    },
+    {
+      "origin": "Belt",
+      "translate": "Ремень (безопасности)"
+    },
+    {
+      "origin": "Mirror",
+      "translate": "Зеркало"
+    },
+    {
+      "origin": "Trunk",
+      "translate": "Багажник"
+    },
+    {
+      "origin": "Open the trunk.",
+      "translate": "Открой багажник."
+    },
+    {
+      "origin": "Fix the mirror.",
+      "translate": "Поправь зеркало."
+    },
+    {
+      "origin": "Put on your belt.",
+      "translate": "Надень ремень."
+    },
+    {
+      "origin": "Close the door.",
+      "translate": "Закрой дверь."
+    },
+    {
+      "origin": "This seat is bad.",
+      "translate": "Это сиденье плохое."
+    },
+    {
+      "origin": "Accident",
+      "translate": "Авария"
+    },
+    {
+      "origin": "Hit",
+      "translate": "Ударить / Сбить"
+    },
+    {
+      "origin": "Speed",
+      "translate": "Скорость"
+    },
+    {
+      "origin": "Limit",
+      "translate": "Лимит / Ограничение"
+    },
+    {
+      "origin": "Fast",
+      "translate": "Быстро"
+    },
+    {
+      "origin": "I had an accident.",
+      "translate": "Я попал в аварию."
+    },
+    {
+      "origin": "Someone hit my car.",
+      "translate": "Кто-то ударил мою машину."
+    },
+    {
+      "origin": "Speed limit is 50.",
+      "translate": "Ограничение скорости — 50."
+    },
+    {
+      "origin": "Don't drive fast.",
+      "translate": "Не едь быстро."
+    },
+    {
+      "origin": "Sorry, my fault.",
+      "translate": "Извини, моя вина."
+    }
+  ],
+  "healthPharmacyWords": [
+    {
+      "origin": "Head",
+      "translate": "Голова"
+    },
+    {
+      "origin": "Back",
+      "translate": "Спина"
+    },
+    {
+      "origin": "Stomach",
+      "translate": "Живот / Желудок"
+    },
+    {
+      "origin": "Hand",
+      "translate": "Рука (кисть)"
+    },
+    {
+      "origin": "Leg",
+      "translate": "Нога"
+    },
+    {
+      "origin": "My head hurts.",
+      "translate": "У меня болит голова."
+    },
+    {
+      "origin": "Problem with my back.",
+      "translate": "Проблема со спиной."
+    },
+    {
+      "origin": "Show me your hand.",
+      "translate": "Покажи руку."
+    },
+    {
+      "origin": "My stomach is bad.",
+      "translate": "У меня плохо с животом."
+    },
+    {
+      "origin": "Can you move your leg?",
+      "translate": "Ты можешь пошевелить ногой?"
+    },
+    {
+      "origin": "Pain",
+      "translate": "Боль"
+    },
+    {
+      "origin": "Hurt",
+      "translate": "Болеть / Причинять боль"
+    },
+    {
+      "origin": "Fever",
+      "translate": "Жар / Температура"
+    },
+    {
+      "origin": "Cold",
+      "translate": "Простуда"
+    },
+    {
+      "origin": "Blood",
+      "translate": "Кровь"
+    },
+    {
+      "origin": "I have a fever.",
+      "translate": "У меня температура."
+    },
+    {
+      "origin": "Where is the pain?",
+      "translate": "Где болит?"
+    },
+    {
+      "origin": "It hurts here.",
+      "translate": "Болит здесь."
+    },
+    {
+      "origin": "I have a cold.",
+      "translate": "У меня простуда."
+    },
+    {
+      "origin": "Too much blood.",
+      "translate": "Слишком много крови."
+    },
+    {
+      "origin": "Doctor",
+      "translate": "Врач"
+    },
+    {
+      "origin": "Nurse",
+      "translate": "Медсестра / Медбрат"
+    },
+    {
+      "origin": "Hospital",
+      "translate": "Больница"
+    },
+    {
+      "origin": "Clinic",
+      "translate": "Клиника"
+    },
+    {
+      "origin": "Pharmacy",
+      "translate": "Аптека"
+    },
+    {
+      "origin": "I need a doctor.",
+      "translate": "Мне нужен врач."
+    },
+    {
+      "origin": "Go to the clinic.",
+      "translate": "Иди в клинику."
+    },
+    {
+      "origin": "Where is the pharmacy?",
+      "translate": "Где аптека?"
+    },
+    {
+      "origin": "Ask the nurse.",
+      "translate": "Спроси медсестру."
+    },
+    {
+      "origin": "Take him to the hospital.",
+      "translate": "Везите его в больницу."
+    },
+    {
+      "origin": "Medicine",
+      "translate": "Лекарство"
+    },
+    {
+      "origin": "Pill",
+      "translate": "Таблетка"
+    },
+    {
+      "origin": "Cream",
+      "translate": "Крем / Мазь"
+    },
+    {
+      "origin": "Help",
+      "translate": "Помогать"
+    },
+    {
+      "origin": "Take",
+      "translate": "Принимать (лекарство)"
+    },
+    {
+      "origin": "Take this pill.",
+      "translate": "Выпей эту таблетку."
+    },
+    {
+      "origin": "I need medicine for pain.",
+      "translate": "Мне нужно лекарство от боли."
+    },
+    {
+      "origin": "This cream is good.",
+      "translate": "Этот крем хороший."
+    },
+    {
+      "origin": "Does it help?",
+      "translate": "Это помогает?"
+    },
+    {
+      "origin": "Take two pills.",
+      "translate": "Прими две таблетки."
+    },
+    {
+      "origin": "Appointment",
+      "translate": "Прием / Запись"
+    },
+    {
+      "origin": "Card",
+      "translate": "Карта (Health Card)"
+    },
+    {
+      "origin": "ID",
+      "translate": "Удостоверение личности"
+    },
+    {
+      "origin": "Wait",
+      "translate": "Ждать"
+    },
+    {
+      "origin": "Insurance",
+      "translate": "Страховка"
+    },
+    {
+      "origin": "Do you have an appointment?",
+      "translate": "У вас назначено?"
+    },
+    {
+      "origin": "Show me your Health Card.",
+      "translate": "Покажите вашу карту здоровья."
+    },
+    {
+      "origin": "Wait here, please.",
+      "translate": "Ждите здесь, пожалуйста."
+    },
+    {
+      "origin": "No insurance, cash.",
+      "translate": "Нет страховки, наличными."
+    },
+    {
+      "origin": "I have my ID.",
+      "translate": "У меня есть ID."
+    },
+    {
+      "origin": "Emergency",
+      "translate": "Экстренный случай / Скорая"
+    },
+    {
+      "origin": "Serious",
+      "translate": "Серьезный"
+    },
+    {
+      "origin": "Better",
+      "translate": "Лучше"
+    },
+    {
+      "origin": "Worse",
+      "translate": "Хуже"
+    },
+    {
+      "origin": "Okay",
+      "translate": "В порядке"
+    },
+    {
+      "origin": "Is it an emergency?",
+      "translate": "Это срочно?"
+    },
+    {
+      "origin": "I feel better.",
+      "translate": "Мне лучше."
+    },
+    {
+      "origin": "It is getting worse.",
+      "translate": "Становится хуже."
+    },
+    {
+      "origin": "Are you okay?",
+      "translate": "Ты в порядке?"
+    },
+    {
+      "origin": "Nothing serious.",
+      "translate": "Ничего серьезного."
+    },
+    {
+      "origin": "Cut",
+      "translate": "Порез / Порезаться"
+    },
+    {
+      "origin": "Burn",
+      "translate": "Ожог / Обжечься"
+    },
+    {
+      "origin": "Break",
+      "translate": "Сломать"
+    },
+    {
+      "origin": "Fall",
+      "translate": "Упасть"
+    },
+    {
+      "origin": "Hit",
+      "translate": "Ударить(ся)"
+    },
+    {
+      "origin": "I cut my finger.",
+      "translate": "Я порезал палец."
+    },
+    {
+      "origin": "It is broken.",
+      "translate": "Оно сломано."
+    },
+    {
+      "origin": "Did you fall?",
+      "translate": "Ты упал?"
+    },
+    {
+      "origin": "I hit my head.",
+      "translate": "Я ударился головой."
+    },
+    {
+      "origin": "Bad burn.",
+      "translate": "Сильный ожог."
+    },
+    {
+      "origin": "Tooth",
+      "translate": "Зуб"
+    },
+    {
+      "origin": "Mouth",
+      "translate": "Рот"
+    },
+    {
+      "origin": "Eye",
+      "translate": "Глаз"
+    },
+    {
+      "origin": "Open",
+      "translate": "Открыть"
+    },
+    {
+      "origin": "Close",
+      "translate": "Закрыть"
+    },
+    {
+      "origin": "Open your mouth.",
+      "translate": "Открой рот."
+    },
+    {
+      "origin": "My tooth hurts.",
+      "translate": "У меня болит зуб."
+    },
+    {
+      "origin": "Close your eyes.",
+      "translate": "Закрой глаза."
+    },
+    {
+      "origin": "Show me your teeth.",
+      "translate": "Покажи зубы."
+    },
+    {
+      "origin": "Something in my eye.",
+      "translate": "Что-то попало в глаз."
+    },
+    {
+      "origin": "Day",
+      "translate": "День"
+    },
+    {
+      "origin": "Night",
+      "translate": "Ночь"
+    },
+    {
+      "origin": "Once",
+      "translate": "Один раз"
+    },
+    {
+      "origin": "Twice",
+      "translate": "Дважды"
+    },
+    {
+      "origin": "Before",
+      "translate": "До / Перед (едой)"
+    },
+    {
+      "origin": "Take twice a day.",
+      "translate": "Принимать дважды в день."
+    },
+    {
+      "origin": "Once in the morning.",
+      "translate": "Один раз утром."
+    },
+    {
+      "origin": "Before sleep.",
+      "translate": "Перед сном."
+    },
+    {
+      "origin": "Before food.",
+      "translate": "Перед едой."
+    },
+    {
+      "origin": "Every day.",
+      "translate": "Каждый день."
+    },
+    {
+      "origin": "Well",
+      "translate": "Хорошо"
+    },
+    {
+      "origin": "Sick",
+      "translate": "Больной"
+    },
+    {
+      "origin": "Sleep",
+      "translate": "Спать"
+    },
+    {
+      "origin": "Drink",
+      "translate": "Питить"
+    },
+    {
+      "origin": "Rest",
+      "translate": "Отдыхать"
+    },
+    {
+      "origin": "I don't feel well.",
+      "translate": "Я нехорошо себя чувствую."
+    },
+    {
+      "origin": "You need rest.",
+      "translate": "Тебе нужен отдых."
+    },
+    {
+      "origin": "Drink more water.",
+      "translate": "Пей больше воды."
+    },
+    {
+      "origin": "I want to sleep.",
+      "translate": "Я хочу спать."
+    },
+    {
+      "origin": "If you are sick, stay home.",
+      "translate": "Если болеешь, сиди дома."
+    }
+  ],
+  "housingBillsWords": [
+    {
+      "origin": "Rent",
+      "translate": "Аренда / Снимать (жилье)"
+    },
+    {
+      "origin": "Deposit",
+      "translate": "Депозит / Залог"
+    },
+    {
+      "origin": "Landlord",
+      "translate": "Хозяин квартиры (Лендлорд)"
+    },
+    {
+      "origin": "Lease",
+      "translate": "Договор аренды"
+    },
+    {
+      "origin": "Include",
+      "translate": "Включать (в цену)"
+    },
+    {
+      "origin": "How much is the rent?",
+      "translate": "Сколько стоит аренда?"
+    },
+    {
+      "origin": "Is heat included?",
+      "translate": "Отопление включено [в цену]?"
+    },
+    {
+      "origin": "I need to pay the deposit.",
+      "translate": "Мне нужно внести депозит."
+    },
+    {
+      "origin": "Sign the lease, please.",
+      "translate": "Подпишите договор, пожалуйста."
+    },
+    {
+      "origin": "Call the landlord.",
+      "translate": "Позвони хозяину."
+    },
+    {
+      "origin": "Apartment",
+      "translate": "Квартира (в здании)"
+    },
+    {
+      "origin": "Basement",
+      "translate": "Цокольный этаж (бейсмент)"
+    },
+    {
+      "origin": "Suite",
+      "translate": "Апартаменты / Номер (отдельное жилье)"
+    },
+    {
+      "origin": "Building",
+      "translate": "Здание"
+    },
+    {
+      "origin": "Elevator",
+      "translate": "Лифт"
+    },
+    {
+      "origin": "I live in the basement.",
+      "translate": "Я живу в бейсменте / цоколе."
+    },
+    {
+      "origin": "Nice apartment!",
+      "translate": "Хорошая квартира!"
+    },
+    {
+      "origin": "Where is the elevator?",
+      "translate": "Где лифт?"
+    },
+    {
+      "origin": "This building is old.",
+      "translate": "Это здание старое."
+    },
+    {
+      "origin": "Is it a separate suite?",
+      "translate": "Это отдельное жилье/номер?"
+    },
+    {
+      "origin": "Bill",
+      "translate": "Счет (к оплате)"
+    },
+    {
+      "origin": "Power",
+      "translate": "Электричество"
+    },
+    {
+      "origin": "Heat",
+      "translate": "Отопление / Тепло"
+    },
+    {
+      "origin": "Water",
+      "translate": "Вода"
+    },
+    {
+      "origin": "Internet",
+      "translate": "Интернет"
+    },
+    {
+      "origin": "Did you pay the bill?",
+      "translate": "Ты оплатил счет?"
+    },
+    {
+      "origin": "The power is off.",
+      "translate": "Света нет / Электричество отключили."
+    },
+    {
+      "origin": "I need internet.",
+      "translate": "Мне нужен интернет."
+    },
+    {
+      "origin": "No heat, very cold!",
+      "translate": "Нет отопления, очень холодно!"
+    },
+    {
+      "origin": "Water is included.",
+      "translate": "Вода включена в цену."
+    },
+    {
+      "origin": "Fridge",
+      "translate": "Холодильник"
+    },
+    {
+      "origin": "Stove",
+      "translate": "Плита (кухонная)"
+    },
+    {
+      "origin": "Oven",
+      "translate": "Духовка"
+    },
+    {
+      "origin": "Washer",
+      "translate": "Стиральная машина"
+    },
+    {
+      "origin": "Dryer",
+      "translate": "Сушильная машина"
+    },
+    {
+      "origin": "The fridge is broken.",
+      "translate": "Холодильник сломан."
+    },
+    {
+      "origin": "Turn off the stove.",
+      "translate": "Выключи плиту."
+    },
+    {
+      "origin": "Where is the washer?",
+      "translate": "Где стиралка?"
+    },
+    {
+      "origin": "Put clothes in the dryer.",
+      "translate": "Положи одежду в сушилку."
+    },
+    {
+      "origin": "Clean the oven.",
+      "translate": "Почисти духовку."
+    },
+    {
+      "origin": "Bedroom",
+      "translate": "Спальня"
+    },
+    {
+      "origin": "Living room",
+      "translate": "Гостиная (Зал)"
+    },
+    {
+      "origin": "Bathroom",
+      "translate": "Ванная комната"
+    },
+    {
+      "origin": "Balcony",
+      "translate": "Балкон"
+    },
+    {
+      "origin": "Yard",
+      "translate": "Двор (свой участок)"
+    },
+    {
+      "origin": "This is my bedroom.",
+      "translate": "Это моя спальня."
+    },
+    {
+      "origin": "Go to the living room.",
+      "translate": "Иди в гостиную."
+    },
+    {
+      "origin": "Smoking on the balcony.",
+      "translate": "Курение на балконе."
+    },
+    {
+      "origin": "Big yard for kids.",
+      "translate": "Большой двор для детей."
+    },
+    {
+      "origin": "One bathroom is not enough.",
+      "translate": "Одной ванной мало."
+    },
+    {
+      "origin": "Bed",
+      "translate": "Кровать"
+    },
+    {
+      "origin": "Sofa / Couch",
+      "translate": "Диван"
+    },
+    {
+      "origin": "Table",
+      "translate": "Стол"
+    },
+    {
+      "origin": "Chair",
+      "translate": "Стул"
+    },
+    {
+      "origin": "Lamp",
+      "translate": "Лампа"
+    },
+    {
+      "origin": "I need a new bed.",
+      "translate": "Мне нужна новая кровать."
+    },
+    {
+      "origin": "Sit on the couch.",
+      "translate": "Садись на диван."
+    },
+    {
+      "origin": "Put it on the table.",
+      "translate": "Положи это на стол."
+    },
+    {
+      "origin": "This chair is free.",
+      "translate": "Этот стул свободен."
+    },
+    {
+      "origin": "Turn on the lamp.",
+      "translate": "Включи лампу."
+    },
+    {
+      "origin": "Leak",
+      "translate": "Протечка / Течь (вода капает)"
+    },
+    {
+      "origin": "Mold",
+      "translate": "Плесень (опасно!)"
+    },
+    {
+      "origin": "Dirt",
+      "translate": "Грязь"
+    },
+    {
+      "origin": "Smell",
+      "translate": "Запах / Пахнуть"
+    },
+    {
+      "origin": "Noise",
+      "translate": "Шум"
+    },
+    {
+      "origin": "We have a leak.",
+      "translate": "У нас течет вода."
+    },
+    {
+      "origin": "Bad smell here.",
+      "translate": "Здесь плохой запах."
+    },
+    {
+      "origin": "Is that mold?",
+      "translate": "Это плесень?"
+    },
+    {
+      "origin": "Too much noise.",
+      "translate": "Слишком много шума."
+    },
+    {
+      "origin": "Check for dirt.",
+      "translate": "Проверь, нет ли грязи."
+    },
+    {
+      "origin": "Garbage",
+      "translate": "Мусор"
+    },
+    {
+      "origin": "Bin",
+      "translate": "Ведро / Контейнер (мусорный)"
+    },
+    {
+      "origin": "Neighbor",
+      "translate": "Сосед"
+    },
+    {
+      "origin": "Throw",
+      "translate": "Бросать / Выкидывать"
+    },
+    {
+      "origin": "Bag",
+      "translate": "Пакет / Мешок"
+    },
+    {
+      "origin": "Take out the garbage.",
+      "translate": "Вынесли мусор."
+    },
+    {
+      "origin": "Where is the bin?",
+      "translate": "Где мусорный бак?"
+    },
+    {
+      "origin": "Throw it away.",
+      "translate": "Выбрось это."
+    },
+    {
+      "origin": "Nice neighbors.",
+      "translate": "Хорошие соседи."
+    },
+    {
+      "origin": "Black garbage bag.",
+      "translate": "Черный мешок для мусора."
+    },
+    {
+      "origin": "Address",
+      "translate": "Адрес"
+    },
+    {
+      "origin": "Code",
+      "translate": "Код (E.g. Postal code)"
+    },
+    {
+      "origin": "Mail",
+      "translate": "Почта (письма)"
+    },
+    {
+      "origin": "Buzz",
+      "translate": "Звонить в домофон"
+    },
+    {
+      "origin": "Unit",
+      "translate": "Номер квартиры (Unit)"
+    },
+    {
+      "origin": "What is your address?",
+      "translate": "Какой у тебя адрес?"
+    },
+    {
+      "origin": "Buzz code is 123.",
+      "translate": "Код домофона 123."
+    },
+    {
+      "origin": "Check the mail.",
+      "translate": "Проверь почту."
+    },
+    {
+      "origin": "Write your postal code.",
+      "translate": "Напиши свой индекс."
+    },
+    {
+      "origin": "I live in unit 5.",
+      "translate": "Я живу в 5-й квартире."
+    },
+    {
+      "origin": "Move",
+      "translate": "Переезжать / Двигаться"
+    },
+    {
+      "origin": "Pack",
+      "translate": "Упаковывать (вещи)"
+    },
+    {
+      "origin": "Pets",
+      "translate": "Домашние животные"
+    },
+    {
+      "origin": "Smoke",
+      "translate": "Курить"
+    },
+    {
+      "origin": "Rules",
+      "translate": "Правила"
+    },
+    {
+      "origin": "When do you move?",
+      "translate": "Когда вы переезжаете?"
+    },
+    {
+      "origin": "No pets allowed.",
+      "translate": "Животные запрещены."
+    },
+    {
+      "origin": "Do not smoke here.",
+      "translate": "Не курите здесь."
+    },
+    {
+      "origin": "Read the rules.",
+      "translate": "Читай правила."
+    },
+    {
+      "origin": "Time to pack.",
+      "translate": "Пора паковать вещи."
+    }
+  ],
+  "bankDocsWords": [
+    {
+      "origin": "Account",
+      "translate": "Счет (банковский)"
+    },
+    {
+      "origin": "Chequing",
+      "translate": "Чековый счет (текущий)"
+    },
+    {
+      "origin": "Savings",
+      "translate": "Сберегательный счет"
+    },
+    {
+      "origin": "Credit",
+      "translate": "Кредитный (карта/история)"
+    },
+    {
+      "origin": "Debit",
+      "translate": "Дебетовый (свои деньги)"
+    },
+    {
+      "origin": "I want to open an account.",
+      "translate": "Я хочу открыть счет."
+    },
+    {
+      "origin": "Chequing or savings?",
+      "translate": "Чековый или сберегательный?"
+    },
+    {
+      "origin": "Debit is okay.",
+      "translate": "Дебетовая карта подойдет."
+    },
+    {
+      "origin": "Check my credit.",
+      "translate": "Проверь мою кредитную историю."
+    },
+    {
+      "origin": "Transfer to savings.",
+      "translate": "Переведи на сберегательный."
+    },
+    {
+      "origin": "Transfer",
+      "translate": "Перевод / Переводить"
+    },
+    {
+      "origin": "Deposit",
+      "translate": "Внести деньги (на счет)"
+    },
+    {
+      "origin": "Withdraw",
+      "translate": "Снять деньги"
+    },
+    {
+      "origin": "Fee",
+      "translate": "Комиссия"
+    },
+    {
+      "origin": "Balance",
+      "translate": "Баланс (остаток)"
+    },
+    {
+      "origin": "What is the fee?",
+      "translate": "Какая комиссия?"
+    },
+    {
+      "origin": "I need to withdraw cash.",
+      "translate": "Мне нужно снять наличные."
+    },
+    {
+      "origin": "Check my balance.",
+      "translate": "Проверь мой баланс."
+    },
+    {
+      "origin": "Make a deposit.",
+      "translate": "Сделать вклад / Положить деньги."
+    },
+    {
+      "origin": "Transfer money to him.",
+      "translate": "Переведи деньги ему."
+    },
+    {
+      "origin": "Name",
+      "translate": "Имя (First name / Last name)"
+    },
+    {
+      "origin": "Date",
+      "translate": "Дата"
+    },
+    {
+      "origin": "Birth",
+      "translate": "Рождение"
+    },
+    {
+      "origin": "Signature",
+      "translate": "Подпись"
+    },
+    {
+      "origin": "Male / Female",
+      "translate": "Мужской / Женский"
+    },
+    {
+      "origin": "Write your name here.",
+      "translate": "Напишите ваше имя здесь."
+    },
+    {
+      "origin": "Date of birth?",
+      "translate": "Дата рождения?"
+    },
+    {
+      "origin": "I need your signature.",
+      "translate": "Мне нужна ваша подпись."
+    },
+    {
+      "origin": "Check Male or Female.",
+      "translate": "Отметьте 'Мужской' или 'Женский'."
+    },
+    {
+      "origin": "Last name, please.",
+      "translate": "Фамилию, пожалуйста."
+    },
+    {
+      "origin": "Form",
+      "translate": "Форма / Бланк / Анкета"
+    },
+    {
+      "origin": "Fill out",
+      "translate": "Заполнять (анкету)"
+    },
+    {
+      "origin": "Print",
+      "translate": "Печатать / Печатными буквами"
+    },
+    {
+      "origin": "Copy",
+      "translate": "Копия"
+    },
+    {
+      "origin": "Document",
+      "translate": "Документ"
+    },
+    {
+      "origin": "Fill out this form.",
+      "translate": "Заполните эту форму."
+    },
+    {
+      "origin": "Can you print this?",
+      "translate": "Можете распечатать это?"
+    },
+    {
+      "origin": "I need a copy.",
+      "translate": "Мне нужна копия."
+    },
+    {
+      "origin": "Bring your documents.",
+      "translate": "Принесите ваши документы."
+    },
+    {
+      "origin": "Print your name.",
+      "translate": "Напишите имя печатными буквами."
+    },
+    {
+      "origin": "SIN",
+      "translate": "SIN-номер (Social Insurance Number)"
+    },
+    {
+      "origin": "Permit",
+      "translate": "Разрешение (Work permit)"
+    },
+    {
+      "origin": "Citizen",
+      "translate": "Гражданин"
+    },
+    {
+      "origin": "Visa",
+      "translate": "Виза"
+    },
+    {
+      "origin": "Expire",
+      "translate": "Истекать (о сроке)"
+    },
+    {
+      "origin": "What is your SIN?",
+      "translate": "Какой у вас SIN?"
+    },
+    {
+      "origin": "I have a work permit.",
+      "translate": "У меня есть разрешение на работу."
+    },
+    {
+      "origin": "My visa expires soon.",
+      "translate": "Моя виза скоро истекает."
+    },
+    {
+      "origin": "Are you a citizen?",
+      "translate": "Вы гражданин?"
+    },
+    {
+      "origin": "Renew the permit.",
+      "translate": "Обновить / Продлить разрешение."
+    },
+    {
+      "origin": "Service",
+      "translate": "Услуга / Обслуживание"
+    },
+    {
+      "origin": "Line",
+      "translate": "Очередь"
+    },
+    {
+      "origin": "Next",
+      "translate": "Следующий"
+    },
+    {
+      "origin": "Officer",
+      "translate": "Сотрудник (офицер)"
+    },
+    {
+      "origin": "Desk",
+      "translate": "Стол / Стойка регистрации"
+    },
+    {
+      "origin": "The line is too long.",
+      "translate": "Очередь слишком длинная."
+    },
+    {
+      "origin": "Who is next?",
+      "translate": "Кто следующий?"
+    },
+    {
+      "origin": "Go to the front desk.",
+      "translate": "Идите на стойку регистрации."
+    },
+    {
+      "origin": "Good service.",
+      "translate": "Хорошее обслуживание."
+    },
+    {
+      "origin": "Ask the officer.",
+      "translate": "Спросите сотрудника."
+    },
+    {
+      "origin": "Letter",
+      "translate": "Письмо (бумажное)"
+    },
+    {
+      "origin": "Email",
+      "translate": "Электронная почта"
+    },
+    {
+      "origin": "Sent",
+      "translate": "Отправил"
+    },
+    {
+      "origin": "Get",
+      "translate": "Получить"
+    },
+    {
+      "origin": "Cheque",
+      "translate": "Чек (банковский)"
+    },
+    {
+      "origin": "Did you get my email?",
+      "translate": "Ты получил мой имейл?"
+    },
+    {
+      "origin": "I sent a letter.",
+      "translate": "Я отправил письмо."
+    },
+    {
+      "origin": "Here is your cheque.",
+      "translate": "Вот ваш чек."
+    },
+    {
+      "origin": "Check the mail.",
+      "translate": "Проверь почту."
+    },
+    {
+      "origin": "I didn't get it.",
+      "translate": "Я это не получил."
+    },
+    {
+      "origin": "Tax",
+      "translate": "Налог"
+    },
+    {
+      "origin": "Return",
+      "translate": "Возврат (Tax return)"
+    },
+    {
+      "origin": "Loan",
+      "translate": "Займ / Кредит"
+    },
+    {
+      "origin": "Apply",
+      "translate": "Подавать заявление"
+    },
+    {
+      "origin": "Approve",
+      "translate": "Одобрить"
+    },
+    {
+      "origin": "Pay your taxes.",
+      "translate": "Плати налоги."
+    },
+    {
+      "origin": "I want to apply.",
+      "translate": "Я хочу подать заявление."
+    },
+    {
+      "origin": "Is it approved?",
+      "translate": "Это одобрено?"
+    },
+    {
+      "origin": "I have a big loan.",
+      "translate": "У меня большой кредит."
+    },
+    {
+      "origin": "Do your tax return.",
+      "translate": "Сделай налоговую декларацию."
+    },
+    {
+      "origin": "Correct",
+      "translate": "Правильно / Исправить"
+    },
+    {
+      "origin": "Wrong",
+      "translate": "Неправильно / Ошибка"
+    },
+    {
+      "origin": "True",
+      "translate": "Правда"
+    },
+    {
+      "origin": "False",
+      "translate": "Ложь / Неверно"
+    },
+    {
+      "origin": "Spell",
+      "translate": "Диктовать по буквам"
+    },
+    {
+      "origin": "Is this correct?",
+      "translate": "Это правильно?"
+    },
+    {
+      "origin": "Something is wrong.",
+      "translate": "Что-то не так."
+    },
+    {
+      "origin": "True or false?",
+      "translate": "Правда или ложь?"
+    },
+    {
+      "origin": "Spell your name.",
+      "translate": "Продиктуйте имя по буквам."
+    },
+    {
+      "origin": "Correct the mistake.",
+      "translate": "Исправь ошибку."
+    },
+    {
+      "origin": "Cancel",
+      "translate": "Отменить"
+    },
+    {
+      "origin": "Change",
+      "translate": "Изменить"
+    },
+    {
+      "origin": "Keep",
+      "translate": "Хранить / Оставить себе"
+    },
+    {
+      "origin": "Lost",
+      "translate": "Потерял"
+    },
+    {
+      "origin": "Need",
+      "translate": "Нужно (must need)"
+    },
+    {
+      "origin": "Cancel my appointment.",
+      "translate": "Отмените мою запись."
+    },
+    {
+      "origin": "I lost my ID.",
+      "translate": "Я потерял удостоверение."
+    },
+    {
+      "origin": "Keep this paper.",
+      "translate": "Сохрани эту бумагу."
+    },
+    {
+      "origin": "Change the date.",
+      "translate": "Поменяй дату."
+    },
+    {
+      "origin": "I need to change address.",
+      "translate": "Мне нужно сменить адрес."
+    }
+  ],
+  "toolsSiteWords": [
+    {
+      "origin": "Tool",
+      "translate": "Инструмент"
+    },
+    {
+      "origin": "Drill",
+      "translate": "Дрель / Шуруповерт"
+    },
+    {
+      "origin": "Ladder",
+      "translate": "Лестница / Стремянка"
+    },
+    {
+      "origin": "Hammer",
+      "translate": "Молоток"
+    },
+    {
+      "origin": "Bit",
+      "translate": "Бита / Сверло"
+    },
+    {
+      "origin": "Pass me the drill.",
+      "translate": "Передай мне шуруповерт."
+    },
+    {
+      "origin": "Hold the ladder, please.",
+      "translate": "Подержи лестницу, пожалуйста."
+    },
+    {
+      "origin": "I need a new bit.",
+      "translate": "Мне нужна новая бита."
+    },
+    {
+      "origin": "Where are my tools?",
+      "translate": "Где мои инструменты?"
+    },
+    {
+      "origin": "Hammer time.",
+      "translate": "Время работать молотком."
+    },
+    {
+      "origin": "Wire",
+      "translate": "Провод (жила)"
+    },
+    {
+      "origin": "Cable",
+      "translate": "Кабель (общий)"
+    },
+    {
+      "origin": "Tape",
+      "translate": "Изолента / Скотч"
+    },
+    {
+      "origin": "Tie",
+      "translate": "Стяжка (Zip tie)"
+    },
+    {
+      "origin": "Box",
+      "translate": "Коробка (подрозетник)"
+    },
+    {
+      "origin": "Pull the wire.",
+      "translate": "Тяни провод."
+    },
+    {
+      "origin": "I need black tape.",
+      "translate": "Мне нужна черная изолента."
+    },
+    {
+      "origin": "Do you have zip ties? (Пластиковые стяжки)",
+      "translate": "У тебя есть стяжки?"
+    },
+    {
+      "origin": "Cut the cable.",
+      "translate": "Обрежь кабель."
+    },
+    {
+      "origin": "Mount the box here.",
+      "translate": "Установи коробку/подрозетник здесь."
+    },
+    {
+      "origin": "Cut",
+      "translate": "Резать / Отрезать"
+    },
+    {
+      "origin": "Pull",
+      "translate": "Тянуть"
+    },
+    {
+      "origin": "Push",
+      "translate": "Толкать"
+    },
+    {
+      "origin": "Measure",
+      "translate": "Измерять"
+    },
+    {
+      "origin": "Mark",
+      "translate": "Отметить (маркером)"
+    },
+    {
+      "origin": "Measure twice, cut once.",
+      "translate": "Семь раз отмерь, один отрежь."
+    },
+    {
+      "origin": "Mark the wall.",
+      "translate": "Сделай отметку на стене."
+    },
+    {
+      "origin": "Pull hard!",
+      "translate": "Тяни сильно!"
+    },
+    {
+      "origin": "Don't push it.",
+      "translate": "Не толкай / Не дави."
+    },
+    {
+      "origin": "Cut it here.",
+      "translate": "Отрежь здесь."
+    },
+    {
+      "origin": "Safety",
+      "translate": "Безопасность"
+    },
+    {
+      "origin": "Hat",
+      "translate": "Каска (Hard hat)"
+    },
+    {
+      "origin": "Boots",
+      "translate": "Ботинки (Steel toe)"
+    },
+    {
+      "origin": "Vest",
+      "translate": "Жилет (High-vis)"
+    },
+    {
+      "origin": "Glasses",
+      "translate": "Очки (защитные)"
+    },
+    {
+      "origin": "Where is your hard hat?",
+      "translate": "Где твоя каска?"
+    },
+    {
+      "origin": "Safety first.",
+      "translate": "Безопасность превыше всего."
+    },
+    {
+      "origin": "Put on your glasses.",
+      "translate": "Надень очки."
+    },
+    {
+      "origin": "Steel toe boots are required.",
+      "translate": "Требуются ботинки с железным носком."
+    },
+    {
+      "origin": "Wear your vest.",
+      "translate": "Носи жилет."
+    },
+    {
+      "origin": "Ceiling",
+      "translate": "Потолок"
+    },
+    {
+      "origin": "Wall",
+      "translate": "Стена"
+    },
+    {
+      "origin": "Floor",
+      "translate": "Пол / Этаж"
+    },
+    {
+      "origin": "High",
+      "translate": "Высоко"
+    },
+    {
+      "origin": "Low",
+      "translate": "Низко"
+    },
+    {
+      "origin": "Up in the ceiling.",
+      "translate": "Наверху, в потолке."
+    },
+    {
+      "origin": "It is too high.",
+      "translate": "Это слишком высоко."
+    },
+    {
+      "origin": "On the second floor.",
+      "translate": "На втором этаже."
+    },
+    {
+      "origin": "Mount it on the wall.",
+      "translate": "Закрепи это на стене."
+    },
+    {
+      "origin": "Keep it low.",
+      "translate": "Держи ниже."
+    },
+    {
+      "origin": "Short",
+      "translate": "Короткий"
+    },
+    {
+      "origin": "Long",
+      "translate": "Длинный"
+    },
+    {
+      "origin": "Tight",
+      "translate": "Тугой / Плотно"
+    },
+    {
+      "origin": "Loose",
+      "translate": "Слабый / Болтается"
+    },
+    {
+      "origin": "Stuck",
+      "translate": "Застрял"
+    },
+    {
+      "origin": "The cable is too short.",
+      "translate": "Кабель слишком короткий."
+    },
+    {
+      "origin": "Make it tight.",
+      "translate": "Затяни потуже."
+    },
+    {
+      "origin": "The screw is loose.",
+      "translate": "Винт болтается."
+    },
+    {
+      "origin": "I am stuck.",
+      "translate": "Я застрял."
+    },
+    {
+      "origin": "Is it long enough?",
+      "translate": "Этого достаточно [длины]?"
+    },
+    {
+      "origin": "Power",
+      "translate": "Питание / Электричество"
+    },
+    {
+      "origin": "Switch",
+      "translate": "Выключатель"
+    },
+    {
+      "origin": "Breaker",
+      "translate": "Автомат (в щитке)"
+    },
+    {
+      "origin": "On",
+      "translate": "Включено"
+    },
+    {
+      "origin": "Off",
+      "translate": "Выключено"
+    },
+    {
+      "origin": "Turn the power off!",
+      "translate": "Выключи электричество!"
+    },
+    {
+      "origin": "Is the breaker off?",
+      "translate": "Автомат выключен?"
+    },
+    {
+      "origin": "Where is the switch?",
+      "translate": "Где выключатель?"
+    },
+    {
+      "origin": "Power is on.",
+      "translate": "Питание есть / Включено."
+    },
+    {
+      "origin": "Turn it on.",
+      "translate": "Включи это."
+    },
+    {
+      "origin": "Inch",
+      "translate": "Дюйм (2.54 см)"
+    },
+    {
+      "origin": "Foot / Feet",
+      "translate": "Фут / Футы (30 см)"
+    },
+    {
+      "origin": "Level",
+      "translate": "Уровень / Ровно"
+    },
+    {
+      "origin": "Line",
+      "translate": "Линия / Провод"
+    },
+    {
+      "origin": "Center",
+      "translate": "Центр"
+    },
+    {
+      "origin": "Six feet high.",
+      "translate": "Шесть футов высотой."
+    },
+    {
+      "origin": "Two inches left.",
+      "translate": "Два дюйма влево."
+    },
+    {
+      "origin": "Is it level?",
+      "translate": "Это ровно [по уровню]?"
+    },
+    {
+      "origin": "Mark the center.",
+      "translate": "Отметь центр."
+    },
+    {
+      "origin": "Hold the line.",
+      "translate": "Держи линию."
+    },
+    {
+      "origin": "Boss",
+      "translate": "Начальник"
+    },
+    {
+      "origin": "Foreman",
+      "translate": "Прораб / Бригадир"
+    },
+    {
+      "origin": "Break",
+      "translate": "Перерыв"
+    },
+    {
+      "origin": "Watch",
+      "translate": "Смотреть / Осторожно!"
+    },
+    {
+      "origin": "Hold",
+      "translate": "Держать"
+    },
+    {
+      "origin": "Ask the foreman.",
+      "translate": "Спроси прораба."
+    },
+    {
+      "origin": "Time for a break.",
+      "translate": "Время перерыва."
+    },
+    {
+      "origin": "Watch your head!",
+      "translate": "Осторожно головой!"
+    },
+    {
+      "origin": "Hold this for a second.",
+      "translate": "Подержи это секунду."
+    },
+    {
+      "origin": "Boss is coming.",
+      "translate": "Босс идет."
+    },
+    {
+      "origin": "Clean",
+      "translate": "Убирать / Чистый"
+    },
+    {
+      "origin": "Trash",
+      "translate": "Мусор"
+    },
+    {
+      "origin": "Pack",
+      "translate": "Собирать (вещи)"
+    },
+    {
+      "origin": "Ready",
+      "translate": "Готов"
+    },
+    {
+      "origin": "Done",
+      "translate": "Сделано / Закончили"
+    },
+    {
+      "origin": "Job is done.",
+      "translate": "Работа сделана."
+    },
+    {
+      "origin": "Clean up the site.",
+      "translate": "Приберитесь на площадке."
+    },
+    {
+      "origin": "Throw it in the trash.",
+      "translate": "Выкинь это в мусор."
+    },
+    {
+      "origin": "Pack your tools.",
+      "translate": "Собирай инструменты."
+    },
+    {
+      "origin": "Are you ready to go?",
+      "translate": "Готов ехать?"
+    }
+  ],
+  "smallTalkWords": [
+    {
+      "origin": "Meet",
+      "translate": "Встречать / Знакомиться"
+    },
+    {
+      "origin": "Name",
+      "translate": "Имя"
+    },
+    {
+      "origin": "From",
+      "translate": "Из (откуда)"
+    },
+    {
+      "origin": "Nice",
+      "translate": "Милый / Приятный"
+    },
+    {
+      "origin": "Know",
+      "translate": "Знать"
+    },
+    {
+      "origin": "Nice to meet you.",
+      "translate": "Приятно познакомиться."
+    },
+    {
+      "origin": "What is your name?",
+      "translate": "Как тебя зовут?"
+    },
+    {
+      "origin": "Where are you from?",
+      "translate": "Откуда ты?"
+    },
+    {
+      "origin": "I am from Canada.",
+      "translate": "Я из Канады."
+    },
+    {
+      "origin": "Do I know you?",
+      "translate": "Я тебя знаю?"
+    },
+    {
+      "origin": "How",
+      "translate": "Как"
+    },
+    {
+      "origin": "Fine",
+      "translate": "Хорошо / Нормально"
+    },
+    {
+      "origin": "Doing",
+      "translate": "Делать (прямо сейчас)"
+    },
+    {
+      "origin": "Everything",
+      "translate": "Всё"
+    },
+    {
+      "origin": "Great",
+      "translate": "Отлично / Великолепно"
+    },
+    {
+      "origin": "How are you doing?",
+      "translate": "Как твои дела?"
+    },
+    {
+      "origin": "I am fine, thanks.",
+      "translate": "Я в порядке, спасибо."
+    },
+    {
+      "origin": "Everything is good.",
+      "translate": "Всё хорошо."
+    },
+    {
+      "origin": "How is work?",
+      "translate": "Как работа?"
+    },
+    {
+      "origin": "Great, thanks!",
+      "translate": "Отлично, спасибо!"
+    },
+    {
+      "origin": "Weather",
+      "translate": "Погода"
+    },
+    {
+      "origin": "Rain",
+      "translate": "Дождь"
+    },
+    {
+      "origin": "Sun",
+      "translate": "Солнце"
+    },
+    {
+      "origin": "Outside",
+      "translate": "Снаружи / На улице"
+    },
+    {
+      "origin": "Beautiful",
+      "translate": "Красивый / Прекрасный"
+    },
+    {
+      "origin": "Nice weather today.",
+      "translate": "Хорошая погода сегодня."
+    },
+    {
+      "origin": "Is it raining?",
+      "translate": "Идет дождь?"
+    },
+    {
+      "origin": "It is hot outside.",
+      "translate": "На улице жарко."
+    },
+    {
+      "origin": "Beautiful day!",
+      "translate": "Прекрасный день!"
+    },
+    {
+      "origin": "I love the sun.",
+      "translate": "Я люблю солнце."
+    },
+    {
+      "origin": "Look",
+      "translate": "Выглядеть (или смотреть)"
+    },
+    {
+      "origin": "Cool",
+      "translate": "Круто / Прохладно"
+    },
+    {
+      "origin": "Like",
+      "translate": "Нравится"
+    },
+    {
+      "origin": "Style",
+      "translate": "Стиль"
+    },
+    {
+      "origin": "Welcome",
+      "translate": "Добро пожаловать / Пожалуйста (на спасибо)"
+    },
+    {
+      "origin": "You look great!",
+      "translate": "Ты отлично выглядишь!"
+    },
+    {
+      "origin": "Cool shoes!",
+      "translate": "Крутые ботинки!"
+    },
+    {
+      "origin": "I like your car.",
+      "translate": "Мне нравится твоя машина."
+    },
+    {
+      "origin": "You are welcome.",
+      "translate": "Пожалуйста (ответ на спасибо)."
+    },
+    {
+      "origin": "Welcome to Canada.",
+      "translate": "Добро пожаловать в Канаду."
+    },
+    {
+      "origin": "See",
+      "translate": "Видеть"
+    },
+    {
+      "origin": "Soon",
+      "translate": "Скоро"
+    },
+    {
+      "origin": "Care",
+      "translate": "Заботиться / Осторожность"
+    },
+    {
+      "origin": "Talk",
+      "translate": "Разговаривать"
+    },
+    {
+      "origin": "Bye",
+      "translate": "Пока"
+    },
+    {
+      "origin": "See you soon.",
+      "translate": "Скоро увидимся."
+    },
+    {
+      "origin": "Take care.",
+      "translate": "Береги себя (пока!)."
+    },
+    {
+      "origin": "Talk to you later.",
+      "translate": "Поговорим позже."
+    },
+    {
+      "origin": "Bye, have a nice day.",
+      "translate": "Пока, хорошего дня."
+    },
+    {
+      "origin": "See ya!",
+      "translate": "Увидимся! (неформ.)"
+    },
+    {
+      "origin": "Agree",
+      "translate": "Согласен / Соглашаться"
+    },
+    {
+      "origin": "Right",
+      "translate": "Прав / Правильно"
+    },
+    {
+      "origin": "Wrong",
+      "translate": "Неправ / Неправильно"
+    },
+    {
+      "origin": "Think",
+      "translate": "Думать"
+    },
+    {
+      "origin": "Maybe",
+      "translate": "Может быть"
+    },
+    {
+      "origin": "I agree with you.",
+      "translate": "Я с тобой согласен."
+    },
+    {
+      "origin": "You are right.",
+      "translate": "Ты прав."
+    },
+    {
+      "origin": "That is wrong.",
+      "translate": "Это неправильно."
+    },
+    {
+      "origin": "I don't think so.",
+      "translate": "Я так не думаю."
+    },
+    {
+      "origin": "Maybe yes, maybe no.",
+      "translate": "Может да, может нет."
+    },
+    {
+      "origin": "Really",
+      "translate": "Правда? / Реально?"
+    },
+    {
+      "origin": "Serious",
+      "translate": "Серьезный"
+    },
+    {
+      "origin": "Kidding",
+      "translate": "Шутить"
+    },
+    {
+      "origin": "Wow",
+      "translate": "Вау / Ого"
+    },
+    {
+      "origin": "Crazy",
+      "translate": "Сумасшедший / Безумный"
+    },
+    {
+      "origin": "Are you serious?",
+      "translate": "Ты серьезно?"
+    },
+    {
+      "origin": "I am just kidding.",
+      "translate": "Я просто шучу."
+    },
+    {
+      "origin": "Really? I didn't know.",
+      "translate": "Правда? Я не знал."
+    },
+    {
+      "origin": "That is crazy!",
+      "translate": "Это безумие!"
+    },
+    {
+      "origin": "Wow, that's big.",
+      "translate": "Ого, это большое."
+    },
+    {
+      "origin": "Lunch",
+      "translate": "Обед"
+    },
+    {
+      "origin": "Dinner",
+      "translate": "Ужин"
+    },
+    {
+      "origin": "Join",
+      "translate": "Присоединиться"
+    },
+    {
+      "origin": "Free",
+      "translate": "Свободен (по времени)"
+    },
+    {
+      "origin": "Drink",
+      "translate": "Пить / Напиток"
+    },
+    {
+      "origin": "Let's have lunch.",
+      "translate": "Давай пообедаем."
+    },
+    {
+      "origin": "Are you free now?",
+      "translate": "Ты сейчас свободен?"
+    },
+    {
+      "origin": "Join us for coffee.",
+      "translate": "Присоединяйся к нам на кофе."
+    },
+    {
+      "origin": "Do you want a drink?",
+      "translate": "Хочешь выпить?"
+    },
+    {
+      "origin": "Dinner is on me.",
+      "translate": "Ужин за мой счет."
+    },
+    {
+      "origin": "Married",
+      "translate": "Женат / Замужем"
+    },
+    {
+      "origin": "Kids",
+      "translate": "Дети"
+    },
+    {
+      "origin": "Old",
+      "translate": "Старый (возраст)"
+    },
+    {
+      "origin": "Live",
+      "translate": "Жить"
+    },
+    {
+      "origin": "Doing",
+      "translate": "Делать (по жизни)"
+    },
+    {
+      "origin": "Are you married?",
+      "translate": "Ты женат/замужем?"
+    },
+    {
+      "origin": "How old are you?",
+      "translate": "Сколько тебе лет?"
+    },
+    {
+      "origin": "Where do you live now?",
+      "translate": "Где ты сейчас живешь?"
+    },
+    {
+      "origin": "I have two kids.",
+      "translate": "У меня двое детей."
+    },
+    {
+      "origin": "How is your family?",
+      "translate": "Как твоя семья?"
+    },
+    {
+      "origin": "Plan",
+      "translate": "План / Планировать"
+    },
+    {
+      "origin": "Fun",
+      "translate": "Веселье / Весело"
+    },
+    {
+      "origin": "Relax",
+      "translate": "Расслабляться / Отдыхать"
+    },
+    {
+      "origin": "Movie",
+      "translate": "Кино / Фильм"
+    },
+    {
+      "origin": "Sport",
+      "translate": "Спорт"
+    },
+    {
+      "origin": "What are your plans?",
+      "translate": "Какие у тебя планы?"
+    },
+    {
+      "origin": "Have fun!",
+      "translate": "Веселись! / Хорошо провести время!"
+    },
+    {
+      "origin": "Time to relax.",
+      "translate": "Время отдыхать."
+    },
+    {
+      "origin": "I like movies.",
+      "translate": "Я люблю кино."
+    },
+    {
+      "origin": "Do you play sports?",
+      "translate": "Ты занимаешься спортом?"
+    }
+  ],
+  "softSkillsWords": [
+    {
+      "origin": "Sure",
+      "translate": "Уверен"
+    },
+    {
+      "origin": "Certain",
+      "translate": "Уверен (более формально) / Определенный"
+    },
+    {
+      "origin": "Believe",
+      "translate": "Верить"
+    },
+    {
+      "origin": "Guess",
+      "translate": "Догадываться / Полагать"
+    },
+    {
+      "origin": "Hope",
+      "translate": "Надеяться"
+    },
+    {
+      "origin": "I am sure.",
+      "translate": "Я уверен."
+    },
+    {
+      "origin": "I guess so.",
+      "translate": "Думаю, да / Полагаю, что так."
+    },
+    {
+      "origin": "I believe in this.",
+      "translate": "Я верю в это."
+    },
+    {
+      "origin": "Are you certain?",
+      "translate": "Вы уверены?"
+    },
+    {
+      "origin": "I hope it works.",
+      "translate": "Надеюсь, это сработает."
+    },
+    {
+      "origin": "Solve",
+      "translate": "Решать (проблему)"
+    },
+    {
+      "origin": "Solution",
+      "translate": "Решение"
+    },
+    {
+      "origin": "Issue",
+      "translate": "Вопрос / Проблема (мягче, чем Problem)"
+    },
+    {
+      "origin": "Fix",
+      "translate": "Исправить / Починить"
+    },
+    {
+      "origin": "Try",
+      "translate": "Пытаться / Пробовать"
+    },
+    {
+      "origin": "We need a solution.",
+      "translate": "Нам нужно решение."
+    },
+    {
+      "origin": "I can fix this issue.",
+      "translate": "Я могу решить этот вопрос."
+    },
+    {
+      "origin": "Let me try.",
+      "translate": "Дай мне попробовать."
+    },
+    {
+      "origin": "Did you solve it?",
+      "translate": "Ты решил это?"
+    },
+    {
+      "origin": "Big issue.",
+      "translate": "Большая проблема/вопрос."
+    },
+    {
+      "origin": "Idea",
+      "translate": "Идея"
+    },
+    {
+      "origin": "Think",
+      "translate": "Думать"
+    },
+    {
+      "origin": "Learn",
+      "translate": "Учить / Узнавать"
+    },
+    {
+      "origin": "Understand",
+      "translate": "Понимать"
+    },
+    {
+      "origin": "Remember",
+      "translate": "Помнить"
+    },
+    {
+      "origin": "Good idea!",
+      "translate": "Хорошая идея!"
+    },
+    {
+      "origin": "Let me think.",
+      "translate": "Дай мне подумать."
+    },
+    {
+      "origin": "I want to learn.",
+      "translate": "Я хочу научиться."
+    },
+    {
+      "origin": "Do you remember me?",
+      "translate": "Ты меня помнишь?"
+    },
+    {
+      "origin": "I don't understand.",
+      "translate": "Я не понимаю."
+    },
+    {
+      "origin": "Early",
+      "translate": "Рано"
+    },
+    {
+      "origin": "Late",
+      "translate": "Поздно"
+    },
+    {
+      "origin": "Soon",
+      "translate": "Скоро"
+    },
+    {
+      "origin": "Already",
+      "translate": "Уже"
+    },
+    {
+      "origin": "Still",
+      "translate": "Все еще"
+    },
+    {
+      "origin": "It is too early.",
+      "translate": "Слишком рано."
+    },
+    {
+      "origin": "See you soon.",
+      "translate": "До скорого."
+    },
+    {
+      "origin": "I am already here.",
+      "translate": "Я уже здесь."
+    },
+    {
+      "origin": "Are you still working?",
+      "translate": "Ты все еще работаешь?"
+    },
+    {
+      "origin": "Better late than never.",
+      "translate": "Лучше поздно, чем никогда."
+    },
+    {
+      "origin": "Meet",
+      "translate": "Встречаться"
+    },
+    {
+      "origin": "Meeting",
+      "translate": "Встреча / Собрание"
+    },
+    {
+      "origin": "Schedule",
+      "translate": "Расписание / График"
+    },
+    {
+      "origin": "Email",
+      "translate": "Электронная почта"
+    },
+    {
+      "origin": "Send",
+      "translate": "Отправлять"
+    },
+    {
+      "origin": "Let's meet tomorrow.",
+      "translate": "Давай встретимся завтра."
+    },
+    {
+      "origin": "I have a meeting.",
+      "translate": "У меня встреча/собрание."
+    },
+    {
+      "origin": "Check your schedule.",
+      "translate": "Проверь свое расписание."
+    },
+    {
+      "origin": "Send me an email.",
+      "translate": "Отправь мне имейл."
+    },
+    {
+      "origin": "Meeting is over.",
+      "translate": "Встреча окончена."
+    },
+    {
+      "origin": "Price",
+      "translate": "Цена"
+    },
+    {
+      "origin": "Cost",
+      "translate": "Стоимость / Стоить"
+    },
+    {
+      "origin": "Pay",
+      "translate": "Платить"
+    },
+    {
+      "origin": "Buy",
+      "translate": "Покупать"
+    },
+    {
+      "origin": "Expensive",
+      "translate": "Дорогой"
+    },
+    {
+      "origin": "What is the price?",
+      "translate": "Какова цена?"
+    },
+    {
+      "origin": "How much does it cost?",
+      "translate": "Сколько это стоит?"
+    },
+    {
+      "origin": "I need to pay.",
+      "translate": "Мне нужно заплатить."
+    },
+    {
+      "origin": "Too expensive.",
+      "translate": "Слишком дорого."
+    },
+    {
+      "origin": "I want to buy this.",
+      "translate": "Я хочу купить это."
+    },
+    {
+      "origin": "Near",
+      "translate": "Рядом"
+    },
+    {
+      "origin": "Far",
+      "translate": "Далеко"
+    },
+    {
+      "origin": "Inside",
+      "translate": "Внутри"
+    },
+    {
+      "origin": "Outside",
+      "translate": "Снаружи"
+    },
+    {
+      "origin": "Around",
+      "translate": "Вокруг / Около"
+    },
+    {
+      "origin": "Is it near here?",
+      "translate": "Это рядом с этим местом?"
+    },
+    {
+      "origin": "Go inside.",
+      "translate": "Заходи внутрь."
+    },
+    {
+      "origin": "Wait outside.",
+      "translate": "Жди снаружи."
+    },
+    {
+      "origin": "Look around.",
+      "translate": "Посмотри вокруг."
+    },
+    {
+      "origin": "It is not far.",
+      "translate": "Это недалеко."
+    },
+    {
+      "origin": "Busy",
+      "translate": "Занят"
+    },
+    {
+      "origin": "Free",
+      "translate": "Свободен / Бесплатный"
+    },
+    {
+      "origin": "Importan",
+      "translate": "Важный"
+    },
+    {
+      "origin": "Ready",
+      "translate": "Готов"
+    },
+    {
+      "origin": "Sorry",
+      "translate": "Сожалеющий / Извини"
+    },
+    {
+      "origin": "I am very busy.",
+      "translate": "Я очень занят."
+    },
+    {
+      "origin": "Is it free?",
+      "translate": "Это бесплатно? / Это свободно?"
+    },
+    {
+      "origin": "It is important.",
+      "translate": "Это важно."
+    },
+    {
+      "origin": "Are you ready?",
+      "translate": "Ты готов?"
+    },
+    {
+      "origin": "I am sorry.",
+      "translate": "Я извиняюсь."
+    },
+    {
+      "origin": "Actually",
+      "translate": "На самом деле / Вообще-то"
+    },
+    {
+      "origin": "Maybe",
+      "translate": "Может быть"
+    },
+    {
+      "origin": "Probably",
+      "translate": "Вероятно / Наверное"
+    },
+    {
+      "origin": "Anyway",
+      "translate": "В любом случае / Ладно"
+    },
+    {
+      "origin": "Suddenly",
+      "translate": "Внезапно"
+    },
+    {
+      "origin": "Actually, I know him.",
+      "translate": "На самом деле, я его знаю."
+    },
+    {
+      "origin": "Maybe later.",
+      "translate": "Может быть позже."
+    },
+    {
+      "origin": "Probably yes.",
+      "translate": "Наверное, да."
+    },
+    {
+      "origin": "Anyway, let's go.",
+      "translate": "В любом случае, пошли."
+    },
+    {
+      "origin": "Suddenly, it stopped.",
+      "translate": "Внезапно это прекратилось."
+    },
+    {
+      "origin": "Can",
+      "translate": "Мочь (физически)"
+    },
+    {
+      "origin": "Could",
+      "translate": "Мог бы (вежливо)"
+    },
+    {
+      "origin": "Must",
+      "translate": "Должен (обязан)"
+    },
+    {
+      "origin": "Should",
+      "translate": "Следует (совет)"
+    },
+    {
+      "origin": "Would",
+      "translate": "Бы (вежливость)"
+    },
+    {
+      "origin": "Can you help me?",
+      "translate": "Можешь мне помочь?"
+    },
+    {
+      "origin": "Could you help me?",
+      "translate": "Не могли бы вы мне помочь?"
+    },
+    {
+      "origin": "You must do it.",
+      "translate": "Ты обязан это сделать."
+    },
+    {
+      "origin": "You should go.",
+      "translate": "Тебе следует пойти."
+    },
+    {
+      "origin": "I would like coffee.",
+      "translate": "Я бы хотел кофе."
+    }
+  ],
+  "upperElementaryWords": [
+    {
+      "origin": "Handle",
+      "translate": "Справиться / Разобраться"
+    },
+    {
+      "origin": "Manage",
+      "translate": "Управлять / Успевать"
+    },
+    {
+      "origin": "Control",
+      "translate": "Контролировать"
+    },
+    {
+      "origin": "Support",
+      "translate": "Поддерживать"
+    },
+    {
+      "origin": "Provide",
+      "translate": "Предоставлять / Обеспечивать"
+    },
+    {
+      "origin": "I can handle this job.",
+      "translate": "Я справлюсь с этой работой."
+    },
+    {
+      "origin": "Can you manage the team?",
+      "translate": "Ты сможешь управлять командой?"
+    },
+    {
+      "origin": "Everything is under control.",
+      "translate": "Всё под контролем."
+    },
+    {
+      "origin": "I need your support.",
+      "translate": "Мне нужна твоя поддержка."
+    },
+    {
+      "origin": "Provide me the details.",
+      "translate": "Предоставьте мне детали."
+    },
+    {
+      "origin": "Sense",
+      "translate": "Смысл (Make sense?)"
+    },
+    {
+      "origin": "Clear",
+      "translate": "Понятно / Чисто"
+    },
+    {
+      "origin": "Meaning",
+      "translate": "Значение"
+    },
+    {
+      "origin": "Point",
+      "translate": "Точка зрения / Суть"
+    },
+    {
+      "origin": "Reason",
+      "translate": "Причина"
+    },
+    {
+      "origin": "Does that make sense?",
+      "translate": "Это понятно? / Логично?"
+    },
+    {
+      "origin": "It is clear now.",
+      "translate": "Теперь понятно."
+    },
+    {
+      "origin": "What is the meaning of this?",
+      "translate": "Что это значит?"
+    },
+    {
+      "origin": "You have a point.",
+      "translate": "В твоих словах есть суть / Ты прав."
+    },
+    {
+      "origin": "Give me one reason.",
+      "translate": "Назови мне одну причину."
+    },
+    {
+      "origin": "Experience",
+      "translate": "Опыт"
+    },
+    {
+      "origin": "Skill",
+      "translate": "Навык / Умение"
+    },
+    {
+      "origin": "Knowledge",
+      "translate": "Знание"
+    },
+    {
+      "origin": "Level",
+      "translate": "Уровень"
+    },
+    {
+      "origin": "Expert",
+      "translate": "Эксперт"
+    },
+    {
+      "origin": "I have 5 years of experience.",
+      "translate": "У меня 5 лет опыта."
+    },
+    {
+      "origin": "Good skills are important.",
+      "translate": "Хорошие навыки важны."
+    },
+    {
+      "origin": "My knowledge is enough.",
+      "translate": "Моих знаний достаточно."
+    },
+    {
+      "origin": "Next level.",
+      "translate": "Следующий уровень."
+    },
+    {
+      "origin": "Ask the expert.",
+      "translate": "Спроси эксперта."
+    },
+    {
+      "origin": "Suggest",
+      "translate": "Предлагать (идею)"
+    },
+    {
+      "origin": "Recommend",
+      "translate": "Рекомендовать"
+    },
+    {
+      "origin": "Advice",
+      "translate": "Совет (сущ.)"
+    },
+    {
+      "origin": "Tip",
+      "translate": "Подсказка / Чаевые"
+    },
+    {
+      "origin": "Warn",
+      "translate": "Предупреждать"
+    },
+    {
+      "origin": "What do you suggest?",
+      "translate": "Что ты предлагаешь?"
+    },
+    {
+      "origin": "I recommend this place.",
+      "translate": "Я рекомендую это место."
+    },
+    {
+      "origin": "I need your advice.",
+      "translate": "Мне нужен твой совет."
+    },
+    {
+      "origin": "Thanks for the tip.",
+      "translate": "Спасибо за подсказку."
+    },
+    {
+      "origin": "I warned you.",
+      "translate": "Я тебя предупреждал."
+    },
+    {
+      "origin": "Nervous",
+      "translate": "Нервный / Волнующийся"
+    },
+    {
+      "origin": "Worried",
+      "translate": "Озабоченный / Переживающий"
+    },
+    {
+      "origin": "Excited",
+      "translate": "В восторге / В предвкушении"
+    },
+    {
+      "origin": "Bored",
+      "translate": "Скучающий"
+    },
+    {
+      "origin": "Proud",
+      "translate": "Гордый"
+    },
+    {
+      "origin": "Don't be nervous.",
+      "translate": "Не нервничай."
+    },
+    {
+      "origin": "I am worried about money.",
+      "translate": "Я беспокоюсь о деньгах."
+    },
+    {
+      "origin": "I am so excited!",
+      "translate": "Я так взволнован/рад!"
+    },
+    {
+      "origin": "I am bored here.",
+      "translate": "Мне здесь скучно."
+    },
+    {
+      "origin": "I am proud of you.",
+      "translate": "Я горжусь тобой."
+    },
+    {
+      "origin": "Lazy",
+      "translate": "Ленивый"
+    },
+    {
+      "origin": "Smart",
+      "translate": "Умный / Сообразительный"
+    },
+    {
+      "origin": "Stupid",
+      "translate": "Глупый"
+    },
+    {
+      "origin": "Useful",
+      "translate": "Полезный"
+    },
+    {
+      "origin": "Useless",
+      "translate": "Бесполезный"
+    },
+    {
+      "origin": "He is lazy.",
+      "translate": "Он ленивый."
+    },
+    {
+      "origin": "Work smart, not hard.",
+      "translate": "Работай с умом, а не тяжело."
+    },
+    {
+      "origin": "This tool is useful.",
+      "translate": "Этот инструмент полезен."
+    },
+    {
+      "origin": "It is useless.",
+      "translate": "Это бесполезно."
+    },
+    {
+      "origin": "Don't do stupid things.",
+      "translate": "Не делай глупостей."
+    },
+    {
+      "origin": "Couple",
+      "translate": "Пара (2-3)"
+    },
+    {
+      "origin": "Several",
+      "translate": "Несколько (3-5)"
+    },
+    {
+      "origin": "Whole",
+      "translate": "Целый / Весь"
+    },
+    {
+      "origin": "Half",
+      "translate": "Половина"
+    },
+    {
+      "origin": "Rest",
+      "translate": "Остаток / Остальные"
+    },
+    {
+      "origin": "Give me a couple of minutes.",
+      "translate": "Дай мне пару минут."
+    },
+    {
+      "origin": "I have several questions.",
+      "translate": "У меня есть несколько вопросов."
+    },
+    {
+      "origin": "The whole day.",
+      "translate": "Весь день."
+    },
+    {
+      "origin": "Half an hour.",
+      "translate": "Полчаса."
+    },
+    {
+      "origin": "Where are the rest?",
+      "translate": "Где остальные?"
+    },
+    {
+      "origin": "Process",
+      "translate": "Процесс"
+    },
+    {
+      "origin": "Result",
+      "translate": "Результат"
+    },
+    {
+      "origin": "Goal",
+      "translate": "Цель"
+    },
+    {
+      "origin": "Success",
+      "translate": "Успех"
+    },
+    {
+      "origin": "Fail",
+      "translate": "Провал / Не сдать"
+    },
+    {
+      "origin": "Trust the process.",
+      "translate": "Доверяй процессу."
+    },
+    {
+      "origin": "Show me the result.",
+      "translate": "Покажи мне результат."
+    },
+    {
+      "origin": "What is your goal?",
+      "translate": "Какова твоя цель?"
+    },
+    {
+      "origin": "Huge success.",
+      "translate": "Огромный успех."
+    },
+    {
+      "origin": "Don't fail me.",
+      "translate": "Не подведи меня."
+    },
+    {
+      "origin": "Allow",
+      "translate": "Разрешать / Позволять"
+    },
+    {
+      "origin": "Expect",
+      "translate": "Ожидать"
+    },
+    {
+      "origin": "Require",
+      "translate": "Требовать"
+    },
+    {
+      "origin": "Accept",
+      "translate": "Принимать"
+    },
+    {
+      "origin": "Refuse",
+      "translate": "Отказываться"
+    },
+    {
+      "origin": "Smoking is not allowed.",
+      "translate": "Курение запрещено."
+    },
+    {
+      "origin": "What do you expect?",
+      "translate": "Чего ты ожидаешь?"
+    },
+    {
+      "origin": "Safety shoes required.",
+      "translate": "Требуется защитная обувь."
+    },
+    {
+      "origin": "We accept cash.",
+      "translate": "Мы принимаем наличные."
+    },
+    {
+      "origin": "He refused to help.",
+      "translate": "Он отказался помочь."
+    },
+    {
+      "origin": "Simple",
+      "translate": "Простой"
+    },
+    {
+      "origin": "Complicated",
+      "translate": "Сложный / Запутанный"
+    },
+    {
+      "origin": "Impossible",
+      "translate": "Невозможный"
+    },
+    {
+      "origin": "Perfect",
+      "translate": "Идеальный"
+    },
+    {
+      "origin": "Regular",
+      "translate": "Обычный / Регулярный"
+    },
+    {
+      "origin": "Keep it simple.",
+      "translate": "Делай проще."
+    },
+    {
+      "origin": "It is very complicated.",
+      "translate": "Это очень запутанно."
+    },
+    {
+      "origin": "Mission impossible.",
+      "translate": "Миссия невыполнима."
+    },
+    {
+      "origin": "Perfect job!",
+      "translate": "Идеальная работа!"
+    },
+    {
+      "origin": "Just regular coffee.",
+      "translate": "Просто обычный кофе."
+    }
+  ],
+  "abstractConceptsWords": [
+    {
+      "origin": "Chance",
+      "translate": "Шанс / Возможность"
+    },
+    {
+      "origin": "Luck",
+      "translate": "Удача"
+    },
+    {
+      "origin": "Hope",
+      "translate": "Надежда / Надеюсь"
+    },
+    {
+      "origin": "Wish",
+      "translate": "Желание / Желать"
+    },
+    {
+      "origin": "Risk",
+      "translate": "Риск"
+    },
+    {
+      "origin": "Take a chance.",
+      "translate": "Рискни / Воспользуйся шансом."
+    },
+    {
+      "origin": "Good luck!",
+      "translate": "Удачи!"
+    },
+    {
+      "origin": "I hope so.",
+      "translate": "Надеюсь, что так."
+    },
+    {
+      "origin": "Make a wish.",
+      "translate": "Загадай желание."
+    },
+    {
+      "origin": "It is a big risk.",
+      "translate": "Это большой риск."
+    },
+    {
+      "origin": "Truth",
+      "translate": "Правда"
+    },
+    {
+      "origin": "Lie",
+      "translate": "Ложь / Врать"
+    },
+    {
+      "origin": "Trust",
+      "translate": "Доверие / Доверять"
+    },
+    {
+      "origin": "Promise",
+      "translate": "Обещание / Обещать"
+    },
+    {
+      "origin": "Secret",
+      "translate": "Секрет"
+    },
+    {
+      "origin": "Tell me the truth.",
+      "translate": "Скажи мне правду."
+    },
+    {
+      "origin": "Don't lie to me.",
+      "translate": "Не ври мне."
+    },
+    {
+      "origin": "Trust me, I know.",
+      "translate": "Доверься мне, я знаю."
+    },
+    {
+      "origin": "I promise.",
+      "translate": "Я обещаю."
+    },
+    {
+      "origin": "Can you keep a secret?",
+      "translate": "Ты умеешь хранить секрет?"
+    },
+    {
+      "origin": "Mind",
+      "translate": "Разум (Change mind)"
+    },
+    {
+      "origin": "Dream",
+      "translate": "Мечта / Сон"
+    },
+    {
+      "origin": "Memory",
+      "translate": "Память"
+    },
+    {
+      "origin": "Attention",
+      "translate": "Внимание"
+    },
+    {
+      "origin": "Focus",
+      "translate": "Фокус / Сосредоточиться"
+    },
+    {
+      "origin": "Change your mind.",
+      "translate": "Передумай."
+    },
+    {
+      "origin": "Pay attention.",
+      "translate": "Обрати внимание."
+    },
+    {
+      "origin": "I have a dream.",
+      "translate": "У меня есть мечта."
+    },
+    {
+      "origin": "Bad memory.",
+      "translate": "Плохая память."
+    },
+    {
+      "origin": "Stay focused.",
+      "translate": "Оставайся сфокусированным."
+    },
+    {
+      "origin": "Respect",
+      "translate": "Уважение / Уважать"
+    },
+    {
+      "origin": "Freedom",
+      "translate": "Свобода"
+    },
+    {
+      "origin": "Peace",
+      "translate": "Мир (покой)"
+    },
+    {
+      "origin": "Trouble",
+      "translate": "Неприятности / Беда"
+    },
+    {
+      "origin": "Fault",
+      "translate": "Вина (Not my fault)"
+    },
+    {
+      "origin": "Show some respect.",
+      "translate": "Прояви уважение."
+    },
+    {
+      "origin": "Freedom is important.",
+      "translate": "Свобода важна."
+    },
+    {
+      "origin": "I want peace and quiet.",
+      "translate": "Я хочу тишины и покоя."
+    },
+    {
+      "origin": "Are you in trouble?",
+      "translate": "У тебя неприятности?"
+    },
+    {
+      "origin": "It is not my fault.",
+      "translate": "Это не моя вина."
+    },
+    {
+      "origin": "Future",
+      "translate": "Будущее"
+    },
+    {
+      "origin": "Past",
+      "translate": "Прошлое"
+    },
+    {
+      "origin": "Present",
+      "translate": "Настоящее"
+    },
+    {
+      "origin": "Moment",
+      "translate": "Момент"
+    },
+    {
+      "origin": "History",
+      "translate": "История"
+    },
+    {
+      "origin": "In the future.",
+      "translate": "В будущем."
+    },
+    {
+      "origin": "Forget the past.",
+      "translate": "Забудь прошлое."
+    },
+    {
+      "origin": "Wait a moment.",
+      "translate": "Подожди момент."
+    },
+    {
+      "origin": "It is history.",
+      "translate": "Это уже история."
+    },
+    {
+      "origin": "Live in the present.",
+      "translate": "Живи настоящим."
+    },
+    {
+      "origin": "Choice",
+      "translate": "Выбор"
+    },
+    {
+      "origin": "Option",
+      "translate": "Вариант / Опция"
+    },
+    {
+      "origin": "Decision",
+      "translate": "Решение"
+    },
+    {
+      "origin": "Difference",
+      "translate": "Разница"
+    },
+    {
+      "origin": "Change",
+      "translate": "Изменение / Сдача"
+    },
+    {
+      "origin": "Make a choice.",
+      "translate": "Сделай выбор."
+    },
+    {
+      "origin": "I have no other option.",
+      "translate": "У меня нет другого варианта."
+    },
+    {
+      "origin": "Big decision.",
+      "translate": "Важное решение."
+    },
+    {
+      "origin": "What is the difference?",
+      "translate": "В чем разница?"
+    },
+    {
+      "origin": "Change is good.",
+      "translate": "Перемены — это хорошо."
+    },
+    {
+      "origin": "Situation",
+      "translate": "Ситуация"
+    },
+    {
+      "origin": "Case",
+      "translate": "Случай / Дело"
+    },
+    {
+      "origin": "Fact",
+      "translate": "Факт"
+    },
+    {
+      "origin": "Example",
+      "translate": "Пример"
+    },
+    {
+      "origin": "Detail",
+      "translate": "Деталь"
+    },
+    {
+      "origin": "Bad situation.",
+      "translate": "Плохая ситуация."
+    },
+    {
+      "origin": "Just in case.",
+      "translate": "На всякий случай."
+    },
+    {
+      "origin": "That is a fact.",
+      "translate": "Это факт."
+    },
+    {
+      "origin": "Give me an example.",
+      "translate": "Приведи пример."
+    },
+    {
+      "origin": "Every detail matters.",
+      "translate": "Каждая деталь важна."
+    },
+    {
+      "origin": "Strength",
+      "translate": "Сила"
+    },
+    {
+      "origin": "Weakness",
+      "translate": "Слабость"
+    },
+    {
+      "origin": "Energy",
+      "translate": "Энергия"
+    },
+    {
+      "origin": "Mood",
+      "translate": "Настроение"
+    },
+    {
+      "origin": "Habit",
+      "translate": "Привычка"
+    },
+    {
+      "origin": "What is your strength?",
+      "translate": "В чем твоя сила?"
+    },
+    {
+      "origin": "My only weakness.",
+      "translate": "Моя единственная слабость."
+    },
+    {
+      "origin": "Low energy today.",
+      "translate": "Мало энергии сегодня."
+    },
+    {
+      "origin": "I am in a bad mood.",
+      "translate": "Я в плохом настроении."
+    },
+    {
+      "origin": "Bad habit.",
+      "translate": "Вредная привычка."
+    },
+    {
+      "origin": "Worth",
+      "translate": "Сто́ящий / Ценность"
+    },
+    {
+      "origin": "Value",
+      "translate": "Ценность / Выгода"
+    },
+    {
+      "origin": "Waste",
+      "translate": "Трата (впустую)"
+    },
+    {
+      "origin": "Save",
+      "translate": "Сохранять / Экономить"
+    },
+    {
+      "origin": "Spend",
+      "translate": "Тратить"
+    },
+    {
+      "origin": "Is it worth it?",
+      "translate": "Оно того стоит?"
+    },
+    {
+      "origin": "Great value.",
+      "translate": "Отличная выгода."
+    },
+    {
+      "origin": "Waste of time.",
+      "translate": "Трата времени впустую."
+    },
+    {
+      "origin": "Save your money.",
+      "translate": "Экономь деньги."
+    },
+    {
+      "origin": "Don't spend it all.",
+      "translate": "Не потрать всё."
+    },
+    {
+      "origin": "Matter",
+      "translate": "Значить (It matters)"
+    },
+    {
+      "origin": "Care",
+      "translate": "Заботиться (I don't care)"
+    },
+    {
+      "origin": "Mind",
+      "translate": "Возражать (Never mind)"
+    },
+    {
+      "origin": "Guess",
+      "translate": "Догадываться"
+    },
+    {
+      "origin": "Check",
+      "translate": "Проверять"
+    },
+    {
+      "origin": "It doesn't matter.",
+      "translate": "Это неважно."
+    },
+    {
+      "origin": "I don't care.",
+      "translate": "Мне всё равно."
+    },
+    {
+      "origin": "Never mind.",
+      "translate": "Забей / Забудь."
+    },
+    {
+      "origin": "Take a guess.",
+      "translate": "Угадай."
+    },
+    {
+      "origin": "Double check.",
+      "translate": "Перепроверь."
+    }
+  ]
+}

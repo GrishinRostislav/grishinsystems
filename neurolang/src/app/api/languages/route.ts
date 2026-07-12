@@ -1,14 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { ensureInitialized } from "@/lib/initializer";
 
 export async function GET() {
   try {
-    let profile = await prisma.userProfile.findFirst();
-    if (!profile) {
-      profile = await prisma.userProfile.create({
-        data: { name: "Student" }
-      });
-    }
+    const { profile } = await ensureInitialized();
     const pairs = await prisma.languagePair.findMany({
       where: { userId: profile.id },
       orderBy: { createdAt: "desc" },
@@ -22,12 +18,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const { sourceLanguage, targetLanguage, proficiencyLevel, isActive } = await req.json();
-    let profile = await prisma.userProfile.findFirst();
-    if (!profile) {
-      profile = await prisma.userProfile.create({
-        data: { name: "Student" }
-      });
-    }
+    const { profile } = await ensureInitialized();
 
     if (isActive) {
       // Deactivate all other pairs
@@ -56,8 +47,7 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   try {
     const { id, isActive, proficiencyLevel } = await req.json();
-    let profile = await prisma.userProfile.findFirst();
-    if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    const { profile } = await ensureInitialized();
 
     if (isActive) {
       await prisma.languagePair.updateMany({
