@@ -7,6 +7,14 @@
     {
       "source": "/cashFlow/:match*",
       "destination": "https://grishinsystems-l8lt.vercel.app/cashFlow/:match*"
+    },
+    {
+      "source": "/neurolang",
+      "destination": "https://grishinsystems-neurolang.vercel.app/neurolang"
+    },
+    {
+      "source": "/neurolang/:match*",
+      "destination": "https://grishinsystems-neurolang.vercel.app/neurolang/:match*"
     }
   ]
 }

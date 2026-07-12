@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model User {
+  id           String      @id @default(cuid())
+  email        String      @unique
+  passwordHash String
+  name         String?
+  xp           Int         @default(0)
+  streak       Int         @default(0)
+  lastActive   DateTime    @default(now())
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  decks        Deck[]
+  dailyStats   DailyStat[]
+}
+
+model Deck {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  words       Word[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Word {
+  id             String    @id @default(cuid())
+  text           String
+  translation    String
+  context        String?
+  audioUrl       String?
+  userId         String
+  deckId         String
+  deck           Deck      @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  
+  // FSRS spaced repetition params
+  state          Int       @default(0) // 0 = New, 1 = Learning, 2 = Review, 3 = Relearning
+  difficulty     Float     @default(0.0)
+  stability      Float     @default(0.0)
+  retrievability Float     @default(0.0)
+  elapsedDays    Int       @default(0)
+  scheduledDays  Int       @default(0)
+  lastReview     DateTime? @default(now())
+  nextReview     DateTime  @default(now())
+  
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model SpeechCache {
+  id        String   @id @default(cuid())
+  textHash  String   @unique // SHA-256 hash of (text + language + voice)
+  text      String
+  language  String
+  voice     String
+  audioUrl  String   // URL of audio stored on Vercel Blob
+  createdAt DateTime @default(now())
+}
+
+model DailyStat {
+  id            String   @id @default(cuid())
+  date          DateTime
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  xpEarned      Int      @default(0)
+  wordsReviewed Int      @default(0)
+  wordsLearned  Int      @default(0)
+  createdAt     DateTime @default(now())
+}
