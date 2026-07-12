@@ -1,13 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  basePath: '/neurolang',
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  basePath: "/neurolang",
+  /* config options here */
 };
 
 export default nextConfig;

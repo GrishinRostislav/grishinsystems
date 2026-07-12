@@ -1,498 +1,765 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { BookOpen, LogOut, Award, Zap, Plus, BookMarked, User } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
 
-interface Deck {
+interface Profile {
   id: string;
   name: string;
-  description: string | null;
-  createdAt: string;
-  _count: {
-    words: number;
-  };
+  totalXP: number;
+  streakCount: number;
+  lastPracticeDate?: string;
 }
 
-interface UserProfile {
+interface LanguagePair {
   id: string;
-  email: string;
-  name: string | null;
-  xp: number;
-  streak: number;
+  sourceLanguage: string;
+  targetLanguage: string;
+  proficiencyLevel: string;
+  isActive: boolean;
 }
 
-export default function Dashboard() {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [decks, setDecks] = useState<Deck[]>([]);
-  const [loading, setLoading] = useState(true);
+interface Word {
+  id: string;
+  origin: string;
+  translate: string;
+  category: string;
+  whenRepeat?: string;
+  wrongAnswer: number;
+  rightAnswer: number;
+}
+
+export default function Home() {
+  const [activeTab, setActiveTab] = useState<"home" | "assignments" | "phrase" | "profile">("home");
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [languagePairs, setLanguagePairs] = useState<LanguagePair[]>([]);
+  const [activePair, setActivePair] = useState<LanguagePair | null>(null);
   
-  // New deck form state
-  const [newDeckName, setNewDeckName] = useState('');
-  const [newDeckDesc, setNewDeckDesc] = useState('');
-  const [creatingDeck, setCreatingDeck] = useState(false);
-  const [deckError, setDeckError] = useState('');
+  // Vocabulary States
+  const [words, setWords] = useState<Word[]>([]);
+  const [categoryFilter, setCategoryFilter] = useState<string>("All");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [newOrigin, setNewOrigin] = useState("");
+  const [newTranslate, setNewTranslate] = useState("");
+  const [newCategory, setNewCategory] = useState("General");
+  const [showAddWord, setShowAddWord] = useState(false);
+  const [showPairSelector, setShowPairSelector] = useState(false);
 
-  // New word form state
-  const [newWordText, setNewWordText] = useState('');
-  const [newWordTranslation, setNewWordTranslation] = useState('');
-  const [newWordContext, setNewWordContext] = useState('');
-  const [selectedDeckId, setSelectedDeckId] = useState('');
-  const [addingWord, setAddingWord] = useState(false);
-  const [wordError, setWordError] = useState('');
-  const [wordSuccess, setWordSuccess] = useState(false);
+  // Active Practice Session
+  const [practiceWords, setPracticeWords] = useState<Word[]>([]);
+  const [currentPracticeIdx, setCurrentPracticeIdx] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
 
-  const router = useRouter();
+  // Phrase Builder States
+  const [phraseTarget, setPhraseTarget] = useState("The weather is nice today");
+  const [phraseOptions, setPhraseOptions] = useState<string[]>(["The", "weather", "is", "nice", "today", "yesterday", "rainy", "beautiful"]);
+  const [phraseSelected, setPhraseSelected] = useState<string[]>([]);
+  const [phraseStatus, setPhraseStatus] = useState<"building" | "correct" | "incorrect">("building");
 
+  // Load Initial Data
   useEffect(() => {
-    async function checkAuthAndLoadData() {
-      try {
-        const sessionRes = await fetch('/neurolang/api/auth/session');
-        const sessionData = await sessionRes.json();
-        
-        if (!sessionRes.ok || !sessionData.authenticated) {
-          router.push('/login');
-          return;
-        }
+    fetchProfile();
+    fetchLanguages();
+    fetchWords();
+  }, []);
 
-        setProfile(sessionData.user);
-
-        const decksRes = await fetch('/neurolang/api/decks');
-        const decksData = await decksRes.json();
-        if (decksRes.ok) {
-          setDecks(decksData.decks);
-          if (decksData.decks.length > 0) {
-            setSelectedDeckId(decksData.decks[0].id);
-          }
-        }
-      } catch (err) {
-        console.error('Failed to load dashboard data:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    checkAuthAndLoadData();
-  }, [router]);
-
-  const handleLogout = async () => {
+  const fetchProfile = async () => {
     try {
-      const res = await fetch('/neurolang/api/auth/logout', { method: 'POST' });
-      if (res.ok) {
-        router.push('/login');
-        router.refresh();
-      }
+      const res = await fetch("/api/profile");
+      const data = await res.json();
+      setProfile(data);
     } catch (err) {
-      console.error('Logout error:', err);
+      console.error(err);
     }
   };
 
-  const handleCreateDeck = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newDeckName.trim()) return;
-
-    setCreatingDeck(true);
-    setDeckError('');
-
+  const fetchLanguages = async () => {
     try {
-      const res = await fetch('/neurolang/api/decks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newDeckName, description: newDeckDesc }),
-      });
+      const res = await fetch("/api/languages");
       const data = await res.json();
+      setLanguagePairs(data);
+      const active = data.find((p: LanguagePair) => p.isActive);
+      setActivePair(active || null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchWords = async () => {
+    try {
+      const res = await fetch("/api/words");
+      const data = await res.json();
+      setWords(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const selectLanguagePair = async (pairId: string) => {
+    try {
+      const res = await fetch("/api/languages", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: pairId, isActive: true }),
+      });
       if (res.ok) {
-        setDecks([data.deck, ...decks]);
-        setNewDeckName('');
-        setNewDeckDesc('');
-        if (!selectedDeckId) setSelectedDeckId(data.deck.id);
-      } else {
-        setDeckError(data.error || 'Failed to create deck');
+        setShowPairSelector(false);
+        fetchLanguages();
+        fetchWords();
       }
     } catch (err) {
-      setDeckError('Connection error.');
-    } finally {
-      setCreatingDeck(false);
+      console.error(err);
+    }
+  };
+
+  const createLanguagePair = async (source: string, target: string) => {
+    try {
+      const res = await fetch("/api/languages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sourceLanguage: source, targetLanguage: target, isActive: true }),
+      });
+      if (res.ok) {
+        fetchLanguages();
+        fetchWords();
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
   const handleAddWord = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newWordText.trim() || !newWordTranslation.trim() || !selectedDeckId) return;
-
-    setAddingWord(true);
-    setWordError('');
-    setWordSuccess(false);
-
+    if (!newOrigin.trim()) return;
     try {
-      const res = await fetch('/neurolang/api/words', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/words", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          text: newWordText,
-          translation: newWordTranslation,
-          context: newWordContext,
-          deckId: selectedDeckId,
+          origin: newOrigin,
+          translate: newTranslate,
+          category: newCategory,
         }),
       });
-      const data = await res.json();
       if (res.ok) {
-        setNewWordText('');
-        setNewWordTranslation('');
-        setNewWordContext('');
-        setWordSuccess(true);
-        
-        // Update deck count locally
-        setDecks(decks.map(d => {
-          if (d.id === selectedDeckId) {
-            return {
-              ...d,
-              _count: { words: d._count.words + 1 }
-            };
-          }
-          return d;
-        }));
-
-        setTimeout(() => setWordSuccess(false), 3000);
-      } else {
-        setWordError(data.error || 'Failed to add word');
+        setNewOrigin("");
+        setNewTranslate("");
+        setShowAddWord(false);
+        fetchWords();
       }
     } catch (err) {
-      setWordError('Connection error.');
-    } finally {
-      setAddingWord(false);
+      console.error(err);
     }
   };
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem' }}>
-        <h2 style={{ fontWeight: 600 }}>Loading Dashboard...</h2>
-        <div className="loading-shimmer" style={{ width: '200px', height: '8px', borderRadius: '4px' }} />
-      </div>
-    );
-  }
+  const submitReview = async (wordId: string, mistakes: number) => {
+    try {
+      const res = await fetch("/api/words", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: wordId, mistakes }),
+      });
+      if (res.ok) {
+        // Increment XP in UI
+        if (profile) {
+          const updatedXp = profile.totalXP + (mistakes === 0 ? 10 : 2);
+          setProfile({ ...profile, totalXP: updatedXp });
+          // Save updated XP back
+          await fetch("/api/profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ totalXP: updatedXp }),
+          });
+        }
+        
+        // Progress practice index or finish
+        if (currentPracticeIdx + 1 < practiceWords.length) {
+          setCurrentPracticeIdx(currentPracticeIdx + 1);
+          setIsFlipped(false);
+        } else {
+          // Finished Practice Session
+          setPracticeWords([]);
+          setCurrentPracticeIdx(0);
+          setIsFlipped(false);
+          fetchWords();
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const startPractice = (filteredWords: Word[]) => {
+    if (filteredWords.length === 0) return;
+    setPracticeWords(filteredWords);
+    setCurrentPracticeIdx(0);
+    setIsFlipped(false);
+  };
+
+  // Compute stats
+  const dueWords = words.filter(w => {
+    if (!w.whenRepeat) return true;
+    return new Date(w.whenRepeat) <= new Date();
+  });
+
+  const categories = ["All", ...Array.from(new Set(words.map(w => w.category)))];
+
+  const filteredWords = words.filter(w => {
+    const matchesCategory = categoryFilter === "All" || w.category === categoryFilter;
+    const matchesSearch = w.origin.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          w.translate.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  const getFlag = (lang: string) => {
+    switch (lang.toLowerCase()) {
+      case "russian": return "🇷🇺";
+      case "english": return "🇬🇧";
+      case "spanish": return "🇪🇸";
+      case "french": return "🇫🇷";
+      case "german": return "🇩🇪";
+      default: return "🌐";
+    }
+  };
 
   return (
-    <div style={{ minHeight: '100vh', padding: '2rem 1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
-      {/* Header */}
-      <header className="glass" style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '1.2rem 2rem',
-        borderRadius: 'var(--radius)',
-        marginBottom: '2rem',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-          <div style={{
-            background: 'linear-gradient(135deg, #8b5cf6, #ec4899)',
-            padding: '0.6rem',
-            borderRadius: '0.8rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <BookOpen size={24} color="#fff" />
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-teal-500 selection:text-slate-950">
+      
+      {/* Header bar */}
+      <header className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-md border-b border-slate-900 py-3 px-6 flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <div className="bg-teal-500/10 text-teal-400 p-2 rounded-xl border border-teal-500/20 font-bold tracking-tight text-lg">
+            🧠 NeuroLang
           </div>
-          <div>
-            <h1 style={{ fontSize: '1.4rem', fontWeight: 800 }}>NeuroLang</h1>
-            <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>Web Version v1.0</span>
-          </div>
+          {activePair && (
+            <button 
+              onClick={() => setShowPairSelector(true)}
+              className="flex items-center gap-1 bg-slate-900 hover:bg-slate-800 transition px-3 py-1.5 rounded-lg border border-slate-800 text-sm font-medium"
+            >
+              <span>{getFlag(activePair.sourceLanguage)}</span>
+              <span className="text-slate-400">→</span>
+              <span>{getFlag(activePair.targetLanguage)}</span>
+            </button>
+          )}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          {profile && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#ffb020' }}>
-                <Award size={18} />
-                <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{profile.xp} XP</span>
+        {profile && (
+          <div className="flex gap-4 items-center">
+            <div className="flex items-center gap-1.5 text-orange-400 text-sm font-semibold bg-orange-500/10 px-2.5 py-1 rounded-full border border-orange-500/20">
+              🔥 <span className="text-orange-300">{profile.streakCount} days</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-yellow-400 text-sm font-semibold bg-yellow-500/10 px-2.5 py-1 rounded-full border border-yellow-500/20">
+              ⚡ <span className="text-yellow-300">{profile.totalXP} XP</span>
+            </div>
+          </div>
+        )}
+      </header>
+
+      {/* Main content grid */}
+      <div className="flex-1 max-w-6xl w-full mx-auto p-6 flex flex-col gap-6">
+
+        {/* Practice Modal / Overlay */}
+        {practiceWords.length > 0 && (
+          <div className="fixed inset-0 z-50 bg-slate-950/90 flex items-center justify-center p-4 backdrop-blur-sm">
+            <div className="bg-slate-900 rounded-3xl border border-slate-800 p-8 max-w-md w-full flex flex-col gap-6 shadow-2xl relative">
+              <button 
+                onClick={() => setPracticeWords([])}
+                className="absolute top-4 right-4 text-slate-500 hover:text-slate-300 transition text-lg"
+              >
+                ✕
+              </button>
+
+              <div className="flex justify-between items-center text-xs text-slate-500 font-semibold tracking-wider uppercase">
+                <span>Card Review</span>
+                <span>{currentPracticeIdx + 1} / {practiceWords.length}</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#ff4b4b' }}>
-                <Zap size={18} />
-                <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{profile.streak} Days</span>
+
+              {/* Progress bar */}
+              <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                <div 
+                  className="bg-teal-500 h-full transition-all duration-300"
+                  style={{ width: `${((currentPracticeIdx + 1) / practiceWords.length) * 100}%` }}
+                />
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderLeft: '1px solid hsl(var(--border))', paddingLeft: '1.2rem' }}>
-                <div style={{
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  padding: '0.4rem',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                  <User size={16} />
+
+              {/* Flashcard container */}
+              <div 
+                onClick={() => setIsFlipped(!isFlipped)}
+                className="bg-slate-950 hover:border-slate-800 border border-slate-900 cursor-pointer rounded-2xl p-10 h-64 flex flex-col items-center justify-center text-center transition relative overflow-hidden"
+              >
+                <div className="absolute top-2 right-3 text-xs text-slate-600 font-semibold uppercase">
+                  Click to Flip
                 </div>
-                <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{profile.name || profile.email.split('@')[0]}</span>
+                {!isFlipped ? (
+                  <div className="text-2xl font-semibold text-slate-200">
+                    {practiceWords[currentPracticeIdx].origin}
+                  </div>
+                ) : (
+                  <div className="text-2xl font-semibold text-teal-400">
+                    {practiceWords[currentPracticeIdx].translate}
+                  </div>
+                )}
+              </div>
+
+              {/* Grade buttons */}
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => submitReview(practiceWords[currentPracticeIdx].id, 1)}
+                  className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 font-semibold py-3 px-4 rounded-xl transition"
+                >
+                  🔴 Again (12h)
+                </button>
+                <button
+                  onClick={() => submitReview(practiceWords[currentPracticeIdx].id, 0)}
+                  className="bg-teal-500 hover:bg-teal-400 text-slate-950 font-semibold py-3 px-4 rounded-xl transition"
+                >
+                  🟢 Got it!
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add Word Modal */}
+        {showAddWord && (
+          <div className="fixed inset-0 z-50 bg-slate-950/80 flex items-center justify-center p-4 backdrop-blur-sm">
+            <form 
+              onSubmit={handleAddWord}
+              className="bg-slate-900 rounded-2xl border border-slate-800 p-6 max-w-sm w-full flex flex-col gap-4 shadow-xl"
+            >
+              <h3 className="text-lg font-bold text-slate-100">Add New Word</h3>
+              
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs text-slate-400 font-semibold">Foreign Word (Origin)</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. солнце"
+                  value={newOrigin}
+                  onChange={(e) => setNewOrigin(e.target.value)}
+                  className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-teal-500"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs text-slate-400 font-semibold">Translation (Native)</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Sun"
+                  value={newTranslate}
+                  onChange={(e) => setNewTranslate(e.target.value)}
+                  className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-teal-500"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs text-slate-400 font-semibold">Category</label>
+                <select
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-teal-500"
+                >
+                  <option value="General">General</option>
+                  <option value="Verbs">Verbs</option>
+                  <option value="Nouns">Nouns</option>
+                  <option value="Adjectives">Adjectives</option>
+                  <option value="Phrases">Phrases</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 justify-end mt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddWord(false)}
+                  className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 px-4 rounded-xl text-sm transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-teal-500 hover:bg-teal-400 text-slate-950 font-semibold py-2 px-4 rounded-xl text-sm transition"
+                >
+                  Save Word
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Language Selector Modal */}
+        {showPairSelector && (
+          <div className="fixed inset-0 z-50 bg-slate-950/80 flex items-center justify-center p-4 backdrop-blur-sm">
+            <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 max-w-sm w-full flex flex-col gap-4 shadow-xl">
+              <h3 className="text-lg font-bold text-slate-100">Select Language Pair</h3>
+              
+              <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
+                {languagePairs.map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => selectLanguagePair(p.id)}
+                    className={`flex items-center justify-between p-3 rounded-xl border text-sm font-semibold transition ${
+                      p.isActive 
+                        ? "bg-teal-500/10 border-teal-500/40 text-teal-400" 
+                        : "bg-slate-950 border-slate-800 hover:bg-slate-800 text-slate-300"
+                    }`}
+                  >
+                    <span>{getFlag(p.sourceLanguage)} {p.sourceLanguage} → {getFlag(p.targetLanguage)} {p.targetLanguage}</span>
+                    {p.isActive && <span className="text-teal-400">✓</span>}
+                  </button>
+                ))}
+              </div>
+
+              <div className="border-t border-slate-800 pt-4 flex flex-col gap-2">
+                <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Create New Pair</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => createLanguagePair("English", "Spanish")}
+                    className="bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 p-2.5 rounded-lg text-xs font-semibold transition"
+                  >
+                    🇬🇧 → 🇪🇸 Spanish
+                  </button>
+                  <button
+                    onClick={() => createLanguagePair("English", "Russian")}
+                    className="bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 p-2.5 rounded-lg text-xs font-semibold transition"
+                  >
+                    🇬🇧 → 🇷🇺 Russian
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex justify-end mt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowPairSelector(false)}
+                  className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 px-4 rounded-xl text-sm transition"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab content renderer */}
+        <main className="flex-1 flex flex-col gap-6">
+          {activeTab === "home" && (
+            <div className="flex flex-col gap-6">
+              
+              {/* Practice cards / Quick Actions */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {/* SRS Review Banner */}
+                <div className="bg-gradient-to-br from-teal-500/10 to-teal-500/5 border border-teal-500/20 rounded-3xl p-6 flex flex-col justify-between items-start gap-4">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-teal-400 text-xs font-bold uppercase tracking-wider">Spaced Repetition Review</span>
+                    <h3 className="text-2xl font-bold text-slate-100">Review Flashcards</h3>
+                    <p className="text-slate-400 text-sm mt-1">
+                      You have <span className="text-teal-400 font-semibold">{dueWords.length} words</span> waiting to be reviewed.
+                    </p>
+                  </div>
+                  <button
+                    disabled={dueWords.length === 0}
+                    onClick={() => startPractice(dueWords)}
+                    className="bg-teal-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-teal-400 text-slate-950 font-bold px-6 py-3 rounded-2xl text-sm transition"
+                  >
+                    Start Review ({dueWords.length})
+                  </button>
+                </div>
+
+                {/* Add vocabulary cards */}
+                <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between items-start gap-4">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Quick Actions</span>
+                    <h3 className="text-2xl font-bold text-slate-100">Expand Vocabulary</h3>
+                    <p className="text-slate-400 text-sm mt-1">
+                      Add new custom words to practice lists and track them with smart intervals.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowAddWord(true)}
+                    className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-6 py-3 rounded-2xl text-sm border border-slate-700 transition"
+                  >
+                    + Add New Word
+                  </button>
+                </div>
+
+              </div>
+
+              {/* Dictionary and words lists */}
+              <div className="flex flex-col gap-4">
+                <div className="flex justify-between items-center gap-4 flex-wrap">
+                  <h3 className="text-xl font-bold text-slate-200">Word Feed</h3>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="Search words..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-100 focus:outline-none focus:border-teal-500"
+                    />
+                    <select
+                      value={categoryFilter}
+                      onChange={(e) => setCategoryFilter(e.target.value)}
+                      className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-100 focus:outline-none focus:border-teal-500"
+                    >
+                      {categories.map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {filteredWords.map(w => {
+                    const isDue = !w.whenRepeat || new Date(w.whenRepeat) <= new Date();
+                    return (
+                      <div 
+                        key={w.id} 
+                        className={`p-5 rounded-2xl border flex flex-col justify-between gap-3 ${
+                          isDue 
+                            ? "bg-teal-500/5 border-teal-500/10" 
+                            : "bg-slate-900/40 border-slate-900"
+                        }`}
+                      >
+                        <div className="flex justify-between items-start">
+                          <span className="text-xs text-slate-500 font-semibold bg-slate-900 px-2.5 py-0.5 rounded-full border border-slate-800">
+                            {w.category}
+                          </span>
+                          {isDue && (
+                            <span className="text-[10px] text-teal-400 font-bold uppercase bg-teal-500/10 px-2 py-0.5 rounded-full border border-teal-500/20">
+                              Due
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-lg font-bold text-slate-200">{w.origin}</span>
+                          <span className="text-sm text-teal-400">{w.translate}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs text-slate-500 mt-2">
+                          <span>Accuracy: {w.rightAnswer}/{w.rightAnswer + w.wrongAnswer}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {activeTab === "assignments" && (
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 flex flex-col gap-6">
+              <h3 className="text-2xl font-bold text-slate-100">Assignments &amp; Quests</h3>
+              <p className="text-slate-400 text-sm">
+                Complete daily assignments to earn extra XP booster points and level up!
+              </p>
+
+              <div className="flex flex-col gap-4">
+                <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 flex justify-between items-center">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-teal-400 font-bold uppercase tracking-wider">Daily Quest</span>
+                    <h4 className="text-lg font-semibold text-slate-200">Practice 10 Words</h4>
+                    <p className="text-xs text-slate-500">Practice new vocabulary words using flashcards</p>
+                  </div>
+                  <button 
+                    onClick={() => startPractice(words.slice(0, 10))}
+                    className="bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 font-semibold px-4 py-2 rounded-xl text-sm transition"
+                  >
+                    Start
+                  </button>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 flex justify-between items-center">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-orange-400 font-bold uppercase tracking-wider">Perfect Streak</span>
+                    <h4 className="text-lg font-semibold text-slate-200">Review 5 Due Words</h4>
+                    <p className="text-xs text-slate-500">Graduated SRS review items</p>
+                  </div>
+                  <button 
+                    disabled={dueWords.length === 0}
+                    onClick={() => startPractice(dueWords.slice(0, 5))}
+                    className="bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 disabled:opacity-50 font-semibold px-4 py-2 rounded-xl text-sm transition"
+                  >
+                    Review
+                  </button>
+                </div>
               </div>
             </div>
           )}
 
-          <button onClick={handleLogout} style={{
-            background: 'transparent',
-            border: 'none',
-            color: 'hsl(var(--muted-foreground))',
-            cursor: 'pointer',
-            padding: '0.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            fontSize: '0.9rem',
-            fontWeight: 500,
-            transition: 'color 0.2s',
-          }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = 'hsl(var(--muted-foreground))'}>
-            <LogOut size={16} />
-            <span>Logout</span>
-          </button>
-        </div>
-      </header>
-
-      {/* Main Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1.2fr', gap: '2rem' }}>
-        
-        {/* Left Side: Decks list */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Your Decks</h2>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {decks.length === 0 ? (
-              <div className="glass" style={{ padding: '3rem', textAlign: 'center', borderRadius: 'var(--radius)', color: 'hsl(var(--muted-foreground))' }}>
-                <BookMarked size={48} style={{ marginBottom: '1rem', opacity: 0.5 }} />
-                <p>You don't have any vocabulary decks yet.</p>
-                <p style={{ fontSize: '0.85rem' }}>Create one below to start learning!</p>
+          {activeTab === "phrase" && (
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 flex flex-col gap-6">
+              <div className="flex flex-col gap-1">
+                <span className="text-xs text-teal-400 font-bold uppercase tracking-wider">Interactive Game</span>
+                <h3 className="text-2xl font-bold text-slate-100">Phrase Builder</h3>
+                <p className="text-slate-400 text-sm">
+                  Assemble target sentences from separate word tiles. Click tiles to arrange them correctly!
+                </p>
               </div>
-            ) : (
-              decks.map(deck => (
-                <div key={deck.id} className="glass glass-interactive" style={{
-                  padding: '1.5rem',
-                  borderRadius: 'var(--radius)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', maxWidth: '70%' }}>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>{deck.name}</h3>
-                    <p style={{ fontSize: '0.9rem', color: 'hsl(var(--muted-foreground))' }}>
-                      {deck.description || 'No description provided'}
-                    </p>
-                    <span style={{
-                      fontSize: '0.8rem',
-                      background: 'rgba(139, 92, 246, 0.1)',
-                      color: 'hsl(var(--primary))',
-                      padding: '0.2rem 0.6rem',
-                      borderRadius: '0.4rem',
-                      width: 'fit-content',
-                      fontWeight: 600,
-                      marginTop: '0.4rem',
-                    }}>
-                      {deck._count.words} words
-                    </span>
-                  </div>
 
-                  <Link href={`/practice/${deck.id}`} className="glass-interactive" style={{
-                    background: 'hsl(var(--primary))',
-                    color: '#fff',
-                    padding: '0.7rem 1.5rem',
-                    borderRadius: '0.6rem',
-                    fontWeight: 700,
-                    fontSize: '0.95rem',
-                    boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)',
-                    transition: 'transform 0.2s',
-                  }}>
-                    Practice (FSRS)
-                  </Link>
-                </div>
-              ))
-            )}
-          </div>
+              <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 flex flex-col gap-4 text-center min-h-[100px] justify-center">
+                <span className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Assemble this sentence:</span>
+                <span className="text-lg font-semibold text-slate-300">Солнечная погода сегодня очень приятная</span>
+                <span className="text-xs text-slate-600">(Target: "{phraseTarget}")</span>
+              </div>
 
-          {/* Create Deck Form */}
-          <div className="glass" style={{ padding: '1.5rem', borderRadius: 'var(--radius)', marginTop: '1rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Plus size={18} />
-              Create New Deck
-            </h3>
-            <form onSubmit={handleCreateDeck} style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-              <input
-                type="text"
-                value={newDeckName}
-                onChange={(e) => setNewDeckName(e.target.value)}
-                placeholder="Deck Name (e.g. Spanish Vocabulary)"
-                required
-                style={{
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '0.5rem',
-                  padding: '0.7rem 0.9rem',
-                  color: '#fff',
-                  outline: 'none',
-                  fontSize: '0.9rem',
-                }}
-              />
-              <input
-                type="text"
-                value={newDeckDesc}
-                onChange={(e) => setNewDeckDesc(e.target.value)}
-                placeholder="Short Description (e.g. Words from A1 Greetings)"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '0.5rem',
-                  padding: '0.7rem 0.9rem',
-                  color: '#fff',
-                  outline: 'none',
-                  fontSize: '0.9rem',
-                }}
-              />
-              {deckError && <span style={{ color: 'hsl(var(--destructive))', fontSize: '0.8rem' }}>{deckError}</span>}
-              <button
-                type="submit"
-                disabled={creatingDeck || !newDeckName.trim()}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid hsl(var(--border))',
-                  color: '#fff',
-                  borderRadius: '0.5rem',
-                  padding: '0.7rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  fontSize: '0.9rem',
-                }}
-              >
-                {creatingDeck ? 'Creating...' : 'Create'}
-              </button>
-            </form>
-          </div>
-        </div>
+              {/* Selected tiles */}
+              <div className="bg-slate-950/50 border border-slate-900 rounded-2xl p-4 min-h-[60px] flex flex-wrap gap-2 items-center">
+                {phraseSelected.map((word, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      setPhraseSelected(phraseSelected.filter((_, i) => i !== idx));
+                      setPhraseStatus("building");
+                    }}
+                    className="bg-teal-500 text-slate-950 font-semibold px-3 py-1.5 rounded-lg text-sm transition hover:bg-teal-400"
+                  >
+                    {word} ✕
+                  </button>
+                ))}
+              </div>
 
-        {/* Right Side: Add word directly to active deck */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Add Card</h2>
-          
-          <div className="glass" style={{ padding: '1.5rem', borderRadius: 'var(--radius)' }}>
-            <form onSubmit={handleAddWord} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Select Deck</label>
-                <select
-                  value={selectedDeckId}
-                  onChange={(e) => setSelectedDeckId(e.target.value)}
-                  style={{
-                    background: '#18181b',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '0.5rem',
-                    padding: '0.7rem 0.9rem',
-                    color: '#fff',
-                    outline: 'none',
-                    fontSize: '0.9rem',
+              {/* Pool of options */}
+              <div className="flex flex-wrap gap-2 justify-center py-2">
+                {phraseOptions.map((word, idx) => {
+                  const isUsed = phraseSelected.includes(word);
+                  return (
+                    <button
+                      key={idx}
+                      disabled={isUsed}
+                      onClick={() => {
+                        setPhraseSelected([...phraseSelected, word]);
+                        setPhraseStatus("building");
+                      }}
+                      className={`font-semibold px-4 py-2 rounded-xl text-sm border transition ${
+                        isUsed
+                          ? "bg-slate-950 border-slate-950 text-slate-700 cursor-not-allowed"
+                          : "bg-slate-900 border-slate-800 hover:border-slate-700 text-slate-300"
+                      }`}
+                    >
+                      {word}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Control buttons */}
+              <div className="flex gap-4 justify-between items-center mt-4">
+                <button
+                  onClick={() => {
+                    setPhraseSelected([]);
+                    setPhraseStatus("building");
                   }}
+                  className="text-sm text-slate-400 hover:text-slate-200 transition font-semibold"
                 >
-                  {decks.map(d => (
-                    <option key={d.id} value={d.id}>{d.name}</option>
-                  ))}
-                </select>
+                  Clear All
+                </button>
+
+                <div className="flex gap-3">
+                  {phraseStatus === "correct" && (
+                    <span className="text-teal-400 font-semibold text-sm flex items-center">✓ Correct! +10 XP</span>
+                  )}
+                  {phraseStatus === "incorrect" && (
+                    <span className="text-red-400 font-semibold text-sm flex items-center">✕ Try again!</span>
+                  )}
+                  <button
+                    onClick={() => {
+                      const joined = phraseSelected.join(" ");
+                      if (joined.toLowerCase() === phraseTarget.toLowerCase()) {
+                        setPhraseStatus("correct");
+                      } else {
+                        setPhraseStatus("incorrect");
+                      }
+                    }}
+                    className="bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl text-sm transition"
+                  >
+                    Check Answer
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "profile" && profile && (
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 flex flex-col gap-6">
+              <h3 className="text-2xl font-bold text-slate-100">Student Profile</h3>
+
+              <div className="flex gap-6 items-center flex-wrap">
+                <div className="w-20 h-20 rounded-full bg-teal-500/20 text-teal-400 flex items-center justify-center text-4xl border border-teal-500/30">
+                  🧑‍🎓
+                </div>
+                <div className="flex flex-col gap-1">
+                  <h4 className="text-xl font-bold text-slate-100">{profile.name}</h4>
+                  <p className="text-xs text-slate-500">Joined NeuroLang on {new Date(profile.createdAt).toLocaleDateString()}</p>
+                </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Word or Phrase (Target Language)</label>
-                <input
-                  type="text"
-                  value={newWordText}
-                  onChange={(e) => setNewWordText(e.target.value)}
-                  placeholder="e.g. Bonjour"
-                  required
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '0.5rem',
-                    padding: '0.7rem 0.9rem',
-                    color: '#fff',
-                    outline: 'none',
-                    fontSize: '0.9rem',
-                  }}
-                />
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
+                <div className="bg-slate-950 border border-slate-800 p-5 rounded-2xl text-center flex flex-col gap-1">
+                  <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Total XP</span>
+                  <span className="text-2xl font-bold text-yellow-400">{profile.totalXP}</span>
+                </div>
+                <div className="bg-slate-950 border border-slate-800 p-5 rounded-2xl text-center flex flex-col gap-1">
+                  <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Streak</span>
+                  <span className="text-2xl font-bold text-orange-400">{profile.streakCount} days</span>
+                </div>
+                <div className="bg-slate-950 border border-slate-800 p-5 rounded-2xl text-center flex flex-col gap-1">
+                  <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Total Words</span>
+                  <span className="text-2xl font-bold text-slate-100">{words.length}</span>
+                </div>
+                <div className="bg-slate-950 border border-slate-800 p-5 rounded-2xl text-center flex flex-col gap-1">
+                  <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Proficiency</span>
+                  <span className="text-2xl font-bold text-teal-400">{activePair?.proficiencyLevel || "A1"}</span>
+                </div>
               </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Translation</label>
-                <input
-                  type="text"
-                  value={newWordTranslation}
-                  onChange={(e) => setNewWordTranslation(e.target.value)}
-                  placeholder="e.g. Hello / Good morning"
-                  required
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '0.5rem',
-                    padding: '0.7rem 0.9rem',
-                    color: '#fff',
-                    outline: 'none',
-                    fontSize: '0.9rem',
-                  }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Context Example (Optional)</label>
-                <textarea
-                  value={newWordContext}
-                  onChange={(e) => setNewWordContext(e.target.value)}
-                  placeholder="e.g. Bonjour, comment ça va?"
-                  rows={3}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '0.5rem',
-                    padding: '0.7rem 0.9rem',
-                    color: '#fff',
-                    outline: 'none',
-                    fontFamily: 'inherit',
-                    fontSize: '0.9rem',
-                    resize: 'none',
-                  }}
-                />
-              </div>
-
-              {wordError && <span style={{ color: 'hsl(var(--destructive))', fontSize: '0.8rem' }}>{wordError}</span>}
-              {wordSuccess && (
-                <span style={{
-                  color: 'hsl(var(--success))',
-                  fontSize: '0.85rem',
-                  background: 'rgba(16, 185, 129, 0.1)',
-                  padding: '0.5rem',
-                  borderRadius: '0.4rem',
-                  textAlign: 'center',
-                }}>
-                  Word added successfully!
-                </span>
-              )}
-
-              <button
-                type="submit"
-                disabled={addingWord || !newWordText.trim() || !newWordTranslation.trim() || !selectedDeckId}
-                className="glass-interactive"
-                style={{
-                  background: 'hsl(var(--primary))',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '0.5rem',
-                  padding: '0.8rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  fontSize: '0.95rem',
-                  boxShadow: '0 4px 15px rgba(139, 92, 246, 0.2)',
-                }}
-              >
-                {addingWord ? 'Adding Word...' : 'Add Word'}
-              </button>
-            </form>
-          </div>
-        </div>
-
+            </div>
+          )}
+        </main>
       </div>
+
+      {/* Navigation Footer */}
+      <footer className="sticky bottom-0 bg-slate-950 border-t border-slate-900 py-3 px-6 flex justify-around items-center">
+        <button
+          onClick={() => setActiveTab("home")}
+          className={`flex flex-col items-center gap-1 text-xs font-medium transition ${
+            activeTab === "home" ? "text-teal-400" : "text-slate-500 hover:text-slate-300"
+          }`}
+        >
+          <span className="text-xl">🏠</span>
+          <span>Home</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("assignments")}
+          className={`flex flex-col items-center gap-1 text-xs font-medium transition ${
+            activeTab === "assignments" ? "text-teal-400" : "text-slate-500 hover:text-slate-300"
+          }`}
+        >
+          <span className="text-xl">📋</span>
+          <span>Quests</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("phrase")}
+          className={`flex flex-col items-center gap-1 text-xs font-medium transition ${
+            activeTab === "phrase" ? "text-teal-400" : "text-slate-500 hover:text-slate-300"
+          }`}
+        >
+          <span className="text-xl">✨</span>
+          <span>Phrase Builder</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("profile")}
+          className={`flex flex-col items-center gap-1 text-xs font-medium transition ${
+            activeTab === "profile" ? "text-teal-400" : "text-slate-500 hover:text-slate-300"
+          }`}
+        >
+          <span className="text-xl">👤</span>
+          <span>Profile</span>
+        </button>
+      </footer>
+
     </div>
   );
 }

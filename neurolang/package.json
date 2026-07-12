@@ -6,28 +6,24 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "postinstall": "prisma generate"
+    "lint": "eslint"
   },
   "dependencies": {
-    "@prisma/client": "5.21.1",
-    "@vercel/blob": "^0.27.0",
-    "bcrypt": "^5.1.1",
-    "canvas-confetti": "^1.9.3",
-    "jsonwebtoken": "^9.0.2",
-    "lucide-react": "^0.468.0",
-    "next": "16.2.9",
-    "openai": "^4.76.0",
+    "@prisma/client": "^7.8.0",
+    "@supabase/supabase-js": "^2.110.2",
+    "next": "16.2.10",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
   "devDependencies": {
-    "@types/bcrypt": "^5.0.2",
-    "@types/canvas-confetti": "^1.6.4",
-    "@types/jsonwebtoken": "^9.0.6",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "prisma": "5.21.1",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.10",
+    "prisma": "^7.8.0",
+    "tailwindcss": "^4",
     "typescript": "^5"
   }
 }
