@@ -52,7 +52,7 @@ export default function Dashboard() {
         const sessionData = await sessionRes.json();
         
         if (!sessionRes.ok || !sessionData.authenticated) {
-          router.push('/neurolang/login');
+          router.push('/login');
           return;
         }
 
@@ -80,7 +80,7 @@ export default function Dashboard() {
     try {
       const res = await fetch('/neurolang/api/auth/logout', { method: 'POST' });
       if (res.ok) {
-        router.push('/neurolang/login');
+        router.push('/login');
         router.refresh();
       }
     } catch (err) {
@@ -292,7 +292,7 @@ export default function Dashboard() {
                     </span>
                   </div>
 
-                  <Link href={`/neurolang/practice/${deck.id}`} className="glass-interactive" style={{
+                  <Link href={`/practice/${deck.id}`} className="glass-interactive" style={{
                     background: 'hsl(var(--primary))',
                     color: '#fff',
                     padding: '0.7rem 1.5rem',

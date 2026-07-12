@@ -268,7 +268,7 @@ export default function PracticePage() {
       
       {/* Top Bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '3rem' }}>
-        <Link href="/neurolang" style={{
+        <Link href="/" style={{
           display: 'flex',
           alignItems: 'center',
           gap: '0.4rem',
@@ -294,7 +294,7 @@ export default function PracticePage() {
           <p style={{ color: 'hsl(var(--muted-foreground))', marginBottom: '2rem' }}>
             No more words due in this deck. Come back later for reviews or add new words!
           </p>
-          <Link href="/neurolang" style={{
+          <Link href="/" style={{
             background: 'hsl(var(--primary))',
             color: '#fff',
             padding: '0.8rem 2rem',

@@ -30,7 +30,7 @@ export default function LoginPage() {
       if (!res.ok) {
         setError(data.error || 'Invalid credentials');
       } else {
-        router.push('/neurolang');
+        router.push('/');
         router.refresh();
       }
     } catch (err) {
@@ -161,7 +161,7 @@ export default function LoginPage() {
           marginTop: '2rem',
         }}>
           Don't have an account?{' '}
-          <Link href="/neurolang/register" style={{
+          <Link href="/register" style={{
             color: 'hsl(var(--primary))',
             fontWeight: 600,
             textDecoration: 'none',

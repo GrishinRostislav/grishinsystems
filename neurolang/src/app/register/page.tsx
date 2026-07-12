@@ -36,7 +36,7 @@ export default function RegisterPage() {
       if (!res.ok) {
         setError(data.error || 'Registration failed');
       } else {
-        router.push('/neurolang');
+        router.push('/');
         router.refresh();
       }
     } catch (err) {
@@ -191,7 +191,7 @@ export default function RegisterPage() {
           marginTop: '2rem',
         }}>
           Already have an account?{' '}
-          <Link href="/neurolang/login" style={{
+          <Link href="/login" style={{
             color: 'hsl(var(--primary))',
             fontWeight: 600,
             textDecoration: 'none',
