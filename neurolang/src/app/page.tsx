@@ -87,6 +87,15 @@ export default function Home() {
   const [debugError, setDebugError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Override window.fetch to automatically prepend /neurolang for all relative /api requests
+    const originalFetch = window.fetch;
+    window.fetch = function (input, init) {
+      if (typeof input === "string" && input.startsWith("/api/")) {
+        return originalFetch(`/neurolang${input}`, init);
+      }
+      return originalFetch(input, init);
+    };
+
     const handleGlobalError = (event: ErrorEvent) => {
       setDebugError(`Global Error: ${event.message} at ${event.filename}:${event.lineno}`);
     };
@@ -98,6 +107,7 @@ export default function Home() {
     window.addEventListener("unhandledrejection", handlePromiseRejection);
 
     return () => {
+      window.fetch = originalFetch; // restore
       window.removeEventListener("error", handleGlobalError);
       window.removeEventListener("unhandledrejection", handlePromiseRejection);
     };
