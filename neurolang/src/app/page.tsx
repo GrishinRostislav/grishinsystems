@@ -84,6 +84,25 @@ export default function Home() {
   const [isPracticeActive, setIsPracticeActive] = useState(false);
   
   // Core Data States
+  const [debugError, setDebugError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleGlobalError = (event: ErrorEvent) => {
+      setDebugError(`Global Error: ${event.message} at ${event.filename}:${event.lineno}`);
+    };
+    const handlePromiseRejection = (event: PromiseRejectionEvent) => {
+      setDebugError(`Unhandled Rejection: ${event.reason}`);
+    };
+
+    window.addEventListener("error", handleGlobalError);
+    window.addEventListener("unhandledrejection", handlePromiseRejection);
+
+    return () => {
+      window.removeEventListener("error", handleGlobalError);
+      window.removeEventListener("unhandledrejection", handlePromiseRejection);
+    };
+  }, []);
+
   const [profile, setProfile] = useState<Profile | null>(null);
   const [languagePairs, setLanguagePairs] = useState<LanguagePair[]>([]);
   const [activePair, setActivePair] = useState<LanguagePair | null>(null);
@@ -178,9 +197,13 @@ export default function Home() {
         setQuests(data.quests);
         setDailyStats(data.stats);
         setDecks(data.decks);
+      } else {
+        const text = await res.text();
+        setDebugError(`API Server Error: ${res.status} ${res.statusText} - ${text}`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to bootstrap application:", err);
+      setDebugError(`Failed to bootstrap: ${err.message || err}`);
     }
   };
 
@@ -721,6 +744,18 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+      {debugError && (
+        <div className="bg-red-500/20 border-b border-red-500 text-red-200 p-4 text-xs font-mono break-all z-50 flex flex-col gap-2">
+          <div className="font-bold text-sm">⚠️ Client-Side Error Detected:</div>
+          <div>{debugError}</div>
+          <button 
+            onClick={() => setDebugError(null)} 
+            className="w-fit bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded font-bold cursor-pointer"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
       
       {/* Header bar */}
       <header className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-md border-b border-slate-900 py-4 px-6 flex justify-between items-center">
