@@ -296,32 +296,116 @@ export default function Home() {
     }
   };
 
+  const loadSqlJs = (): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      if ((window as any).initSqlJs) {
+        resolve((window as any).initSqlJs);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.12.0/sql-wasm.js";
+      script.async = true;
+      script.onload = () => {
+        resolve((window as any).initSqlJs);
+      };
+      script.onerror = (err) => {
+        reject(new Error("Failed to load sql.js WebAssembly SQLite library"));
+      };
+      document.body.appendChild(script);
+    });
+  };
+
   const handleImportDB = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setImportStatus("Importing database...");
-    const formData = new FormData();
-    formData.append("file", file);
-
+    setImportStatus("Loading SQLite parser (sql.js)...");
     try {
-      const res = await fetch("/api/import-db", {
-        method: "POST",
-        body: formData,
+      const initSqlJs = await loadSqlJs();
+      const SQL = await initSqlJs({
+        locateFile: (filename: string) => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.12.0/${filename}`,
       });
+
+      setImportStatus("Parsing database file...");
+      const arrayBuffer = await file.arrayBuffer();
+      const u8Array = new Uint8Array(arrayBuffer);
+      const db = new SQL.Database(u8Array);
+
+      const getRows = (query: string) => {
+        try {
+          const res = db.exec(query);
+          if (res.length === 0) return [];
+          const columns = res[0].columns;
+          return res[0].values.map((row: any) => {
+            const obj: any = {};
+            columns.forEach((col: string, idx: number) => {
+              obj[col] = row[idx];
+            });
+            return obj;
+          });
+        } catch (err) {
+          console.error("Query failed:", query, err);
+          return [];
+        }
+      };
+
+      // 1. Extract Profile
+      const profileRows = getRows("SELECT ZNAME, ZTOTALXP, ZSTREAKCOUNT FROM ZUSERPROFILE LIMIT 1;");
+      const profileData = profileRows.length > 0 ? {
+        name: profileRows[0].ZNAME || "Student",
+        totalXP: profileRows[0].ZTOTALXP || 0,
+        streakCount: profileRows[0].ZSTREAKCOUNT || 0,
+      } : null;
+
+      // 2. Extract Language Pairs
+      const lpRows = getRows("SELECT Z_PK, ZSOURCELANGUAGE, ZTARGETLANGUAGE, ZPROFICIENCYLEVEL, ZISACTIVE FROM ZLANGUAGEPAIR;");
+      if (lpRows.length === 0) {
+        throw new Error("No language pairs found in database. Make sure this is the default.store file.");
+      }
+
+      const languagePairs = lpRows.map((row: any) => ({
+        pk: row.Z_PK,
+        sourceLanguage: row.ZSOURCELANGUAGE,
+        targetLanguage: row.ZTARGETLANGUAGE,
+        proficiencyLevel: row.ZPROFICIENCYLEVEL,
+        isActive: row.ZISACTIVE === 1,
+      }));
+
+      // 3. Extract Words
+      const wordRows = getRows("SELECT ZORIGIN, ZTRANSLATE, ZCATEGORY, ZWORDPOINTS, ZWHENREPEAT, ZWRONGANSWER, ZRIGHTANSWER, ZISLEARNING, ZLANGUAGEPAIR, ZFSRSSTABILITY, ZFSRSDIFFICULTY, ZFSRSLASTREVIEW FROM ZWORD;");
+      const wordsData = wordRows.map((row: any) => ({
+        languagePairPk: row.ZLANGUAGEPAIR,
+        origin: row.ZORIGIN,
+        translate: row.ZTRANSLATE,
+        category: row.ZCATEGORY,
+        wordPoints: row.ZWORDPOINTS,
+        whenRepeat: row.ZWHENREPEAT,
+        wrongAnswer: row.ZWRONGANSWER,
+        rightAnswer: row.ZRIGHTANSWER,
+        isLearning: row.ZISLEARNING === 1,
+        fsrsStability: row.ZFSRSSTABILITY,
+        fsrsDifficulty: row.ZFSRSDIFFICULTY,
+        fsrsLastReview: row.ZFSRSLASTREVIEW,
+      }));
+
+      db.close();
+
+      setImportStatus(`Uploading ${wordsData.length} words to server...`);
+      const res = await fetch("/api/import-json", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profile: profileData, languagePairs, words: wordsData }),
+      });
+
       const data = await res.json();
       if (res.ok) {
         setImportStatus(data.message);
-        fetchProfile();
-        fetchWords();
-        fetchLanguages();
-        fetchQuests();
-        fetchDecks();
+        bootstrapApp(); // Reload everything
       } else {
         setImportStatus(`Error: ${data.error}`);
       }
     } catch (err: any) {
-      setImportStatus(`Error: ${err.message}`);
+      setImportStatus(`Error parsing database: ${err.message}`);
     }
   };
 
