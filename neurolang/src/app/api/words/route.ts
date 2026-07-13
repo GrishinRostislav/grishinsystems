@@ -180,3 +180,28 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export async function DELETE() {
+  try {
+    const { activePair, profile } = await ensureInitialized();
+    
+    await prisma.word.deleteMany({
+      where: { languagePairId: activePair.id }
+    });
+
+    await prisma.dailyStat.deleteMany({});
+
+    await prisma.userProfile.update({
+      where: { id: profile.id },
+      data: {
+        totalXP: 0,
+        streakCount: 0,
+      }
+    });
+
+    return NextResponse.json({ success: true, message: "Database reset successfully." });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+

@@ -141,6 +141,7 @@ export default function Home() {
   const [srsBaseMinutes, setSrsBaseMinutes] = useState(120);
   const [srsComplexity, setSrsComplexity] = useState(5.0);
   const [importStatus, setImportStatus] = useState("");
+  const [resetStatus, setResetStatus] = useState("");
 
   // Category view sorting & filters
   const [sortOption, setSortOption] = useState<"name" | "points" | "due">("name");
@@ -428,6 +429,26 @@ export default function Home() {
     });
     if (res.ok) {
       bootstrapApp();
+    }
+  };
+
+  const handleResetDatabase = async () => {
+    if (!confirm("⚠️ WARNING: This will delete ALL words, stats, and reset your XP/streak to zero. Are you sure you want to proceed?")) return;
+    setResetStatus("Resetting database...");
+    try {
+      const res = await fetch("/api/words", {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setResetStatus("Database reset successfully!");
+        bootstrapApp();
+        setTimeout(() => setResetStatus(""), 3000);
+      } else {
+        setResetStatus(`Error: ${data.error}`);
+      }
+    } catch (err: any) {
+      setResetStatus(`Error: ${err.message}`);
     }
   };
 
@@ -1797,6 +1818,25 @@ export default function Home() {
                   </div>
                   {importStatus && (
                     <p className="text-xs font-bold text-teal-400 animate-pulse">{importStatus}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Danger Zone Section */}
+              <div className="bg-red-950/15 border border-red-950/50 rounded-3xl p-8 flex flex-col gap-6">
+                <h4 className="font-black text-lg text-red-400">Danger Zone</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Resetting the database will permanently delete all your words, category lists, daily stats, and reset your XP. This cannot be undone.
+                </p>
+                <div className="flex flex-col gap-3">
+                  <button 
+                    onClick={handleResetDatabase}
+                    className="w-fit bg-red-900 hover:bg-red-800 text-white font-black py-2.5 px-5 rounded-xl text-xs transition cursor-pointer"
+                  >
+                    Reset Database
+                  </button>
+                  {resetStatus && (
+                    <p className="text-xs font-bold text-red-400 animate-pulse">{resetStatus}</p>
                   )}
                 </div>
               </div>
