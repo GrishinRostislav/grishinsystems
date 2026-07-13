@@ -152,15 +152,41 @@ export default function Home() {
   const [binaryGameInterval, setBinaryGameInterval] = useState<any>(null);
   const [binaryGameOver, setBinaryGameOver] = useState(false);
 
+  // Consolidated Bootstrap Load
+  const bootstrapApp = async () => {
+    try {
+      const res = await fetch("/api/bootstrap");
+      if (res.ok) {
+        const data = await res.json();
+        setProfile(data.profile);
+        setEditNameValue(data.profile.name);
+        setLanguagePairs(data.languages);
+        setActivePair(data.languages.find((p: any) => p.isActive) || null);
+        setWords(data.words);
+        setCategories(data.categories && data.categories.length > 0 ? data.categories : [
+          { id: "1", name: "General", sortOrder: -1, isHidden: false },
+          { id: "2", name: "Survival Words", sortOrder: 0, isHidden: false },
+          { id: "3", name: "Car & Road", sortOrder: 1, isHidden: false },
+          { id: "4", name: "Health & Pharmacy", sortOrder: 2, isHidden: false },
+          { id: "5", name: "Housing & Bills", sortOrder: 3, isHidden: false },
+          { id: "6", name: "Bank & Docs", sortOrder: 4, isHidden: false },
+          { id: "7", name: "Tools & Site", sortOrder: 5, isHidden: false },
+          { id: "8", name: "Small Talk", sortOrder: 6, isHidden: false },
+          { id: "9", name: "Soft Skills", sortOrder: 7, isHidden: false },
+          { id: "10", name: "Time and Weather", sortOrder: 8, isHidden: false },
+        ]);
+        setQuests(data.quests);
+        setDailyStats(data.stats);
+        setDecks(data.decks);
+      }
+    } catch (err) {
+      console.error("Failed to bootstrap application:", err);
+    }
+  };
+
   // Initial Load
   useEffect(() => {
-    fetchProfile();
-    fetchLanguages();
-    fetchWords();
-    fetchCategories();
-    fetchQuests();
-    fetchStats();
-    fetchDecks();
+    bootstrapApp();
     
     // Load highscore
     const savedHighScore = localStorage.getItem("binaryHighScore");
