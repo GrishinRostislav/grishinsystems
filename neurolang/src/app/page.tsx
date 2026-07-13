@@ -118,6 +118,7 @@ export default function Home() {
   const [activePair, setActivePair] = useState<LanguagePair | null>(null);
   const [words, setWords] = useState<Word[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [importToGeneral, setImportToGeneral] = useState(true);
   const [quests, setQuests] = useState<Quest[]>([]);
   const [dailyStats, setDailyStats] = useState<DailyStat[]>([]);
   const [decks, setDecks] = useState<Deck[]>([]);
@@ -377,7 +378,7 @@ export default function Home() {
         languagePairPk: row.ZLANGUAGEPAIR,
         origin: row.ZORIGIN,
         translate: row.ZTRANSLATE,
-        category: row.ZCATEGORY,
+        category: importToGeneral ? "General" : (row.ZCATEGORY || "General"),
         wordPoints: row.ZWORDPOINTS,
         whenRepeat: row.ZWHENREPEAT,
         wrongAnswer: row.ZWRONGANSWER,
@@ -406,6 +407,27 @@ export default function Home() {
       }
     } catch (err: any) {
       setImportStatus(`Error parsing database: ${err.message}`);
+    }
+  };
+
+  const handleToggleCategoryHide = async (catId: string, currentHidden: boolean) => {
+    const res = await fetch(`/api/categories/${catId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isHidden: !currentHidden }),
+    });
+    if (res.ok) {
+      bootstrapApp();
+    }
+  };
+
+  const handleDeleteCategory = async (catId: string, catName: string) => {
+    if (!confirm(`Are you sure you want to delete "${catName}"? All words in it will be automatically moved to "General".`)) return;
+    const res = await fetch(`/api/categories/${catId}`, {
+      method: "DELETE",
+    });
+    if (res.ok) {
+      bootstrapApp();
     }
   };
 
@@ -809,7 +831,8 @@ export default function Home() {
   };
 
   // --- Computed fields ---
-  const dueCount = words.filter(w => !w.whenRepeat || new Date(w.whenRepeat) <= new Date()).length;
+  const hiddenCategoryNames = categories.filter(c => c.isHidden).map(c => c.name);
+  const dueCount = words.filter(w => !hiddenCategoryNames.includes(w.category) && (!w.whenRepeat || new Date(w.whenRepeat) <= new Date())).length;
 
   const getRank = (xp: number) => {
     if (xp >= 10000) return "Master 👑";
@@ -1295,14 +1318,34 @@ export default function Home() {
                     <div
                       key={cat.id}
                       onClick={() => setSelectedCategory(cat.name)}
-                      className="bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-slate-750 cursor-pointer rounded-2xl p-5 flex flex-col gap-4 justify-between transition relative overflow-hidden"
+                      className={`bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-slate-750 cursor-pointer rounded-2xl p-5 flex flex-col gap-4 justify-between transition relative overflow-hidden ${cat.isHidden ? "opacity-50" : ""}`}
                     >
                       <div className="flex justify-between items-start">
-                        <span className="text-3xl">📂</span>
-                        {catDueCount > 0 && (
-                          <span className="bg-red-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
-                            {catDueCount}
-                          </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-3xl">{cat.isHidden ? "🙈" : "📂"}</span>
+                          {catDueCount > 0 && !cat.isHidden && (
+                            <span className="bg-red-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
+                              {catDueCount}
+                            </span>
+                          )}
+                        </div>
+                        {cat.name !== "General" && (
+                          <div className="flex gap-1.5" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              onClick={() => handleToggleCategoryHide(cat.id, cat.isHidden)}
+                              title={cat.isHidden ? "Unhide category" : "Hide category"}
+                              className="text-xs hover:bg-slate-800 p-1.5 rounded-lg border border-slate-800 text-slate-400 hover:text-slate-200 transition"
+                            >
+                              {cat.isHidden ? "👁️" : "👁️‍🗨️"}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteCategory(cat.id, cat.name)}
+                              title="Delete category"
+                              className="text-xs hover:bg-red-500/10 p-1.5 rounded-lg border border-slate-800 hover:border-red-500/35 text-slate-400 hover:text-red-400 transition"
+                            >
+                              🗑️
+                            </button>
+                          </div>
                         )}
                       </div>
                       <div className="flex flex-col">
@@ -1733,13 +1776,25 @@ export default function Home() {
                   Restore your learned words, XP progress, streaks, and custom settings directly from your SwiftUI app. Upload your backup <span className="font-mono text-indigo-400 font-bold bg-slate-950 px-2 py-1 rounded">default.store</span> file below.
                 </p>
                 
-                <div className="flex flex-col gap-3">
+                 <div className="flex flex-col gap-3">
                   <input 
                     type="file"
                     accept=".store"
                     onChange={handleImportDB}
                     className="text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-indigo-500 file:text-white hover:file:bg-indigo-400 file:cursor-pointer transition-all"
                   />
+                  <div className="flex items-center gap-2 mt-1">
+                    <input 
+                      type="checkbox"
+                      id="importToGeneral"
+                      checked={importToGeneral}
+                      onChange={(e) => setImportToGeneral(e.target.checked)}
+                      className="rounded border-slate-800 text-indigo-500 bg-slate-950 focus:ring-indigo-500 h-4 w-4 cursor-pointer"
+                    />
+                    <label htmlFor="importToGeneral" className="text-xs text-slate-400 font-bold select-none cursor-pointer">
+                      Import all words directly into "General" category
+                    </label>
+                  </div>
                   {importStatus && (
                     <p className="text-xs font-bold text-teal-400 animate-pulse">{importStatus}</p>
                   )}
