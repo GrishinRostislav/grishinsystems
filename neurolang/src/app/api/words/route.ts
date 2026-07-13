@@ -191,6 +191,12 @@ export async function DELETE() {
 
     await prisma.dailyStat.deleteMany({});
 
+    await prisma.category.deleteMany({
+      where: {
+        NOT: { name: "General" }
+      }
+    });
+
     await prisma.userProfile.update({
       where: { id: profile.id },
       data: {
