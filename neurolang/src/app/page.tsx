@@ -209,7 +209,7 @@ export default function Home() {
         setDecks(data.decks);
       } else {
         const text = await res.text();
-        setDebugError(`API Server Error: ${res.status} ${res.statusText} - ${text}`);
+        setDebugError(`API Server Error requesting "${res.url}" (on page "${window.location.href}"): ${res.status} ${res.statusText} - ${text.substring(0, 100)}`);
       }
     } catch (err: any) {
       console.error("Failed to bootstrap application:", err);
