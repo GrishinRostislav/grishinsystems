@@ -1435,170 +1435,177 @@ export default function Home() {
           </div>
         )}
 
-        {activeTab === "profile" && profile && (
-          <div className="flex flex-col gap-6 animate-fade-in">
-            
-            {/* User Profile Info Card */}
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 flex flex-col gap-6 relative overflow-hidden">
-              <div className="flex gap-6 items-center flex-wrap">
-                <div className="w-20 h-20 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-4xl font-bold">
-                  🧑‍🎓
+        {activeTab === "profile" && (
+          !profile ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
+              <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-sm text-slate-400 font-medium">Loading profile from database...</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-6 animate-fade-in">
+              
+              {/* User Profile Info Card */}
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 flex flex-col gap-6 relative overflow-hidden">
+                <div className="flex gap-6 items-center flex-wrap">
+                  <div className="w-20 h-20 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-4xl font-bold">
+                    🧑‍🎓
+                  </div>
+                  <div className="flex-1 flex flex-col gap-1.5">
+                    {isEditingName ? (
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={editNameValue}
+                          onChange={(e) => setEditNameValue(e.target.value)}
+                          className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-100 focus:outline-none"
+                        />
+                        <button
+                          onClick={handleUpdateName}
+                          className="bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-2 px-4 rounded-xl text-xs transition"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-2xl font-black text-slate-100">{profile.name}</h4>
+                        <button 
+                          onClick={() => setIsEditingName(true)}
+                          className="text-xs text-slate-500 hover:text-slate-300"
+                        >
+                          ✏️ Edit
+                        </button>
+                      </div>
+                    )}
+                    <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
+                      Rank: <span className="text-indigo-400 font-bold">{getRank(profile.totalXP)}</span>
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 flex flex-col gap-1.5">
-                  {isEditingName ? (
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={editNameValue}
-                        onChange={(e) => setEditNameValue(e.target.value)}
-                        className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-100 focus:outline-none"
+
+                {/* Stats Summary Rows */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-850 pt-6 mt-2">
+                  <div className="bg-slate-950 border border-slate-850 p-4 rounded-2xl flex flex-col gap-0.5">
+                    <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">Total XP</span>
+                    <span className="text-xl font-black text-yellow-400">{profile.totalXP}</span>
+                  </div>
+                  <div className="bg-slate-950 border border-slate-850 p-4 rounded-2xl flex flex-col gap-0.5">
+                    <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">Active Streak</span>
+                    <span className="text-xl font-black text-orange-400">{profile.streakCount} days</span>
+                  </div>
+                  <div className="bg-slate-950 border border-slate-850 p-4 rounded-2xl flex flex-col gap-0.5">
+                    <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">Total Words</span>
+                    <span className="text-xl font-black text-slate-200">{words.length}</span>
+                  </div>
+                  <div className="bg-slate-950 border border-slate-850 p-4 rounded-2xl flex flex-col gap-0.5">
+                    <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">Proficiency</span>
+                    <span className="text-xl font-black text-teal-400">{activePair?.proficiencyLevel || "A1"}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Swift Charts Simulator */}
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 flex flex-col gap-6">
+                <div className="flex justify-between items-center">
+                  <h4 className="font-black text-lg text-slate-200">Activity chart</h4>
+                  <div className="flex bg-slate-950 p-1.5 rounded-xl border border-slate-850">
+                    <button className="bg-indigo-500 text-white text-xs font-bold py-1 px-3.5 rounded-lg">Week</button>
+                  </div>
+                </div>
+
+                {/* Graphical representation */}
+                <div className="h-44 flex items-end gap-3 px-2 pt-4">
+                  {dailyStats.slice(-7).map((stat, idx) => (
+                    <div key={idx} className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+                      <span className="text-[10px] text-slate-500 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                        {stat.xpEarned}
+                      </span>
+                      <div 
+                        className="w-full bg-gradient-to-t from-indigo-500 to-purple-500 rounded-t-lg transition-all duration-500 group-hover:brightness-110"
+                        style={{ height: `${Math.max(10, Math.min(130, stat.xpEarned * 0.8))}px` }}
                       />
-                      <button
-                        onClick={handleUpdateName}
-                        className="bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-2 px-4 rounded-xl text-xs transition"
-                      >
-                        Save
-                      </button>
+                      <span className="text-[10px] text-slate-500 font-bold uppercase">
+                        {new Date(stat.date).toLocaleDateString(undefined, { weekday: "short" })}
+                      </span>
                     </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-2xl font-black text-slate-100">{profile.name}</h4>
-                      <button 
-                        onClick={() => setIsEditingName(true)}
-                        className="text-xs text-slate-500 hover:text-slate-300"
-                      >
-                        ✏️ Edit
-                      </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Interactive sliders for SRS settings */}
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 flex flex-col gap-6">
+                <h4 className="font-black text-lg text-slate-200">SRS Intervals Parameters</h4>
+                
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex justify-between text-xs text-slate-400 font-bold">
+                      <span>Base repetition intervals (Minutes)</span>
+                      <span className="text-indigo-400">{srsBaseMinutes} min</span>
                     </div>
-                  )}
-                  <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
-                    Rank: <span className="text-indigo-400 font-bold">{getRank(profile.totalXP)}</span>
-                  </p>
-                </div>
-              </div>
-
-              {/* Stats Summary Rows */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-850 pt-6 mt-2">
-                <div className="bg-slate-950 border border-slate-850 p-4 rounded-2xl flex flex-col gap-0.5">
-                  <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">Total XP</span>
-                  <span className="text-xl font-black text-yellow-400">{profile.totalXP}</span>
-                </div>
-                <div className="bg-slate-950 border border-slate-850 p-4 rounded-2xl flex flex-col gap-0.5">
-                  <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">Active Streak</span>
-                  <span className="text-xl font-black text-orange-400">{profile.streakCount} days</span>
-                </div>
-                <div className="bg-slate-950 border border-slate-850 p-4 rounded-2xl flex flex-col gap-0.5">
-                  <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">Total Words</span>
-                  <span className="text-xl font-black text-slate-200">{words.length}</span>
-                </div>
-                <div className="bg-slate-950 border border-slate-850 p-4 rounded-2xl flex flex-col gap-0.5">
-                  <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">Proficiency</span>
-                  <span className="text-xl font-black text-teal-400">{activePair?.proficiencyLevel || "A1"}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Swift Charts Simulator */}
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 flex flex-col gap-6">
-              <div className="flex justify-between items-center">
-                <h4 className="font-black text-lg text-slate-200">Activity chart</h4>
-                <div className="flex bg-slate-950 p-1.5 rounded-xl border border-slate-850">
-                  <button className="bg-indigo-500 text-white text-xs font-bold py-1 px-3.5 rounded-lg">Week</button>
-                </div>
-              </div>
-
-              {/* Graphical representation */}
-              <div className="h-44 flex items-end gap-3 px-2 pt-4">
-                {dailyStats.slice(-7).map((stat, idx) => (
-                  <div key={idx} className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
-                    <span className="text-[10px] text-slate-500 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                      {stat.xpEarned}
-                    </span>
-                    <div 
-                      className="w-full bg-gradient-to-t from-indigo-500 to-purple-500 rounded-t-lg transition-all duration-500 group-hover:brightness-110"
-                      style={{ height: `${Math.max(10, Math.min(130, stat.xpEarned * 0.8))}px` }}
+                    <input
+                      type="range"
+                      min="60"
+                      max="1440"
+                      step="30"
+                      value={srsBaseMinutes}
+                      onChange={(e) => setSrsBaseMinutes(parseInt(e.target.value))}
+                      className="w-full h-1 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-indigo-500"
                     />
-                    <span className="text-[10px] text-slate-500 font-bold uppercase">
-                      {new Date(stat.date).toLocaleDateString(undefined, { weekday: "short" })}
-                    </span>
                   </div>
-                ))}
-              </div>
-            </div>
 
-            {/* Interactive sliders for SRS settings */}
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 flex flex-col gap-6">
-              <h4 className="font-black text-lg text-slate-200">SRS Intervals Parameters</h4>
-              
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex justify-between text-xs text-slate-400 font-bold">
-                    <span>Base repetition intervals (Minutes)</span>
-                    <span className="text-indigo-400">{srsBaseMinutes} min</span>
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex justify-between text-xs text-slate-400 font-bold">
+                      <span>Complexity coefficient</span>
+                      <span className="text-indigo-400">{srsComplexity}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="1.0"
+                      max="10.0"
+                      step="0.5"
+                      value={srsComplexity}
+                      onChange={(e) => setSrsComplexity(parseFloat(e.target.value))}
+                      className="w-full h-1 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                    />
                   </div>
-                  <input
-                    type="range"
-                    min="60"
-                    max="1440"
-                    step="30"
-                    value={srsBaseMinutes}
-                    onChange={(e) => setSrsBaseMinutes(parseInt(e.target.value))}
-                    className="w-full h-1 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-indigo-500"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex justify-between text-xs text-slate-400 font-bold">
-                    <span>Complexity coefficient</span>
-                    <span className="text-indigo-400">{srsComplexity}</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="1.0"
-                    max="10.0"
-                    step="0.5"
-                    value={srsComplexity}
-                    onChange={(e) => setSrsComplexity(parseFloat(e.target.value))}
-                    className="w-full h-1 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-indigo-500"
-                  />
                 </div>
               </div>
-            </div>
 
-            {/* Database Migration Section */}
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 flex flex-col gap-6">
-              <h4 className="font-black text-lg text-slate-200">Database Migration (SwiftData)</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Restore your learned words, XP progress, streaks, and custom settings directly from your SwiftUI app. Upload your backup <span className="font-mono text-indigo-400 font-bold bg-slate-950 px-2 py-1 rounded">default.store</span> file below.
-              </p>
-              
-              <div className="flex flex-col gap-3">
-                <input 
-                  type="file"
-                  accept=".store"
-                  onChange={handleImportDB}
-                  className="text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-indigo-500 file:text-white hover:file:bg-indigo-400 file:cursor-pointer transition-all"
-                />
-                {importStatus && (
-                  <p className="text-xs font-bold text-teal-400 animate-pulse">{importStatus}</p>
-                )}
+              {/* Database Migration Section */}
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 flex flex-col gap-6">
+                <h4 className="font-black text-lg text-slate-200">Database Migration (SwiftData)</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Restore your learned words, XP progress, streaks, and custom settings directly from your SwiftUI app. Upload your backup <span className="font-mono text-indigo-400 font-bold bg-slate-950 px-2 py-1 rounded">default.store</span> file below.
+                </p>
+                
+                <div className="flex flex-col gap-3">
+                  <input 
+                    type="file"
+                    accept=".store"
+                    onChange={handleImportDB}
+                    className="text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-indigo-500 file:text-white hover:file:bg-indigo-400 file:cursor-pointer transition-all"
+                  />
+                  {importStatus && (
+                    <p className="text-xs font-bold text-teal-400 animate-pulse">{importStatus}</p>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Binary Game Easter Egg row */}
-            <div 
-              onClick={startBinaryGame}
-              className="bg-gradient-to-r from-indigo-500/10 to-indigo-500/0 border border-indigo-500/20 hover:border-indigo-500/40 cursor-pointer rounded-2xl p-6 flex justify-between items-center transition"
-            >
-              <div className="flex flex-col gap-1">
-                <span className="text-xs text-indigo-400 font-bold uppercase tracking-wider">Mini-game Easter Egg</span>
-                <h4 className="font-black text-lg text-slate-200">Cisco Binary Game</h4>
-                <p className="text-xs text-slate-400 mt-0.5">Test your decimal-binary conversion speed!</p>
+              {/* Binary Game Easter Egg row */}
+              <div 
+                onClick={startBinaryGame}
+                className="bg-gradient-to-r from-indigo-500/10 to-indigo-500/0 border border-indigo-500/20 hover:border-indigo-500/40 cursor-pointer rounded-2xl p-6 flex justify-between items-center transition"
+              >
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs text-indigo-400 font-bold uppercase tracking-wider">Mini-game Easter Egg</span>
+                  <h4 className="font-black text-lg text-slate-200">Cisco Binary Game</h4>
+                  <p className="text-xs text-slate-400 mt-0.5">Test your decimal-binary conversion speed!</p>
+                </div>
+                <span className="text-2xl">⚡ ➔</span>
               </div>
-              <span className="text-2xl">⚡ ➔</span>
-            </div>
 
-          </div>
+            </div>
+          )
         )}
 
       </div>
