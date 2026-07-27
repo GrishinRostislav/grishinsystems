@@ -1918,7 +1918,8 @@ document.addEventListener("DOMContentLoaded", () => {
               else remotePortName = getDevicePortFriendlyLabel(rDev ? rDev.id : "", remotePortIdx);
             }
 
-            connLines.push(`${localPortName} ──🔗──> ${remoteName} (${remotePortName})`);
+            const labelSuffix = c.label ? ` [${c.label}]` : "";
+            connLines.push(`${localPortName} ──🔗──> ${remoteName}${labelSuffix} (${remotePortName})`);
           });
         }
 
