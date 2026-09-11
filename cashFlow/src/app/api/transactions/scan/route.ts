@@ -63,7 +63,7 @@ export async function POST(request: Request) {
 
     // Initialize Gemini API Client with fallback models
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+    const modelsToTry = ['gemini-2.0-flash', 'gemini-1.5-flash'];
 
     // 3. Fetch recent product mappings to teach the AI
     const recentMappings = await prisma.productMapping.findMany({

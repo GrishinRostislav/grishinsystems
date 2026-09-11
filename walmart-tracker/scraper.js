@@ -91,8 +91,6 @@ async function scrapeWalmartProduct(url) {
       });
     }
 
-    await browser.close();
-    
     if (price === null) {
       throw new Error("Could not find product price. Walmart might have blocked the request or the selector has changed.");
     }
@@ -102,9 +100,10 @@ async function scrapeWalmartProduct(url) {
       price: price
     };
 
-  } catch (err) {
-    await browser.close();
-    throw err;
+  } finally {
+    if (browser) {
+      await browser.close().catch(() => {});
+    }
   }
 }
 

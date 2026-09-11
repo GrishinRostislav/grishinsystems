@@ -60,19 +60,8 @@ export async function POST(request: Request) {
     }
   } catch (error: any) {
     console.error("Auth error:", error);
-    
-    const rawUrl = process.env.POSTGRES_PRISMA_URL || "undefined";
-    const maskedUrl = rawUrl.replace(/:[^:@]+@/, ':****@');
-
     return NextResponse.json({ 
-      error: `Internal Server Error: ${error.message || error}`,
-      debug: {
-        POSTGRES_PRISMA_URL: maskedUrl,
-        length: rawUrl.length,
-        startsWithQuote: rawUrl.startsWith('"'),
-        endsWithQuote: rawUrl.endsWith('"'),
-        type: typeof rawUrl
-      }
+      error: 'Authentication service temporarily unavailable'
     }, { status: 500 });
   }
 }

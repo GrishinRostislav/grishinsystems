@@ -12,7 +12,14 @@ if (!token) {
   process.exit(1);
 }
 
-// Sends structured markdown alerts to the configured Telegram chat
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+// Sends structured HTML alerts to the configured Telegram chat
 async function sendTelegramMessage(text) {
   if (!chatId) {
     console.warn("Warning: TELEGRAM_CHAT_ID is not configured. Running in debug mode. Alerts will only be logged locally.");
@@ -28,7 +35,7 @@ async function sendTelegramMessage(text) {
       body: JSON.stringify({
         chat_id: chatId,
         text: text,
-        parse_mode: 'Markdown'
+        parse_mode: 'HTML'
       })
     });
     const data = await res.json();
@@ -61,12 +68,13 @@ async function checkPrices() {
           console.log(`Price drop detected! $${lastPrice} -> $${current.price} (-${discountPct}%)`);
           
           if (discountPct >= config.minDiscountPercent) {
+            const safeTitle = escapeHtml(current.title);
             const alertMsg = 
-`🚨 *Walmart Pricing Alert!* 🚨\n\n` +
-`*Product:* ${current.title}\n` +
-`*Old Price:* $${lastPrice.toFixed(2)}\n` +
-`*New Price:* $${current.price.toFixed(2)} (-${discountPct}%)\n\n` +
-`🔗 [Buy on Walmart](${product.url})`;
+`🚨 <b>Walmart Pricing Alert!</b> 🚨\n\n` +
+`<b>Product:</b> ${safeTitle}\n` +
+`<b>Old Price:</b> $${lastPrice.toFixed(2)}\n` +
+`<b>New Price:</b> $${current.price.toFixed(2)} (-${discountPct}%)\n\n` +
+`🔗 <a href="${product.url}">Buy on Walmart</a>`;
             
             await sendTelegramMessage(alertMsg);
           }
