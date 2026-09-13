@@ -46,17 +46,15 @@ export default function Topbar() {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch("/api/auth", {
+      await fetch("/api/auth", {
         method: "DELETE"
       });
-      if (res.ok) {
-        window.location.href = "/cashFlow/login";
-      } else {
-        alert("Logout failed");
-      }
     } catch (err) {
       console.error(err);
-      alert("Error logging out");
+    } finally {
+      // Always clear client cookie and redirect to /login
+      document.cookie = "auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      window.location.href = "/login";
     }
   };
 
