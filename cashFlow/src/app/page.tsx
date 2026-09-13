@@ -10,6 +10,7 @@ import GlobalDateFilter from "@/components/GlobalDateFilter";
 import TransactionModal from "@/components/TransactionModal";
 import ReceiptPreviewModal from "@/components/ReceiptPreviewModal";
 import BudgetCard from "@/components/BudgetCard";
+import { useAutoSync } from "@/hooks/useAutoSync";
 import { formatCurrency, formatDate } from "@/utils/format";
 import { getChartDomain } from "@/utils/chart";
 import { compressReceiptImage } from "@/utils/image";
@@ -132,10 +133,10 @@ export default function Home() {
     }
   };
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (isSilent = false) => {
     if (!startDate || !endDate) return;
     try {
-      setLoading(true);
+      if (!isSilent) setLoading(true);
       // Process any due scheduled transactions first so dashboard is accurate
       await fetch('/cashFlow/api/scheduled/process', { method: 'POST' });
 
@@ -167,13 +168,15 @@ export default function Home() {
     } catch (err) {
       console.error("Failed to fetch dashboard data", err);
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchDashboardData();
   }, [startDate, endDate]);
+
+  useAutoSync(() => fetchDashboardData(true));
 
   const [isMobile, setIsMobile] = useState(false);
 

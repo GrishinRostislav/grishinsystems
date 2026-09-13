@@ -6,6 +6,7 @@ import { formatCurrency } from "@/utils/format";
 import { getChartDomain } from "@/utils/chart";
 import ScenarioModal from "@/components/ScenarioModal";
 import { addFrequency } from "@/utils/recurrence";
+import { useAutoSync } from "@/hooks/useAutoSync";
 import {
   AreaChart,
   Area,
@@ -180,8 +181,8 @@ export default function ForecastPage() {
 
   const [pastMonths, setPastMonths] = useState(6);
 
-  const fetchForecast = async (m: number, pastM: number, accountsFilter: string[]) => {
-    setLoading(true);
+  const fetchForecast = async (m: number, pastM: number, accountsFilter: string[], isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       let url = `/cashFlow/api/forecast?months=${m}&pastMonths=${pastM}`;
       if (accountsFilter.length > 0) {
@@ -193,7 +194,7 @@ export default function ForecastPage() {
     } catch (err) {
       console.error(err);
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 
@@ -244,6 +245,12 @@ export default function ForecastPage() {
       fetchForecast(months, pastMonths, selectedAccounts);
     }
   }, [months, pastMonths, selectedAccounts, isInitialized]);
+
+  useAutoSync(() => {
+    if (isInitialized) {
+      fetchForecast(months, pastMonths, selectedAccounts, true);
+    }
+  });
 
   const handleToggleScenario = async (id: string, currentActive: boolean) => {
     try {

@@ -47,12 +47,9 @@ export default function BudgetsPage() {
   const [inflationRate, setInflationRate] = useState("");
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = async (isSilent = false) => {
     try {
+      if (!isSilent) setLoading(true);
       const [budgetsRes, categoriesRes] = await Promise.all([
         fetch("/cashFlow/api/budgets"),
         fetch("/cashFlow/api/categories"),
@@ -66,9 +63,15 @@ export default function BudgetsPage() {
     } catch (err) {
       console.error("Failed to fetch budgets data", err);
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useAutoSync(() => fetchData(true));
 
   const openCreateModal = () => {
     setEditingBudget(null);

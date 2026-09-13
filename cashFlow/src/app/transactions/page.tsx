@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAutoSync } from "@/hooks/useAutoSync";
 import styles from "./page.module.css";
 import Papa from "papaparse";
 import GlobalDateFilter from "@/components/GlobalDateFilter";
@@ -77,8 +78,9 @@ export default function TransactionsPage() {
     setIsModalOpen(true);
   };
 
-  const fetchData = async () => {
+  const fetchData = async (isSilent = false) => {
     try {
+      if (!isSilent) setLoading(true);
       const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
       const typeParam = searchParams.get("type");
       
@@ -100,7 +102,7 @@ export default function TransactionsPage() {
     } catch (err) {
       console.error("Failed to fetch data", err);
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 
@@ -109,6 +111,12 @@ export default function TransactionsPage() {
       fetchData();
     }
   }, [startDate, endDate]);
+
+  useAutoSync(() => {
+    if (startDate && endDate) {
+      fetchData(true);
+    }
+  });
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

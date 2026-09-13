@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useAutoSync } from "@/hooks/useAutoSync";
 import styles from "./page.module.css";
 import { formatCurrency } from "@/utils/format";
 import GlobalDateFilter from "@/components/GlobalDateFilter";
@@ -169,23 +170,20 @@ export default function AccountsPage() {
       .catch(err => console.error(err));
   }, []);
 
-  const fetchAccounts = async () => {
+  const fetchAccounts = async (isSilent = false) => {
     try {
-      setLoading(true);
+      if (!isSilent) setLoading(true);
       const [accRes, dashRes] = await Promise.all([
         fetch(`/cashFlow/api/accounts?includeArchived=${showArchived}&startDate=${startDate}&endDate=${endDate}`),
         fetch(`/cashFlow/api/dashboard?startDate=${startDate}&endDate=${endDate}`)
       ]);
       const accData = await accRes.json();
       const dashData = await dashRes.json();
+
       setAccounts(accData);
-      if (dashData && dashData.totalBalance !== undefined) {
-        setTotalBalance(dashData.totalBalance);
-        
-        const netFlow = (dashData.monthlyIncome || 0) - (dashData.monthlyExpenses || 0);
-        const prevBalance = dashData.totalBalance - netFlow;
-        const percentage = prevBalance !== 0 ? (netFlow / prevBalance) * 100 : 0;
-        setBalanceChange({ amount: netFlow, percentage });
+      setTotalBalance(dashData.totalBalance);
+      if (dashData.balanceChange) {
+        setBalanceChange(dashData.balanceChange);
       }
     } catch (err) {
       console.error("Failed to fetch accounts", err);
@@ -199,6 +197,12 @@ export default function AccountsPage() {
       fetchAccounts();
     }
   }, [showArchived, startDate, endDate]);
+
+  useAutoSync(() => {
+    if (startDate && endDate) {
+      fetchAccounts(true);
+    }
+  });
 
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
