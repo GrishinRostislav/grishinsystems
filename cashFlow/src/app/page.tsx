@@ -487,7 +487,8 @@ export default function Home() {
             {activeBudgets.map((budget: any) => {
               const spentPercent = budget.amount > 0 ? (budget.spent / budget.amount) * 100 : 0;
               const projectedPercent = budget.amount > 0 ? ((budget.projected || 0) / budget.amount) * 100 : 0;
-              const isOverBudget = budget.remaining < 0;
+              const remaining = budget.remaining !== undefined ? budget.remaining : (budget.amount - budget.spent);
+              const isOverBudget = remaining < 0;
               return (
                 <Link href={`/budgets/${budget.id}`} key={budget.id} style={{ textDecoration: 'none', color: 'inherit' }}>
                   <div className={budgetStyles.budgetCard}>
@@ -525,7 +526,7 @@ export default function Home() {
                   <div className={budgetStyles.cardFooter}>
                     <span className={budgetStyles.percentageText}>{Math.round(spentPercent)}% used {projectedPercent > 0 && `(+${Math.round(projectedPercent)}% planned)`}</span>
                     <span className={isOverBudget ? budgetStyles.remainingOver : budgetStyles.remainingUnder}>
-                      {isOverBudget ? `${formatCurrency(Math.abs(budget.remaining), homeCurrency)} over limit` : `${formatCurrency(budget.remaining, homeCurrency)} remaining`}
+                      {isOverBudget ? `${formatCurrency(Math.abs(remaining), homeCurrency)} over limit` : `${formatCurrency(remaining, homeCurrency)} remaining`}
                     </span>
                   </div>
                   </div>

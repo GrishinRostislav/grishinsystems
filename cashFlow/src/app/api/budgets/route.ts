@@ -77,8 +77,9 @@ export async function GET() {
           for (const st of scheduledTxs) {
             let simDate = new Date(st.nextRunDate);
             while (simDate <= end) {
-              if (simDate >= start) {
-                const convertedAmt = convertAmount(st.amount, st.account?.currency || homeCurrency, homeCurrency, rates);
+              // Only count future scheduled occurrences in this period to avoid double counting executed transactions
+              if (simDate >= now && simDate >= start) {
+                const convertedAmt = convertAmount(st.amount, st.account?.currency || homeCurrency, rates);
                 projected += Math.abs(convertedAmt);
               }
               simDate = addFrequency(simDate, st.frequency);
@@ -86,10 +87,13 @@ export async function GET() {
           }
         }
 
+        const remaining = budget.amount - spent;
+
         return {
           ...budget,
           spent,
           projected,
+          remaining,
           currentPeriodStart: start.toISOString(),
           currentPeriodEnd: end.toISOString()
         };

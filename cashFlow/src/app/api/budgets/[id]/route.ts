@@ -80,7 +80,7 @@ export async function GET(
       for (const st of scheduledTxs) {
         let simDate = new Date(st.nextRunDate);
         while (simDate <= end) {
-          if (simDate >= start) {
+          if (simDate >= now && simDate >= start) {
             const convertedAmt = convertAmount(st.amount, st.account?.currency || homeCurrency, homeCurrency, rates);
             projected += Math.abs(convertedAmt);
           }
@@ -89,10 +89,13 @@ export async function GET(
       }
     }
 
+    const remaining = budget.amount - spent;
+
     const budgetWithSpent = {
       ...budget,
       spent,
       projected,
+      remaining,
       currentPeriodStart: start.toISOString(),
       currentPeriodEnd: end.toISOString()
     };
