@@ -119,10 +119,33 @@ export async function GET(request: Request) {
     // Baseline variable expenses from Budgets are now calculated dynamically per month to account for inflation
 
     // We need to simulate instances of scheduled transactions
-    const futureMap = new Map<string, { income: number, expense: number, net: number, scenarioIncome: number, scenarioExpense: number, scenarioNet: number }>();
-    
+    interface MonthFlow {
+      income: number;
+      expense: number;
+      net: number;
+      scenarioRecurringIncome: number;
+      scenarioRecurringExpense: number;
+      scenarioRecurringNet: number;
+      scenarioOneTimeIncome: number;
+      scenarioOneTimeExpense: number;
+      scenarioOneTimeNet: number;
+    }
+
+    const futureMap = new Map<string, MonthFlow>();
+    const getOrInitMonthFlow = (key: string): MonthFlow => {
+      if (!futureMap.has(key)) {
+        futureMap.set(key, {
+          income: 0, expense: 0, net: 0,
+          scenarioRecurringIncome: 0, scenarioRecurringExpense: 0, scenarioRecurringNet: 0,
+          scenarioOneTimeIncome: 0, scenarioOneTimeExpense: 0, scenarioOneTimeNet: 0
+        });
+      }
+      return futureMap.get(key)!;
+    };
+
     const endDate = new Date(now.getFullYear(), now.getMonth() + futureMonths + 1, 1);
 
+    // Process Scheduled Transactions
     for (const st of scheduledTxs) {
       if (selectedAccountIds) {
         if (!st.accountId || !selectedAccountIds.includes(st.accountId)) continue;
@@ -130,32 +153,34 @@ export async function GET(request: Request) {
         if (st.account && !st.account.includeInTotal) continue;
       }
 
+      if (st.type === 'transfer') continue;
+
       let simDate = new Date(st.nextRunDate);
-      if (st.type === 'transfer') continue; 
+
+      // Fast-forward simDate if it's in the past to avoid double counting executed transactions
+      while (simDate < now && st.frequency !== 'ONCE') {
+        const nextDate = addFrequency(simDate, st.frequency, st.interval || 1, st.daysOfWeek, st.monthsOfYear);
+        if (nextDate.getTime() === simDate.getTime()) break;
+        simDate = nextDate;
+      }
 
       while (simDate < endDate) {
-        if (st.endDate && simDate > new Date(st.endDate)) {
-          break;
+        if (st.endDate && simDate > new Date(st.endDate)) break;
+        if (simDate < now) {
+          if (st.frequency === 'ONCE') break;
+          simDate = addFrequency(simDate, st.frequency, st.interval || 1, st.daysOfWeek, st.monthsOfYear);
+          continue;
         }
 
-        let effectDate = new Date(simDate);
-        if (effectDate < now) {
-          effectDate = new Date(now);
-        }
-
-        const year = effectDate.getFullYear();
-        const monthStr = String(effectDate.getMonth() + 1).padStart(2, '0');
+        const year = simDate.getFullYear();
+        const monthStr = String(simDate.getMonth() + 1).padStart(2, '0');
         const key = `${year}-${monthStr}`;
 
-        if (!futureMap.has(key)) {
-          futureMap.set(key, { income: 0, expense: 0, net: 0, scenarioIncome: 0, scenarioExpense: 0, scenarioNet: 0 });
-        }
-
-        const stats = futureMap.get(key)!;
+        const stats = getOrInitMonthFlow(key);
         let convertedStAmt = st.account ? convertAmount(st.amount, st.account.currency, homeCurrency, rates) : st.amount;
         
         if (st.inflationRate) {
-          const yearsDiff = (effectDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+          const yearsDiff = (simDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
           if (yearsDiff > 0) {
             convertedStAmt = convertedStAmt * Math.pow(1 + (st.inflationRate / 100), yearsDiff);
           }
@@ -165,11 +190,12 @@ export async function GET(request: Request) {
         if (convertedStAmt > 0) stats.income += convertedStAmt;
         else stats.expense += Math.abs(convertedStAmt);
 
+        if (st.frequency === 'ONCE') break;
         simDate = addFrequency(simDate, st.frequency, st.interval || 1, st.daysOfWeek, st.monthsOfYear);
       }
     }
 
-    // Include Active Simulated Scenarios
+    // Process Active Scenarios
     const activeScenarios = await prisma.forecastScenario.findMany({
       where: { isActive: true },
       include: { items: true }
@@ -185,12 +211,7 @@ export async function GET(request: Request) {
           let simDate = new Date(item.date);
           const itemEndDate = item.endDate ? new Date(item.endDate) : endDate;
 
-          // If the start date is in the past, we start calculating from 'now' 
-          // but we shouldn't retroactively compound past years for a *forecast* scenario.
-          // We will only compound future months.
-          if (simDate < now) {
-            simDate = new Date(now);
-          }
+          if (simDate < now) simDate = new Date(now);
 
           let monthIter = new Date(now.getFullYear(), now.getMonth() + 1, 1);
           while (monthIter <= endDate) {
@@ -198,12 +219,7 @@ export async function GET(request: Request) {
             const monthStr = String(monthIter.getMonth() + 1).padStart(2, '0');
             const key = `${year}-${monthStr}`;
             
-            if (!futureMap.has(key)) {
-              futureMap.set(key, { income: 0, expense: 0, net: 0, scenarioIncome: 0, scenarioExpense: 0, scenarioNet: 0 });
-            }
-            const stats = futureMap.get(key)!;
-
-            // 1. Accumulate deposits that happen in this specific month
+            const stats = getOrInitMonthFlow(key);
             let depositsThisMonth = 0;
             const currentMonthStart = new Date(monthIter.getFullYear(), monthIter.getMonth() - 1, 1);
             
@@ -212,24 +228,19 @@ export async function GET(request: Request) {
                 depositsThisMonth += Math.abs(item.amount);
               }
               if (item.frequency === 'ONCE') {
-                simDate = new Date(8640000000000000); // push far into future to break
+                simDate = new Date(8640000000000000);
               } else {
                 simDate = addFrequency(simDate, item.frequency, item.interval || 1, item.daysOfWeek, item.monthsOfYear);
               }
             }
 
             balance += depositsThisMonth;
-
-            // 2. Calculate interest on the new balance for this month
             const interest = balance * monthlyRate;
             balance += interest;
 
-            // 3. Add ONLY the earned interest to the wealth trajectory
-            // (Deposits themselves are just cash moving to investments, net wealth unchanged)
-            stats.scenarioNet += interest;
-            stats.scenarioIncome += interest;
+            stats.scenarioRecurringNet += interest;
+            stats.scenarioRecurringIncome += interest;
 
-            // Advance to next month
             monthIter = new Date(monthIter.getFullYear(), monthIter.getMonth() + 1, 1);
           }
         } else {
@@ -237,21 +248,16 @@ export async function GET(request: Request) {
           const itemEndDate = item.endDate ? new Date(item.endDate) : endDate;
 
           while (simDate < endDate && simDate <= itemEndDate) {
+            if (simDate < now && item.frequency === 'ONCE') break;
+            
             let effectDate = new Date(simDate);
-            if (effectDate < now) {
-              effectDate = new Date(now);
-            }
+            if (effectDate < now) effectDate = new Date(now);
 
             const year = effectDate.getFullYear();
             const monthStr = String(effectDate.getMonth() + 1).padStart(2, '0');
             const key = `${year}-${monthStr}`;
 
-            if (!futureMap.has(key)) {
-              futureMap.set(key, { income: 0, expense: 0, net: 0, scenarioIncome: 0, scenarioExpense: 0, scenarioNet: 0 });
-            }
-
-            const stats = futureMap.get(key)!;
-            // All scenario amounts are assumed to be in homeCurrency as agreed
+            const stats = getOrInitMonthFlow(key);
             let rawAmt = item.amount;
             if (item.annualRate) {
               const yearsDiff = (effectDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
@@ -261,11 +267,18 @@ export async function GET(request: Request) {
             }
             const amt = item.type === 'expense' ? -Math.abs(rawAmt) : Math.abs(rawAmt);
             
-            stats.scenarioNet += amt;
-            if (amt > 0) stats.scenarioIncome += amt;
-            else stats.scenarioExpense += Math.abs(amt);
+            const isOneTime = item.frequency === 'ONCE';
+            if (isOneTime) {
+              stats.scenarioOneTimeNet += amt;
+              if (amt > 0) stats.scenarioOneTimeIncome += amt;
+              else stats.scenarioOneTimeExpense += Math.abs(amt);
+              break;
+            } else {
+              stats.scenarioRecurringNet += amt;
+              if (amt > 0) stats.scenarioRecurringIncome += amt;
+              else stats.scenarioRecurringExpense += Math.abs(amt);
+            }
 
-            if (item.frequency === 'ONCE') break;
             simDate = addFrequency(simDate, item.frequency, item.interval || 1, item.daysOfWeek, item.monthsOfYear);
           }
         }
@@ -276,15 +289,15 @@ export async function GET(request: Request) {
     let runningBalanceForward = currentBalance;
     let runningSimulatedBalance = currentBalance;
     
-    // Apply any future scheduled/scenario flows that occur in the current month but haven't been captured by the loop
+    // Apply remaining scheduled/scenario flows for the current month
     const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     const currentMonthFlow = futureMap.get(currentMonthKey);
     if (currentMonthFlow) {
       runningBalanceForward += currentMonthFlow.net;
-      runningSimulatedBalance += currentMonthFlow.net + (currentMonthFlow.scenarioNet || 0);
+      runningSimulatedBalance += currentMonthFlow.net + currentMonthFlow.scenarioRecurringNet + currentMonthFlow.scenarioOneTimeNet;
     }
 
-    // Average metrics
+    // Calculate monthly averages and future points
     let totalProjectedIncome = 0;
     let totalProjectedExpense = 0;
     let projectionMonthCount = 0;
@@ -295,7 +308,11 @@ export async function GET(request: Request) {
       const monthStr = String(d.getMonth() + 1).padStart(2, '0');
       const key = `${year}-${monthStr}`;
 
-      const flow = futureMap.get(key) || { income: 0, expense: 0, net: 0, scenarioIncome: 0, scenarioExpense: 0, scenarioNet: 0 };
+      const flow = futureMap.get(key) || {
+        income: 0, expense: 0, net: 0,
+        scenarioRecurringIncome: 0, scenarioRecurringExpense: 0, scenarioRecurringNet: 0,
+        scenarioOneTimeIncome: 0, scenarioOneTimeExpense: 0, scenarioOneTimeNet: 0
+      };
       
       const yearsDiff = i / 12;
       let monthSpecificBudget = 0;
@@ -329,12 +346,12 @@ export async function GET(request: Request) {
       // Baseline running balance
       runningBalanceForward += totalMonthNet;
       
-      // Simulated running balance
-      runningSimulatedBalance += totalMonthNet + (flow.scenarioNet || 0);
+      // Simulated running balance includes baseline net + scenario recurring net + scenario one-time net
+      runningSimulatedBalance += totalMonthNet + flow.scenarioRecurringNet + flow.scenarioOneTimeNet;
       
-      // We will report the scenario-affected averages if scenarios are active
-      totalProjectedIncome += totalMonthIncome + (hasActiveScenarios ? (flow.scenarioIncome || 0) : 0);
-      totalProjectedExpense += totalMonthExpense + (hasActiveScenarios ? (flow.scenarioExpense || 0) : 0);
+      // Averages ONLY include recurring income and recurring expenses (NOT one-time scenario spikes)
+      totalProjectedIncome += totalMonthIncome + (hasActiveScenarios ? flow.scenarioRecurringIncome : 0);
+      totalProjectedExpense += totalMonthExpense + (hasActiveScenarios ? flow.scenarioRecurringExpense : 0);
       projectionMonthCount++;
 
       projectedPoints.push({
@@ -346,9 +363,7 @@ export async function GET(request: Request) {
       });
     }
 
-    // 4. Combine data
     const formattedHistoricalPoints = historicalPoints.map((p, index) => {
-      // Connect simulated line to history at the transition point (Today)
       if (index === historicalPoints.length - 1 && hasActiveScenarios) {
         return { ...p, simulatedBalance: p.balance };
       }
