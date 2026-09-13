@@ -403,6 +403,8 @@ export async function GET(request: Request) {
       };
     });
 
+    const chartData = [...formattedHistoricalPoints, ...formattedProjectedPoints];
+
     const allScenarios = await prisma.forecastScenario.findMany({
       include: { items: true }
     });

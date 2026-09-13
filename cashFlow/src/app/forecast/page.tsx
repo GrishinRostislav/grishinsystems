@@ -452,7 +452,7 @@ export default function ForecastPage() {
         <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-muted)' }}>Calculating financial trajectory...</div>
       ) : (
         <>
-          <div className={styles.grid} style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+          <div className={styles.summaryCards}>
             <div className={styles.card}>
               <div className={styles.cardTitle}>Current Total Balance</div>
               <div className={styles.cardValue} style={{ color: 'var(--unique-blue)' }}>
