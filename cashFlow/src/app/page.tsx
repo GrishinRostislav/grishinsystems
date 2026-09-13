@@ -185,6 +185,8 @@ export default function Home() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  const { totalBalance = 0, monthlyIncome = 0, monthlyExpenses = 0, chartData = [], pieData = [], balanceTrendData = [], recentTransactions = [], budgets = [], forecast = null, homeCurrency = "CAD" } = data || {};
+
   const diffTime = (startDate && endDate) ? Math.abs(new Date(endDate).getTime() - new Date(startDate).getTime()) : 30 * 24 * 60 * 60 * 1000;
   const periodDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
   const plannedIncomeForPeriod = forecast ? (forecast.avgMonthlyIncome / 30) * periodDays : 0;
