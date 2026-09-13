@@ -32,7 +32,7 @@ export default function MerchantsPage() {
   const [isCreating, setIsCreating] = useState(false);
 
   const fetchMerchants = () => {
-    fetch('/cashFlow/api/merchants')
+    fetch('/api/merchants')
       .then(res => res.json())
       .then(data => {
         setMerchants(data);
@@ -53,7 +53,7 @@ export default function MerchantsPage() {
     if (!newMerchantName.trim()) return;
     setIsCreating(true);
     try {
-      const res = await fetch('/cashFlow/api/merchants', {
+      const res = await fetch('/api/merchants', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: newMerchantName })

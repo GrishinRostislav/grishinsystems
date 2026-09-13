@@ -60,7 +60,7 @@ export default function ScheduledTransactionModal({ isOpen, onClose, onSave, tra
   const [type, setType] = useState('expense');
 
   useEffect(() => {
-    Promise.all([fetch("/cashFlow/api/merchants"), fetch("/cashFlow/api/payment-methods")]).then(async ([mRes, pmRes]) => {
+    Promise.all([fetch("/api/merchants"), fetch("/api/payment-methods")]).then(async ([mRes, pmRes]) => {
       if (mRes.ok) setMerchantsList(await mRes.json());
       if (pmRes.ok) setPaymentMethodsList(await pmRes.json());
     }).catch(console.error);

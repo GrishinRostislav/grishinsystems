@@ -26,7 +26,7 @@ export default function Topbar() {
   const handleSyncMerchants = async () => {
     setIsSyncing(true);
     try {
-      const res = await fetch("/cashFlow/api/merchants/sync", {
+      const res = await fetch("/api/merchants/sync", {
         method: "POST"
       });
       if (res.ok) {
@@ -46,7 +46,7 @@ export default function Topbar() {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch("/cashFlow/api/auth", {
+      const res = await fetch("/api/auth", {
         method: "DELETE"
       });
       if (res.ok) {

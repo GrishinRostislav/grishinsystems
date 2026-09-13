@@ -27,7 +27,7 @@ export function proxy(request: NextRequest) {
     pathname.startsWith('/_next') ||
     pathname.startsWith('/cashFlow/_next') ||
     pathname.startsWith('/api/auth') ||
-    pathname.startsWith('/cashFlow/api/auth') ||
+    pathname.startsWith('/api/auth') ||
     pathname === '/login' ||
     pathname === '/cashFlow/login' ||
     pathname.includes('.')

@@ -91,7 +91,7 @@ export default function TransactionsPage() {
       }
       if (typeParam) queryParams.set("type", typeParam);
       
-      const url = `/cashFlow/api/transactions${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const url = `/api/transactions${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
       const [txRes] = await Promise.all([
         fetch(url)
@@ -153,7 +153,7 @@ export default function TransactionsPage() {
       const formData = new FormData();
       formData.append("file", processedFile);
 
-      const res = await fetch("/cashFlow/api/transactions/scan", {
+      const res = await fetch("/api/transactions/scan", {
         method: "POST",
         body: formData
       });

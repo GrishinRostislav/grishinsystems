@@ -15,7 +15,7 @@ export default function CategoriesPage() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch("/cashFlow/api/categories");
+      const res = await fetch("/api/categories");
       const data = await res.json();
       setCategories(data);
     } catch (err) {
@@ -32,7 +32,7 @@ export default function CategoriesPage() {
   const handleSaveCategory = async (data: any) => {
     try {
       const isEdit = !!data.id;
-      const url = isEdit ? `/cashFlow/api/categories/${data.id}` : "/cashFlow/api/categories";
+      const url = isEdit ? `/api/categories/${data.id}` : "/api/categories";
       const method = isEdit ? "PUT" : "POST";
       
       const res = await fetch(url, {
@@ -52,7 +52,7 @@ export default function CategoriesPage() {
 
   const handleDeleteCategory = async (id: string) => {
     try {
-      const res = await fetch(`/cashFlow/api/categories/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
       if (res.ok) {
         setIsModalOpen(false);
         setEditingCategory(null);

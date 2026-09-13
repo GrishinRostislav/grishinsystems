@@ -111,7 +111,7 @@ export default function Home() {
       const formData = new FormData();
       formData.append("file", processedFile);
 
-      const res = await fetch("/cashFlow/api/transactions/scan", {
+      const res = await fetch("/api/transactions/scan", {
         method: "POST",
         body: formData
       });
@@ -138,14 +138,14 @@ export default function Home() {
     try {
       if (!isSilent) setLoading(true);
       // Process any due scheduled transactions first so dashboard is accurate
-      await fetch('/cashFlow/api/scheduled/process', { method: 'POST' });
+      await fetch('/api/scheduled/process', { method: 'POST' });
 
-      const res = await fetch(`/cashFlow/api/dashboard?startDate=${startDate}&endDate=${endDate}`);
+      const res = await fetch(`/api/dashboard?startDate=${startDate}&endDate=${endDate}`);
       const dashboardData = await res.json();
       
       let budgetsData = [];
       try {
-        const budgetsRes = await fetch('/cashFlow/api/budgets');
+        const budgetsRes = await fetch('/api/budgets');
         if (budgetsRes.ok) {
           const parsed = await budgetsRes.json();
           budgetsData = parsed.budgets || [];
@@ -156,7 +156,7 @@ export default function Home() {
 
       let forecastData = null;
       try {
-        const forecastRes = await fetch('/cashFlow/api/forecast?months=1');
+        const forecastRes = await fetch('/api/forecast?months=1');
         if (forecastRes.ok) {
           forecastData = await forecastRes.json();
         }

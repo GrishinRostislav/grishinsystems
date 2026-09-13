@@ -108,7 +108,7 @@ export default function ScenarioModal({
 
     setLoading(true);
     try {
-      const url = scenario?.id ? `/cashFlow/api/scenarios/${scenario.id}` : `/cashFlow/api/scenarios`;
+      const url = scenario?.id ? `/api/scenarios/${scenario.id}` : `/api/scenarios`;
       const method = scenario?.id ? "PUT" : "POST";
 
       const res = await fetch(url, {

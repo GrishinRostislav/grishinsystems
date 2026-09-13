@@ -57,9 +57,9 @@ export default function ReceiptPreviewModal({ isOpen, onClose, scanData, onSave 
 
     // Fetch accounts, categories and payment methods
     Promise.all([
-      fetch("/cashFlow/api/accounts"),
-      fetch("/cashFlow/api/categories"),
-      fetch("/cashFlow/api/payment-methods")
+      fetch("/api/accounts"),
+      fetch("/api/categories"),
+      fetch("/api/payment-methods")
     ])
       .then(async ([accRes, catRes, pmRes]) => {
         const accData = await accRes.json();
@@ -165,7 +165,7 @@ export default function ReceiptPreviewModal({ isOpen, onClose, scanData, onSave 
         }] : [])
       ];
 
-      const res = await fetch("/cashFlow/api/transactions/import", {
+      const res = await fetch("/api/transactions/import", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

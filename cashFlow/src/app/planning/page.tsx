@@ -27,13 +27,13 @@ function PlanningContent() {
   const fetchData = async () => {
     setLoading(true);
     // Process autos first
-    await fetch('/cashFlow/api/scheduled/process', { method: 'POST' });
+    await fetch('/api/scheduled/process', { method: 'POST' });
     
     // Then fetch
     const [schedRes, accRes, catRes] = await Promise.all([
-      fetch('/cashFlow/api/scheduled'),
-      fetch('/cashFlow/api/accounts'),
-      fetch('/cashFlow/api/categories')
+      fetch('/api/scheduled'),
+      fetch('/api/accounts'),
+      fetch('/api/categories')
     ]);
     
     if (schedRes.ok) setScheduled(await schedRes.json());
@@ -64,7 +64,7 @@ function PlanningContent() {
   }, [searchParams, router]);
 
   const handleSave = async (data: any) => {
-    const url = data.id ? `/cashFlow/api/scheduled/${data.id}` : '/cashFlow/api/scheduled';
+    const url = data.id ? `/api/scheduled/${data.id}` : '/api/scheduled';
     const method = data.id ? 'PUT' : 'POST';
     
     const res = await fetch(url, {
@@ -82,7 +82,7 @@ function PlanningContent() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this scheduled transaction?")) return;
-    const res = await fetch(`/cashFlow/api/scheduled/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/api/scheduled/${id}`, { method: 'DELETE' });
     if (res.ok) {
       await fetchData();
     }
@@ -90,7 +90,7 @@ function PlanningContent() {
 
   const handleConfirmPayment = async (data: any) => {
     if (!confirmingSched) return;
-    const res = await fetch(`/cashFlow/api/scheduled/${confirmingSched.id}/approve`, {
+    const res = await fetch(`/api/scheduled/${confirmingSched.id}/approve`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -105,7 +105,7 @@ function PlanningContent() {
   };
 
   const handleSkip = async (id: string) => {
-    const res = await fetch(`/cashFlow/api/scheduled/${id}/skip`, { method: 'POST' });
+    const res = await fetch(`/api/scheduled/${id}/skip`, { method: 'POST' });
     if (res.ok) {
       await fetchData();
     } else {

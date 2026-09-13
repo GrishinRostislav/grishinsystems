@@ -45,7 +45,7 @@ export default function MerchantDetailsPage() {
     if (id && startDate && endDate) {
       setLoading(true);
       try {
-        const res = await fetch(`/cashFlow/api/merchants/${id}?startDate=${startDate}&endDate=${endDate}`);
+        const res = await fetch(`/api/merchants/${id}?startDate=${startDate}&endDate=${endDate}`);
         if (!res.ok) throw new Error('Not found');
         const data = await res.json();
         setMerchant(data);
@@ -71,7 +71,7 @@ export default function MerchantDetailsPage() {
     if (!newName.trim() || newName.trim() === merchant.name) return;
     setIsSaving(true);
     try {
-      const res = await fetch(`/cashFlow/api/merchants/${id}`, {
+      const res = await fetch(`/api/merchants/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: newName })
@@ -94,7 +94,7 @@ export default function MerchantDetailsPage() {
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this merchant? This will NOT delete the associated transactions, but they will be marked as uncategorized/no merchant.")) return;
     try {
-      const res = await fetch(`/cashFlow/api/merchants/${id}`, {
+      const res = await fetch(`/api/merchants/${id}`, {
         method: 'DELETE'
       });
       if (res.ok) {
