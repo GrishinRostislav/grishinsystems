@@ -8,6 +8,7 @@ import TransactionModal from "@/components/TransactionModal";
 import TransactionList from "@/components/TransactionList";
 import ReceiptPreviewModal from "@/components/ReceiptPreviewModal";
 import { formatCurrency, formatDate } from "@/utils/format";
+import { compressReceiptImage } from "@/utils/image";
 
 type Transaction = {
   id: string;
@@ -138,10 +139,12 @@ export default function TransactionsPage() {
     if (!file) return;
 
     setScanning(true);
-    const formData = new FormData();
-    formData.append("file", file);
 
     try {
+      const processedFile = await compressReceiptImage(file);
+      const formData = new FormData();
+      formData.append("file", processedFile);
+
       const res = await fetch("/cashFlow/api/transactions/scan", {
         method: "POST",
         body: formData

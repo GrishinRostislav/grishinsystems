@@ -25,6 +25,9 @@ export function proxy(request: NextRequest) {
   const authCookie = request.cookies.get('auth');
   
   if (!authCookie || authCookie.value !== 'authenticated') {
+    if (pathname.includes('/api/')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     return NextResponse.redirect(new URL('/cashFlow/login', request.url));
   }
 

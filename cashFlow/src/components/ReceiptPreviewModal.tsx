@@ -133,10 +133,19 @@ export default function ReceiptPreviewModal({ isOpen, onClose, scanData, onSave 
 
     setSaving(true);
     try {
+      // Safely validate date
+      const validIsoDate = (() => {
+        if (date) {
+          const d = new Date(`${date}T12:00:00`);
+          if (!isNaN(d.getTime())) return d.toISOString();
+        }
+        return new Date().toISOString();
+      })();
+
       // Build transactions array
       const transactionsToSave = [
         ...items.map(item => ({
-          date: new Date(`${date}T12:00:00`).toISOString(),
+          date: validIsoDate,
           amount: parseFloat(item.amount as any) || 0,
           merchant,
           paymentMethod,
@@ -147,7 +156,7 @@ export default function ReceiptPreviewModal({ isOpen, onClose, scanData, onSave 
           friendlyName: item.description,
         })),
         ...(gstAmount !== 0 ? [{
-          date: new Date(`${date}T12:00:00`).toISOString(),
+          date: validIsoDate,
           amount: gstAmount,
           merchant,
           paymentMethod,

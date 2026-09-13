@@ -11,6 +11,7 @@ import TransactionModal from "@/components/TransactionModal";
 import ReceiptPreviewModal from "@/components/ReceiptPreviewModal";
 import { formatCurrency, formatDate } from "@/utils/format";
 import { getChartDomain } from "@/utils/chart";
+import { compressReceiptImage } from "@/utils/image";
 
 function getCategoryColor(categoryName: string | null | undefined) {
   if (!categoryName) return "linear-gradient(135deg, #94a3b8, #64748b)"; // slate gray
@@ -102,10 +103,12 @@ export default function Home() {
 
     setScanning(true);
     setIsMenuOpen(false);
-    const formData = new FormData();
-    formData.append("file", file);
 
     try {
+      const processedFile = await compressReceiptImage(file);
+      const formData = new FormData();
+      formData.append("file", processedFile);
+
       const res = await fetch("/cashFlow/api/transactions/scan", {
         method: "POST",
         body: formData

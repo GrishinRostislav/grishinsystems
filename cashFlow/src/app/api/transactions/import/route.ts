@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     const createdTransactions = [];
 
     for (const txn of transactions) {
-      const parsedAmount = parseFloat(txn.amount);
+      const parsedAmount = parseFloat(txn.amount) || 0;
       totalAmount += parsedAmount;
       
       let finalPayeeId = null;
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       const newTxn = await prisma.transaction.create({
         data: {
           amount: parsedAmount,
-          date: new Date(txn.date),
+          date: (txn.date && !isNaN(new Date(txn.date).getTime())) ? new Date(txn.date) : new Date(),
           merchant: finalMerchantName || null,
           payeeId: finalPayeeId,
           paymentMethod: txn.paymentMethod || null,

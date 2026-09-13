@@ -2,6 +2,21 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+export const maxDuration = 60; // Allow up to 60s for AI image analysis on Vercel
+
+function extractJson(text: string): string {
+  let clean = text.trim();
+  // Strip markdown code block wrappers
+  clean = clean.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  // Extract substring between outermost { and }
+  const start = clean.indexOf('{');
+  const end = clean.lastIndexOf('}');
+  if (start !== -1 && end !== -1 && end > start) {
+    clean = clean.substring(start, end + 1);
+  }
+  return clean;
+}
+
 export async function POST(request: Request) {
   try {
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -59,11 +74,21 @@ export async function POST(request: Request) {
     // Convert file to base64 for Gemini multimodal API
     const buffer = Buffer.from(await file.arrayBuffer());
     const base64Image = buffer.toString('base64');
-    const mimeType = file.type;
+    
+    // Normalize and infer MIME type safely
+    let mimeType = file.type || '';
+    if (!mimeType || mimeType === 'application/octet-stream') {
+      const name = (file.name || '').toLowerCase();
+      if (name.endsWith('.png')) mimeType = 'image/png';
+      else if (name.endsWith('.webp')) mimeType = 'image/webp';
+      else if (name.endsWith('.heic')) mimeType = 'image/heic';
+      else if (name.endsWith('.pdf')) mimeType = 'application/pdf';
+      else mimeType = 'image/jpeg';
+    }
 
     // Initialize Gemini API Client with fallback models
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const modelsToTry = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+    const modelsToTry = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
 
     // 3. Fetch recent product mappings to teach the AI
     const recentMappings = await prisma.productMapping.findMany({
@@ -122,23 +147,27 @@ export async function POST(request: Request) {
     for (const modelName of modelsToTry) {
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
-          const model = genAI.getGenerativeModel({ model: modelName });
+          const model = genAI.getGenerativeModel({
+            model: modelName,
+            generationConfig: {
+              responseMimeType: "application/json"
+            }
+          });
           result = await model.generateContent(contentPayload);
           break; // success
         } catch (err: any) {
           lastError = err;
           const status = err?.status || err?.httpStatusCode || 0;
           const msg = err?.message || '';
+          console.warn(`Model ${modelName} attempt ${attempt + 1} failed: ${msg}`);
           // Retry on 503 (overloaded) or 429 (rate limit)
           if (status === 503 || status === 429 || msg.includes('503') || msg.includes('429') || msg.includes('overloaded') || msg.includes('high demand')) {
-            console.warn(`Model ${modelName} attempt ${attempt + 1} failed (${status}), trying next...`);
             if (attempt === 0) {
               await new Promise(r => setTimeout(r, 1500)); // brief pause before retry
             }
             continue;
           }
-          // For other errors, don't retry this model
-          console.error(`Model ${modelName} failed with non-retryable error:`, msg);
+          // For other errors (e.g. 404 model not found or config unsupported), try next model
           break;
         }
       }
@@ -150,26 +179,36 @@ export async function POST(request: Request) {
     }
 
     const textResponse = result.response.text();
-    
-    // Clean code blocks (in case Gemini wraps JSON in markdown ```json ... ``` blocks)
-    const cleanJsonText = textResponse
-      .replace(/^```json\s*/i, '')
-      .replace(/```$/, '')
-      .trim();
+    const cleanJsonText = extractJson(textResponse);
 
-    const parsedData = JSON.parse(cleanJsonText);
+    let parsedData: any;
+    try {
+      parsedData = JSON.parse(cleanJsonText);
+    } catch (parseErr: any) {
+      console.error("JSON parse failed on response:", textResponse);
+      throw new Error(`Failed to parse AI receipt response as JSON: ${parseErr.message}`);
+    }
 
-    // Fix hallucinated category IDs (if Gemini returned a name instead of an ID)
-    if (parsedData.items) {
-      for (const item of parsedData.items) {
-        if (item.categoryId && !categories.find(c => c.id === item.categoryId)) {
-          const match = categories.find(c => c.name.toLowerCase() === String(item.categoryId).toLowerCase());
-          if (match) {
-            item.categoryId = match.id;
-          } else {
-            item.categoryId = null;
-          }
-        }
+    if (!parsedData || typeof parsedData !== 'object') {
+      throw new Error('AI returned an invalid receipt structure.');
+    }
+
+    if (!Array.isArray(parsedData.items)) {
+      parsedData.items = [];
+    }
+
+    // Fix hallucinated category IDs and ensure amounts are negative numbers
+    for (const item of parsedData.items) {
+      if (typeof item.amount === 'number' && item.amount > 0) {
+        item.amount = -item.amount;
+      } else if (typeof item.amount === 'string') {
+        const parsed = parseFloat(item.amount);
+        item.amount = !isNaN(parsed) ? (parsed > 0 ? -parsed : parsed) : 0;
+      }
+
+      if (item.categoryId && !categories.find(c => c.id === item.categoryId)) {
+        const match = categories.find(c => c.name.toLowerCase() === String(item.categoryId).toLowerCase());
+        item.categoryId = match ? match.id : null;
       }
     }
 
@@ -202,7 +241,7 @@ export async function POST(request: Request) {
         processedItems.push({
           code: item.code || null,
           rawName: item.rawName,
-          description: item.rawName, // Default to raw receipt name
+          description: item.rawName || item.description || "Scanned Item",
           amount: item.amount,
           categoryId: item.categoryId
         });
@@ -211,8 +250,14 @@ export async function POST(request: Request) {
 
     parsedData.items = processedItems;
 
-    // Force GST to Taxes & Fees category
+    // Force GST to Taxes & Fees category and ensure negative amount
     if (parsedData.gst) {
+      if (typeof parsedData.gst.amount === 'number' && parsedData.gst.amount > 0) {
+        parsedData.gst.amount = -parsedData.gst.amount;
+      } else if (typeof parsedData.gst.amount === 'string') {
+        const parsed = parseFloat(parsedData.gst.amount);
+        parsedData.gst.amount = !isNaN(parsed) ? (parsed > 0 ? -parsed : parsed) : 0;
+      }
       parsedData.gst.categoryId = taxCat.id;
     }
 
