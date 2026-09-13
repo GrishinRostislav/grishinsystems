@@ -61,10 +61,12 @@ export async function GET(request: Request) {
       }
     }
 
-    // Calculate historical average baseline from recent past completed months
-    let totalPastIncome = 0;
-    let totalPastExpense = 0;
-    let pastMonthCount = 0;
+    // Calculate weighted historical baseline (recent months weighted more heavily)
+    // Weights: Month -1 (40%), Month -2 (30%), Month -3 (20%), Month -4..6 (10% total)
+    const pastMonthWeights = [0.40, 0.30, 0.20, 0.0333, 0.0333, 0.0334];
+    let weightedPastIncome = 0;
+    let weightedPastExpense = 0;
+    let totalWeight = 0;
 
     for (let i = 1; i <= Math.min(6, pastMonths); i++) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -74,16 +76,17 @@ export async function GET(request: Request) {
       
       const inc = historyIncomeMap.get(key) || 0;
       const exp = historyExpenseMap.get(key) || 0;
+      const weight = pastMonthWeights[i - 1] || 0.05;
       
       if (inc > 0 || exp > 0) {
-        totalPastIncome += inc;
-        totalPastExpense += exp;
-        pastMonthCount++;
+        weightedPastIncome += inc * weight;
+        weightedPastExpense += exp * weight;
+        totalWeight += weight;
       }
     }
 
-    const historicalBaselineIncome = pastMonthCount > 0 ? (totalPastIncome / pastMonthCount) : 0;
-    const historicalBaselineExpense = pastMonthCount > 0 ? (totalPastExpense / pastMonthCount) : 0;
+    const historicalBaselineIncome = totalWeight > 0 ? (weightedPastIncome / totalWeight) : 0;
+    const historicalBaselineExpense = totalWeight > 0 ? (weightedPastExpense / totalWeight) : 0;
 
     // Build historical balance points (backward calculation)
     let runningBalanceBackward = currentBalance;
@@ -295,6 +298,21 @@ export async function GET(request: Request) {
     if (currentMonthFlow) {
       runningBalanceForward += currentMonthFlow.net;
       runningSimulatedBalance += currentMonthFlow.net + currentMonthFlow.scenarioRecurringNet + currentMonthFlow.scenarioOneTimeNet;
+    }
+
+    // Daily Pacing: Extrapolate remaining unscheduled daily spending for the rest of the current month
+    const dayOfMonth = now.getDate();
+    const totalDaysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const daysRemainingInMonth = totalDaysInMonth - dayOfMonth;
+
+    if (dayOfMonth > 0 && daysRemainingInMonth > 0) {
+      const currentMonthSpentSoFar = historyExpenseMap.get(currentMonthKey) || 0;
+      const dailyExpensePace = currentMonthSpentSoFar / dayOfMonth;
+      const estimatedUnscheduledExpenseRemaining = dailyExpensePace * daysRemainingInMonth;
+      
+      // Deduct estimated remaining unscheduled daily expense from starting balance trajectory
+      runningBalanceForward -= estimatedUnscheduledExpenseRemaining;
+      runningSimulatedBalance -= estimatedUnscheduledExpenseRemaining;
     }
 
     // Calculate monthly averages and future points
