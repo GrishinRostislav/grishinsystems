@@ -385,12 +385,25 @@ export async function GET(request: Request) {
     }
 
     const formattedHistoricalPoints = historicalPoints.map((p, index) => {
-      if (index === historicalPoints.length - 1 && hasActiveScenarios) {
-        return { ...p, simulatedBalance: p.balance };
-      }
-      return { ...p, simulatedBalance: null };
+      const isToday = index === historicalPoints.length - 1;
+      return {
+        ...p,
+        historyBalance: p.balance,
+        forecastBalance: isToday ? p.balance : null,
+        simulatedBalance: isToday && hasActiveScenarios ? p.balance : null,
+      };
     });
-    const chartData = [...formattedHistoricalPoints, ...projectedPoints];
+
+    const formattedProjectedPoints = projectedPoints.map((p) => {
+      return {
+        ...p,
+        historyBalance: null,
+        forecastBalance: p.balance,
+        simulatedBalance: hasActiveScenarios ? p.simulatedBalance : null,
+      };
+    });
+
+    const chartData = [...formattedHistoricalPoints, ...formattedProjectedPoints];
 
     return NextResponse.json({
       homeCurrency,

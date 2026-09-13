@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getExchangeRates, convertAmount } from "@/lib/currency";
-import { getCurrentPeriodDates, addFrequency, getCategoryDescendantIds } from "@/lib/budgetUtils";
+import { getExchangeRates } from "@/lib/currency";
+import { getCurrentPeriodDates, getCategoryDescendantIds } from "@/lib/budgetUtils";
+import { calculateBudgetMetrics } from "@/lib/services/budgetService";
 
 export async function GET(
   request: Request,
@@ -55,49 +56,11 @@ export async function GET(
       orderBy: { date: "desc" }
     });
 
-    let spent = 0;
-    for (const t of transactions) {
-      spent += Math.abs(convertAmount(t.amount, t.account.currency, homeCurrency, rates));
-    }
-
-    let projected = 0;
-    const now = new Date();
-    if (end > now) {
-      const scheduledTxs = await prisma.scheduledTransaction.findMany({
-        where: {
-          isActive: true,
-          type: 'expense',
-          account: { includeInTotal: true, isArchived: false },
-          ...(!budget.isGlobal ? {
-            categoryId: {
-              in: allTargetCategoryIds
-            }
-          } : {})
-        },
-        include: { account: true }
-      });
-
-      for (const st of scheduledTxs) {
-        let simDate = new Date(st.nextRunDate);
-        while (simDate <= end) {
-          if (simDate >= now && simDate >= start) {
-            const convertedAmt = convertAmount(st.amount, st.account?.currency || homeCurrency, homeCurrency, rates);
-            projected += Math.abs(convertedAmt);
-          }
-          simDate = addFrequency(simDate, st.frequency);
-        }
-      }
-    }
-
-    const remaining = budget.amount - spent;
+    const metrics = await calculateBudgetMetrics(budget, homeCurrency, rates);
 
     const budgetWithSpent = {
       ...budget,
-      spent,
-      projected,
-      remaining,
-      currentPeriodStart: start.toISOString(),
-      currentPeriodEnd: end.toISOString()
+      ...metrics
     };
 
     return NextResponse.json({ budget: budgetWithSpent, transactions, homeCurrency });

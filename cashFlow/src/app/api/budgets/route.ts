@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getExchangeRates, convertAmount } from "@/lib/currency";
-import { getCurrentPeriodDates, addFrequency, getCategoryDescendantIds } from "@/lib/budgetUtils";
+import { getExchangeRates } from "@/lib/currency";
+import { calculateBudgetMetrics } from "@/lib/services/budgetService";
 
 export async function GET() {
   try {
@@ -21,81 +21,12 @@ export async function GET() {
       orderBy: { createdAt: "desc" }
     });
 
-    const allTargetCategoryIdsByBudget = new Map();
-
     const budgetsWithSpent = await Promise.all(
       budgets.map(async (budget) => {
-        const { start, end } = getCurrentPeriodDates(budget.period, budget.startDate, budget.endDate);
-
-        // Find all descendant categories to include in budget
-        const selectedCategoryIds = budget.categories.map(c => c.id);
-        const allTargetCategoryIds = budget.isGlobal ? [] : await getCategoryDescendantIds(selectedCategoryIds);
-
-        // Fetch expense transactions (amount < 0) in the category set, excluding transfers
-        const txns = await prisma.transaction.findMany({
-          where: {
-            isTransfer: false,
-            date: {
-              gte: start,
-              lte: end
-            },
-            amount: {
-              lt: 0
-            },
-            ...(!budget.isGlobal ? {
-              categoryId: {
-                in: allTargetCategoryIds
-              }
-            } : {})
-          },
-          include: { account: true }
-        });
-
-        let spent = 0;
-        for (const t of txns) {
-          spent += Math.abs(convertAmount(t.amount, t.account.currency, homeCurrency, rates));
-        }
-
-        // Calculate projected from ScheduledTransactions
-        let projected = 0;
-        const now = new Date();
-        if (end > now) {
-          const scheduledTxs = await prisma.scheduledTransaction.findMany({
-            where: {
-              isActive: true,
-              type: 'expense',
-              account: { includeInTotal: true, isArchived: false },
-              ...(!budget.isGlobal ? {
-                categoryId: {
-                  in: allTargetCategoryIds
-                }
-              } : {})
-            },
-            include: { account: true }
-          });
-
-          for (const st of scheduledTxs) {
-            let simDate = new Date(st.nextRunDate);
-            while (simDate <= end) {
-              // Only count future scheduled occurrences in this period to avoid double counting executed transactions
-              if (simDate >= now && simDate >= start) {
-                const convertedAmt = convertAmount(st.amount, st.account?.currency || homeCurrency, homeCurrency, rates);
-                projected += Math.abs(convertedAmt);
-              }
-              simDate = addFrequency(simDate, st.frequency);
-            }
-          }
-        }
-
-        const remaining = budget.amount - spent;
-
+        const metrics = await calculateBudgetMetrics(budget, homeCurrency, rates);
         return {
           ...budget,
-          spent,
-          projected,
-          remaining,
-          currentPeriodStart: start.toISOString(),
-          currentPeriodEnd: end.toISOString()
+          ...metrics
         };
       })
     );

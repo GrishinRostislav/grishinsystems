@@ -178,15 +178,14 @@ export default function ForecastPage() {
     );
   };
 
-  const fetchForecast = async (m: number, accountsFilter: string[]) => {
+  const [pastMonths, setPastMonths] = useState(6);
+
+  const fetchForecast = async (m: number, pastM: number, accountsFilter: string[]) => {
     setLoading(true);
     try {
-      let url = `/cashFlow/api/forecast?months=${m}`;
+      let url = `/cashFlow/api/forecast?months=${m}&pastMonths=${pastM}`;
       if (accountsFilter.length > 0) {
         url += `&accountIds=${accountsFilter.join(',')}`;
-      }
-      if (isMobile) {
-        url += `&pastMonths=2`;
       }
       const res = await fetch(url);
       const json = await res.json();
@@ -242,23 +241,22 @@ export default function ForecastPage() {
     if (isInitialized) {
       localStorage.setItem("forecast_months", months.toString());
       localStorage.setItem("forecast_accounts", JSON.stringify(selectedAccounts));
-      fetchForecast(months, selectedAccounts);
+      fetchForecast(months, pastMonths, selectedAccounts);
     }
-  }, [months, selectedAccounts, isInitialized, isMobile]);
+  }, [months, pastMonths, selectedAccounts, isInitialized]);
 
   const handleToggleScenario = async (id: string, currentActive: boolean) => {
     try {
-      // optimistic UI update
       setScenarios(scenarios.map(s => s.id === id ? { ...s, isActive: !currentActive } : s));
       await fetch(`/cashFlow/api/scenarios/${id}`, {
         method: 'PUT',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive: !currentActive })
       });
-      fetchForecast(months, selectedAccounts); // refetch forecast
+      fetchForecast(months, pastMonths, selectedAccounts);
     } catch (err) {
       console.error(err);
-      fetchScenarios(); // revert on fail
+      fetchScenarios();
     }
   };
 
@@ -270,7 +268,7 @@ export default function ForecastPage() {
       });
       setScenarioModalOpen(false);
       fetchScenarios();
-      fetchForecast(months, selectedAccounts);
+      fetchForecast(months, pastMonths, selectedAccounts);
     } catch (err) {
       console.error(err);
     }
@@ -278,22 +276,37 @@ export default function ForecastPage() {
 
   const handleSaveScenario = () => {
     fetchScenarios();
-    fetchForecast(months, selectedAccounts);
+    fetchForecast(months, pastMonths, selectedAccounts);
   };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const dataPoint = payload[0].payload;
+      const isHistory = dataPoint.isHistory;
+
       return (
         <div style={{ background: 'var(--bg-primary)', padding: '16px', border: '1px solid var(--border-color)', borderRadius: '12px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}>
-          <p style={{ margin: '0 0 8px 0', fontWeight: 600, color: 'var(--text-secondary)' }}>{dataPoint.displayDate}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <span style={{
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              padding: '2px 8px',
+              borderRadius: '6px',
+              textTransform: 'uppercase',
+              background: isHistory ? 'rgba(99, 102, 241, 0.15)' : 'rgba(37, 99, 235, 0.15)',
+              color: isHistory ? '#6366f1' : 'var(--unique-blue)'
+            }}>
+              {isHistory ? "Past History" : "Forecast"}
+            </span>
+            <span style={{ fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{dataPoint.displayDate}</span>
+          </div>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '2px' }}>
-                {dataPoint.isHistory ? "Historical Balance" : "Baseline Forecast"}
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '2px' }}>
+                {isHistory ? "Recorded Balance" : "Baseline Forecast"}
               </span>
-              <span style={{ fontSize: '1.1rem', fontWeight: 700, color: dataPoint.isHistory ? 'var(--text-main)' : 'var(--unique-blue)' }}>
+              <span style={{ fontSize: '1.1rem', fontWeight: 700, color: isHistory ? '#6366f1' : 'var(--unique-blue)' }}>
                 {formatCurrency(dataPoint.balance, data?.homeCurrency)}
               </span>
             </div>
@@ -328,6 +341,19 @@ export default function ForecastPage() {
       </div>
 
       <div className={styles.controls} style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Past History:</span>
+          <select 
+            className={styles.select} 
+            value={pastMonths} 
+            onChange={(e) => setPastMonths(Number(e.target.value))}
+          >
+            <option value={3}>3 Months</option>
+            <option value={6}>6 Months</option>
+            <option value={12}>1 Year</option>
+          </select>
+        </div>
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Projection Horizon:</span>
           <select 
@@ -380,53 +406,66 @@ export default function ForecastPage() {
                 style={{ padding: '8px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', borderBottom: '1px solid var(--border-color)' }}
                 onClick={() => setSelectedAccounts([])}
               >
-                <input type="radio" checked={selectedAccounts.length === 0} readOnly />
-                <span style={{ fontWeight: selectedAccounts.length === 0 ? 600 : 400 }}>All Included Accounts</span>
+                <input 
+                  type="checkbox" 
+                  checked={selectedAccounts.length === 0} 
+                  readOnly 
+                />
+                <span style={{ fontWeight: 600 }}>All Included Accounts</span>
               </div>
-              {availableAccounts.filter(a => !a.isArchived).map(acc => (
-                <div 
-                  key={acc.id}
-                  style={{ padding: '8px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
-                  onClick={() => {
-                    setSelectedAccounts(prev => 
-                      prev.includes(acc.id) 
-                        ? prev.filter(id => id !== acc.id) 
-                        : [...prev, acc.id]
-                    );
-                  }}
-                >
-                  <input type="checkbox" checked={selectedAccounts.includes(acc.id)} readOnly />
-                  <span>{acc.name}</span>
-                </div>
-              ))}
+              {availableAccounts.map(acc => {
+                const isSelected = selectedAccounts.includes(acc.id);
+                return (
+                  <div 
+                    key={acc.id} 
+                    style={{ padding: '8px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+                    onClick={() => {
+                      if (isSelected) {
+                        setSelectedAccounts(selectedAccounts.filter(id => id !== acc.id));
+                      } else {
+                        setSelectedAccounts([...selectedAccounts, acc.id]);
+                      }
+                    }}
+                  >
+                    <input 
+                      type="checkbox" 
+                      checked={isSelected} 
+                      readOnly 
+                    />
+                    <span>{acc.name}</span>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
       </div>
 
       {loading && !data ? (
-        <div className={styles.loading}>Generating your financial forecast...</div>
+        <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-muted)' }}>Calculating financial trajectory...</div>
       ) : (
         <>
-          <div className={styles.summaryCards}>
+          <div className={styles.grid}>
             <div className={styles.card}>
-              <div className={styles.cardTitle}>Current Total Balance</div>
-              <div className={styles.cardValue}>
-                {formatCurrency(data?.currentBalance || 0, data?.homeCurrency)}
-              </div>
-            </div>
-            
-            <div className={styles.card}>
-              <div className={styles.cardTitle}>Avg. Projected Monthly Income</div>
-              <div className={`${styles.cardValue} ${styles.cardValueIncome}`}>
-                +{formatCurrency(data?.avgMonthlyIncome || 0, data?.homeCurrency)}
+              <div className={styles.cardTitle}>Avg Monthly Income</div>
+              <div className={styles.cardValue} style={{ color: 'var(--sporty-teal)' }}>
+                {formatCurrency(data?.avgMonthlyIncome || 0, data?.homeCurrency)}
               </div>
             </div>
 
             <div className={styles.card}>
-              <div className={styles.cardTitle}>Avg. Projected Monthly Expenses</div>
-              <div className={`${styles.cardValue} ${styles.cardValueExpense}`}>
-                -{formatCurrency(data?.avgMonthlyExpense || 0, data?.homeCurrency)}
+              <div className={styles.cardTitle}>Avg Monthly Expense</div>
+              <div className={styles.cardValue} style={{ color: 'var(--silent-dark-blue)' }}>
+                {formatCurrency(data?.avgMonthlyExpense || 0, data?.homeCurrency)}
+              </div>
+            </div>
+
+            <div className={styles.card}>
+              <div className={styles.cardTitle}>Projected Net Monthly</div>
+              <div className={styles.cardValue} style={{ 
+                color: ((data?.avgMonthlyIncome || 0) - (data?.avgMonthlyExpense || 0)) >= 0 ? 'var(--sporty-teal)' : '#b91c1c' 
+              }}>
+                {formatCurrency((data?.avgMonthlyIncome || 0) - (data?.avgMonthlyExpense || 0), data?.homeCurrency)}
               </div>
             </div>
 
@@ -448,14 +487,37 @@ export default function ForecastPage() {
           </div>
 
           <div className={styles.chartContainer}>
-            <h2 className={styles.chartTitle}>Wealth Trajectory</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+              <h2 className={styles.chartTitle} style={{ margin: 0 }}>Wealth Trajectory</h2>
+              <div style={{ display: 'flex', gap: '16px', fontSize: '0.85rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ width: '12px', height: '3px', background: '#6366f1', borderRadius: '2px' }} />
+                  <span style={{ color: 'var(--text-muted)' }}>Past History</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ width: '12px', height: '3px', background: 'var(--unique-blue)', borderRadius: '2px' }} />
+                  <span style={{ color: 'var(--text-muted)' }}>Forecast</span>
+                </div>
+                {data?.hasActiveScenarios && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ width: '12px', height: '3px', background: data?.futureBalance >= data?.baselineFutureBalance ? 'var(--sporty-teal)' : '#b91c1c', borderRadius: '2px' }} />
+                    <span style={{ color: 'var(--text-muted)' }}>Simulation</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className={styles.chartWrapper}>
               <ResponsiveContainer>
-                <AreaChart data={data?.chartData || []} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                <AreaChart data={data?.chartData || []} margin={{ top: 15, right: 15, left: -10, bottom: 0 }}>
                   <defs>
+                    <linearGradient id="colorHistory" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.35}/>
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0.02}/>
+                    </linearGradient>
                     <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--unique-blue)" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="var(--unique-blue)" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="var(--unique-blue)" stopOpacity={0.35}/>
+                      <stop offset="95%" stopColor="var(--unique-blue)" stopOpacity={0.02}/>
                     </linearGradient>
                     <linearGradient id="colorSimulated" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="var(--sporty-teal)" stopOpacity={0.4}/>
@@ -465,13 +527,13 @@ export default function ForecastPage() {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" />
                   <XAxis 
                     dataKey="displayDate" 
-                    tick={{ fill: 'var(--text-muted)', fontSize: 12 }} 
+                    tick={{ fill: 'var(--text-muted)', fontSize: 11 }} 
                     axisLine={false} 
                     tickLine={false}
-                    minTickGap={30}
+                    minTickGap={25}
                   />
                   <YAxis 
-                    tick={{ fill: 'var(--text-muted)', fontSize: 12 }} 
+                    tick={{ fill: 'var(--text-muted)', fontSize: 11 }} 
                     axisLine={false} 
                     tickLine={false}
                     tickFormatter={(val) => {
@@ -482,32 +544,46 @@ export default function ForecastPage() {
                   />
                   <Tooltip content={<CustomTooltip />} />
                   
-                  {/* Find the index where future starts to draw a reference line */}
+                  {/* Vertical TODAY Divider */}
                   {data?.chartData && (
                     <ReferenceLine 
                       x={data.chartData.find((d: any) => !d.isHistory)?.displayDate} 
-                      stroke="var(--sporty-teal)" 
-                      strokeDasharray="3 3" 
-                      label={{ position: 'top', value: 'Today', fill: 'var(--sporty-teal)', fontSize: 12, fontWeight: 600 }}
+                      stroke="#10b981" 
+                      strokeWidth={2}
+                      strokeDasharray="4 4"
+                      label={{ position: 'top', value: 'TODAY', fill: '#10b981', fontSize: 11, fontWeight: 700 }}
                     />
                   )}
                   
-                  {/* BASELINE: Always Unique Blue */}
+                  {/* PAST HISTORY: Indigo/Slate Solid Area */}
                   <Area 
                     type="monotone" 
-                    dataKey="balance" 
+                    dataKey="historyBalance" 
+                    stroke="#6366f1" 
+                    strokeWidth={3}
+                    fillOpacity={1} 
+                    fill="url(#colorHistory)" 
+                    activeDot={{ r: 6, fill: '#6366f1' }}
+                    connectNulls
+                  />
+                  
+                  {/* FORECAST BASELINE: Dashed Unique Blue Area */}
+                  <Area 
+                    type="monotone" 
+                    dataKey="forecastBalance" 
                     stroke="var(--unique-blue)" 
-                    strokeWidth={data?.hasActiveScenarios ? 2 : 3}
+                    strokeWidth={3}
                     strokeDasharray={data?.hasActiveScenarios ? "5 5" : undefined}
                     fillOpacity={data?.hasActiveScenarios ? 0 : 1} 
                     fill={data?.hasActiveScenarios ? "transparent" : "url(#colorBalance)"} 
-                    activeDot={{ r: data?.hasActiveScenarios ? 4 : 8, strokeWidth: 0, fill: 'var(--unique-blue)' }}
+                    activeDot={{ r: 7, fill: 'var(--unique-blue)' }}
+                    connectNulls
                   />
                   
-                  {/* SIMULATION: Red if negative impact, Green if positive impact */}
+                  {/* SIMULATION: Active Scenarios */}
                   {data?.hasActiveScenarios && (() => {
                     const isPositive = data.futureBalance >= data.baselineFutureBalance;
-                    const simColor = isPositive ? "var(--sporty-teal)" : "#b91c1c"; // Darkish red
+                    const simColor = isPositive ? "var(--sporty-teal)" : "#b91c1c";
                     
                     return (
                       <Area 
@@ -515,9 +591,10 @@ export default function ForecastPage() {
                         dataKey="simulatedBalance" 
                         stroke={simColor} 
                         strokeWidth={3}
-                        fillOpacity={0.15} 
+                        fillOpacity={0.2} 
                         fill={simColor} 
-                        activeDot={{ r: 8, strokeWidth: 0, fill: simColor }}
+                        activeDot={{ r: 7, fill: simColor }}
+                        connectNulls
                       />
                     );
                   })()}

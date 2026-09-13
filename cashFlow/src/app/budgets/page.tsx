@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import styles from "./page.module.css";
+import BudgetCard from "@/components/BudgetCard";
 import { formatCurrency, formatDate } from "@/utils/format";
 import { buildCategoryTree, flattenCategoryTree, type Category as CatType } from "@/utils/categories";
 
@@ -203,72 +204,9 @@ export default function BudgetsPage() {
                   {p.charAt(0).toUpperCase() + p.slice(1)} Budgets
                 </h2>
                 <div className={styles.budgetsGrid}>
-                  {list.map((budget: any) => {
-                    const spentPercent = budget.amount > 0 ? (budget.spent / budget.amount) * 100 : 0;
-                    const projectedPercent = budget.amount > 0 ? ((budget.projected || 0) / budget.amount) * 100 : 0;
-                    const remaining = budget.remaining !== undefined ? budget.remaining : (budget.amount - budget.spent);
-                    const isOverBudget = remaining < 0;
-
-                    return (
-                      <Link href={`/budgets/${budget.id}`} key={budget.id} style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <div className={styles.budgetCard}>
-                        <div className={styles.cardTop}>
-                          <div>
-                            <h3 className={styles.budgetName}>{budget.name}</h3>
-                            <span className={styles.cardInterval}>
-                              {formatDate(budget.currentPeriodStart)} - {formatDate(budget.currentPeriodEnd)}
-                            </span>
-                            <div className={styles.cardBadges}>
-                              {budget.isGlobal ? (
-                                <span className={styles.globalBadge}>Global Budget</span>
-                              ) : (
-                                <>
-                                  {budget.categories.slice(0, 3).map((c: any) => (
-                                    <span key={c.id} className={styles.categoryBadge}>{c.name}</span>
-                                  ))}
-                                  {budget.categories.length > 3 && (
-                                    <span className={styles.categoryBadgeMore}>+{budget.categories.length - 3} more</span>
-                                  )}
-                                </>
-                              )}
-                            </div>
-                          </div>
-                          <div className={styles.cardStats}>
-                            <span className={styles.spentAmount}>{formatCurrency(budget.spent, homeCurrency)}</span>
-                            <span className={styles.limitAmount}>of {formatCurrency(budget.amount, homeCurrency)} {budget.period}</span>
-                          </div>
-                        </div>
-
-                        <div className={styles.progressContainer}>
-                          <div 
-                            className={styles.progressBar} 
-                            style={{ 
-                              width: `${Math.min(spentPercent, 100)}%`, 
-                              background: getProgressBarColor(spentPercent) 
-                            }} 
-                          />
-                          {(projectedPercent > 0 && spentPercent < 100) && (
-                            <div 
-                              className={styles.progressBarProjected} 
-                              style={{ 
-                                width: `${Math.min(projectedPercent, 100 - spentPercent)}%`, 
-                                left: `${Math.min(spentPercent, 100)}%`,
-                                background: 'repeating-linear-gradient(45deg, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0.3) 10px, rgba(16, 185, 129, 0.5) 10px, rgba(16, 185, 129, 0.5) 20px)'
-                              }} 
-                            />
-                          )}
-                        </div>
-
-                        <div className={styles.cardFooter}>
-                          <span className={styles.percentageText}>{Math.round(spentPercent)}% used {projectedPercent > 0 && `(+${Math.round(projectedPercent)}% planned)`}</span>
-                          <span className={isOverBudget ? styles.remainingOver : styles.remainingUnder}>
-                            {isOverBudget ? `${formatCurrency(Math.abs(remaining), homeCurrency)} over limit` : `${formatCurrency(remaining, homeCurrency)} remaining`}
-                          </span>
-                        </div>
-                        </div>
-                      </Link>
-                    );
-                  })}
+                  {list.map((budget: any) => (
+                    <BudgetCard key={budget.id} budget={budget} homeCurrency={homeCurrency} />
+                  ))}
                 </div>
               </div>
             );
