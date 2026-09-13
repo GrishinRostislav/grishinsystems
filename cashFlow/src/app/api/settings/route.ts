@@ -27,10 +27,11 @@ export async function GET() {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { homeCurrency, aiCustomInstructions, aiFinancialGoal, aiAuditTone, aiMinBufferMonths } = body;
+    const { homeCurrency, appPassword, aiCustomInstructions, aiFinancialGoal, aiAuditTone, aiMinBufferMonths } = body;
 
     const updateData: any = {};
     if (homeCurrency !== undefined) updateData.homeCurrency = homeCurrency;
+    if (appPassword !== undefined) updateData.appPassword = appPassword && appPassword.trim() ? appPassword.trim() : null;
     if (aiCustomInstructions !== undefined) updateData.aiCustomInstructions = aiCustomInstructions;
     if (aiFinancialGoal !== undefined) updateData.aiFinancialGoal = aiFinancialGoal;
     if (aiAuditTone !== undefined) updateData.aiAuditTone = aiAuditTone;
@@ -42,6 +43,7 @@ export async function PUT(request: Request) {
       create: {
         id: "global",
         homeCurrency: homeCurrency || "CAD",
+        appPassword: appPassword && appPassword.trim() ? appPassword.trim() : null,
         aiCustomInstructions: aiCustomInstructions || null,
         aiFinancialGoal: aiFinancialGoal || "balanced",
         aiAuditTone: aiAuditTone || "strict",

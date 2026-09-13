@@ -10,6 +10,7 @@ type SettingsModalProps = {
 
 export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [homeCurrency, setHomeCurrency] = useState("CAD");
+  const [appPassword, setAppPassword] = useState("");
   const [aiCustomInstructions, setAiCustomInstructions] = useState("");
   const [aiFinancialGoal, setAiFinancialGoal] = useState("balanced");
   const [aiAuditTone, setAiAuditTone] = useState("strict");
@@ -22,6 +23,11 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         .then(res => res.json())
         .then(data => {
           if (data.homeCurrency) setHomeCurrency(data.homeCurrency);
+          if (data.appPassword !== undefined && data.appPassword !== null) {
+            setAppPassword(data.appPassword);
+          } else {
+            setAppPassword("");
+          }
           if (data.aiCustomInstructions !== undefined && data.aiCustomInstructions !== null) {
             setAiCustomInstructions(data.aiCustomInstructions);
           }
@@ -42,6 +48,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           homeCurrency,
+          appPassword,
           aiCustomInstructions,
           aiFinancialGoal,
           aiAuditTone,
@@ -85,6 +92,26 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               <option value="GBP">GBP - British Pound (£)</option>
               <option value="AUD">AUD - Australian Dollar ($)</option>
             </select>
+          </div>
+
+          <div className={styles.divider} />
+
+          <div className={styles.sectionHeader}>
+            <h3>🔐 Безопасность и Пароль</h3>
+            <p className={styles.description}>
+              Установите новый пароль для входа. Оставьте поле пустым, если хотите отключить запрос пароля при входе.
+            </p>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Пароль приложения</label>
+            <input 
+              type="text"
+              value={appPassword}
+              onChange={e => setAppPassword(e.target.value)}
+              placeholder="Оставьте пустым для отключения пароля"
+              className={styles.select}
+            />
           </div>
 
           <div className={styles.divider} />
