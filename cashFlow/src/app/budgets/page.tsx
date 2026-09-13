@@ -6,6 +6,7 @@ import styles from "./page.module.css";
 import BudgetCard from "@/components/BudgetCard";
 import { formatCurrency, formatDate } from "@/utils/format";
 import { buildCategoryTree, flattenCategoryTree, type Category as CatType } from "@/utils/categories";
+import { useAutoSync } from "@/hooks/useAutoSync";
 
 type Category = {
   id: string;

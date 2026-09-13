@@ -484,6 +484,16 @@ export default function ForecastPage() {
             </div>
 
             <div className={styles.card}>
+              <div className={styles.cardTitle}>3-Mo Safety Cushion</div>
+              <div className={styles.cardValue} style={{ color: '#6366f1' }}>
+                {formatCurrency(data?.emergencyBuffer || ((data?.avgMonthlyExpense || 0) * 3), data?.homeCurrency)}
+              </div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                3x avg monthly expenses
+              </div>
+            </div>
+
+            <div className={styles.card}>
               <div className={styles.cardTitle}>Projected Balance in {months >= 12 ? `${months/12} Yrs` : `${months} Mo`}</div>
               <div className={styles.cardValue} style={{ 
                 color: data?.hasActiveScenarios 
@@ -639,35 +649,68 @@ export default function ForecastPage() {
               </div>
             ) : (
               <div className={styles.scenariosGrid}>
-                {scenarios.map((scenario) => (
-                  <div 
-                    key={scenario.id} 
-                    className={`${styles.scenarioCard} ${scenario.isActive ? styles.scenarioCardActive : ''}`}
-                  >
-                    <div className={styles.scenarioHeader}>
-                      <h3 className={styles.scenarioTitle}>{scenario.name}</h3>
-                      <label className={styles.switch}>
-                        <input 
-                          type="checkbox" 
-                          checked={scenario.isActive}
-                          onChange={() => handleToggleScenario(scenario.id, scenario.isActive)}
-                        />
-                        <span className={styles.slider}></span>
-                      </label>
-                    </div>
-                    <div className={styles.scenarioItemsCount} style={{ marginBottom: '0' }}>
-                      {scenario.items.length} impact item{scenario.items.length !== 1 ? 's' : ''}
-                    </div>
-                    {getScenarioSummary(scenario)}
-                    <button 
-                      onClick={() => { setEditingScenario(scenario); setScenarioModalOpen(true); }}
-                      className={styles.btnOutline}
-                      style={{ marginTop: '16px' }}
+                {scenarios.map((scenario) => {
+                  const rec = data?.scenarioRecommendations?.[scenario.id];
+
+                  return (
+                    <div 
+                      key={scenario.id} 
+                      className={`${styles.scenarioCard} ${scenario.isActive ? styles.scenarioCardActive : ''}`}
                     >
-                      Edit Details
-                    </button>
-                  </div>
-                ))}
+                      <div className={styles.scenarioHeader}>
+                        <h3 className={styles.scenarioTitle}>{scenario.name}</h3>
+                        <label className={styles.switch}>
+                          <input 
+                            type="checkbox" 
+                            checked={scenario.isActive}
+                            onChange={() => handleToggleScenario(scenario.id, scenario.isActive)}
+                          />
+                          <span className={styles.slider}></span>
+                        </label>
+                      </div>
+                      <div className={styles.scenarioItemsCount} style={{ marginBottom: '0' }}>
+                        {scenario.items.length} impact item{scenario.items.length !== 1 ? 's' : ''}
+                      </div>
+                      {getScenarioSummary(scenario)}
+
+                      {/* Smart Purchase Timing Advisor Box */}
+                      {rec && (
+                        <div style={{
+                          marginTop: '12px',
+                          padding: '12px',
+                          borderRadius: '10px',
+                          fontSize: '0.85rem',
+                          background: rec.status === 'OPTIMAL' 
+                            ? 'rgba(16, 185, 129, 0.08)' 
+                            : (rec.status === 'WAIT_AND_SAVE' ? 'rgba(245, 158, 11, 0.08)' : 'rgba(239, 68, 68, 0.08)'),
+                          border: `1px solid ${
+                            rec.status === 'OPTIMAL' 
+                              ? 'rgba(16, 185, 129, 0.3)' 
+                              : (rec.status === 'WAIT_AND_SAVE' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(239, 68, 68, 0.3)')
+                          }`,
+                          color: 'var(--text-main)'
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, marginBottom: '4px', color: rec.status === 'OPTIMAL' ? '#059669' : (rec.status === 'WAIT_AND_SAVE' ? '#d97706' : '#dc2626') }}>
+                            <span>
+                              {rec.status === 'OPTIMAL' ? '💡 Советник: Отличный момент' : (rec.status === 'WAIT_AND_SAVE' ? '⏳ Советник: Рекомендуется накопить' : '⚠️ Советник: Высокий риск')}
+                            </span>
+                          </div>
+                          <div style={{ lineHeight: 1.4, color: 'var(--text-secondary)' }}>
+                            {rec.recommendationText}
+                          </div>
+                        </div>
+                      )}
+
+                      <button 
+                        onClick={() => { setEditingScenario(scenario); setScenarioModalOpen(true); }}
+                        className={styles.btnOutline}
+                        style={{ marginTop: '16px' }}
+                      >
+                        Edit Details
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

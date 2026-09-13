@@ -403,16 +403,106 @@ export async function GET(request: Request) {
       };
     });
 
-    const chartData = [...formattedHistoricalPoints, ...formattedProjectedPoints];
+    const allScenarios = await prisma.forecastScenario.findMany({
+      include: { items: true }
+    });
+
+    const avgMonthlyIncomeVal = projectionMonthCount ? (totalProjectedIncome / projectionMonthCount) : historicalBaselineIncome;
+    const avgMonthlyExpenseVal = projectionMonthCount ? (totalProjectedExpense / projectionMonthCount) : historicalBaselineExpense;
+    const emergencyBuffer = avgMonthlyExpenseVal * 3;
+    const netMonthlySavings = Math.max(0, avgMonthlyIncomeVal - avgMonthlyExpenseVal);
+
+    const scenarioRecommendations: Record<string, any> = {};
+
+    for (const scenario of allScenarios) {
+      let oneTimeCost = 0;
+      let recurringMonthlyImpact = 0;
+
+      for (const item of scenario.items) {
+        const amt = item.type === 'expense' ? item.amount : (item.type === 'income' ? -item.amount : 0);
+        if (item.frequency === 'ONCE') {
+          oneTimeCost += amt;
+        } else {
+          recurringMonthlyImpact += amt;
+        }
+      }
+
+      const remainingAfterPurchase = currentBalance - oneTimeCost;
+      const deficit = (emergencyBuffer + oneTimeCost) - currentBalance;
+
+      if (oneTimeCost <= 0) {
+        scenarioRecommendations[scenario.id] = {
+          scenarioId: scenario.id,
+          oneTimeCost,
+          emergencyBuffer,
+          remainingAfterPurchase,
+          isSafeNow: true,
+          status: 'OPTIMAL',
+          monthsToWait: 0,
+          recommendedDate: null,
+          deficit: 0,
+          recommendationText: 'Сценарий не требует разовых расходов и безопасен для вашей подушки безопасности.'
+        };
+      } else if (remainingAfterPurchase >= emergencyBuffer) {
+        scenarioRecommendations[scenario.id] = {
+          scenarioId: scenario.id,
+          oneTimeCost,
+          emergencyBuffer,
+          remainingAfterPurchase,
+          isSafeNow: true,
+          status: 'OPTIMAL',
+          monthsToWait: 0,
+          recommendedDate: null,
+          deficit: 0,
+          recommendationText: `Отличный момент для покупки! Ваш остаток ($${Math.round(remainingAfterPurchase).toLocaleString()}) останется выше 3-месячного резерва ($${Math.round(emergencyBuffer).toLocaleString()}).`
+        };
+      } else {
+        const effectiveMonthlySavings = netMonthlySavings - recurringMonthlyImpact;
+        if (effectiveMonthlySavings <= 0) {
+          scenarioRecommendations[scenario.id] = {
+            scenarioId: scenario.id,
+            oneTimeCost,
+            emergencyBuffer,
+            remainingAfterPurchase,
+            isSafeNow: false,
+            status: 'HIGH_RISK',
+            monthsToWait: null,
+            recommendedDate: null,
+            deficit: Math.max(0, deficit),
+            recommendationText: `Покупка прямо сейчас снизит баланс до $${Math.round(remainingAfterPurchase).toLocaleString()} (ниже резерва $${Math.round(emergencyBuffer).toLocaleString()}). Рекомендуется увеличить ежемесячные накопления.`
+          };
+        } else {
+          const monthsToWait = Math.ceil(deficit / effectiveMonthlySavings);
+          const recDate = new Date(now.getFullYear(), now.getMonth() + monthsToWait, 1);
+          const monthYearStr = recDate.toLocaleDateString('ru-RU', { month: 'short', year: 'numeric' });
+
+          scenarioRecommendations[scenario.id] = {
+            scenarioId: scenario.id,
+            oneTimeCost,
+            emergencyBuffer,
+            remainingAfterPurchase,
+            isSafeNow: false,
+            status: 'WAIT_AND_SAVE',
+            monthsToWait,
+            recommendedDate: monthYearStr,
+            deficit: Math.max(0, deficit),
+            recommendationText: `Покупка сейчас снизит баланс до $${Math.round(remainingAfterPurchase).toLocaleString()}, что ниже подушки $${Math.round(emergencyBuffer).toLocaleString()}. Рекомендуется отложить покупку на ${monthsToWait} мес. (до ${monthYearStr}), накопив еще $${Math.round(deficit).toLocaleString()}.`
+          };
+        }
+      }
+    }
 
     return NextResponse.json({
       homeCurrency,
       currentBalance,
-      avgMonthlyIncome: projectionMonthCount ? (totalProjectedIncome / projectionMonthCount) : 0,
-      avgMonthlyExpense: projectionMonthCount ? (totalProjectedExpense / projectionMonthCount) : 0,
+      avgMonthlyIncome: avgMonthlyIncomeVal,
+      avgMonthlyExpense: avgMonthlyExpenseVal,
+      emergencyBuffer,
+      netMonthlySavings,
       futureBalance: hasActiveScenarios ? runningSimulatedBalance : runningBalanceForward,
       baselineFutureBalance: runningBalanceForward,
       hasActiveScenarios,
+      scenarioRecommendations,
       chartData
     });
 

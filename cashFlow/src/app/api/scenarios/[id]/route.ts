@@ -8,10 +8,26 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const body = await request.json();
     const { name, isActive, items } = body;
 
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
     // We can do a full replace of items if they are provided,
     // or just update isActive if only isActive is passed (for toggling).
     if (name === undefined && items === undefined && isActive !== undefined) {
       // Toggle case
+      if (isActive) {
+        // Automatically align any item dates in the past to start from today
+        const existingItems = await prisma.scenarioItem.findMany({ where: { scenarioId: id } });
+        for (const item of existingItems) {
+          if (new Date(item.date) < startOfToday) {
+            await prisma.scenarioItem.update({
+              where: { id: item.id },
+              data: { date: new Date() }
+            });
+          }
+        }
+      }
+
       const updated = await prisma.forecastScenario.update({
         where: { id },
         data: { isActive: !!isActive },
@@ -32,18 +48,24 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         name,
         isActive: !!isActive,
         items: {
-          create: (items || []).map((item: any) => ({
-            name: item.name,
-            amount: parseFloat(item.amount),
-            type: item.type || 'expense',
-            date: new Date(item.date),
-            frequency: item.frequency || 'ONCE',
-            interval: item.interval ? parseInt(item.interval) : 1,
-            daysOfWeek: Array.isArray(item.daysOfWeek) ? item.daysOfWeek : [],
-            monthsOfYear: Array.isArray(item.monthsOfYear) ? item.monthsOfYear : [],
-            endDate: item.endDate ? new Date(item.endDate) : null,
-            annualRate: item.annualRate ? parseFloat(item.annualRate) : null,
-          }))
+          create: (items || []).map((item: any) => {
+            let itemDate = new Date(item.date);
+            if (isActive && itemDate < startOfToday) {
+              itemDate = new Date();
+            }
+            return {
+              name: item.name,
+              amount: parseFloat(item.amount),
+              type: item.type || 'expense',
+              date: itemDate,
+              frequency: item.frequency || 'ONCE',
+              interval: item.interval ? parseInt(item.interval) : 1,
+              daysOfWeek: Array.isArray(item.daysOfWeek) ? item.daysOfWeek : [],
+              monthsOfYear: Array.isArray(item.monthsOfYear) ? item.monthsOfYear : [],
+              endDate: item.endDate ? new Date(item.endDate) : null,
+              annualRate: item.annualRate ? parseFloat(item.annualRate) : null,
+            };
+          })
         }
       },
       include: { items: true }
