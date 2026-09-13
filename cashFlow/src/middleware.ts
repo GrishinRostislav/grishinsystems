@@ -14,7 +14,7 @@ function getOrigin(request: NextRequest): string {
   return request.nextUrl.origin;
 }
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   // Check if there is an APP_PASSWORD configured. If not, bypass auth.
   if (!process.env.APP_PASSWORD) {
     return NextResponse.next();
@@ -25,11 +25,8 @@ export function proxy(request: NextRequest) {
   // Exclude static files, login page, and auth api
   if (
     pathname.startsWith('/_next') ||
-    pathname.startsWith('/cashFlow/_next') ||
-    pathname.startsWith('/api/auth') ||
     pathname.startsWith('/api/auth') ||
     pathname === '/login' ||
-    pathname === '/cashFlow/login' ||
     pathname.includes('.')
   ) {
     return NextResponse.next();
@@ -42,7 +39,7 @@ export function proxy(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     const origin = getOrigin(request);
-    return NextResponse.redirect(`${origin}/cashFlow/login`);
+    return NextResponse.redirect(`${origin}/login`);
   }
 
   return NextResponse.next();
