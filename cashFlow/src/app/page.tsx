@@ -185,7 +185,10 @@ export default function Home() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const { totalBalance = 0, monthlyIncome = 0, monthlyExpenses = 0, chartData = [], pieData = [], balanceTrendData = [], recentTransactions = [], budgets = [], forecast = null, homeCurrency = "CAD" } = data || {};
+  const diffTime = (startDate && endDate) ? Math.abs(new Date(endDate).getTime() - new Date(startDate).getTime()) : 30 * 24 * 60 * 60 * 1000;
+  const periodDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+  const plannedIncomeForPeriod = forecast ? (forecast.avgMonthlyIncome / 30) * periodDays : 0;
+  const plannedExpenseForPeriod = forecast ? (forecast.avgMonthlyExpense / 30) * periodDays : 0;
 
   const processedChartData = isCumulative ? chartData.reduce((acc: any[], curr: any, index: number) => {
     if (index === 0) {
@@ -296,7 +299,7 @@ export default function Home() {
         <Link href="/forecast" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className={styles.card} style={{ cursor: 'pointer' }}>
             <div className={styles.cardHeader}>
-              <h3>Planned (30 days)</h3>
+              <h3>Planned ({periodDays === 30 ? "30 days" : `${periodDays} days`})</h3>
               <span className={styles.icon} style={{ background: 'rgba(139, 92, 246, 0.1)', padding: '8px', borderRadius: '12px', display: 'flex' }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -309,11 +312,11 @@ export default function Home() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Income</span>
-                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--sporty-teal)' }}>+{formatCurrency(forecast.avgMonthlyIncome, homeCurrency)}</span>
+                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--sporty-teal)' }}>+{formatCurrency(plannedIncomeForPeriod, homeCurrency)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Expenses</span>
-                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#e11d48' }}>-{formatCurrency(forecast.avgMonthlyExpense, homeCurrency)}</span>
+                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#e11d48' }}>-{formatCurrency(plannedExpenseForPeriod, homeCurrency)}</span>
               </div>
             </div>
           </div>

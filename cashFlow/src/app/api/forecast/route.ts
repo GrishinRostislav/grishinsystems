@@ -42,15 +42,48 @@ export async function GET(request: Request) {
       select: { amount: true, date: true, account: { select: { currency: true } } }
     });
 
-    // Calculate historical monthly net flow
+    // Calculate historical monthly net flow, income, and expenses
     const historyMap = new Map<string, number>(); // format: "YYYY-MM" -> net flow
+    const historyIncomeMap = new Map<string, number>();
+    const historyExpenseMap = new Map<string, number>();
+
     for (const tx of allTransactions) {
       const year = tx.date.getFullYear();
       const month = String(tx.date.getMonth() + 1).padStart(2, '0');
       const key = `${year}-${month}`;
       const convertedAmt = convertAmount(tx.amount, tx.account.currency, homeCurrency, rates);
       historyMap.set(key, (historyMap.get(key) || 0) + convertedAmt);
+
+      if (convertedAmt > 0) {
+        historyIncomeMap.set(key, (historyIncomeMap.get(key) || 0) + convertedAmt);
+      } else {
+        historyExpenseMap.set(key, (historyExpenseMap.get(key) || 0) + Math.abs(convertedAmt));
+      }
     }
+
+    // Calculate historical average baseline from recent past completed months
+    let totalPastIncome = 0;
+    let totalPastExpense = 0;
+    let pastMonthCount = 0;
+
+    for (let i = 1; i <= Math.min(6, pastMonths); i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const year = d.getFullYear();
+      const monthStr = String(d.getMonth() + 1).padStart(2, '0');
+      const key = `${year}-${monthStr}`;
+      
+      const inc = historyIncomeMap.get(key) || 0;
+      const exp = historyExpenseMap.get(key) || 0;
+      
+      if (inc > 0 || exp > 0) {
+        totalPastIncome += inc;
+        totalPastExpense += exp;
+        pastMonthCount++;
+      }
+    }
+
+    const historicalBaselineIncome = pastMonthCount > 0 ? (totalPastIncome / pastMonthCount) : 0;
+    const historicalBaselineExpense = pastMonthCount > 0 ? (totalPastExpense / pastMonthCount) : 0;
 
     // Build historical balance points (backward calculation)
     let runningBalanceBackward = currentBalance;
@@ -280,10 +313,18 @@ export async function GET(request: Request) {
         else monthSpecificBudget += monthly;
       }
       const finalBudgetExpense = Math.max(monthSpecificBudget, monthGlobalBudget);
-      const unplannedExpense = Math.max(0, finalBudgetExpense - flow.expense);
       
-      const totalMonthExpense = flow.expense + unplannedExpense;
-      const totalMonthNet = flow.income - totalMonthExpense;
+      // Calculate projected income by blending scheduled items with historical baseline
+      const totalMonthIncome = Math.max(flow.income, historicalBaselineIncome);
+
+      // Calculate projected expense by blending scheduled items, budgets, and historical baseline
+      const unscheduledExpenseEstimate = Math.max(
+        finalBudgetExpense - flow.expense,
+        historicalBaselineExpense - flow.expense,
+        0
+      );
+      const totalMonthExpense = Math.max(flow.expense + unscheduledExpenseEstimate, historicalBaselineExpense);
+      const totalMonthNet = totalMonthIncome - totalMonthExpense;
 
       // Baseline running balance
       runningBalanceForward += totalMonthNet;
@@ -292,7 +333,7 @@ export async function GET(request: Request) {
       runningSimulatedBalance += totalMonthNet + (flow.scenarioNet || 0);
       
       // We will report the scenario-affected averages if scenarios are active
-      totalProjectedIncome += flow.income + (hasActiveScenarios ? (flow.scenarioIncome || 0) : 0);
+      totalProjectedIncome += totalMonthIncome + (hasActiveScenarios ? (flow.scenarioIncome || 0) : 0);
       totalProjectedExpense += totalMonthExpense + (hasActiveScenarios ? (flow.scenarioExpense || 0) : 0);
       projectionMonthCount++;
 
