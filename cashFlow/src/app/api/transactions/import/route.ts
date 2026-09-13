@@ -99,7 +99,7 @@ export async function POST(request: Request) {
       }
     }
 
-    if (totalAmount !== 0) {
+    if (accountId && totalAmount !== 0) {
       await prisma.account.update({
         where: { id: accountId },
         data: {
