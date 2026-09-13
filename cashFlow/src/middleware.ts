@@ -14,7 +14,7 @@ function getOrigin(request: NextRequest): string {
   return request.nextUrl.origin;
 }
 
-export function proxy(request: NextRequest) {
+export default function middleware(request: NextRequest) {
   // Check if there is an APP_PASSWORD configured. If not, bypass auth.
   if (!process.env.APP_PASSWORD) {
     return NextResponse.next();
