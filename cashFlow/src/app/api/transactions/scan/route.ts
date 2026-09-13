@@ -86,9 +86,14 @@ export async function POST(request: Request) {
       else mimeType = 'image/jpeg';
     }
 
-    // Initialize Gemini API Client with fallback models
+    // Initialize Gemini API Client with active modern models (Gemini 1.5 was sunset/retired by Google)
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const modelsToTry = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+    const modelsToTry = [
+      'gemini-2.5-flash',
+      'gemini-2.0-flash',
+      'gemini-2.5-pro',
+      'gemini-2.0-flash-lite'
+    ];
 
     // 3. Fetch recent product mappings to teach the AI
     const recentMappings = await prisma.productMapping.findMany({
@@ -143,31 +148,33 @@ export async function POST(request: Request) {
 
     let result: any = null;
     let lastError: any = null;
+    const modelErrors: string[] = [];
 
     for (const modelName of modelsToTry) {
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
+          // Attempt 0 requests structured JSON; attempt 1 falls back to default if MIME config was rejected
           const model = genAI.getGenerativeModel({
             model: modelName,
-            generationConfig: {
-              responseMimeType: "application/json"
-            }
+            ...(attempt === 0 ? { generationConfig: { responseMimeType: "application/json" } } : {})
           });
           result = await model.generateContent(contentPayload);
           break; // success
         } catch (err: any) {
           lastError = err;
           const status = err?.status || err?.httpStatusCode || 0;
-          const msg = err?.message || '';
+          const msg = err?.message || String(err);
+          modelErrors.push(`${modelName}: ${msg}`);
           console.warn(`Model ${modelName} attempt ${attempt + 1} failed: ${msg}`);
+
           // Retry on 503 (overloaded) or 429 (rate limit)
           if (status === 503 || status === 429 || msg.includes('503') || msg.includes('429') || msg.includes('overloaded') || msg.includes('high demand')) {
             if (attempt === 0) {
-              await new Promise(r => setTimeout(r, 1500)); // brief pause before retry
+              await new Promise(r => setTimeout(r, 1200)); // brief pause before retry
             }
             continue;
           }
-          // For other errors (e.g. 404 model not found or config unsupported), try next model
+          // For other errors (e.g. 404 model not found, unsupported config), try next model
           break;
         }
       }
@@ -175,7 +182,16 @@ export async function POST(request: Request) {
     }
 
     if (!result) {
-      throw lastError || new Error('All AI models are currently unavailable. Please try again in a minute.');
+      const all404 = modelErrors.length > 0 && modelErrors.every(e => e.includes('404'));
+      const isKeyInvalid = modelErrors.some(e => e.includes('API_KEY_INVALID') || e.includes('API key not valid') || e.includes('403'));
+      
+      let errorMsg = lastError?.message || 'All AI models are currently unavailable.';
+      if (all404) {
+        errorMsg = 'Google Generative AI returned 404 for all models. Please ensure your GEMINI_API_KEY was created in Google AI Studio (https://aistudio.google.com) and has the Generative Language API enabled.';
+      } else if (isKeyInvalid) {
+        errorMsg = 'Invalid GEMINI_API_KEY. Please verify or re-generate your API key in Google AI Studio (https://aistudio.google.com) and update it in Vercel environment variables.';
+      }
+      throw new Error(errorMsg);
     }
 
     const textResponse = result.response.text();

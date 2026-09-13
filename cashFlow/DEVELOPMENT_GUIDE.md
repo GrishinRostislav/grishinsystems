@@ -98,7 +98,7 @@ Multiple currencies are converted dynamically using local currency rates or exch
 ### AI Receipt Scanning
 The application can scan images of receipts.
 - **API**: `/api/transactions/scan`
-- **Fallback Chain**: Uses Gemini API (`gemini-2.5-flash` → `gemini-2.0-flash` → `gemini-1.5-flash`) to scan receipt text, extract amounts, date, merchant, and categorize them.
+- **Fallback Chain**: Uses Gemini API (`gemini-2.5-flash` → `gemini-2.0-flash` → `gemini-2.5-pro` → `gemini-2.0-flash-lite`) to scan receipt text, extract amounts, date, merchant, and categorize them.
 
 ### Financial Planning Forecast
 Simulates wealth trends into the future based on:
