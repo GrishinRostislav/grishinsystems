@@ -184,7 +184,7 @@ export default function ForecastPage() {
   const fetchForecast = async (m: number, pastM: number, accountsFilter: string[], isSilent = false) => {
     if (!isSilent) setLoading(true);
     try {
-      let url = `/api/forecast?months=${m}&pastMonths=${pastM}`;
+      let url = `/cashFlow/api/forecast?months=${m}&pastMonths=${pastM}`;
       if (accountsFilter.length > 0) {
         url += `&accountIds=${accountsFilter.join(',')}`;
       }
@@ -200,7 +200,7 @@ export default function ForecastPage() {
 
   const fetchScenarios = async () => {
     try {
-      const res = await fetch("/api/scenarios");
+      const res = await fetch("/cashFlow/api/scenarios");
       const json = await res.json();
       setScenarios(json.scenarios || []);
     } catch (err) {
@@ -210,7 +210,7 @@ export default function ForecastPage() {
 
   const fetchAccounts = async () => {
     try {
-      const res = await fetch("/api/accounts");
+      const res = await fetch("/cashFlow/api/accounts");
       const json = await res.json();
       setAvailableAccounts(json);
     } catch (err) {
@@ -255,7 +255,7 @@ export default function ForecastPage() {
   const handleToggleScenario = async (id: string, currentActive: boolean) => {
     try {
       setScenarios(scenarios.map(s => s.id === id ? { ...s, isActive: !currentActive } : s));
-      await fetch(`/api/scenarios/${id}`, {
+      await fetch(`/cashFlow/api/scenarios/${id}`, {
         method: 'PUT',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive: !currentActive })
@@ -270,7 +270,7 @@ export default function ForecastPage() {
   const handleDeleteScenario = async (id: string) => {
     if (!confirm("Are you sure you want to delete this scenario?")) return;
     try {
-      await fetch(`/api/scenarios/${id}`, {
+      await fetch(`/cashFlow/api/scenarios/${id}`, {
         method: 'DELETE'
       });
       setScenarioModalOpen(false);

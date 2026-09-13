@@ -52,8 +52,8 @@ export default function BudgetsPage() {
     try {
       if (!isSilent) setLoading(true);
       const [budgetsRes, categoriesRes] = await Promise.all([
-        fetch("/api/budgets"),
-        fetch("/api/categories"),
+        fetch("/cashFlow/api/budgets"),
+        fetch("/cashFlow/api/categories"),
       ]);
       const data = await budgetsRes.json();
       const categoriesData = await categoriesRes.json();
@@ -117,8 +117,8 @@ export default function BudgetsPage() {
 
     try {
       const url = editingBudget
-        ? `/api/budgets/${editingBudget.id}`
-        : "/api/budgets";
+        ? `/cashFlow/api/budgets/${editingBudget.id}`
+        : "/cashFlow/api/budgets";
       const method = editingBudget ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -145,7 +145,7 @@ export default function BudgetsPage() {
     if (!confirm(`Are you sure you want to delete the budget "${editingBudget.name}"?`)) return;
 
     try {
-      const res = await fetch(`/api/budgets/${editingBudget.id}`, {
+      const res = await fetch(`/cashFlow/api/budgets/${editingBudget.id}`, {
         method: "DELETE",
       });
 

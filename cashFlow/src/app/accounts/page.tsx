@@ -159,7 +159,7 @@ export default function AccountsPage() {
   );
 
   useEffect(() => {
-    fetch("/api/settings")
+    fetch("/cashFlow/api/settings")
       .then(res => res.json())
       .then(data => {
         if (data.homeCurrency) {
@@ -174,8 +174,8 @@ export default function AccountsPage() {
     try {
       if (!isSilent) setLoading(true);
       const [accRes, dashRes] = await Promise.all([
-        fetch(`/api/accounts?includeArchived=${showArchived}&startDate=${startDate}&endDate=${endDate}`),
-        fetch(`/api/dashboard?startDate=${startDate}&endDate=${endDate}`)
+        fetch(`/cashFlow/api/accounts?includeArchived=${showArchived}&startDate=${startDate}&endDate=${endDate}`),
+        fetch(`/cashFlow/api/dashboard?startDate=${startDate}&endDate=${endDate}`)
       ]);
       const accData = await accRes.json();
       const dashData = await dashRes.json();
@@ -207,7 +207,7 @@ export default function AccountsPage() {
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("/api/accounts", {
+      const res = await fetch("/cashFlow/api/accounts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -247,7 +247,7 @@ export default function AccountsPage() {
     setIsSavingOrder(true);
     try {
       const orderedIds = accounts.map(a => a.id);
-      await fetch("/api/accounts/reorder", {
+      await fetch("/cashFlow/api/accounts/reorder", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderedIds })

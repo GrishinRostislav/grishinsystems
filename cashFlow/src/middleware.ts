@@ -26,7 +26,7 @@ export default function middleware(request: NextRequest) {
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/cashFlow/_next') ||
-    pathname.startsWith('/api/auth') ||
+    pathname.startsWith('/cashFlow/api/auth') ||
     pathname.startsWith('/cashFlow/api/auth') ||
     pathname === '/login' ||
     pathname === '/cashFlow/login' ||

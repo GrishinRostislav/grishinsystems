@@ -29,7 +29,7 @@ export default function BudgetDetail({ params }: { params: Promise<{ id: string 
   const fetchBudgetData = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/budgets/${resolvedParams.id}`);
+      const res = await fetch(`/cashFlow/api/budgets/${resolvedParams.id}`);
       const result = await res.json();
       setData(result);
     } catch (err) {

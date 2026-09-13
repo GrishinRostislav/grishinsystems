@@ -18,7 +18,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
   useEffect(() => {
     if (isOpen) {
-      fetch("/api/settings")
+      fetch("/cashFlow/api/settings")
         .then(res => res.json())
         .then(data => {
           if (data.homeCurrency) setHomeCurrency(data.homeCurrency);
@@ -37,7 +37,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await fetch("/api/settings", {
+      const res = await fetch("/cashFlow/api/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

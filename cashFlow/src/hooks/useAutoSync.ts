@@ -26,7 +26,7 @@ export function useAutoSync(
 
     const checkSyncStatus = async () => {
       try {
-        const res = await fetch("/api/sync/status");
+        const res = await fetch("/cashFlow/api/sync/status");
         if (res.ok) {
           const { lastUpdated } = await res.json();
           if (lastSyncTimestampRef.current === 0) {

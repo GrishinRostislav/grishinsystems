@@ -26,7 +26,7 @@ export default function Topbar() {
   const handleSyncMerchants = async () => {
     setIsSyncing(true);
     try {
-      const res = await fetch("/api/merchants/sync", {
+      const res = await fetch("/cashFlow/api/merchants/sync", {
         method: "POST"
       });
       if (res.ok) {
@@ -46,15 +46,16 @@ export default function Topbar() {
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth", {
+      await fetch("/cashFlow/api/auth", {
         method: "DELETE"
       });
     } catch (err) {
       console.error(err);
     } finally {
-      // Always clear client cookie and redirect to /login
+      // Clear client cookies for all potential paths
       document.cookie = "auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      window.location.href = "/login";
+      document.cookie = "auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/cashFlow;";
+      window.location.href = "/cashFlow/login";
     }
   };
 

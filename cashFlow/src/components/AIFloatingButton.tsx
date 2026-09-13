@@ -35,7 +35,7 @@ export default function AIFloatingButton() {
 
   const fetchAlerts = async () => {
     try {
-      const res = await fetch('/api/ai/alerts');
+      const res = await fetch('/cashFlow/api/ai/alerts');
       if (res.ok) {
         const json = await res.json();
         setAlerts(json.alerts || []);
@@ -68,7 +68,7 @@ export default function AIFloatingButton() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/ai/chat', {
+      const res = await fetch('/cashFlow/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
