@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import styles from "./Layout.module.css";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
+import AIFloatingButton from "@/components/AIFloatingButton";
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -24,6 +25,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
           {children}
         </main>
       </div>
+      <AIFloatingButton />
     </div>
   );
 }
