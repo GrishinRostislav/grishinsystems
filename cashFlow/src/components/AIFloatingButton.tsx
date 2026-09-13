@@ -94,14 +94,14 @@ export default function AIFloatingButton() {
 
   return (
     <>
-      {/* Floating AI Button */}
+      {/* Top Center AI Pill Button */}
       <button 
         className={styles.floatingBtn}
         onClick={() => setIsOpen(true)}
         title="ИИ-Финансовый Советник"
         aria-label="ИИ-Финансовый Советник"
       >
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2Z" fill="url(#aiBtnGrad)" />
           <path d="M12 5.5L13.8 9.5L17.8 11.3L13.8 13.1L12 17.1L10.2 13.1L6.2 11.3L10.2 9.5L12 5.5Z" fill="white" />
           <path d="M17.5 4.5L18.2 6.1L19.8 6.8L18.2 7.5L17.5 9.1L16.8 7.5L15.2 6.8L16.8 6.1L17.5 4.5Z" fill="#a7f3d0" />
@@ -113,6 +113,7 @@ export default function AIFloatingButton() {
             </linearGradient>
           </defs>
         </svg>
+        <span style={{ fontWeight: 700, letterSpacing: '-0.2px' }}>AI Copilot</span>
         {alerts.length > 0 && (
           <span className={styles.badge}>
             {alerts.length}
