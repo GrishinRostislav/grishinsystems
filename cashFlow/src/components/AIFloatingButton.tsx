@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./AIFloatingButton.module.css";
 
+import SettingsModal from "./SettingsModal";
+
 interface AlertItem {
   id: string;
   type: 'PAYMENT' | 'SPIKE' | 'BUDGET';
@@ -18,6 +20,7 @@ interface Message {
 
 export default function AIFloatingButton() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -32,7 +35,7 @@ export default function AIFloatingButton() {
 
   const fetchAlerts = async () => {
     try {
-      const res = await fetch('/cashFlow/api/ai/alerts');
+      const res = await fetch('/api/ai/alerts');
       if (res.ok) {
         const json = await res.json();
         setAlerts(json.alerts || []);
@@ -65,7 +68,7 @@ export default function AIFloatingButton() {
     setLoading(true);
 
     try {
-      const res = await fetch('/cashFlow/api/ai/chat', {
+      const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -140,9 +143,19 @@ export default function AIFloatingButton() {
                   <span className={styles.chatSubtitle}>CashFlow Copilot • Онлайн</span>
                 </div>
               </div>
-              <button className={styles.closeBtn} onClick={() => setIsOpen(false)}>
-                &times;
-              </button>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button 
+                  className={styles.closeBtn} 
+                  style={{ fontSize: '1.2rem', padding: '4px 8px' }}
+                  onClick={() => setIsSettingsOpen(true)}
+                  title="Настройки ИИ"
+                >
+                  ⚙️
+                </button>
+                <button className={styles.closeBtn} onClick={() => setIsOpen(false)}>
+                  &times;
+                </button>
+              </div>
             </div>
 
             {/* Proactive Alerts Section */}
@@ -236,6 +249,12 @@ export default function AIFloatingButton() {
           </div>
         </div>
       )}
+
+      {/* AI & Global Settings Modal */}
+      <SettingsModal 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+      />
     </>
   );
 }

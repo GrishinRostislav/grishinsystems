@@ -140,9 +140,13 @@ model Budget {
 }
   
 model Settings {
-  id           String   @id @default("global")
-  homeCurrency String   @default("CAD")
-  updatedAt    DateTime @updatedAt
+  id                   String   @id @default("global")
+  homeCurrency         String   @default("CAD")
+  aiCustomInstructions String?
+  aiFinancialGoal      String?  @default("balanced")
+  aiAuditTone          String?  @default("strict")
+  aiMinBufferMonths    Int      @default(3)
+  updatedAt            DateTime @updatedAt
 }
 
 model ForecastScenario {

@@ -137,11 +137,25 @@ export async function POST(request: Request) {
       `- Сценарий "${s.name}" [Активен: ${s.isActive ? 'Да' : 'Нет'}]: ${s.items.length} элементов`
     ).join('\n');
 
+    // Compute custom user settings for AI
+    const minBufferMonths = settings.aiMinBufferMonths ?? 3;
+    const customGoal = settings.aiFinancialGoal || "balanced";
+    const customTone = settings.aiAuditTone || "strict";
+    const customInstructions = settings.aiCustomInstructions || "";
+
+    const userBufferTarget = avgMonthlyExpense12M * minBufferMonths;
+
     // 2. Build AI Context Prompt
     const systemPrompt = `
 Вы — персональный ИИ-Финансовый Советник в приложении CashFlow.
 У ВАС ЕСТЬ ПОЛНЫЙ ДОСТУП КО ВСЕЙ БАЗЕ ДАННЫХ CASHFLOW И ВСЕЙ ИСТОРИИ ОПЕРАЦИЙ ПОЛЬЗОВАТЕЛЯ ИЗ БАЗЫ!
 Никогда не утверждайте, что у вас нет доступа к годовым данным или истории! Вся статистика за все время, за 12 месяцев, 6 месяцев и 30 дней приведена ниже.
+
+ВАЖНЕЙШИЕ ПОЛЬЗОВАТЕЛЬСКИЕ НАСТРОЙКИ И ПРАВИЛА ИИ:
+- Целевая подушка безопасности: **${minBufferMonths} месяцев** расходов (Цель = $${userBufferTarget.toFixed(2)} ${homeCurrency}).
+- Финансовая цель пользователя: **${customGoal}**
+- Тональность аудита/анализа: **${customTone}**
+${customInstructions ? `- СПЕЦИАЛЬНЫЕ ИНСТРУКЦИИ И ПРАВИЛА ПОЛЬЗОВАТЕЛЯ:\n  "${customInstructions}"` : ''}
 
 ВАЛЮТА ПО УМОЛЧАНИЮ: ${homeCurrency}
 
@@ -160,7 +174,7 @@ ${accountsSummary || 'Нет активных счетов'}
 - Общий доход за 12 мес: +${income365.toFixed(2)} ${homeCurrency} (среднемесячный: +${avgMonthlyIncome12M.toFixed(2)} ${homeCurrency}/мес)
 - Общие расходы за 12 мес: -${expense365.toFixed(2)} ${homeCurrency} (среднемесячный: -${avgMonthlyExpense12M.toFixed(2)} ${homeCurrency}/мес)
 - Чистый годовой Cash Flow: ${(income365 - expense365).toFixed(2)} ${homeCurrency}
-- **3-Месячная Подушка Безопасности (на базе 12 мес): ${emergencyBuffer12M.toFixed(2)} ${homeCurrency}**
+- **Расчитанная подушка безопасности на ${minBufferMonths} мес: ${userBufferTarget.toFixed(2)} ${homeCurrency}**
 
 4. АНАЛИЗ ЗА ПОСЛЕДНИЕ 30 ДНЕЙ (Текущий месяц):
 - Доход за 30 дней: +${income30.toFixed(2)} ${homeCurrency}
@@ -183,10 +197,11 @@ ${scenariosSummary || 'Сценарии не созданы'}
 ${recentTxList.join('\n') || 'Нет операций'}
 
 ПРАВИЛА И СТИЛЬ ОТВЕТА:
-- Отвечайте на русском языке в вежливом, уверенном и экспертном тоне.
+- Отвечайте на русском языке в тоне, соответствующем настройке (${customTone}).
 - Используйте форматирование Markdown (жирный текст, маркированные списки, смайлики-эмодзи).
 - Базируйте свои выводы и рекомендации СТРОГО на приведенных выше реальных данных из базы данных CashFlow.
-- При вопросах о покупках или экономии всегда учитывайте 3-месячную подушку безопасности ($${emergencyBuffer12M.toFixed(0)}) и текущий чистый доход ($${(income30 - expense30).toFixed(0)}/мес).
+- При вопросах о покупках или экономии всегда учитывайте ${minBufferMonths}-месячную подушку безопасности ($${userBufferTarget.toFixed(0)}) и индивидуальную цель (${customGoal}).
+- Если пользователь задал специальные инструкции (${customInstructions}), неукоснительно придерживайтесь их.
 - Ответы должны быть лаконичными, практичными и содержать конкретные цифры и шаги.
 `;
 

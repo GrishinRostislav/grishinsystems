@@ -27,14 +27,25 @@ export async function GET() {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { homeCurrency } = body;
+    const { homeCurrency, aiCustomInstructions, aiFinancialGoal, aiAuditTone, aiMinBufferMonths } = body;
+
+    const updateData: any = {};
+    if (homeCurrency !== undefined) updateData.homeCurrency = homeCurrency;
+    if (aiCustomInstructions !== undefined) updateData.aiCustomInstructions = aiCustomInstructions;
+    if (aiFinancialGoal !== undefined) updateData.aiFinancialGoal = aiFinancialGoal;
+    if (aiAuditTone !== undefined) updateData.aiAuditTone = aiAuditTone;
+    if (aiMinBufferMonths !== undefined) updateData.aiMinBufferMonths = Number(aiMinBufferMonths);
 
     const settings = await prisma.settings.upsert({
       where: { id: "global" },
-      update: { homeCurrency },
+      update: updateData,
       create: {
         id: "global",
-        homeCurrency: homeCurrency || "CAD"
+        homeCurrency: homeCurrency || "CAD",
+        aiCustomInstructions: aiCustomInstructions || null,
+        aiFinancialGoal: aiFinancialGoal || "balanced",
+        aiAuditTone: aiAuditTone || "strict",
+        aiMinBufferMonths: aiMinBufferMonths ? Number(aiMinBufferMonths) : 3,
       }
     });
 
