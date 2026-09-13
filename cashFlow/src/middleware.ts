@@ -25,8 +25,11 @@ export default function middleware(request: NextRequest) {
   // Exclude static files, login page, and auth api
   if (
     pathname.startsWith('/_next') ||
+    pathname.startsWith('/cashFlow/_next') ||
     pathname.startsWith('/api/auth') ||
+    pathname.startsWith('/cashFlow/api/auth') ||
     pathname === '/login' ||
+    pathname === '/cashFlow/login' ||
     pathname.includes('.')
   ) {
     return NextResponse.next();
@@ -38,7 +41,8 @@ export default function middleware(request: NextRequest) {
     if (pathname.includes('/api/')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    return NextResponse.redirect(new URL('/login', request.url));
+    const origin = getOrigin(request);
+    return NextResponse.redirect(`${origin}/cashFlow/login`);
   }
 
   return NextResponse.next();
