@@ -1,6 +1,19 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+function getOrigin(request: NextRequest): string {
+  const forwardedHost = request.headers.get('x-forwarded-host');
+  const forwardedProto = request.headers.get('x-forwarded-proto') || 'https';
+  if (forwardedHost) {
+    return `${forwardedProto}://${forwardedHost}`;
+  }
+  const host = request.headers.get('host');
+  if (host) {
+    return `${forwardedProto}://${host}`;
+  }
+  return request.nextUrl.origin;
+}
+
 export function proxy(request: NextRequest) {
   // Check if there is an APP_PASSWORD configured. If not, bypass auth.
   if (!process.env.APP_PASSWORD) {
@@ -28,7 +41,8 @@ export function proxy(request: NextRequest) {
     if (pathname.includes('/api/')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    return NextResponse.redirect(new URL('/cashFlow/login', request.url));
+    const origin = getOrigin(request);
+    return NextResponse.redirect(`${origin}/cashFlow/login`);
   }
 
   return NextResponse.next();

@@ -33,8 +33,7 @@ export default function LoginPage() {
       } else if (!res.ok) {
         setError(data.error === "Invalid password" ? "Invalid password" : (data.error || "Invalid password"));
       } else {
-        router.push("/");
-        router.refresh();
+        window.location.href = "/cashFlow";
       }
     } catch (err) {
       setError("Connection error");

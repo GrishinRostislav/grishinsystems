@@ -30,9 +30,20 @@ export async function POST(request: Request) {
 
       const response = NextResponse.json({ success: true });
       
-      // Set the auth cookie manually using the HTTP header to bypass Next.js basePath auto-prefixing.
-      // This ensures the cookie path is exactly '/' and is sent for both '/cashFlow' and '/cashFlow/' requests.
       const isProd = process.env.NODE_ENV === 'production';
+
+      // Set cookie via Next.js response.cookies API
+      response.cookies.set({
+        name: 'auth',
+        value: 'authenticated',
+        path: '/',
+        httpOnly: true,
+        secure: isProd,
+        sameSite: 'lax',
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+      });
+
+      // Also append raw Set-Cookie header with Path=/ as safety fallback for basePath overrides
       const cookieValue = `auth=authenticated; Path=/; HttpOnly; ${isProd ? 'Secure;' : ''} Max-Age=2592000; SameSite=Lax`;
       response.headers.append('Set-Cookie', cookieValue);
 
