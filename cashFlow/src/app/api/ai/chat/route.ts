@@ -35,53 +35,88 @@ export async function POST(request: Request) {
       `- ${a.name} (${a.currency}): ${a.balance.toFixed(2)} [В общем балансе: ${a.includeInTotal ? 'Да' : 'Нет'}]`
     ).join('\n');
 
-    // Recent 30 days & 90 days date bounds
-    const now = new Date();
-    const past30DaysStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const past90DaysStart = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-
-    const transactions = await prisma.transaction.findMany({
-      where: { date: { gte: past90DaysStart } },
+    // Query ALL transactions from DB for complete multi-year history
+    const allTransactions = await prisma.transaction.findMany({
       include: { category: true, account: true },
       orderBy: { date: 'desc' }
     });
 
-    let totalIncome30 = 0;
-    let totalExpense30 = 0;
-    const categoryExpenseMap = new Map<string, number>();
+    const now = new Date();
+    const totalTxCount = allTransactions.length;
+    let firstTxDate: Date | null = null;
+    let lastTxDate: Date | null = null;
 
+    if (totalTxCount > 0) {
+      firstTxDate = allTransactions[allTransactions.length - 1].date;
+      lastTxDate = allTransactions[0].date;
+    }
+
+    const past30DaysStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const past180DaysStart = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+    const past365DaysStart = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+
+    let allTimeIncome = 0;
+    let allTimeExpense = 0;
+
+    let income365 = 0;
+    let expense365 = 0;
+
+    let income180 = 0;
+    let expense180 = 0;
+
+    let income30 = 0;
+    let expense30 = 0;
+
+    const categoryExpense365 = new Map<string, number>();
     const recentTxList: string[] = [];
 
-    for (const tx of transactions) {
+    for (const tx of allTransactions) {
       if (tx.isTransfer) continue;
       const convertedAmt = convertAmount(tx.amount, tx.account.currency, homeCurrency, rates);
 
-      if (tx.date >= past30DaysStart) {
-        if (convertedAmt > 0) {
-          totalIncome30 += convertedAmt;
-        } else {
-          const expenseVal = Math.abs(convertedAmt);
-          totalExpense30 += expenseVal;
+      if (convertedAmt > 0) {
+        allTimeIncome += convertedAmt;
+        if (tx.date >= past365DaysStart) income365 += convertedAmt;
+        if (tx.date >= past180DaysStart) income180 += convertedAmt;
+        if (tx.date >= past30DaysStart) income30 += convertedAmt;
+      } else {
+        const val = Math.abs(convertedAmt);
+        allTimeExpense += val;
+        if (tx.date >= past365DaysStart) {
+          expense365 += val;
           const catName = tx.category ? tx.category.name : 'Без категории';
-          categoryExpenseMap.set(catName, (categoryExpenseMap.get(catName) || 0) + expenseVal);
+          categoryExpense365.set(catName, (categoryExpense365.get(catName) || 0) + val);
         }
+        if (tx.date >= past180DaysStart) expense180 += val;
+        if (tx.date >= past30DaysStart) expense30 += val;
       }
 
-      if (recentTxList.length < 30) {
+      if (recentTxList.length < 40) {
         const dateStr = new Date(tx.date).toISOString().split('T')[0];
         const catName = tx.category ? tx.category.name : 'Без категории';
         const sign = convertedAmt > 0 ? '+' : '';
-        recentTxList.push(`${dateStr} | ${tx.merchant || tx.description || 'Транзакция'} | ${sign}${convertedAmt.toFixed(2)} ${homeCurrency} | Категория: ${catName}`);
+        recentTxList.push(`${dateStr} | ${tx.merchant || tx.description || 'Операция'} | ${sign}${convertedAmt.toFixed(2)} ${homeCurrency} | Категория: ${catName}`);
       }
     }
 
-    const netMonthlyCashflow30 = totalIncome30 - totalExpense30;
-    const emergencyBuffer3M = totalExpense30 * 3; // 3 months of expenses
+    let historyMonthsSpan = 1;
+    if (firstTxDate) {
+      const diffMs = Math.max(0, now.getTime() - firstTxDate.getTime());
+      historyMonthsSpan = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24 * 30.4375)));
+    }
 
-    const topCategoriesSummary = Array.from(categoryExpenseMap.entries())
+    const monthsFor12M = Math.min(12, historyMonthsSpan);
+    const avgMonthlyIncome12M = income365 / monthsFor12M;
+    const avgMonthlyExpense12M = expense365 / monthsFor12M;
+    const emergencyBuffer12M = avgMonthlyExpense12M * 3;
+
+    const avgMonthlyIncomeAllTime = allTimeIncome / historyMonthsSpan;
+    const avgMonthlyExpenseAllTime = allTimeExpense / historyMonthsSpan;
+
+    const topCategoriesSummary12M = Array.from(categoryExpense365.entries())
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
-      .map(([cat, amt]) => `- ${cat}: ${amt.toFixed(2)} ${homeCurrency}`)
+      .slice(0, 12)
+      .map(([cat, amt]) => `- ${cat}: ${amt.toFixed(2)} ${homeCurrency} (среднее ${(amt / monthsFor12M).toFixed(2)} ${homeCurrency}/мес)`)
       .join('\n');
 
     // Budgets
@@ -105,35 +140,46 @@ export async function POST(request: Request) {
     // 2. Build AI Context Prompt
     const systemPrompt = `
 Вы — персональный ИИ-Финансовый Советник в приложении CashFlow.
-Ваша цель — давать четкие, объективные, профессиональные и доброжелательные финансовые советы, проводить аудит расходов, помогать экономить и отвечать на любые вопросы пользователя по его финансовому состоянию.
+У ВАС ЕСТЬ ПОЛНЫЙ ДОСТУП КО ВСЕЙ БАЗЕ ДАННЫХ CASHFLOW И ВСЕЙ ИСТОРИИ ОПЕРАЦИЙ ПОЛЬЗОВАТЕЛЯ ИЗ БАЗЫ!
+Никогда не утверждайте, что у вас нет доступа к годовым данным или истории! Вся статистика за все время, за 12 месяцев, 6 месяцев и 30 дней приведена ниже.
 
 ВАЛЮТА ПО УМОЛЧАНИЮ: ${homeCurrency}
 
-АКТУАЛЬНЫЕ ФИНАНСОВЫЕ ДАННЫЕ ПОЛЬЗОВАТЕЛЯ ИЗ БАЗЫ DEDICATED PRISMA:
+АКТУАЛЬНЫЕ ФИНАНСОВЫЕ ДАННЫЕ ПОЛЬЗОВАТЕЛЯ ИЗ БАЗЫ PRISMA:
 
-1. ТЕКУЩИЙ ОБЩИЙ БАЛАНС СЧЕТОВ: ${totalBalance.toFixed(2)} ${homeCurrency}
+1. СЧЕТА И БАЛАНСЫ:
+- Общий ликвидный баланс: ${totalBalance.toFixed(2)} ${homeCurrency}
 Счета:
 ${accountsSummary || 'Нет активных счетов'}
 
-2. АКТИВНОСТЬ ЗА ПОСЛЕДНИЕ 30 ДНЕЙ:
-- Общий доход: +${totalIncome30.toFixed(2)} ${homeCurrency}
-- Общие расходы: -${totalExpense30.toFixed(2)} ${homeCurrency}
-- Чистый остаток (Cash Flow): ${netMonthlyCashflow30.toFixed(2)} ${homeCurrency}
-- 3-месячная Подушка Безопасности (3x расходы): ${emergencyBuffer3M.toFixed(2)} ${homeCurrency}
+2. ИСТОРИЯ ЗА ВСЕ ВРЕМЯ (Всего операций в базе: ${totalTxCount}, с ${firstTxDate ? firstTxDate.toISOString().split('T')[0] : 'начала'}, всего месяцев: ${historyMonthsSpan}):
+- Всего получено доходов за все время: +${allTimeIncome.toFixed(2)} ${homeCurrency} (в среднем ${avgMonthlyIncomeAllTime.toFixed(2)} ${homeCurrency}/мес)
+- Всего потрачено за все время: -${allTimeExpense.toFixed(2)} ${homeCurrency} (в среднем ${avgMonthlyExpenseAllTime.toFixed(2)} ${homeCurrency}/мес)
 
-ТОП КАТЕГОРИЙ РАСХОДОВ ЗА 30 ДНЕЙ:
-${topCategoriesSummary || 'Нет расходов за 30 дней'}
+3. АНАЛИЗ ЗА ПОСЛЕДНИЕ 12 МЕСЯЦЕВ (Годовые данные):
+- Общий доход за 12 мес: +${income365.toFixed(2)} ${homeCurrency} (среднемесячный: +${avgMonthlyIncome12M.toFixed(2)} ${homeCurrency}/мес)
+- Общие расходы за 12 мес: -${expense365.toFixed(2)} ${homeCurrency} (среднемесячный: -${avgMonthlyExpense12M.toFixed(2)} ${homeCurrency}/мес)
+- Чистый годовой Cash Flow: ${(income365 - expense365).toFixed(2)} ${homeCurrency}
+- **3-Месячная Подушка Безопасности (на базе 12 мес): ${emergencyBuffer12M.toFixed(2)} ${homeCurrency}**
 
-3. АКТИВНЫЕ БЮДЖЕТЫ:
+4. АНАЛИЗ ЗА ПОСЛЕДНИЕ 30 ДНЕЙ (Текущий месяц):
+- Доход за 30 дней: +${income30.toFixed(2)} ${homeCurrency}
+- Расходы за 30 дней: -${expense30.toFixed(2)} ${homeCurrency}
+- Чистый остаток за 30 дней: ${(income30 - expense30).toFixed(2)} ${homeCurrency}
+
+5. РАСПРЕДЕЛЕНИЕ РАСХОДОВ ПО КАТЕГОРИЯМ ЗА 12 МЕСЯЦЕВ:
+${topCategoriesSummary12M || 'Нет данных по категориям'}
+
+6. АКТИВНЫЕ БЮДЖЕТЫ:
 ${budgetsSummary || 'Бюджеты не настроены'}
 
-4. ЗАПЛАНИРОВАННЫЕ РЕГУЛЯРНЫЕ ПЛАТЕЖИ:
+7. ЗАПЛАНИРОВАННЫЕ РЕГУЛЯРНЫЕ ПЛАТЕЖИ:
 ${scheduledSummary || 'Нет запланированных платежей'}
 
-5. СЦЕНАРИИ СИМУЛЯЦИИ:
+8. СЦЕНАРИИ СИМУЛЯЦИИ:
 ${scenariosSummary || 'Сценарии не созданы'}
 
-6. ПОСЛЕДНИЕ 30 ОПЕРАЦИЙ ИЗ БАЗЫ:
+9. ПОСЛЕДНИЕ ОПЕРАЦИИ ИЗ БАЗЫ DEDICATED (до 40 операций):
 ${recentTxList.join('\n') || 'Нет операций'}
 
 ПРАВИЛА И СТИЛЬ ОТВЕТА:
