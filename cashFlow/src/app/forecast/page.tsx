@@ -452,7 +452,14 @@ export default function ForecastPage() {
         <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-muted)' }}>Calculating financial trajectory...</div>
       ) : (
         <>
-          <div className={styles.grid}>
+          <div className={styles.grid} style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+            <div className={styles.card}>
+              <div className={styles.cardTitle}>Current Total Balance</div>
+              <div className={styles.cardValue} style={{ color: 'var(--unique-blue)' }}>
+                {formatCurrency(data?.currentBalance || 0, data?.homeCurrency)}
+              </div>
+            </div>
+
             <div className={styles.card}>
               <div className={styles.cardTitle}>Avg Monthly Income</div>
               <div className={styles.cardValue} style={{ color: 'var(--sporty-teal)' }}>
@@ -462,7 +469,7 @@ export default function ForecastPage() {
 
             <div className={styles.card}>
               <div className={styles.cardTitle}>Avg Monthly Expense</div>
-              <div className={styles.cardValue} style={{ color: 'var(--silent-dark-blue)' }}>
+              <div className={styles.cardValue} style={{ color: '#ef4444' }}>
                 {formatCurrency(data?.avgMonthlyExpense || 0, data?.homeCurrency)}
               </div>
             </div>
@@ -477,7 +484,7 @@ export default function ForecastPage() {
             </div>
 
             <div className={styles.card}>
-              <div className={styles.cardTitle}>Projected Balance in {months >= 12 ? `${months/12} Years` : `${months} Months`}</div>
+              <div className={styles.cardTitle}>Projected Balance in {months >= 12 ? `${months/12} Yrs` : `${months} Mo`}</div>
               <div className={styles.cardValue} style={{ 
                 color: data?.hasActiveScenarios 
                   ? (data?.futureBalance >= data?.baselineFutureBalance ? 'var(--sporty-teal)' : '#b91c1c') 
