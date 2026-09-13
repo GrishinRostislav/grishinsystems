@@ -79,7 +79,7 @@ export async function GET() {
             while (simDate <= end) {
               // Only count future scheduled occurrences in this period to avoid double counting executed transactions
               if (simDate >= now && simDate >= start) {
-                const convertedAmt = convertAmount(st.amount, st.account?.currency || homeCurrency, rates);
+                const convertedAmt = convertAmount(st.amount, st.account?.currency || homeCurrency, homeCurrency, rates);
                 projected += Math.abs(convertedAmt);
               }
               simDate = addFrequency(simDate, st.frequency);
