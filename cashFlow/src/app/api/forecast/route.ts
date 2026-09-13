@@ -39,7 +39,7 @@ export async function GET(request: Request) {
       where: selectedAccountIds 
         ? { accountId: { in: selectedAccountIds } } 
         : { account: { includeInTotal: true, isArchived: false } },
-      select: { amount: true, date: true, account: { select: { currency: true } } }
+      select: { amount: true, date: true, isTransfer: true, account: { select: { currency: true } } }
     });
 
     // Calculate historical monthly net flow, income, and expenses
@@ -54,10 +54,13 @@ export async function GET(request: Request) {
       const convertedAmt = convertAmount(tx.amount, tx.account.currency, homeCurrency, rates);
       historyMap.set(key, (historyMap.get(key) || 0) + convertedAmt);
 
-      if (convertedAmt > 0) {
-        historyIncomeMap.set(key, (historyIncomeMap.get(key) || 0) + convertedAmt);
-      } else {
-        historyExpenseMap.set(key, (historyExpenseMap.get(key) || 0) + Math.abs(convertedAmt));
+      // Transfers between accounts must NOT pollute historical income and expense baselines
+      if (!tx.isTransfer) {
+        if (convertedAmt > 0) {
+          historyIncomeMap.set(key, (historyIncomeMap.get(key) || 0) + convertedAmt);
+        } else {
+          historyExpenseMap.set(key, (historyExpenseMap.get(key) || 0) + Math.abs(convertedAmt));
+        }
       }
     }
 
