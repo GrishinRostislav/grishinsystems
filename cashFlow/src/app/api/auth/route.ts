@@ -19,7 +19,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Server configuration error: APP_PASSWORD environment variable is not defined.' }, { status: 500 });
     }
 
-    if (password === APP_PASSWORD) {
+    const cleanInput = (password || '').trim();
+    const cleanExpected = APP_PASSWORD.trim();
+
+    if (cleanInput === cleanExpected) {
       // Reset attempts on success
       if (attempt) {
         await prisma.loginAttempt.update({
