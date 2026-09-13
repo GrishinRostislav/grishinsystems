@@ -498,6 +498,20 @@ export default function Home() {
                       <span className={budgetStyles.cardInterval}>
                         {formatDate(budget.currentPeriodStart)} - {formatDate(budget.currentPeriodEnd)}
                       </span>
+                      <div className={budgetStyles.cardBadges}>
+                        {budget.isGlobal ? (
+                          <span className={budgetStyles.globalBadge}>Global Budget</span>
+                        ) : (
+                          <>
+                            {budget.categories?.slice(0, 3).map((c: any) => (
+                              <span key={c.id} className={budgetStyles.categoryBadge}>{c.name}</span>
+                            ))}
+                            {budget.categories?.length > 3 && (
+                              <span className={budgetStyles.categoryBadgeMore}>+{budget.categories.length - 3} more</span>
+                            )}
+                          </>
+                        )}
+                      </div>
                     </div>
                     <div className={budgetStyles.cardStats}>
                       <span className={budgetStyles.spentAmount}>{formatCurrency(budget.spent, homeCurrency)}</span>
