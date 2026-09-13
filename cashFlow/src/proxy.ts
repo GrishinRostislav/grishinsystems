@@ -14,7 +14,7 @@ function getOrigin(request: NextRequest): string {
   return request.nextUrl.origin;
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   // Check if there is an APP_PASSWORD configured. If not, bypass auth.
   if (!process.env.APP_PASSWORD) {
     return NextResponse.next();
@@ -38,8 +38,7 @@ export function middleware(request: NextRequest) {
     if (pathname.includes('/api/')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const origin = getOrigin(request);
-    return NextResponse.redirect(`${origin}/login`);
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
   return NextResponse.next();
