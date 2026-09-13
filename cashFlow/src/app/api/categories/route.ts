@@ -3,6 +3,14 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
+    // Auto-migrate "Food & Dining" or "Food and Dining" category names to "Groceries"
+    await prisma.category.updateMany({
+      where: {
+        name: { in: ["Food & Dining", "Food and Dining", "Food & dining", "Food"] }
+      },
+      data: { name: "Groceries" }
+    });
+
     const categories = await prisma.category.findMany({
       orderBy: { name: "asc" },
     });

@@ -24,7 +24,7 @@ async function main() {
   console.log("Creating categories...");
   const catIncome = await prisma.category.create({ data: { name: "Income" } });
   const catHousing = await prisma.category.create({ data: { name: "Housing" } });
-  const catFood = await prisma.category.create({ data: { name: "Food & Dining" } });
+  const catFood = await prisma.category.create({ data: { name: "Groceries" } });
   const catTransport = await prisma.category.create({ data: { name: "Transportation" } });
   const catEntertainment = await prisma.category.create({ data: { name: "Entertainment" } });
   const catUtilities = await prisma.category.create({ data: { name: "Utilities" } });
