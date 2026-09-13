@@ -32,8 +32,12 @@
 
 html,
 body {
+  width: 100%;
   max-width: 100vw;
   overflow-x: hidden;
+  overscroll-behavior-x: none;
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
   height: 100%;
 }
 
@@ -93,4 +97,14 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 16px !important;
   }
 }
+
+/* Prevent modal and page horizontal touch shift / elastic drag across all screens */
+div[class*="modalOverlay"],
+div[class*="modal"],
+div[class*="card"] {
+  touch-action: pan-y;
+  overscroll-behavior-x: none;
+  max-width: 100%;
+}
+
 
