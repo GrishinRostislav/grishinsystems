@@ -27,13 +27,22 @@ export async function GET(request: Request) {
 
     // 2. Transactions for calculations
     const now = new Date();
-    let startDate = new Date(0); // default all time
+    let startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // default past 30 days
     let endDate = new Date();    // default now
     
-    if (startDateParam) startDate = new Date(startDateParam);
-    if (endDateParam) {
-      endDate = new Date(endDateParam);
-      endDate.setHours(23, 59, 59, 999); // end of the selected day
+    if (startDateParam && startDateParam !== "undefined" && startDateParam !== "null") {
+      const parsed = new Date(startDateParam);
+      if (!isNaN(parsed.getTime())) {
+        startDate = parsed;
+      }
+    }
+
+    if (endDateParam && endDateParam !== "undefined" && endDateParam !== "null") {
+      const parsed = new Date(endDateParam);
+      if (!isNaN(parsed.getTime())) {
+        endDate = parsed;
+        endDate.setHours(23, 59, 59, 999); // end of the selected day
+      }
     }
 
     const diffTime = Math.abs(endDate.getTime() - startDate.getTime());

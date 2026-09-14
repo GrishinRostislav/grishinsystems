@@ -21,10 +21,16 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     let startDate = new Date(0);
     let endDate = new Date();
     
-    if (startDateParam) startDate = new Date(startDateParam);
-    if (endDateParam) {
-      endDate = new Date(endDateParam);
-      endDate.setHours(23, 59, 59, 999);
+    if (startDateParam && startDateParam !== "undefined" && startDateParam !== "null") {
+      const parsed = new Date(startDateParam);
+      if (!isNaN(parsed.getTime())) startDate = parsed;
+    }
+    if (endDateParam && endDateParam !== "undefined" && endDateParam !== "null") {
+      const parsed = new Date(endDateParam);
+      if (!isNaN(parsed.getTime())) {
+        endDate = parsed;
+        endDate.setHours(23, 59, 59, 999);
+      }
     }
 
     // Include transactions for this category AND its subcategories

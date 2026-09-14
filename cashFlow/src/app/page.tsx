@@ -134,13 +134,26 @@ export default function Home() {
   };
 
   const fetchDashboardData = async (isSilent = false) => {
-    if (!startDate || !endDate) return;
+    let sDate = startDate;
+    let eDate = endDate;
+
+    if (!sDate || !eDate || sDate === "undefined" || eDate === "undefined" || sDate === "null" || eDate === "null" || isNaN(Date.parse(sDate)) || isNaN(Date.parse(eDate))) {
+      const now = new Date();
+      eDate = now.toISOString().split('T')[0];
+      const past = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      sDate = past.toISOString().split('T')[0];
+    }
+
     try {
       if (!isSilent) setLoading(true);
       // Process any due scheduled transactions first so dashboard is accurate
-      await fetch('/cashFlow/api/scheduled/process', { method: 'POST' });
+      await fetch('/cashFlow/api/scheduled/process', { method: 'POST' }).catch(() => {});
 
-      const res = await fetch(`/cashFlow/api/dashboard?startDate=${startDate}&endDate=${endDate}`);
+      const res = await fetch(`/cashFlow/api/dashboard?startDate=${sDate}&endDate=${eDate}`);
+      if (res.status === 401) {
+        window.location.href = "/cashFlow/login";
+        return;
+      }
       if (!res.ok) {
         console.error("Dashboard API error status:", res.status);
         return;

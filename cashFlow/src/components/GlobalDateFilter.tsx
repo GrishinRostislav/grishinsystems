@@ -53,6 +53,12 @@ function computeDates(val: string): { startStr: string, endStr: string } {
   return { startStr, endStr };
 }
 
+function isValidDateStr(val: any): boolean {
+  if (!val || typeof val !== 'string') return false;
+  if (val === 'undefined' || val === 'null' || val.trim() === '') return false;
+  return !isNaN(Date.parse(val));
+}
+
 export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProps) {
   const pathname = usePathname() || "default";
   
@@ -60,7 +66,8 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
 
   const [interval, setIntervalState] = useState(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem(getStorageKey("date_interval")) || localStorage.getItem("global_date_interval") || "month";
+      const saved = localStorage.getItem(getStorageKey("date_interval")) || localStorage.getItem("global_date_interval");
+      if (saved && saved !== "undefined" && saved !== "null") return saved;
     }
     return "month";
   });
@@ -69,7 +76,7 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
     const intv = typeof window !== "undefined" ? (localStorage.getItem(getStorageKey("date_interval")) || localStorage.getItem("global_date_interval") || "month") : "month";
     if (intv === "custom" && typeof window !== "undefined") {
       const stored = localStorage.getItem(getStorageKey("start_date")) || localStorage.getItem("global_start_date");
-      if (stored) return stored;
+      if (isValidDateStr(stored)) return stored as string;
     }
     return computeDates(intv).startStr;
   });
@@ -78,7 +85,7 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
     const intv = typeof window !== "undefined" ? (localStorage.getItem(getStorageKey("date_interval")) || localStorage.getItem("global_date_interval") || "month") : "month";
     if (intv === "custom" && typeof window !== "undefined") {
       const stored = localStorage.getItem(getStorageKey("end_date")) || localStorage.getItem("global_end_date");
-      if (stored) return stored;
+      if (isValidDateStr(stored)) return stored as string;
     }
     return computeDates(intv).endStr;
   });
@@ -87,18 +94,19 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
     if (typeof window === "undefined") return;
     
     const savedInterval = localStorage.getItem(getStorageKey("date_interval")) || localStorage.getItem("global_date_interval") || "month";
-    setIntervalState(savedInterval);
+    const validInterval = (savedInterval && savedInterval !== "undefined" && savedInterval !== "null") ? savedInterval : "month";
+    setIntervalState(validInterval);
 
     let newStart = startDate;
     let newEnd = endDate;
 
-    if (savedInterval === "custom") {
+    if (validInterval === "custom") {
       const storedStart = localStorage.getItem(getStorageKey("start_date")) || localStorage.getItem("global_start_date");
       const storedEnd = localStorage.getItem(getStorageKey("end_date")) || localStorage.getItem("global_end_date");
-      if (storedStart) newStart = storedStart;
-      if (storedEnd) newEnd = storedEnd;
+      if (isValidDateStr(storedStart)) newStart = storedStart as string;
+      if (isValidDateStr(storedEnd)) newEnd = storedEnd as string;
     } else {
-      const { startStr, endStr } = computeDates(savedInterval);
+      const { startStr, endStr } = computeDates(validInterval);
       newStart = startStr;
       newEnd = endStr;
     }
@@ -108,8 +116,10 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
   }, [pathname]);
 
   useEffect(() => {
-    // Notify parent immediately
-    onDatesChange(startDate, endDate);
+    // Notify parent if dates are valid
+    if (isValidDateStr(startDate) && isValidDateStr(endDate)) {
+      onDatesChange(startDate, endDate);
+    }
   }, [startDate, endDate]);
 
   const handleIntervalChange = (val: string) => {
