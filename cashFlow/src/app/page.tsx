@@ -52,6 +52,7 @@ export default function Home() {
   const router = useRouter();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -146,6 +147,7 @@ export default function Home() {
 
     try {
       if (!isSilent) setLoading(true);
+      setError(null);
       // Process any due scheduled transactions first so dashboard is accurate
       await fetch('/cashFlow/api/scheduled/process', { method: 'POST' }).catch(() => {});
 
@@ -155,7 +157,9 @@ export default function Home() {
         return;
       }
       if (!res.ok) {
-        console.error("Dashboard API error status:", res.status);
+        const errJson = await res.json().catch(() => ({}));
+        console.error("Dashboard API error:", res.status, errJson);
+        setError(errJson.error || `Server error (${res.status}). Failed to load dashboard data.`);
         return;
       }
       const dashboardData = await res.json();
@@ -182,8 +186,9 @@ export default function Home() {
       }
 
       setData({ ...dashboardData, budgets: budgetsData, forecast: forecastData });
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to fetch dashboard data", err);
+      setError(err?.message || "Failed to load dashboard data.");
     } finally {
       if (!isSilent) setLoading(false);
     }
@@ -258,6 +263,15 @@ export default function Home() {
         <GlobalDateFilter onDatesChange={handleDatesChange} />
       </div>
       
+      {error && (
+        <div style={{ background: '#fee2e2', border: '1px solid #f87171', color: '#991b1b', padding: '12px 16px', borderRadius: '8px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>⚠️ {error}</span>
+          <button onClick={() => fetchDashboardData()} style={{ background: '#dc2626', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>
+            Retry
+          </button>
+        </div>
+      )}
+
       {loading && !data ? (
         <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Loading Dashboard...</div>
       ) : (

@@ -1,7 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 
 const cleanUrl = (url: string): string => {
-  let cleaned = url.trim().replace(/^"|"$/g, '');
+  if (!url) return '';
+  let cleaned = url.trim().replace(/^['"\\]+|['"\\]+$/g, '');
   
   // If the value includes an equals sign (e.g. "POSTGRES_PRISMA_URL=postgresql://..."),
   // strip the variable name prefix before the equals sign.
@@ -10,7 +11,12 @@ const cleanUrl = (url: string): string => {
     cleaned = cleaned.substring(equalIdx + 1);
   }
   
-  return cleaned.trim().replace(/^"|"$/g, '');
+  cleaned = cleaned.trim().replace(/^['"\\]+|['"\\]+$/g, '');
+
+  if (cleaned.startsWith('prisma+postgres://')) {
+    cleaned = cleaned.replace('prisma+postgres://', 'postgres://');
+  }
+  return cleaned;
 };
 
 // Clean connection strings dynamically
