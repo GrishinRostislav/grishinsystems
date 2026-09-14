@@ -312,21 +312,9 @@ ${recentTxList.join('\n') || 'Нет операций'}
     let replyText = "";
     let lastError: any = null;
 
-    const isOpenAIKey = apiKey.startsWith("sk-") || apiKey.startsWith("sk-proj-") || apiKey.startsWith("sk-svcacct-") || apiKey.startsWith("AQ");
     const isGeminiKey = apiKey.startsWith("AIza");
 
-    if (isOpenAIKey) {
-      try {
-        replyText = await callOpenAI(apiKey, systemPrompt, history, message);
-      } catch (err) {
-        lastError = err;
-        try {
-          replyText = await callGemini(apiKey, systemPrompt, history, message);
-        } catch (gErr) {
-          // Keep original error
-        }
-      }
-    } else if (isGeminiKey) {
+    if (isGeminiKey) {
       try {
         replyText = await callGemini(apiKey, systemPrompt, history, message);
       } catch (err) {
@@ -334,11 +322,11 @@ ${recentTxList.join('\n') || 'Нет операций'}
         try {
           replyText = await callOpenAI(apiKey, systemPrompt, history, message);
         } catch (oErr) {
-          // Keep original error
+          // Keep Gemini error as primary
         }
       }
     } else {
-      // Unknown prefix: try OpenAI first, then Gemini
+      // Treat any non-AIza key (sk-..., sk-proj-..., AQ..., etc.) as an OpenAI key
       try {
         replyText = await callOpenAI(apiKey, systemPrompt, history, message);
       } catch (err) {
@@ -346,19 +334,17 @@ ${recentTxList.join('\n') || 'Нет операций'}
         try {
           replyText = await callGemini(apiKey, systemPrompt, history, message);
         } catch (gErr) {
-          // Keep original error
+          // Keep OpenAI error as primary
         }
       }
     }
 
     if (!replyText) {
       const errMsg = lastError instanceof Error ? lastError.message : String(lastError);
-      if (isOpenAIKey || /OpenAI|Authorization|Incorrect API key|quota|exceeded/i.test(errMsg)) {
-        replyText = `⚠️ **Ошибка OpenAI (ChatGPT) API Key**\n\nПроизошла ошибка при обращении к OpenAI API:\n\`${errMsg}\`\n\nПроверьте ваш API-ключ в Настройках приложения (ключ OpenAI начинается на \`sk-...\`) и баланс аккаунта OpenAI.`;
-      } else if (isGeminiKey || /API_KEY_INVALID|API key|400 Bad Request|GoogleGenerativeAI/i.test(errMsg)) {
-        replyText = `⚠️ **Ошибка Google Gemini API Key**\n\nКлюч Gemini API недействителен (ошибка: \`${errMsg}\`).\n\nПроверьте ваш ключ на [Google AI Studio](https://aistudio.google.com/app/apikey) или используйте ключ OpenAI (\`sk-...\`).`;
+      if (isGeminiKey) {
+        replyText = `⚠️ **Ошибка Google Gemini API Key**\n\nКлюч Gemini API недействителен (ошибка: \`${errMsg}\`).\n\nПроверьте ваш ключ на [Google AI Studio](https://aistudio.google.com/app/apikey) или установите ключ OpenAI (\`sk-...\`) в Настройках приложения.`;
       } else {
-        replyText = `🤖 **ИИ-Финансовый Советник CashFlow**\n\n**Ваш текущий баланс:** ${totalBalance.toFixed(2)} ${homeCurrency}\n**Доходы за 30 дней:** +${income30.toFixed(2)} ${homeCurrency}\n**Расходы за 30 дней:** -${expense30.toFixed(2)} ${homeCurrency}\n**Чистый доход:** ${(income30 - expense30).toFixed(2)} ${homeCurrency}\n**Целевая подушка (${minBufferMonths} мес):** ${userBufferTarget.toFixed(2)} ${homeCurrency}\n\n💡 *Служебный отклик: ${errMsg.slice(0, 120)}*`;
+        replyText = `⚠️ **Ошибка OpenAI (ChatGPT) API Key**\n\nПроизошла ошибка при обращении к OpenAI API:\n\`${errMsg}\`\n\nПроверьте ваш API-ключ в Настройках приложения (откройте ⚙️ Настройки -> вставьте новый ключ OpenAI) и убедитесь в наличии средств на балансе OpenAI.`;
       }
     }
 
