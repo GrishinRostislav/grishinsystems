@@ -7,15 +7,25 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     const { password } = body;
 
+    let attempt = await prisma.loginAttempt.findUnique({ where: { ip } });
+    if (attempt && attempt.lockoutAt && new Date() < attempt.lockoutAt) {
+      return NextResponse.json({ error: 'Too many attempts. Locked out.' }, { status: 429 });
+    }
+
     let settings = await prisma.settings.findUnique({ where: { id: "global" } });
-    const configuredPassword = settings?.appPassword !== undefined 
-      ? settings.appPassword 
-      : ""; // Default to blank password if reset
+    
+    // Priority:
+    // 1. If settings.appPassword is set to a non-empty string, require that exact password.
+    // 2. If settings exists and settings.appPassword === "" or null (explicit reset), password is disabled (allow any/blank).
+    // 3. If settings is not created yet, allow blank/any password.
+    let cleanExpected = "";
+    if (settings && settings.appPassword) {
+      cleanExpected = settings.appPassword.trim();
+    }
 
     const cleanInput = (password || '').trim();
-    const cleanExpected = (configuredPassword || '').trim();
 
-    // If password is not configured or empty string, allow blank login or direct access
+    // If cleanExpected is empty, authentication is disabled (always match)
     const isMatch = !cleanExpected || cleanInput === cleanExpected;
 
     if (isMatch) {
