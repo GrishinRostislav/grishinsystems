@@ -143,6 +143,7 @@ model Settings {
   id                   String   @id @default("global")
   homeCurrency         String   @default("CAD")
   appPassword          String?
+  geminiApiKey         String?
   aiCustomInstructions String?
   aiFinancialGoal      String?  @default("balanced")
   aiAuditTone          String?  @default("strict")

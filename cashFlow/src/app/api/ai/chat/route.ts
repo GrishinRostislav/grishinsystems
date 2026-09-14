@@ -3,11 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { getExchangeRates, convertAmount } from "@/lib/currency";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-export const maxDuration = 60; // Allow 60s for Gemini financial audit analysis
-
 export async function POST(request: Request) {
   try {
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
     const body = await request.json();
     const { message, history } = body;
 
@@ -18,10 +15,12 @@ export async function POST(request: Request) {
     // 1. Gather comprehensive financial context from Prisma DB
     let settings = await prisma.settings.findUnique({
       where: { id: "global" },
-      select: { homeCurrency: true, aiCustomInstructions: true, aiFinancialGoal: true, aiAuditTone: true, aiMinBufferMonths: true }
+      select: { homeCurrency: true, geminiApiKey: true, aiCustomInstructions: true, aiFinancialGoal: true, aiAuditTone: true, aiMinBufferMonths: true }
     }).catch(() => null);
     const homeCurrency = settings?.homeCurrency || "CAD";
     const rates = await getExchangeRates(homeCurrency);
+
+    const GEMINI_API_KEY = settings?.geminiApiKey || process.env.GEMINI_API_KEY;
 
     // Accounts & balances
     const accounts = await prisma.account.findMany({

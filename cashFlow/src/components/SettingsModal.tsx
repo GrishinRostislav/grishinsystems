@@ -11,6 +11,7 @@ type SettingsModalProps = {
 export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [homeCurrency, setHomeCurrency] = useState("CAD");
   const [appPassword, setAppPassword] = useState("");
+  const [geminiApiKey, setGeminiApiKey] = useState("");
   const [aiCustomInstructions, setAiCustomInstructions] = useState("");
   const [aiFinancialGoal, setAiFinancialGoal] = useState("balanced");
   const [aiAuditTone, setAiAuditTone] = useState("strict");
@@ -27,6 +28,11 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             setAppPassword(data.appPassword);
           } else {
             setAppPassword("");
+          }
+          if (data.geminiApiKey !== undefined && data.geminiApiKey !== null) {
+            setGeminiApiKey(data.geminiApiKey);
+          } else {
+            setGeminiApiKey("");
           }
           if (data.aiCustomInstructions !== undefined && data.aiCustomInstructions !== null) {
             setAiCustomInstructions(data.aiCustomInstructions);
@@ -49,6 +55,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         body: JSON.stringify({
           homeCurrency,
           appPassword,
+          geminiApiKey,
           aiCustomInstructions,
           aiFinancialGoal,
           aiAuditTone,
@@ -119,8 +126,22 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           <div className={styles.sectionHeader}>
             <h3>🤖 Настройки ИИ-Советника и Правила Аудита</h3>
             <p className={styles.description}>
-              Укажите ваши личные условия и критерии анализа, чтобы ИИ давал максимально точные советы.
+              Укажите ключ Google Gemini API и личные критерии анализа, чтобы ИИ давал ответы в диалоговом режиме.
             </p>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Google Gemini API Key (начинается на AIzaSy...)</label>
+            <p className={styles.description}>
+              Бесплатный ключ из <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" style={{ color: 'var(--unique-blue)', textDecoration: 'underline' }}>Google AI Studio</a>.
+            </p>
+            <input 
+              type="password"
+              value={geminiApiKey}
+              onChange={e => setGeminiApiKey(e.target.value)}
+              placeholder="AIzaSy..."
+              className={styles.select}
+            />
           </div>
 
           <div className={styles.formGroup}>
