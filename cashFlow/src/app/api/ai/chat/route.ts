@@ -20,7 +20,8 @@ export async function POST(request: Request) {
     const homeCurrency = settings?.homeCurrency || "CAD";
     const rates = await getExchangeRates(homeCurrency);
 
-    const GEMINI_API_KEY = settings?.geminiApiKey || process.env.GEMINI_API_KEY;
+    const rawKey = settings?.geminiApiKey || process.env.GEMINI_API_KEY || "";
+    const GEMINI_API_KEY = rawKey.trim().replace(/^['"\\]+|['"\\]+$/g, '');
 
     // Accounts & balances
     const accounts = await prisma.account.findMany({
