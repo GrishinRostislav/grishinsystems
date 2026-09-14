@@ -77,18 +77,20 @@ export default function AIFloatingButton() {
         })
       });
 
-      if (!res.ok) throw new Error("AI API request failed");
-      const json = await res.json();
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(json.error || `Server status ${res.status}`);
+      }
 
       setMessages([
         ...updatedMessages,
         { role: 'model', content: json.reply || 'Не удалось получить ответ от ИИ.' }
       ]);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setMessages([
         ...updatedMessages,
-        { role: 'model', content: '⚠️ Произошла ошибка при обращении к ИИ-Ассистенту. Попробуйте еще раз.' }
+        { role: 'model', content: `⚠️ ${err?.message || 'Произошла ошибка при обращении к ИИ-Ассистенту. Попробуйте еще раз.'}` }
       ]);
     } finally {
       setLoading(false);

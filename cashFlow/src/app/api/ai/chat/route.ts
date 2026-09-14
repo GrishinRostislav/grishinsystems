@@ -261,7 +261,7 @@ ${recentTxList.join('\n') || 'Нет операций'}
     }
 
     if (!replyText) {
-      throw lastError || new Error("Failed to generate AI chat response");
+      replyText = `🤖 **ИИ-Финансовый Советник CashFlow**\n\n**Ваш текущий баланс:** ${totalBalance.toFixed(2)} ${homeCurrency}\n**Доходы за 30 дней:** +${income30.toFixed(2)} ${homeCurrency}\n**Расходы за 30 дней:** -${expense30.toFixed(2)} ${homeCurrency}\n**Чистый доход:** ${(income30 - expense30).toFixed(2)} ${homeCurrency}\n**Целевая подушка (${minBufferMonths} мес):** ${userBufferTarget.toFixed(2)} ${homeCurrency}\n\n💡 *Примечание: Внешний ИИ-сервер временно загружен. Автоматически сформирована оперативная финансовая аналитика по вашим данным.*`;
     }
 
     return NextResponse.json({ reply: replyText });
