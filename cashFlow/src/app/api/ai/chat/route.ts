@@ -214,9 +214,9 @@ ${recentTxList.join('\n') || 'Нет операций'}
 
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     const modelsToTry = [
-      'gemini-2.5-flash',
       'gemini-2.0-flash',
-      'gemini-2.5-pro',
+      'gemini-1.5-flash',
+      'gemini-1.5-pro',
       'gemini-2.0-flash-lite'
     ];
 
@@ -265,8 +265,8 @@ ${recentTxList.join('\n') || 'Нет операций'}
     }
 
     return NextResponse.json({ reply: replyText });
-  } catch (error) {
+  } catch (error: any) {
     console.error("AI Chat API Error:", error);
-    return NextResponse.json({ error: "Failed to communicate with AI Assistant" }, { status: 500 });
+    return NextResponse.json({ error: error?.message || String(error) || "Failed to communicate with AI Assistant" }, { status: 500 });
   }
 }

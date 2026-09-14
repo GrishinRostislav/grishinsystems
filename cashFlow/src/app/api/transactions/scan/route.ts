@@ -89,9 +89,9 @@ export async function POST(request: Request) {
     // Initialize Gemini API Client with active modern models (Gemini 1.5 was sunset/retired by Google)
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     const modelsToTry = [
-      'gemini-2.5-flash',
       'gemini-2.0-flash',
-      'gemini-2.5-pro',
+      'gemini-1.5-flash',
+      'gemini-1.5-pro',
       'gemini-2.0-flash-lite'
     ];
 
