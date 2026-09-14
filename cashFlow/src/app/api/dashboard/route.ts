@@ -295,8 +295,8 @@ export async function GET(request: Request) {
       homeCurrency
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Dashboard API Error:", error);
-    return NextResponse.json({ error: "Failed to fetch dashboard data" }, { status: 500 });
+    return NextResponse.json({ error: error?.message || String(error) || "Failed to fetch dashboard data" }, { status: 500 });
   }
 }
