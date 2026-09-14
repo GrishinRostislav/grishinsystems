@@ -8,31 +8,25 @@ export async function POST(request: Request) {
     const { password } = body;
 
     let attempt = await prisma.loginAttempt.findUnique({ where: { ip } });
+    
     if (attempt && attempt.lockoutAt && new Date() < attempt.lockoutAt) {
       return NextResponse.json({ error: 'Too many attempts. Locked out.' }, { status: 429 });
     }
 
-    let settings = await prisma.settings.findUnique({ where: { id: "global" } });
+    const APP_PASSWORD = process.env.APP_PASSWORD;
     
-    // Priority:
-    // 1. If settings.appPassword is set to a non-empty string, require that exact password.
-    // 2. If settings exists and settings.appPassword === "" or null (explicit reset), password is disabled (allow any/blank).
-    // 3. If settings is not created yet, allow blank/any password.
-    let cleanExpected = "";
-    if (settings && settings.appPassword) {
-      cleanExpected = settings.appPassword.trim();
+    if (!APP_PASSWORD) {
+      return NextResponse.json({ error: 'Server configuration error: APP_PASSWORD environment variable is not defined.' }, { status: 500 });
     }
 
-    const cleanInput = (password || '').trim();
-
-    // If cleanExpected is empty, authentication is disabled (always match)
-    const isMatch = !cleanExpected || cleanInput === cleanExpected;
-
-    if (isMatch) {
-      // Clear all lockouts
-      try {
-        await prisma.loginAttempt.deleteMany();
-      } catch (e) {}
+    if (password === APP_PASSWORD) {
+      // Reset attempts on success
+      if (attempt) {
+        await prisma.loginAttempt.update({
+          where: { ip },
+          data: { attempts: 0, lockoutAt: null }
+        });
+      }
 
       const response = NextResponse.json({ success: true });
       
@@ -49,9 +43,9 @@ export async function POST(request: Request) {
         maxAge: 30 * 24 * 60 * 60, // 30 days
       });
 
-      // Also append raw Set-Cookie headers for both root and /cashFlow basePath
-      response.headers.append('Set-Cookie', `auth=authenticated; Path=/; HttpOnly; ${isProd ? 'Secure;' : ''} Max-Age=2592000; SameSite=Lax`);
-      response.headers.append('Set-Cookie', `auth=authenticated; Path=/cashFlow; HttpOnly; ${isProd ? 'Secure;' : ''} Max-Age=2592000; SameSite=Lax`);
+      // Also append raw Set-Cookie header with Path=/ as safety fallback for basePath overrides
+      const cookieValue = `auth=authenticated; Path=/; HttpOnly; ${isProd ? 'Secure;' : ''} Max-Age=2592000; SameSite=Lax`;
+      response.headers.append('Set-Cookie', cookieValue);
 
       return response;
     } else {
@@ -87,14 +81,10 @@ export async function DELETE() {
   try {
     const response = NextResponse.json({ success: true });
     
-    // Clear the auth cookie on root path and basePath
+    // Clear the auth cookie by setting it with Max-Age=0 and an expired value
     response.headers.append(
       'Set-Cookie',
       'auth=; Path=/; HttpOnly; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax'
-    );
-    response.headers.append(
-      'Set-Cookie',
-      'auth=; Path=/cashFlow; HttpOnly; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax'
     );
     
     return response;

@@ -13,7 +13,7 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (frozen) return;
+    if (frozen || !password) return;
     
     setLoading(true);
     setError("");
@@ -58,14 +58,14 @@ export default function LoginPage() {
           <form onSubmit={handleLogin} className={styles.form}>
             <input
               type="password"
-              placeholder="Password (leave blank if disabled)"
+              placeholder="Password"
               className={styles.input}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
               autoFocus
             />
-            <button type="submit" className={styles.button} disabled={loading}>
+            <button type="submit" className={styles.button} disabled={loading || !password}>
               {loading ? "Checking..." : "Log In"}
             </button>
             {error && <div className={styles.error}>{error}</div>}
