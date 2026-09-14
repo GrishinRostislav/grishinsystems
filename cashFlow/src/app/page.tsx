@@ -141,6 +141,10 @@ export default function Home() {
       await fetch('/cashFlow/api/scheduled/process', { method: 'POST' });
 
       const res = await fetch(`/cashFlow/api/dashboard?startDate=${startDate}&endDate=${endDate}`);
+      if (!res.ok) {
+        console.error("Dashboard API error status:", res.status);
+        return;
+      }
       const dashboardData = await res.json();
       
       let budgetsData = [];
