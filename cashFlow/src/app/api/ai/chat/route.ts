@@ -261,10 +261,11 @@ ${recentTxList.join('\n') || 'Нет операций'}
 
     if (!replyText) {
       const errMsg = lastError instanceof Error ? lastError.message : String(lastError);
-      if (errMsg.includes("API_KEY_INVALID") || errMsg.includes("API key not valid")) {
-        replyText = `⚠️ **Ошибка ключа Google Gemini API**\n\nПеременная \`GEMINI_API_KEY\` в Vercel содержит недействительный ключ (Google API Error: \`API_KEY_INVALID\`).\n\nЧтобы активировать полноценный диалоговый ИИ:\n1. Получите бесплатный ключ на [Google AI Studio](https://aistudio.google.com/app/apikey)\n2. Обновите переменную \`GEMINI_API_KEY\` в настройках Vercel (Project Settings -> Environment Variables).`;
+      const isKeyError = /API_KEY_INVALID|API key|400 Bad Request|GoogleGenerativeAI/i.test(errMsg);
+      if (isKeyError) {
+        replyText = `⚠️ **Ошибка ключа Google Gemini API**\n\nКлюч \`GEMINI_API_KEY\` в Vercel недействителен (Google API Error: \`API_KEY_INVALID\`).\n\nЧтобы включить живой ИИ-чат:\n1. Получите бесплатный ключ на [Google AI Studio](https://aistudio.google.com/app/apikey)\n2. Зайдите в Vercel (Project Settings -> Environment Variables) и обновите \`GEMINI_API_KEY\`.`;
       } else {
-        replyText = `🤖 **ИИ-Финансовый Советник CashFlow**\n\n**Ваш текущий баланс:** ${totalBalance.toFixed(2)} ${homeCurrency}\n**Доходы за 30 дней:** +${income30.toFixed(2)} ${homeCurrency}\n**Расходы за 30 дней:** -${expense30.toFixed(2)} ${homeCurrency}\n**Чистый доход:** ${(income30 - expense30).toFixed(2)} ${homeCurrency}\n**Целевая подушка (${minBufferMonths} мес):** ${userBufferTarget.toFixed(2)} ${homeCurrency}\n\n💡 *Ошибка API: ${errMsg.slice(0, 100)}*`;
+        replyText = `🤖 **ИИ-Финансовый Советник CashFlow**\n\n**Ваш текущий баланс:** ${totalBalance.toFixed(2)} ${homeCurrency}\n**Доходы за 30 дней:** +${income30.toFixed(2)} ${homeCurrency}\n**Расходы за 30 дней:** -${expense30.toFixed(2)} ${homeCurrency}\n**Чистый доход:** ${(income30 - expense30).toFixed(2)} ${homeCurrency}\n**Целевая подушка (${minBufferMonths} мес):** ${userBufferTarget.toFixed(2)} ${homeCurrency}\n\n💡 *Служебный отклик: ${errMsg.slice(0, 120)}*`;
       }
     }
 
