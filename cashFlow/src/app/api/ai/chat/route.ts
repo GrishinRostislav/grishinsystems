@@ -223,12 +223,8 @@ ${recentTxList.join('\n') || 'Нет операций'}
     let replyText = "";
     let lastError = null;
 
-    // Convert conversation history if present
-    const contents: any[] = [
-      { role: 'user', parts: [{ text: systemPrompt }] },
-      { role: 'model', parts: [{ text: "Здравствуйте! Я ваш персональный финансовый ассистент CashFlow. Чем я могу помочь вам прямо сейчас?" }] }
-    ];
-
+    // Build clean conversation contents for Gemini API
+    const contents: any[] = [];
     if (Array.isArray(history)) {
       for (const h of history) {
         if (h.role && h.content) {
@@ -247,7 +243,10 @@ ${recentTxList.join('\n') || 'Нет операций'}
 
     for (const modelName of modelsToTry) {
       try {
-        const model = genAI.getGenerativeModel({ model: modelName });
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          systemInstruction: systemPrompt
+        });
         const result = await model.generateContent({ contents });
         const response = await result.response;
         replyText = response.text();
