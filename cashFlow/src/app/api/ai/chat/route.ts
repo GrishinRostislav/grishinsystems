@@ -3,6 +3,104 @@ import { prisma } from "@/lib/prisma";
 import { getExchangeRates, convertAmount } from "@/lib/currency";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+async function callOpenAI(apiKey: string, systemPrompt: string, history: any[], message: string) {
+  const messages: any[] = [{ role: "system", content: systemPrompt }];
+  if (Array.isArray(history)) {
+    for (const h of history) {
+      if (h.role && h.content) {
+        messages.push({
+          role: h.role === "user" ? "user" : "assistant",
+          content: h.content
+        });
+      }
+    }
+  }
+  messages.push({ role: "user", content: message });
+
+  const models = ["gpt-4o-mini", "gpt-4o", "gpt-3.5-turbo"];
+  let lastError: any = null;
+
+  for (const model of models) {
+    try {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: 0.7
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error?.message || `OpenAI API error (${res.status})`);
+      }
+
+      const text = data?.choices?.[0]?.message?.content;
+      if (text && text.trim().length > 0) {
+        return text;
+      }
+    } catch (err: any) {
+      console.warn(`OpenAI model ${model} error:`, err?.message || err);
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error("Failed to call OpenAI API");
+}
+
+async function callGemini(apiKey: string, systemPrompt: string, history: any[], message: string) {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const modelsToTry = [
+    'gemini-2.0-flash',
+    'gemini-1.5-flash',
+    'gemini-1.5-pro',
+    'gemini-2.0-flash-lite'
+  ];
+
+  const contents: any[] = [];
+  if (Array.isArray(history)) {
+    for (const h of history) {
+      if (h.role && h.content) {
+        contents.push({
+          role: h.role === 'user' ? 'user' : 'model',
+          parts: [{ text: h.content }]
+        });
+      }
+    }
+  }
+  contents.push({
+    role: 'user',
+    parts: [{ text: message }]
+  });
+
+  let lastError: any = null;
+
+  for (const modelName of modelsToTry) {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        systemInstruction: systemPrompt
+      });
+      const result = await model.generateContent({ contents });
+      const response = await result.response;
+      const text = response.text();
+      if (text && text.trim().length > 0) {
+        return text;
+      }
+    } catch (err) {
+      console.warn(`Gemini model ${modelName} error:`, err);
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error("Failed to call Gemini API");
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -20,8 +118,8 @@ export async function POST(request: Request) {
     const homeCurrency = settings?.homeCurrency || "CAD";
     const rates = await getExchangeRates(homeCurrency);
 
-    const rawKey = settings?.geminiApiKey || process.env.GEMINI_API_KEY || "";
-    const GEMINI_API_KEY = rawKey.trim().replace(/^['"\\]+|['"\\]+$/g, '');
+    const rawKey = settings?.geminiApiKey || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY || "";
+    const apiKey = rawKey.trim().replace(/^['"\\]+|['"\\]+$/g, '');
 
     // Accounts & balances
     const accounts = await prisma.account.findMany({
@@ -108,7 +206,6 @@ export async function POST(request: Request) {
     const monthsFor12M = Math.min(12, historyMonthsSpan);
     const avgMonthlyIncome12M = income365 / monthsFor12M;
     const avgMonthlyExpense12M = expense365 / monthsFor12M;
-    const emergencyBuffer12M = avgMonthlyExpense12M * 3;
 
     const avgMonthlyIncomeAllTime = allTimeIncome / historyMonthsSpan;
     const avgMonthlyExpenseAllTime = allTimeExpense / historyMonthsSpan;
@@ -138,10 +235,10 @@ export async function POST(request: Request) {
     ).join('\n');
 
     // Compute custom user settings for AI
-    const minBufferMonths = settings.aiMinBufferMonths ?? 3;
-    const customGoal = settings.aiFinancialGoal || "balanced";
-    const customTone = settings.aiAuditTone || "strict";
-    const customInstructions = settings.aiCustomInstructions || "";
+    const minBufferMonths = settings?.aiMinBufferMonths ?? 3;
+    const customGoal = settings?.aiFinancialGoal || "balanced";
+    const customTone = settings?.aiAuditTone || "strict";
+    const customInstructions = settings?.aiCustomInstructions || "";
 
     const userBufferTarget = avgMonthlyExpense12M * minBufferMonths;
 
@@ -205,65 +302,61 @@ ${recentTxList.join('\n') || 'Нет операций'}
 - Ответы должны быть лаконичными, практичными и содержать конкретные цифры и шаги.
 `;
 
-    // Fallback response if GEMINI_API_KEY is not set
-    if (!GEMINI_API_KEY) {
+    // Fallback response if no API key is provided
+    if (!apiKey) {
       return NextResponse.json({
-        reply: `🤖 **ИИ-Ассистент CashFlow (Демо-режим)**\n\n**Ваш текущий баланс:** ${totalBalance.toFixed(2)} ${homeCurrency}\n**Расходы за месяц:** ${totalExpense30.toFixed(2)} ${homeCurrency}\n**Рекомендуемая подушка:** ${emergencyBuffer3M.toFixed(2)} ${homeCurrency}\n\n💡 *Для активации полноценного диалогового ИИ добавьте GEMINI_API_KEY в окружение.*`
+        reply: `🤖 **ИИ-Ассистент CashFlow (Демо-режим)**\n\n**Ваш текущий баланс:** ${totalBalance.toFixed(2)} ${homeCurrency}\n**Расходы за 30 дней:** -${expense30.toFixed(2)} ${homeCurrency}\n**Рекомендуемая подушка:** ${userBufferTarget.toFixed(2)} ${homeCurrency}\n\n💡 *Для активации полноценного диалогового ИИ добавьте API Key (OpenAI ChatGPT или Google Gemini) в Настройках.*`
       });
     }
 
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const modelsToTry = [
-      'gemini-2.0-flash',
-      'gemini-1.5-flash',
-      'gemini-1.5-pro',
-      'gemini-2.0-flash-lite'
-    ];
-
     let replyText = "";
-    let lastError = null;
+    let lastError: any = null;
 
-    // Build clean conversation contents for Gemini API
-    const contents: any[] = [];
-    if (Array.isArray(history)) {
-      for (const h of history) {
-        if (h.role && h.content) {
-          contents.push({
-            role: h.role === 'user' ? 'user' : 'model',
-            parts: [{ text: h.content }]
-          });
+    const isOpenAIKey = apiKey.startsWith("sk-") || apiKey.startsWith("sk-proj-") || apiKey.startsWith("sk-svcacct-") || apiKey.startsWith("AQ");
+    const isGeminiKey = apiKey.startsWith("AIza");
+
+    if (isOpenAIKey) {
+      try {
+        replyText = await callOpenAI(apiKey, systemPrompt, history, message);
+      } catch (err) {
+        lastError = err;
+        try {
+          replyText = await callGemini(apiKey, systemPrompt, history, message);
+        } catch (gErr) {
+          // Keep original error
         }
       }
-    }
-
-    contents.push({
-      role: 'user',
-      parts: [{ text: message }]
-    });
-
-    for (const modelName of modelsToTry) {
+    } else if (isGeminiKey) {
       try {
-        const model = genAI.getGenerativeModel({
-          model: modelName,
-          systemInstruction: systemPrompt
-        });
-        const result = await model.generateContent({ contents });
-        const response = await result.response;
-        replyText = response.text();
-        if (replyText && replyText.trim().length > 0) {
-          break;
-        }
+        replyText = await callGemini(apiKey, systemPrompt, history, message);
       } catch (err) {
-        console.warn(`Model ${modelName} error in chat API:`, err);
         lastError = err;
+        try {
+          replyText = await callOpenAI(apiKey, systemPrompt, history, message);
+        } catch (oErr) {
+          // Keep original error
+        }
+      }
+    } else {
+      // Unknown prefix: try OpenAI first, then Gemini
+      try {
+        replyText = await callOpenAI(apiKey, systemPrompt, history, message);
+      } catch (err) {
+        lastError = err;
+        try {
+          replyText = await callGemini(apiKey, systemPrompt, history, message);
+        } catch (gErr) {
+          // Keep original error
+        }
       }
     }
 
     if (!replyText) {
       const errMsg = lastError instanceof Error ? lastError.message : String(lastError);
-      const isKeyError = /API_KEY_INVALID|API key|400 Bad Request|GoogleGenerativeAI/i.test(errMsg);
-      if (isKeyError) {
-        replyText = `⚠️ **Ошибка ключа Google Gemini API**\n\nКлюч \`GEMINI_API_KEY\` в Vercel недействителен (Google API Error: \`API_KEY_INVALID\`).\n\nЧтобы включить живой ИИ-чат:\n1. Получите бесплатный ключ на [Google AI Studio](https://aistudio.google.com/app/apikey)\n2. Зайдите в Vercel (Project Settings -> Environment Variables) и обновите \`GEMINI_API_KEY\`.`;
+      if (isOpenAIKey || /OpenAI|Authorization|Incorrect API key|quota|exceeded/i.test(errMsg)) {
+        replyText = `⚠️ **Ошибка OpenAI (ChatGPT) API Key**\n\nПроизошла ошибка при обращении к OpenAI API:\n\`${errMsg}\`\n\nПроверьте ваш API-ключ в Настройках приложения (ключ OpenAI начинается на \`sk-...\`) и баланс аккаунта OpenAI.`;
+      } else if (isGeminiKey || /API_KEY_INVALID|API key|400 Bad Request|GoogleGenerativeAI/i.test(errMsg)) {
+        replyText = `⚠️ **Ошибка Google Gemini API Key**\n\nКлюч Gemini API недействителен (ошибка: \`${errMsg}\`).\n\nПроверьте ваш ключ на [Google AI Studio](https://aistudio.google.com/app/apikey) или используйте ключ OpenAI (\`sk-...\`).`;
       } else {
         replyText = `🤖 **ИИ-Финансовый Советник CashFlow**\n\n**Ваш текущий баланс:** ${totalBalance.toFixed(2)} ${homeCurrency}\n**Доходы за 30 дней:** +${income30.toFixed(2)} ${homeCurrency}\n**Расходы за 30 дней:** -${expense30.toFixed(2)} ${homeCurrency}\n**Чистый доход:** ${(income30 - expense30).toFixed(2)} ${homeCurrency}\n**Целевая подушка (${minBufferMonths} мес):** ${userBufferTarget.toFixed(2)} ${homeCurrency}\n\n💡 *Служебный отклик: ${errMsg.slice(0, 120)}*`;
       }

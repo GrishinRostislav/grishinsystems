@@ -126,20 +126,20 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           <div className={styles.sectionHeader}>
             <h3>🤖 Настройки ИИ-Советника и Правила Аудита</h3>
             <p className={styles.description}>
-              Укажите ключ Google Gemini API и личные критерии анализа, чтобы ИИ давал ответы в диалоговом режиме.
+              Укажите API Key (OpenAI ChatGPT или Google Gemini) и личные критерии анализа, чтобы ИИ давал ответы в диалоговом режиме.
             </p>
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>Google Gemini API Key (начинается на AIzaSy...)</label>
+            <label className={styles.label}>AI API Key (OpenAI ChatGPT или Google Gemini)</label>
             <p className={styles.description}>
-              Бесплатный ключ из <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" style={{ color: 'var(--unique-blue)', textDecoration: 'underline' }}>Google AI Studio</a>.
+              Поддерживается <strong>OpenAI (ChatGPT)</strong> (ключ <code>sk-...</code> из <a href="https://platform.openai.com/api-keys" target="_blank" rel="noreferrer" style={{ color: 'var(--unique-blue)', textDecoration: 'underline' }}>OpenAI Platform</a>) или <strong>Google Gemini</strong> (ключ <code>AIzaSy...</code> из <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" style={{ color: 'var(--unique-blue)', textDecoration: 'underline' }}>Google AI Studio</a>).
             </p>
             <input 
               type="password"
               value={geminiApiKey}
               onChange={e => setGeminiApiKey(e.target.value)}
-              placeholder="AIzaSy..."
+              placeholder="sk-... или AIzaSy..."
               className={styles.select}
             />
           </div>
