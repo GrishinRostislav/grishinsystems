@@ -5,22 +5,32 @@ export async function GET() {
   try {
     let settings = await prisma.settings.findUnique({
       where: { id: "global" }
-    });
+    }).catch(() => null);
     
-    // Create defaults if not exists
     if (!settings) {
-      settings = await prisma.settings.create({
-        data: {
-          id: "global",
-          homeCurrency: "CAD",
-        }
-      });
+      settings = await prisma.settings.findUnique({
+        where: { id: "global" },
+        select: { id: true, homeCurrency: true }
+      }).catch(() => null);
+    }
+
+    if (!settings) {
+      settings = {
+        id: "global",
+        homeCurrency: "CAD",
+        appPassword: null,
+        aiCustomInstructions: null,
+        aiFinancialGoal: "balanced",
+        aiAuditTone: "strict",
+        aiMinBufferMonths: 3,
+        updatedAt: new Date()
+      } as any;
     }
 
     return NextResponse.json(settings);
   } catch (error) {
     console.error("Failed to fetch settings:", error);
-    return NextResponse.json({ error: "Failed to fetch settings" }, { status: 500 });
+    return NextResponse.json({ homeCurrency: "CAD" });
   }
 }
 

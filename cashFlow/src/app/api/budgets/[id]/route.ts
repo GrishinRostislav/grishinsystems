@@ -11,11 +11,11 @@ export async function GET(
   try {
     const { id } = await params;
     
-    let settings = await prisma.settings.findUnique({ where: { id: "global" } });
-    if (!settings) {
-      settings = await prisma.settings.create({ data: { id: "global", homeCurrency: "CAD" } });
-    }
-    const homeCurrency = settings.homeCurrency;
+    let settings = await prisma.settings.findUnique({
+      where: { id: "global" },
+      select: { homeCurrency: true }
+    }).catch(() => null);
+    const homeCurrency = settings?.homeCurrency || "CAD";
     const rates = await getExchangeRates(homeCurrency);
 
     const budget = await prisma.budget.findUnique({

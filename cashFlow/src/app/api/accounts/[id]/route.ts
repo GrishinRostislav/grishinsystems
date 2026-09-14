@@ -67,11 +67,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     const futureDelta = futureTransactions.reduce((acc, txn) => acc + txn.amount, 0);
     let runningBalance = account.balance - futureDelta;
 
-    let settings = await prisma.settings.findUnique({ where: { id: "global" } });
-    if (!settings) {
-      settings = await prisma.settings.create({ data: { id: "global", homeCurrency: "CAD" } });
-    }
-    const homeCurrency = settings.homeCurrency;
+    let settings = await prisma.settings.findUnique({
+      where: { id: "global" },
+      select: { homeCurrency: true }
+    }).catch(() => null);
+    const homeCurrency = settings?.homeCurrency || "CAD";
 
     let loopStart = new Date(startDate);
     if (loopStart.getFullYear() < 2000) {

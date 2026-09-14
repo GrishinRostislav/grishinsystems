@@ -16,11 +16,11 @@ export async function POST(request: Request) {
     }
 
     // 1. Gather comprehensive financial context from Prisma DB
-    let settings = await prisma.settings.findUnique({ where: { id: "global" } });
-    if (!settings) {
-      settings = await prisma.settings.create({ data: { id: "global", homeCurrency: "CAD" } });
-    }
-    const homeCurrency = settings.homeCurrency;
+    let settings = await prisma.settings.findUnique({
+      where: { id: "global" },
+      select: { homeCurrency: true, aiCustomInstructions: true, aiFinancialGoal: true, aiAuditTone: true, aiMinBufferMonths: true }
+    }).catch(() => null);
+    const homeCurrency = settings?.homeCurrency || "CAD";
     const rates = await getExchangeRates(homeCurrency);
 
     // Accounts & balances

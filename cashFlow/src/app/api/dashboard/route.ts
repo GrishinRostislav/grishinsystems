@@ -8,11 +8,11 @@ export async function GET(request: Request) {
     const startDateParam = searchParams.get("startDate");
     const endDateParam = searchParams.get("endDate");
 
-    let settings = await prisma.settings.findUnique({ where: { id: "global" } });
-    if (!settings) {
-      settings = await prisma.settings.create({ data: { id: "global", homeCurrency: "CAD" } });
-    }
-    const homeCurrency = settings.homeCurrency;
+    let settings = await prisma.settings.findUnique({
+      where: { id: "global" },
+      select: { homeCurrency: true }
+    }).catch(() => null);
+    const homeCurrency = settings?.homeCurrency || "CAD";
     const rates = await getExchangeRates(homeCurrency);
 
     // 1. Total Balance of Included Accounts
