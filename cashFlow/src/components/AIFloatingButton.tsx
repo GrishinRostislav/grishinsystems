@@ -148,6 +148,17 @@ export default function AIFloatingButton() {
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                 <button 
                   className={styles.closeBtn} 
+                  style={{ fontSize: '1.1rem', padding: '4px 8px' }}
+                  onClick={() => setMessages([{
+                    role: 'model',
+                    content: '👋 Здравствуйте! Я ваш ИИ-Финансовый Советник в CashFlow. Чем могу помочь прямо сейчас?'
+                  }])}
+                  title="Очистить историю диалога (Новый чат)"
+                >
+                  🔄
+                </button>
+                <button 
+                  className={styles.closeBtn} 
                   style={{ fontSize: '1.2rem', padding: '4px 8px' }}
                   onClick={() => setIsSettingsOpen(true)}
                   title="Настройки ИИ"
