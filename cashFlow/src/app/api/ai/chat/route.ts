@@ -256,24 +256,22 @@ export async function POST(request: Request) {
     // Budgets
     const budgets = await prisma.budget.findMany({ include: { categories: true } });
     const budgetsSummary = budgets.map(b => 
-      `- Бюджет "${b.name}": Лимит ${b.amount} ${homeCurrency} (${b.period}, ${b.isGlobal ? 'Глобальный' : 'По категориям: ' + b.categories.map(c => c.name).join(', ')})`
+      `- Budget "${b.name}": Limit ${b.amount} ${homeCurrency} (${b.period}, ${b.isGlobal ? 'Global' : 'Categories: ' + b.categories.map(c => c.name).join(', ')})`
     ).join('\n');
 
     // Scheduled Payments
     const scheduled = await prisma.scheduledTransaction.findMany({ where: { isActive: true } });
     const scheduledSummary = scheduled.map(s => 
-      `- ${s.name || 'Платеж'}: ${s.amount} (${s.frequency}) | Следующий запуск: ${new Date(s.nextRunDate).toISOString().split('T')[0]}`
+      `- ${s.name || 'Payment'}: ${s.amount} (${s.frequency}) | Next Run: ${new Date(s.nextRunDate).toISOString().split('T')[0]}`
     ).join('\n');
 
     // Active Scenarios
     const scenarios = await prisma.forecastScenario.findMany({ include: { items: true } });
     const scenariosSummary = scenarios.map(s => 
-      `- Сценарий "${s.name}" [Активен: ${s.isActive ? 'Да' : 'Нет'}]: ${s.items.length} элементов`
+      `- Scenario "${s.name}" [Active: ${s.isActive ? 'Yes' : 'No'}]: ${s.items.length} items`
     ).join('\n');
 
     // Compute custom user settings for AI
-    const minBufferMonths = settings?.aiMinBufferMonths ?? 3;
-    const customTone = settings?.aiAuditTone || "strict";
     const customInstructionsRaw = settings?.aiCustomInstructions || "";
     let customInstructionsFormatted = "";
 
@@ -298,74 +296,61 @@ export async function POST(request: Request) {
       }
     }
 
-    const toneLabels: Record<string, string> = {
-      strict: "Строгая (критика трат, прямой жесткий аудит)",
-      supportive: "Поддерживающая (мягкие советы и похвала)",
-      analytical: "Аналитическая (только сухие факты, цифры и расчёты)"
-    };
-    const toneText = toneLabels[customTone] || customTone;
-
-    const userBufferTarget = realAvgMonthlyExpense * minBufferMonths;
-
     // 2. Build AI Context Prompt
     const systemPrompt = `
-Вы — персональный ИИ-Финансовый Советник в приложении CashFlow.
+You are the Personal AI Financial Advisor in the CashFlow app.
 
-🚨 КРИТИЧЕСКИ ВАЖНЫЕ ПЕРСОНАЛЬНЫЕ ПРАВИЛА ПОЛЬЗОВАТЕЛЯ (ВЫ ДОЛЖНЫ НЕУКОСНИТЕЛЬНО СЛЕДОВАТЬ ИМ В КАЖДОМ ОТВЕТЕ):
-${customInstructionsFormatted ? customInstructionsFormatted : '  (Персональные правила пока не заданы)'}
+🚨 CRITICAL USER RULES & INSTRUCTIONS (YOU MUST STRICTLY FOLLOW THESE IN EVERY RESPONSE):
+${customInstructionsFormatted ? customInstructionsFormatted : '  (No custom rules provided by user yet)'}
 
-ПРИОРИТЕТНЫЕ НАСТРОЙКИ АНАЛИЗА:
-- Тональность общения и аудита: **${toneText}**
-- Расчетная подушка безопасности на **${minBufferMonths} месяцев**: ${userBufferTarget.toFixed(2)} ${homeCurrency} (из расчета реальных расходов ${realAvgMonthlyExpense.toFixed(2)} ${homeCurrency}/мес)
-- Основная валюта: **${homeCurrency}**
+SYSTEM CONFIGURATION:
+- Default Currency: **${homeCurrency}**
 
-У ВАС ЕСТЬ ПОЛНЫЙ ДОСТУП КО ВСЕЙ БАЗЕ ДАННЫХ CASHFLOW И ВСЕЙ ИСТОРИИ ОПЕРАЦИЙ ПОЛЬЗОВАТЕЛЯ!
-Никогда не утверждайте, что у вас нет доступа к данным. Все данные из базы приведены ниже по каждому месяцу.
+YOU HAVE FULL ACCESS TO THE USER'S ENTIRE CASHFLOW DATABASE & FINANCIAL HISTORY!
+Never claim that you lack access to financial history. All real data from Prisma DB is provided below by month.
 
-АКТУАЛЬНЫЕ ФИНАНСОВЫЕ ДАННЫЕ ПОЛЬЗОВАТЕЛЯ ИЗ БАЗЫ PRISMA:
+CURRENT FINANCIAL DATA FROM PRISMA DB:
 
-1. СЧЕТА И БАЛАНСЫ:
-- Общий ликвидный баланс: ${totalBalance.toFixed(2)} ${homeCurrency}
-Счета:
-${accountsSummary || 'Нет активных счетов'}
+1. ACCOUNTS & BALANCES:
+- Total Liquid Balance: ${totalBalance.toFixed(2)} ${homeCurrency}
+Accounts:
+${accountsSummary || 'No active accounts'}
 
-2. ПОМЕСЯЧНАЯ ДЕТАЛИЗАЦИЯ (АКТИВНЫХ МЕСЯЦЕВ В БАЗЕ: ${activeMonthsCount}):
-${monthlyBreakdownText || 'Нет данных по месяцах'}
+2. MONTHLY BREAKDOWN (Active Months in DB: ${activeMonthsCount}):
+${monthlyBreakdownText || 'No monthly data'}
 
-3. ОБЩАЯ ИСТОРИЯ И СРЕДНИЕ ПОКАЗАТЕЛИ (Всего операций в базе: ${totalTxCount}):
-- Всего доходов за все время: +${allTimeIncome.toFixed(2)} ${homeCurrency} (реальное среднее: +${realAvgMonthlyIncome.toFixed(2)} ${homeCurrency}/мес за ${activeMonthsCount} активных мес.)
-- Всего расходов за все время: -${allTimeExpense.toFixed(2)} ${homeCurrency} (реальное среднее: -${realAvgMonthlyExpense.toFixed(2)} ${homeCurrency}/мес за ${activeMonthsCount} активных мес.)
-- **Расчитанная подушка безопасности на ${minBufferMonths} мес: ${userBufferTarget.toFixed(2)} ${homeCurrency}**
+3. OVERALL HISTORY & AVERAGE STATS (Total Transactions in DB: ${totalTxCount}):
+- Total Income: +${allTimeIncome.toFixed(2)} ${homeCurrency} (Real avg: +${realAvgMonthlyIncome.toFixed(2)} ${homeCurrency}/mo across ${activeMonthsCount} active months)
+- Total Expenses: -${allTimeExpense.toFixed(2)} ${homeCurrency} (Real avg: -${realAvgMonthlyExpense.toFixed(2)} ${homeCurrency}/mo across ${activeMonthsCount} active months)
 
-4. ПОСЛЕДНИЕ 30 ДНЕЙ:
-- Доход за 30 дней: +${income30.toFixed(2)} ${homeCurrency}
-- Расходы за 30 дней: -${expense30.toFixed(2)} ${homeCurrency}
-- Чистый остаток за 30 дней: ${(income30 - expense30).toFixed(2)} ${homeCurrency}
+4. PAST 30 DAYS:
+- 30-Day Income: +${income30.toFixed(2)} ${homeCurrency}
+- 30-Day Expenses: -${expense30.toFixed(2)} ${homeCurrency}
+- 30-Day Net Balance: ${(income30 - expense30).toFixed(2)} ${homeCurrency}
 
-5. РАСПРЕДЕЛЕНИЕ РАСХОДОВ ПО КАТЕГОРИЯМ:
-${topCategoriesSummary || 'Нет данных по категориям'}
+5. EXPENSE CATEGORIES BREAKDOWN:
+${topCategoriesSummary || 'No category data'}
 
-6. АКТИВНЫЕ БЮДЖЕТЫ:
-${budgetsSummary || 'Бюджеты не настроены'}
+6. ACTIVE BUDGETS:
+${budgetsSummary || 'No budgets configured'}
 
-7. ЗАПЛАНИРОВАННЫЕ РЕГУЛЯРНЫЕ ПЛАТЕЖИ:
-${scheduledSummary || 'Нет запланированных платежей'}
+7. SCHEDULED PAYMENTS:
+${scheduledSummary || 'No scheduled payments'}
 
-8. СЦЕНАРИИ СИМУЛЯЦИИ:
-${scenariosSummary || 'Сценарии не созданы'}
+8. FORECAST SCENARIOS:
+${scenariosSummary || 'No scenarios created'}
 
-9. ПОСЛЕДНИЕ ОПЕРАЦИИ ИЗ БАЗЫ (до 40 операций):
-${recentTxList.join('\n') || 'Нет операций'}
+9. RECENT TRANSACTIONS (Up to 40 items):
+${recentTxList.join('\n') || 'No transactions'}
 
-ПРАВИЛА И СТИЛЬ ОТВЕТА ИИ:
-- Отвечайте строго на русском языке в заданном тоне: "${toneText}".
-- СТРОГО И НЕУКОСНИТЕЛЬНО соблюдайте персональные правила пользователя:
-${customInstructionsFormatted ? customInstructionsFormatted : '  (Нет дополнительных ограничений)'}
-- ВАЖНО: Не берите "слепое деление на 12 месяцев", если операции велись меньше 12 месяцев! Смотрите на конкретные помесячные цифры выше.
-- Если пользователь спрашивает про свои правила, инструкции или условия, перечислите ВСЕ СПЕЦИАЛЬНЫЕ ИНСТРУКЦИИ выше ДОСЛОВНО пунктами.
-- Базируйте свои выводы и рекомендации СТРОГО на приведенных выше реальных данных из базы данных CashFlow.
-- При вопросах о покупках или экономии всегда учитывайте ${minBufferMonths}-месячную подушку безопасности (${userBufferTarget.toFixed(0)} ${homeCurrency}).
-- Ответы должны быть лаконичными, практичными и содержать конкретные цифры и шаги.
+AI RESPONSE RULES & STYLE:
+- Respond in English unless the user explicitly speaks another language.
+- STRICTLY AND UNCONDITIONALLY follow the user's custom rules listed above:
+${customInstructionsFormatted ? customInstructionsFormatted : '  (No custom rules provided)'}
+- Do NOT perform forced 12-month division if transactions only exist for fewer months. Look at the exact monthly figures above.
+- If the user asks about their rules or custom instructions, cite ALL CRITICAL USER RULES listed above verbatim.
+- Base all calculations and recommendations STRICTLY on the actual CashFlow database data above.
+- Keep answers concise, actionable, practical, and filled with exact numbers and clear steps.
 `;
 
     const isGeminiModel = selectedModel.startsWith("gemini") || (geminiKey && !openaiKey);
@@ -374,7 +359,7 @@ ${customInstructionsFormatted ? customInstructionsFormatted : '  (Нет доп�
     // Fallback response if no API key is provided
     if (!activeKey) {
       return NextResponse.json({
-        reply: `🤖 **ИИ-Ассистент CashFlow (Демо-режим)**\n\n**Ваш текущий баланс:** ${totalBalance.toFixed(2)} ${homeCurrency}\n**Расходы за 30 дней:** -${expense30.toFixed(2)} ${homeCurrency}\n**Рекомендуемая подушка:** ${userBufferTarget.toFixed(2)} ${homeCurrency}\n\n💡 *Для активации полноценного диалогового ИИ добавьте OpenAI API Key или Gemini API Key в Настройках.*`
+        reply: `🤖 **CashFlow AI Copilot (Demo Mode)**\n\n**Current Balance:** ${totalBalance.toFixed(2)} ${homeCurrency}\n**Past 30 Days Expenses:** -${expense30.toFixed(2)} ${homeCurrency}\n\n💡 *To activate live AI conversations, please add an OpenAI API Key or Gemini API Key in Settings.*`
       });
     }
 

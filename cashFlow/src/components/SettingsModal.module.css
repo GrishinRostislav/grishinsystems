@@ -4,8 +4,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(6px);
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14,150 +14,109 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .modal {
-  background: white;
-  border-radius: 16px;
-  padding: 32px;
-  width: 90%;
-  max-width: 540px;
+  background: #0f172a;
+  color: #f8fafc;
+  border-radius: 20px;
+  padding: 28px 32px;
+  width: 92%;
+  max-width: 560px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
 .title {
-  margin-top: 0;
-  margin-bottom: 24px;
-  color: var(--text-main);
-  font-size: 1.5rem;
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.4rem;
   font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.closeBtnIcon {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  font-size: 1.4rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.closeBtnIcon:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
 }
 
 .formGroup {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .label {
   display: block;
   font-weight: 600;
-  margin-bottom: 8px;
-  color: var(--text-main);
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+  color: #e2e8f0;
 }
 
 .description {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin-bottom: 12px;
-  line-height: 1.5;
+  font-size: 0.825rem;
+  color: #94a3b8;
+  margin-bottom: 10px;
+  line-height: 1.4;
 }
 
 .select {
   width: 100%;
-  padding: 12px 16px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  background-color: #f8fafc;
-  font-size: 1rem;
-  color: var(--text-main);
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1px solid #334155;
+  background-color: #1e293b;
+  font-size: 0.925rem;
+  color: #f8fafc;
   transition: all 0.2s;
-  cursor: pointer;
+  outline: none;
 }
 
 .select:focus {
-  outline: none;
-  border-color: var(--unique-blue);
-  box-shadow: 0 0 0 3px rgba(45, 93, 123, 0.1);
-}
-
-.actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 32px;
-}
-
-.btnSecondary {
-  padding: 10px 20px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  background: white;
-  color: var(--text-main);
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btnSecondary:hover {
-  background: #f1f5f9;
-}
-
-.btnPrimary {
-  padding: 10px 24px;
-  border-radius: 8px;
-  border: none;
-  background: var(--unique-blue);
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btnPrimary:hover {
-  background: #1f4258;
-}
-
-.btnPrimary:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
 }
 
 .divider {
   height: 1px;
-  background: var(--border-color, #e2e8f0);
+  background: rgba(255, 255, 255, 0.08);
   margin: 20px 0;
 }
 
 .sectionHeader {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .sectionHeader h3 {
   margin: 0 0 4px 0;
-  font-size: 1.1rem;
-  color: var(--text-main);
-}
-
-.formRow {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.formGroupHalf {
-  flex: 1;
-}
-
-.textarea {
-  width: 100%;
-  padding: 12px 16px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color, #cbd5e1);
-  background-color: #f8fafc;
-  font-size: 0.95rem;
-  font-family: inherit;
-  color: var(--text-main);
-  resize: vertical;
-  transition: all 0.2s;
-}
-
-.textarea:focus {
-  outline: none;
-  border-color: var(--unique-blue);
-  box-shadow: 0 0 0 3px rgba(45, 93, 123, 0.1);
+  font-size: 1.05rem;
+  color: #f1f5f9;
+  font-weight: 600;
 }
 
 .rulesList {
@@ -172,22 +131,22 @@
 
 .noRulesText {
   font-size: 0.85rem;
-  color: var(--text-muted, #64748b);
+  color: #64748b;
   font-style: italic;
   padding: 8px 0;
 }
 
 .ruleCard {
-  background: #f8fafc;
-  border: 1px solid var(--border-color, #e2e8f0);
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   padding: 10px 14px;
   transition: all 0.2s ease;
 }
 
 .ruleCard:hover {
-  border-color: #cbd5e1;
-  background: #f1f5f9;
+  border-color: #475569;
+  background: #334155;
 }
 
 .ruleContent {
@@ -198,7 +157,7 @@
 }
 
 .ruleBadge {
-  background: var(--unique-blue, #2d5d7b);
+  background: #0284c7;
   color: white;
   font-size: 0.75rem;
   font-weight: 700;
@@ -213,8 +172,8 @@
 
 .ruleText {
   flex: 1;
-  font-size: 0.9rem;
-  color: var(--text-main, #0f172a);
+  font-size: 0.875rem;
+  color: #f1f5f9;
   word-break: break-word;
   line-height: 1.4;
 }
@@ -228,7 +187,7 @@
 .ruleActionBtn {
   background: transparent;
   border: none;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   cursor: pointer;
   padding: 4px 6px;
   border-radius: 6px;
@@ -236,7 +195,7 @@
 }
 
 .ruleActionBtn:hover {
-  background: #e2e8f0;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .editRuleRow {
@@ -249,8 +208,10 @@
   flex: 1;
   padding: 8px 12px;
   border-radius: 6px;
-  border: 1px solid var(--unique-blue, #2d5d7b);
-  font-size: 0.9rem;
+  border: 1px solid #38bdf8;
+  background: #0f172a;
+  color: white;
+  font-size: 0.875rem;
   outline: none;
 }
 
@@ -260,7 +221,7 @@
   padding: 6px 12px;
   font-weight: bold;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   transition: opacity 0.2s;
 }
 
@@ -274,52 +235,94 @@
   color: white;
 }
 
-.iconBtnCheck:hover, .iconBtnCancel:hover {
-  opacity: 0.85;
-}
-
 .addRuleRow {
   display: flex;
   gap: 8px;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .addRuleInput {
   flex: 1;
   padding: 10px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color, #cbd5e1);
-  background-color: #f8fafc;
-  font-size: 0.9rem;
-  color: var(--text-main);
+  border-radius: 10px;
+  border: 1px solid #334155;
+  background-color: #1e293b;
+  font-size: 0.875rem;
+  color: #f8fafc;
   outline: none;
 }
 
 .addRuleInput:focus {
-  border-color: var(--unique-blue);
-  background-color: white;
-  box-shadow: 0 0 0 3px rgba(45, 93, 123, 0.1);
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
 }
 
 .addRuleBtn {
   padding: 10px 16px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
-  background: var(--unique-blue, #2d5d7b);
+  background: linear-gradient(135deg, #0284c7, #2563eb);
   color: white;
   font-weight: 600;
   font-size: 0.85rem;
   cursor: pointer;
   white-space: nowrap;
-  transition: opacity 0.2s;
+  transition: all 0.2s;
 }
 
 .addRuleBtn:hover:not(:disabled) {
   opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 .addRuleBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.btnSecondary {
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #94a3b8;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnSecondary:hover {
+  background: #334155;
+  color: white;
+}
+
+.btnPrimary {
+  padding: 10px 24px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btnPrimary:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.btnPrimary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  box-shadow: none;
 }

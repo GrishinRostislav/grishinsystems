@@ -42,11 +42,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [geminiApiKey, setGeminiApiKey] = useState("");
   const [aiModel, setAiModel] = useState("gpt-5.6-luna");
   const [customModelInput, setCustomModelInput] = useState("");
-  const [aiAuditTone, setAiAuditTone] = useState("strict");
-  const [aiMinBufferMonths, setAiMinBufferMonths] = useState(3);
   const [saving, setSaving] = useState(false);
 
-  // Custom AI Rules as separate cards (плашки)
+  // Custom AI Rules as separate cards
   const [rules, setRules] = useState<RuleItem[]>([]);
   const [newRuleText, setNewRuleText] = useState("");
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
@@ -106,8 +104,6 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           } else {
             setRules([]);
           }
-          if (data.aiAuditTone) setAiAuditTone(data.aiAuditTone);
-          if (data.aiMinBufferMonths) setAiMinBufferMonths(data.aiMinBufferMonths);
         })
         .catch(err => console.error(err));
     }
@@ -161,17 +157,15 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           openaiApiKey,
           geminiApiKey,
           aiModel: effectiveModel,
-          aiCustomInstructions: formattedInstructions,
-          aiAuditTone,
-          aiMinBufferMonths: Number(aiMinBufferMonths)
+          aiCustomInstructions: formattedInstructions
         })
       });
       if (res.ok) {
         onClose();
-        window.location.reload(); // Reload to apply new settings everywhere
+        window.location.reload();
       } else {
         const errJson = await res.json().catch(() => ({}));
-        alert(`Не удалось сохранить настройки: ${errJson.error || res.statusText}`);
+        alert(`Failed to save settings: ${errJson.error || res.statusText}`);
       }
     } catch (err) {
       console.error(err);
@@ -186,12 +180,16 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <h2 className={styles.title}>⚙️ Настройки и Правила ИИ</h2>
+        <div className={styles.headerRow}>
+          <h2 className={styles.title}>⚙️ Settings & AI Rules</h2>
+          <button className={styles.closeBtnIcon} onClick={onClose}>&times;</button>
+        </div>
+
         <form onSubmit={handleSave}>
           <div className={styles.formGroup}>
-            <label className={styles.label}>Основная Валюта (Home Currency)</label>
+            <label className={styles.label}>Primary Currency (Home Currency)</label>
             <p className={styles.description}>
-              Валюта для агрегирования отчетов на дашборде, в бюджетах и ответах ИИ.
+              Consolidates reporting across your dashboard, budgets, and AI financial analysis.
             </p>
             <select 
               value={homeCurrency} 
@@ -201,8 +199,8 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               <option value="CAD">CAD - Canadian Dollar ($)</option>
               <option value="USD">USD - US Dollar ($)</option>
               <option value="EUR">EUR - Euro (€)</option>
-              <option value="RUB">RUB - Российский Рубль (₽)</option>
-              <option value="KZT">KZT - Казахстаский Тенге (₸)</option>
+              <option value="RUB">RUB - Russian Ruble (₽)</option>
+              <option value="KZT">KZT - Kazakhstani Tenge (₸)</option>
               <option value="GBP">GBP - British Pound (£)</option>
               <option value="AUD">AUD - Australian Dollar ($)</option>
             </select>
@@ -211,19 +209,19 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           <div className={styles.divider} />
 
           <div className={styles.sectionHeader}>
-            <h3>🔐 Безопасность и Пароль</h3>
+            <h3>🔐 Security & Passcode</h3>
             <p className={styles.description}>
-              Установите новый пароль для входа. Оставьте поле пустым, если хотите отключить запрос пароля при входе.
+              Set an app passcode to restrict access. Leave empty to disable security check on launch.
             </p>
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>Пароль приложения</label>
+            <label className={styles.label}>App Passcode</label>
             <input 
               type="text"
               value={appPassword}
               onChange={e => setAppPassword(e.target.value)}
-              placeholder="Оставьте пустым для отключения пароля"
+              placeholder="Leave empty to disable passcode"
               className={styles.select}
             />
           </div>
@@ -231,63 +229,63 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           <div className={styles.divider} />
 
           <div className={styles.sectionHeader}>
-            <h3>🤖 Настройки ИИ-Советника и Модель</h3>
+            <h3>🤖 AI Assistant & Model Selection</h3>
             <p className={styles.description}>
-              Укажите ваши ключи API для OpenAI и/или Google Gemini, выберите модель ИИ и личные критерии анализа.
+              Configure your API keys for OpenAI and/or Google Gemini, select models, and manage custom rules.
             </p>
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>🔑 OpenAI API Key (ChatGPT / GPT-5.6 / GPT-6)</label>
+            <label className={styles.label}>🔑 OpenAI API Key (ChatGPT / GPT-5.6 / GPT-6 / o3-mini)</label>
             <p className={styles.description}>
-              Ключ из <a href="https://platform.openai.com/api-keys" target="_blank" rel="noreferrer" style={{ color: 'var(--unique-blue)', textDecoration: 'underline' }}>OpenAI Platform</a> (начинается на <code>sk-...</code> или <code>AQ...</code>).
+              API Key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noreferrer" style={{ color: '#38bdf8', textDecoration: 'underline' }}>OpenAI Platform</a> (starts with <code>sk-...</code> or <code>AQ...</code>).
             </p>
             <input 
               type="password"
               value={openaiApiKey}
               onChange={e => setOpenaiApiKey(e.target.value)}
-              placeholder="sk-... или AQ..."
+              placeholder="sk-proj-..."
               className={styles.select}
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>✨ Google Gemini API Key (Gemini 2.5 / 2.0 / 1.5)</label>
+            <label className={styles.label}>✨ Google Gemini API Key (Gemini 3.5 / 2.5)</label>
             <p className={styles.description}>
-              Ключ из <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" style={{ color: 'var(--unique-blue)', textDecoration: 'underline' }}>Google AI Studio</a> (начинается на <code>AIzaSy...</code>).
+              API Key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" style={{ color: '#38bdf8', textDecoration: 'underline' }}>Google AI Studio</a> (starts with <code>AQ...</code> or <code>AIzaSy...</code>).
             </p>
             <input 
               type="password"
               value={geminiApiKey}
               onChange={e => setGeminiApiKey(e.target.value)}
-              placeholder="AIzaSy..."
+              placeholder="AQ..."
               className={styles.select}
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>Модель ИИ (AI Model)</label>
+            <label className={styles.label}>AI Model</label>
             <p className={styles.description}>
-              Выберите модель ИИ для диалогового финансового советника и аудита.
+              Select the default LLM model for your AI Financial Advisor and receipt scanner.
             </p>
             <select 
               value={aiModel} 
               onChange={e => setAiModel(e.target.value)}
               className={styles.select}
             >
-              <option value="gpt-5.6-luna">🌙 OpenAI gpt-5.6-luna (Быстрая, экономная, серия 2026 — по умолчанию)</option>
-              <option value="gpt-5.6-sol">☀️ OpenAI gpt-5.6-sol (Высокоточная профессиональная модель)</option>
-              <option value="gpt-5.6-terra">🌍 OpenAI gpt-5.6-terra (Баланс интеллекта и скорости)</option>
-              <option value="gpt-6-astra">🚀 OpenAI gpt-6-astra (Флагманская модель последнего поколения 2026)</option>
+              <option value="gpt-5.6-luna">🌙 OpenAI gpt-5.6-luna (Fast, cost-efficient 2026 default)</option>
+              <option value="gpt-5.6-sol">☀️ OpenAI gpt-5.6-sol (High-precision professional model)</option>
+              <option value="gpt-5.6-terra">🌍 OpenAI gpt-5.6-terra (Balanced intelligence & speed)</option>
+              <option value="gpt-6-astra">🚀 OpenAI gpt-6-astra (Flagship 2026 next-gen model)</option>
               <option value="gpt-4o-mini">⚡ OpenAI gpt-4o-mini</option>
               <option value="gpt-4o">🧠 OpenAI gpt-4o</option>
               <option value="o3-mini">💡 OpenAI o3-mini (Reasoning Model)</option>
-              <option value="gemini-3.5-flash-lite">✨ Google gemini-3.5-flash-lite (Рекомендуемая 2026)</option>
+              <option value="gemini-3.5-flash-lite">✨ Google gemini-3.5-flash-lite (Recommended 2026)</option>
               <option value="gemini-3.5-flash">✨ Google gemini-3.5-flash</option>
               <option value="gemini-2.5-flash">✨ Google gemini-2.5-flash</option>
               <option value="gemini-2.0-flash">✨ Google gemini-2.0-flash</option>
               <option value="gemini-1.5-pro">💎 Google gemini-1.5-pro</option>
-              <option value="custom">✏️ Своё название модели (Ввести название вручную...)</option>
+              <option value="custom">✏️ Custom Model Name (Type manually...)</option>
             </select>
 
             {aiModel === "custom" && (
@@ -295,51 +293,24 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 type="text"
                 value={customModelInput}
                 onChange={e => setCustomModelInput(e.target.value)}
-                placeholder="Введите название модели (например: gpt-5.6-luna-light или fine-tuned ID)..."
+                placeholder="Enter model name (e.g. gpt-5.6-luna-light or fine-tuned ID)..."
                 className={styles.select}
                 style={{ marginTop: '10px' }}
               />
             )}
           </div>
 
-          <div className={styles.formRow}>
-            <div className={styles.formGroupHalf}>
-              <label className={styles.label}>Тональность аудита</label>
-              <select 
-                value={aiAuditTone} 
-                onChange={e => setAiAuditTone(e.target.value)}
-                className={styles.select}
-              >
-                <option value="strict">⚡ Строгая (критика трат, жесткий аудит)</option>
-                <option value="supportive">🤝 Поддерживающая (мягкие советы)</option>
-                <option value="analytical">📊 Аналитическая (только факты и цифры)</option>
-              </select>
-            </div>
-
-            <div className={styles.formGroupHalf}>
-              <label className={styles.label}>Размер подушки (мес)</label>
-              <select 
-                value={aiMinBufferMonths} 
-                onChange={e => setAiMinBufferMonths(Number(e.target.value))}
-                className={styles.select}
-              >
-                <option value={1}>1 месяц расходов</option>
-                <option value={3}>3 месяца (Стандарт)</option>
-                <option value={6}>6 месяцев (Надежная защита)</option>
-                <option value={12}>12 месяцев (Полная автономия)</option>
-              </select>
-            </div>
-          </div>
+          <div className={styles.divider} />
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>Персональные условия и правила для ИИ</label>
+            <label className={styles.label}>Custom AI Rules & Directives</label>
             <p className={styles.description}>
-              Каждое правило хранится в виде отдельной плашки. Вы можете добавлять, редактировать ✏️ и удалять 🗑️ правила.
+              Each rule is stored as a distinct card. You can add, edit ✏️, and delete 🗑️ rules anytime.
             </p>
 
             <div className={styles.rulesList}>
               {rules.length === 0 ? (
-                <div className={styles.noRulesText}>У вас пока нет сохраненных правил. Добавьте первое правило ниже!</div>
+                <div className={styles.noRulesText}>No custom rules saved yet. Add your first rule card below!</div>
               ) : (
                 rules.map((rule, idx) => (
                   <div key={rule.id} className={styles.ruleCard}>
@@ -365,7 +336,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                           type="button"
                           onClick={() => handleSaveEdit(rule.id)}
                           className={styles.iconBtnCheck}
-                          title="Сохранить"
+                          title="Save Rule"
                         >
                           ✓
                         </button>
@@ -373,7 +344,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                           type="button"
                           onClick={handleCancelEdit}
                           className={styles.iconBtnCancel}
-                          title="Отмена"
+                          title="Cancel"
                         >
                           ✕
                         </button>
@@ -387,7 +358,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                             type="button"
                             onClick={() => handleStartEdit(rule)}
                             className={styles.ruleActionBtn}
-                            title="Изменить правило"
+                            title="Edit Rule"
                           >
                             ✏️
                           </button>
@@ -395,7 +366,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                             type="button"
                             onClick={() => handleDeleteRule(rule.id)}
                             className={styles.ruleActionBtn}
-                            title="Удалить правило"
+                            title="Delete Rule"
                           >
                             🗑️
                           </button>
@@ -418,7 +389,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     handleAddRule();
                   }
                 }}
-                placeholder="Например: Не учитывай расходы на путешествия в июне..."
+                placeholder="e.g. Analyze each month separately without year averaging..."
                 className={styles.addRuleInput}
               />
               <button
@@ -427,15 +398,15 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 disabled={!newRuleText.trim()}
                 className={styles.addRuleBtn}
               >
-                + Добавить
+                + Add Rule
               </button>
             </div>
           </div>
           
           <div className={styles.actions}>
-            <button type="button" onClick={onClose} className={styles.btnSecondary}>Отмена</button>
+            <button type="button" onClick={onClose} className={styles.btnSecondary}>Cancel</button>
             <button type="submit" disabled={saving} className={styles.btnPrimary}>
-              {saving ? "Сохранение..." : "Сохранить настройки"}
+              {saving ? "Saving..." : "Save Settings"}
             </button>
           </div>
         </form>
@@ -443,3 +414,4 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     </div>
   );
 }
+

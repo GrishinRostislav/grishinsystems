@@ -25,7 +25,7 @@ export default function AIFloatingButton() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'model',
-      content: '👋 Здравствуйте! Я ваш ИИ-Финансовый Советник в CashFlow. Чем могу помочь прямо сейчас?'
+      content: '👋 Hello! I am your Personal AI Financial Advisor in CashFlow. How can I help you today?'
     }
   ]);
   const [input, setInput] = useState("");
@@ -84,13 +84,13 @@ export default function AIFloatingButton() {
 
       setMessages([
         ...updatedMessages,
-        { role: 'model', content: json.reply || 'Не удалось получить ответ от ИИ.' }
+        { role: 'model', content: json.reply || 'Failed to get a response from AI.' }
       ]);
     } catch (err: any) {
       console.error(err);
       setMessages([
         ...updatedMessages,
-        { role: 'model', content: `⚠️ ${err?.message || 'Произошла ошибка при обращении к ИИ-Ассистенту. Попробуйте еще раз.'}` }
+        { role: 'model', content: `⚠️ ${err?.message || 'An error occurred while connecting to AI Assistant. Please try again.'}` }
       ]);
     } finally {
       setLoading(false);
@@ -103,8 +103,8 @@ export default function AIFloatingButton() {
       <button 
         className={styles.floatingBtn}
         onClick={() => setIsOpen(true)}
-        title="ИИ-Финансовый Советник"
-        aria-label="ИИ-Финансовый Советник"
+        title="AI Financial Advisor"
+        aria-label="AI Financial Advisor"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2Z" fill="url(#aiBtnGrad)" />
@@ -141,8 +141,8 @@ export default function AIFloatingButton() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className={styles.chatTitle}>ИИ-Финансовый Советник</h3>
-                  <span className={styles.chatSubtitle}>CashFlow Copilot • Онлайн</span>
+                  <h3 className={styles.chatTitle}>AI Financial Advisor</h3>
+                  <span className={styles.chatSubtitle}>CashFlow Copilot • Online</span>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -151,9 +151,9 @@ export default function AIFloatingButton() {
                   style={{ fontSize: '1.1rem', padding: '4px 8px' }}
                   onClick={() => setMessages([{
                     role: 'model',
-                    content: '👋 Здравствуйте! Я ваш ИИ-Финансовый Советник в CashFlow. Чем могу помочь прямо сейчас?'
+                    content: '👋 Hello! I am your Personal AI Financial Advisor in CashFlow. How can I help you today?'
                   }])}
-                  title="Очистить историю диалога (Новый чат)"
+                  title="Clear Chat History (New Session)"
                 >
                   🔄
                 </button>
@@ -161,7 +161,7 @@ export default function AIFloatingButton() {
                   className={styles.closeBtn} 
                   style={{ fontSize: '1.2rem', padding: '4px 8px' }}
                   onClick={() => setIsSettingsOpen(true)}
-                  title="Настройки ИИ"
+                  title="AI Settings"
                 >
                   ⚙️
                 </button>
@@ -200,7 +200,7 @@ export default function AIFloatingButton() {
               ))}
               {loading && (
                 <div className={`${styles.messageBubble} ${styles.aiMessage}`} style={{ fontStyle: 'italic', opacity: 0.8 }}>
-                  🧠 Анализирую данные из базы...
+                  🧠 Analyzing database transactions...
                 </div>
               )}
               <div ref={messagesEndRef} />
@@ -210,27 +210,27 @@ export default function AIFloatingButton() {
             <div className={styles.chipsContainer}>
               <button 
                 className={styles.chip}
-                onClick={() => handleSend("Проведи глубокий аудит моих трат за этот месяц.")}
+                onClick={() => handleSend("Perform a detailed audit of my expenses for this month.")}
               >
-                 Аудит трат
+                 Audit Expenses
               </button>
               <button 
                 className={styles.chip}
-                onClick={() => handleSend("Где я могу сэкономить больше всего денег?")}
+                onClick={() => handleSend("Where can I optimize my spending and save money?")}
               >
-                💡 Где сэкономить
+                💡 Where to Save
               </button>
               <button 
                 className={styles.chip}
-                onClick={() => handleSend("Оцени мою подушку безопасности и финансовое здоровье.")}
+                onClick={() => handleSend("Give me a full breakdown of my monthly cash flow.")}
               >
-                 Подушка 3-Mo
+                 Cash Flow Summary
               </button>
               <button 
                 className={styles.chip}
-                onClick={() => handleSend("Какие платежи мне предстоят в ближайшее время?")}
+                onClick={() => handleSend("What upcoming scheduled bills or payments do I have?")}
               >
-                 Счета и платежи
+                 Upcoming Payments
               </button>
             </div>
 
@@ -245,7 +245,7 @@ export default function AIFloatingButton() {
               <input 
                 type="text"
                 className={styles.input}
-                placeholder="Спросите ИИ о ваших финансах..."
+                placeholder="Ask AI about your finances..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 disabled={loading}
@@ -255,7 +255,7 @@ export default function AIFloatingButton() {
                 className={styles.sendBtn}
                 disabled={loading || !input.trim()}
               >
-                Отправить
+                Send
               </button>
             </form>
 
