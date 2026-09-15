@@ -71,10 +71,12 @@ async function callOpenAIVision(apiKey: string, prompt: string, base64Image: str
 async function callGeminiVision(apiKey: string, prompt: string, base64Image: string, mimeType: string) {
   const genAI = new GoogleGenerativeAI(apiKey);
   const modelsToTry = [
+    'gemini-3.5-flash-lite',
+    'gemini-3.5-flash',
+    'gemini-2.5-flash',
+    'gemini-2.5-pro',
     'gemini-2.0-flash',
-    'gemini-1.5-flash',
-    'gemini-1.5-pro',
-    'gemini-2.0-flash-lite'
+    'gemini-1.5-flash'
   ];
 
   const contentPayload = [

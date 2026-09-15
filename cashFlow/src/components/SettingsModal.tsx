@@ -84,6 +84,8 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               "gpt-4o",
               "gpt-4-turbo",
               "o3-mini",
+              "gemini-3.5-flash-lite",
+              "gemini-3.5-flash",
               "gemini-2.5-flash",
               "gemini-2.0-flash",
               "gemini-1.5-pro"
@@ -279,6 +281,8 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               <option value="gpt-4o-mini">⚡ OpenAI gpt-4o-mini</option>
               <option value="gpt-4o">🧠 OpenAI gpt-4o</option>
               <option value="o3-mini">💡 OpenAI o3-mini (Reasoning Model)</option>
+              <option value="gemini-3.5-flash-lite">✨ Google gemini-3.5-flash-lite (Рекомендуемая 2026)</option>
+              <option value="gemini-3.5-flash">✨ Google gemini-3.5-flash</option>
               <option value="gemini-2.5-flash">✨ Google gemini-2.5-flash</option>
               <option value="gemini-2.0-flash">✨ Google gemini-2.0-flash</option>
               <option value="gemini-1.5-pro">💎 Google gemini-1.5-pro</option>
