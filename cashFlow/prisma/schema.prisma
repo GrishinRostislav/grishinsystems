@@ -144,6 +144,7 @@ model Settings {
   homeCurrency         String   @default("CAD")
   appPassword          String?
   geminiApiKey         String?
+  aiModel              String?  @default("gpt-4o-mini")
   aiCustomInstructions String?
   aiFinancialGoal      String?  @default("balanced")
   aiAuditTone          String?  @default("strict")

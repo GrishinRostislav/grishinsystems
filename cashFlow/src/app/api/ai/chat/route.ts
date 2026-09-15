@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getExchangeRates, convertAmount } from "@/lib/currency";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-async function callOpenAI(apiKey: string, systemPrompt: string, history: any[], message: string) {
+async function callOpenAI(apiKey: string, systemPrompt: string, history: any[], message: string, preferredModel?: string) {
   const messages: any[] = [{ role: "system", content: systemPrompt }];
   if (Array.isArray(history)) {
     for (const h of history) {
@@ -17,7 +17,11 @@ async function callOpenAI(apiKey: string, systemPrompt: string, history: any[], 
   }
   messages.push({ role: "user", content: message });
 
-  const models = ["gpt-4o-mini", "gpt-4o", "gpt-3.5-turbo"];
+  const defaultModels = ["gpt-4o-mini", "gpt-4o", "gpt-3.5-turbo"];
+  const models = preferredModel && preferredModel.trim()
+    ? Array.from(new Set([preferredModel.trim(), ...defaultModels]))
+    : defaultModels;
+
   let lastError: any = null;
 
   for (const model of models) {
@@ -53,14 +57,17 @@ async function callOpenAI(apiKey: string, systemPrompt: string, history: any[], 
   throw lastError || new Error("Failed to call OpenAI API");
 }
 
-async function callGemini(apiKey: string, systemPrompt: string, history: any[], message: string) {
+async function callGemini(apiKey: string, systemPrompt: string, history: any[], message: string, preferredModel?: string) {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const modelsToTry = [
+  const defaultModels = [
     'gemini-2.0-flash',
     'gemini-1.5-flash',
     'gemini-1.5-pro',
     'gemini-2.0-flash-lite'
   ];
+  const modelsToTry = preferredModel && preferredModel.trim()
+    ? Array.from(new Set([preferredModel.trim(), ...defaultModels]))
+    : defaultModels;
 
   const contents: any[] = [];
   if (Array.isArray(history)) {
@@ -113,13 +120,14 @@ export async function POST(request: Request) {
     // 1. Gather comprehensive financial context from Prisma DB
     let settings = await prisma.settings.findUnique({
       where: { id: "global" },
-      select: { homeCurrency: true, geminiApiKey: true, aiCustomInstructions: true, aiFinancialGoal: true, aiAuditTone: true, aiMinBufferMonths: true }
+      select: { homeCurrency: true, geminiApiKey: true, aiModel: true, aiCustomInstructions: true, aiFinancialGoal: true, aiAuditTone: true, aiMinBufferMonths: true }
     }).catch(() => null);
     const homeCurrency = settings?.homeCurrency || "CAD";
     const rates = await getExchangeRates(homeCurrency);
 
     const rawKey = settings?.geminiApiKey || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY || "";
     const apiKey = rawKey.trim().replace(/^['"\\]+|['"\\]+$/g, '');
+    const selectedModel = settings?.aiModel || "gpt-4o-mini";
 
     // Accounts & balances
     const accounts = await prisma.account.findMany({
@@ -338,11 +346,11 @@ ${recentTxList.join('\n') || 'Нет операций'}
 
     if (isGeminiKey) {
       try {
-        replyText = await callGemini(apiKey, systemPrompt, history, message);
+        replyText = await callGemini(apiKey, systemPrompt, history, message, selectedModel);
       } catch (err) {
         lastError = err;
         try {
-          replyText = await callOpenAI(apiKey, systemPrompt, history, message);
+          replyText = await callOpenAI(apiKey, systemPrompt, history, message, selectedModel);
         } catch (oErr) {
           // Keep Gemini error as primary
         }
@@ -350,11 +358,11 @@ ${recentTxList.join('\n') || 'Нет операций'}
     } else {
       // Treat any non-AIza key (sk-..., sk-proj-..., AQ..., etc.) as an OpenAI key
       try {
-        replyText = await callOpenAI(apiKey, systemPrompt, history, message);
+        replyText = await callOpenAI(apiKey, systemPrompt, history, message, selectedModel);
       } catch (err) {
         lastError = err;
         try {
-          replyText = await callGemini(apiKey, systemPrompt, history, message);
+          replyText = await callGemini(apiKey, systemPrompt, history, message, selectedModel);
         } catch (gErr) {
           // Keep OpenAI error as primary
         }

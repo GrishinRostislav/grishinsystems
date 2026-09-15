@@ -39,6 +39,8 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [homeCurrency, setHomeCurrency] = useState("CAD");
   const [appPassword, setAppPassword] = useState("");
   const [geminiApiKey, setGeminiApiKey] = useState("");
+  const [aiModel, setAiModel] = useState("gpt-4o-mini");
+  const [customModelInput, setCustomModelInput] = useState("");
   const [aiFinancialGoal, setAiFinancialGoal] = useState("balanced");
   const [aiAuditTone, setAiAuditTone] = useState("strict");
   const [aiMinBufferMonths, setAiMinBufferMonths] = useState(3);
@@ -65,6 +67,19 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             setGeminiApiKey(data.geminiApiKey);
           } else {
             setGeminiApiKey("");
+          }
+          if (data.aiModel) {
+            const predefined = ["gpt-4o-mini", "gpt-4o", "gpt-4-turbo", "o3-mini", "gemini-2.0-flash", "gemini-1.5-pro"];
+            if (predefined.includes(data.aiModel)) {
+              setAiModel(data.aiModel);
+              setCustomModelInput("");
+            } else {
+              setAiModel("custom");
+              setCustomModelInput(data.aiModel);
+            }
+          } else {
+            setAiModel("gpt-4o-mini");
+            setCustomModelInput("");
           }
           if (data.aiCustomInstructions !== undefined && data.aiCustomInstructions !== null) {
             setRules(parseRules(data.aiCustomInstructions));
@@ -115,6 +130,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     setSaving(true);
 
     const formattedInstructions = JSON.stringify(rules.map(r => r.text.trim()).filter(Boolean));
+    const effectiveModel = aiModel === "custom" ? (customModelInput.trim() || "gpt-4o-mini") : aiModel;
 
     try {
       const res = await fetch("/cashFlow/api/settings", {
@@ -124,6 +140,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           homeCurrency,
           appPassword,
           geminiApiKey,
+          aiModel: effectiveModel,
           aiCustomInstructions: formattedInstructions,
           aiFinancialGoal,
           aiAuditTone,
@@ -192,9 +209,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           <div className={styles.divider} />
 
           <div className={styles.sectionHeader}>
-            <h3>🤖 Настройки ИИ-Советника и Правила Аудита</h3>
+            <h3>🤖 Настройки ИИ-Советника и Модель</h3>
             <p className={styles.description}>
-              Укажите API Key (OpenAI ChatGPT или Google Gemini) и личные критерии анализа, чтобы ИИ давал ответы в диалоговом режиме.
+              Укажите API Key (OpenAI ChatGPT или Google Gemini), выберите модель ИИ и личные критерии анализа.
             </p>
           </div>
 
@@ -210,6 +227,37 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               placeholder="sk-... или AIzaSy..."
               className={styles.select}
             />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Модель ИИ (AI Model)</label>
+            <p className={styles.description}>
+              Выберите модель ИИ для диалогового финансового советника и аудита.
+            </p>
+            <select 
+              value={aiModel} 
+              onChange={e => setAiModel(e.target.value)}
+              className={styles.select}
+            >
+              <option value="gpt-4o-mini">⚡ OpenAI gpt-4o-mini (Быстрая, экономная, по умолчанию)</option>
+              <option value="gpt-4o">🧠 OpenAI gpt-4o (Флагманская высокоточная модель)</option>
+              <option value="gpt-4-turbo">🚀 OpenAI gpt-4-turbo</option>
+              <option value="o3-mini">💡 OpenAI o3-mini (Reasoning Model)</option>
+              <option value="gemini-2.0-flash">✨ Google gemini-2.0-flash</option>
+              <option value="gemini-1.5-pro">💎 Google gemini-1.5-pro</option>
+              <option value="custom">✏️ Своё название модели (Write custom model name...)</option>
+            </select>
+
+            {aiModel === "custom" && (
+              <input
+                type="text"
+                value={customModelInput}
+                onChange={e => setCustomModelInput(e.target.value)}
+                placeholder="Введите название модели (например: gpt-5.6-luna-light или fine-tuned ID)..."
+                className={styles.select}
+                style={{ marginTop: '10px' }}
+              />
+            )}
           </div>
 
           <div className={styles.formGroup}>
