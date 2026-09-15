@@ -42,7 +42,6 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [geminiApiKey, setGeminiApiKey] = useState("");
   const [aiModel, setAiModel] = useState("gpt-5.6-luna");
   const [customModelInput, setCustomModelInput] = useState("");
-  const [aiFinancialGoal, setAiFinancialGoal] = useState("balanced");
   const [aiAuditTone, setAiAuditTone] = useState("strict");
   const [aiMinBufferMonths, setAiMinBufferMonths] = useState(3);
   const [saving, setSaving] = useState(false);
@@ -100,13 +99,11 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           } else {
             setAiModel("gpt-5.6-luna");
             setCustomModelInput("");
-          }
-          if (data.aiCustomInstructions !== undefined && data.aiCustomInstructions !== null) {
+                if (data.aiCustomInstructions !== undefined && data.aiCustomInstructions !== null) {
             setRules(parseRules(data.aiCustomInstructions));
           } else {
             setRules([]);
           }
-          if (data.aiFinancialGoal) setAiFinancialGoal(data.aiFinancialGoal);
           if (data.aiAuditTone) setAiAuditTone(data.aiAuditTone);
           if (data.aiMinBufferMonths) setAiMinBufferMonths(data.aiMinBufferMonths);
         })
@@ -163,7 +160,6 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           geminiApiKey,
           aiModel: effectiveModel,
           aiCustomInstructions: formattedInstructions,
-          aiFinancialGoal,
           aiAuditTone,
           aiMinBufferMonths: Number(aiMinBufferMonths)
         })
@@ -171,7 +167,10 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       if (res.ok) {
         onClose();
         window.location.reload(); // Reload to apply new settings everywhere
-      }
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        alert(`Не удалось сохранить настройки: ${errJson.error || res.statusText}`);
+      }     }
     } catch (err) {
       console.error(err);
       alert("Error saving settings");
@@ -299,20 +298,6 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 style={{ marginTop: '10px' }}
               />
             )}
-          </div>
-
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Финансовая цель</label>
-            <select 
-              value={aiFinancialGoal} 
-              onChange={e => setAiFinancialGoal(e.target.value)}
-              className={styles.select}
-            >
-              <option value="accumulation">💰 Быстрое накопление и жесткая экономия</option>
-              <option value="balanced">⚖️ Баланс между комфортной жизнью и накоплениями</option>
-              <option value="investing">📈 Активное инвестирование и развитие бизнеса</option>
-              <option value="debt_payoff">🛡️ Досрочное гашение кредитов и долгов</option>
-            </select>
           </div>
 
           <div className={styles.formRow}>
