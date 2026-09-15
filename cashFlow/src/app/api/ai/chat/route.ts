@@ -192,18 +192,29 @@ export async function POST(request: Request) {
     const categoryExpense365 = new Map<string, number>();
     const recentTxList: string[] = [];
 
+    const monthlyMap = new Map<string, { income: number; expense: number }>();
+
     for (const tx of allTransactions) {
       if (tx.isTransfer) continue;
       const convertedAmt = convertAmount(tx.amount, tx.account.currency, homeCurrency, rates);
 
+      const d = new Date(tx.date);
+      const yearMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      if (!monthlyMap.has(yearMonth)) {
+        monthlyMap.set(yearMonth, { income: 0, expense: 0 });
+      }
+      const mData = monthlyMap.get(yearMonth)!;
+
       if (convertedAmt > 0) {
         allTimeIncome += convertedAmt;
+        mData.income += convertedAmt;
         if (tx.date >= past365DaysStart) income365 += convertedAmt;
         if (tx.date >= past180DaysStart) income180 += convertedAmt;
         if (tx.date >= past30DaysStart) income30 += convertedAmt;
       } else {
         const val = Math.abs(convertedAmt);
         allTimeExpense += val;
+        mData.expense += val;
         if (tx.date >= past365DaysStart) {
           expense365 += val;
           const catName = tx.category ? tx.category.name : 'Без категории';
@@ -221,23 +232,25 @@ export async function POST(request: Request) {
       }
     }
 
-    let historyMonthsSpan = 1;
+    const sortedMonths = Array.from(monthlyMap.entries()).sort((a, b) => b[0].localeCompare(a[0]));
+    const activeMonthsCount = Math.max(1, sortedMonths.length);
+    const realAvgMonthlyExpense = allTimeExpense / activeMonthsCount;
+    const realAvgMonthlyIncome = allTimeIncome / activeMonthsCount;
+
+    const monthlyBreakdownText = sortedMonths.map(([m, data]) => 
+      `- Месяц ${m}: Доход +${data.income.toFixed(2)} ${homeCurrency} | Расход -${data.expense.toFixed(2)} ${homeCurrency} | Чистый остаток: ${(data.income - data.expense).toFixed(2)} ${homeCurrency}`
+    ).join('\n');
+
+    let historyMonthsSpan = activeMonthsCount;
     if (firstTxDate) {
       const diffMs = Math.max(0, now.getTime() - firstTxDate.getTime());
       historyMonthsSpan = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24 * 30.4375)));
     }
 
-    const monthsFor12M = Math.min(12, historyMonthsSpan);
-    const avgMonthlyIncome12M = income365 / monthsFor12M;
-    const avgMonthlyExpense12M = expense365 / monthsFor12M;
-
-    const avgMonthlyIncomeAllTime = allTimeIncome / historyMonthsSpan;
-    const avgMonthlyExpenseAllTime = allTimeExpense / historyMonthsSpan;
-
-    const topCategoriesSummary12M = Array.from(categoryExpense365.entries())
+    const topCategoriesSummary = Array.from(categoryExpense365.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, 12)
-      .map(([cat, amt]) => `- ${cat}: ${amt.toFixed(2)} ${homeCurrency} (среднее ${(amt / monthsFor12M).toFixed(2)} ${homeCurrency}/мес)`)
+      .map(([cat, amt]) => `- ${cat}: всего ${amt.toFixed(2)} ${homeCurrency} (среднее ${(amt / activeMonthsCount).toFixed(2)} ${homeCurrency}/мес)`)
       .join('\n');
 
     // Budgets
@@ -260,7 +273,6 @@ export async function POST(request: Request) {
 
     // Compute custom user settings for AI
     const minBufferMonths = settings?.aiMinBufferMonths ?? 3;
-    const customGoal = settings?.aiFinancialGoal || "balanced";
     const customTone = settings?.aiAuditTone || "strict";
     const customInstructionsRaw = settings?.aiCustomInstructions || "";
     let customInstructionsFormatted = "";
@@ -286,23 +298,14 @@ export async function POST(request: Request) {
       }
     }
 
-    // Human-readable labels for goals & tones
-    const goalLabels: Record<string, string> = {
-      accumulation: "Быстрое накопление и жесткая экономия",
-      balanced: "Баланс между комфортной жизнью и накоплениями",
-      investing: "Активное инвестирование и развитие бизнеса",
-      debt_payoff: "Досрочное гашение кредитов и долгов"
-    };
     const toneLabels: Record<string, string> = {
       strict: "Строгая (критика трат, прямой жесткий аудит)",
       supportive: "Поддерживающая (мягкие советы и похвала)",
       analytical: "Аналитическая (только сухие факты, цифры и расчёты)"
     };
-
-    const goalText = goalLabels[customGoal] || customGoal;
     const toneText = toneLabels[customTone] || customTone;
 
-    const userBufferTarget = avgMonthlyExpense12M * minBufferMonths;
+    const userBufferTarget = realAvgMonthlyExpense * minBufferMonths;
 
     // 2. Build AI Context Prompt
     const systemPrompt = `
@@ -313,12 +316,11 @@ ${customInstructionsFormatted ? customInstructionsFormatted : '  (Персона
 
 ПРИОРИТЕТНЫЕ НАСТРОЙКИ АНАЛИЗА:
 - Тональность общения и аудита: **${toneText}**
-- Главная финансовая цель пользователя: **${goalText}**
-- Целевая подушка безопасности: **${minBufferMonths} месяцев** расходов (Цель = ${userBufferTarget.toFixed(2)} ${homeCurrency})
+- Расчетная подушка безопасности на **${minBufferMonths} месяцев**: ${userBufferTarget.toFixed(2)} ${homeCurrency} (из расчета реальных расходов ${realAvgMonthlyExpense.toFixed(2)} ${homeCurrency}/мес)
 - Основная валюта: **${homeCurrency}**
 
 У ВАС ЕСТЬ ПОЛНЫЙ ДОСТУП КО ВСЕЙ БАЗЕ ДАННЫХ CASHFLOW И ВСЕЙ ИСТОРИИ ОПЕРАЦИЙ ПОЛЬЗОВАТЕЛЯ!
-Никогда не утверждайте, что у вас нет доступа к годовым данным или истории. Вся статистика из базы данных приведена ниже.
+Никогда не утверждайте, что у вас нет доступа к данным. Все данные из базы приведены ниже по каждому месяцу.
 
 АКТУАЛЬНЫЕ ФИНАНСОВЫЕ ДАННЫЕ ПОЛЬЗОВАТЕЛЯ ИЗ БАЗЫ PRISMA:
 
@@ -327,23 +329,21 @@ ${customInstructionsFormatted ? customInstructionsFormatted : '  (Персона
 Счета:
 ${accountsSummary || 'Нет активных счетов'}
 
-2. ИСТОРИЯ ЗА ВСЕ ВРЕМЯ (Всего операций в базе: ${totalTxCount}, с ${firstTxDate ? firstTxDate.toISOString().split('T')[0] : 'начала'}, всего месяцев: ${historyMonthsSpan}):
-- Всего получено доходов за все время: +${allTimeIncome.toFixed(2)} ${homeCurrency} (в среднем ${avgMonthlyIncomeAllTime.toFixed(2)} ${homeCurrency}/мес)
-- Всего потрачено за все время: -${allTimeExpense.toFixed(2)} ${homeCurrency} (в среднем ${avgMonthlyExpenseAllTime.toFixed(2)} ${homeCurrency}/мес)
+2. ПОМЕСЯЧНАЯ ДЕТАЛИЗАЦИЯ (АКТИВНЫХ МЕСЯЦЕВ В БАЗЕ: ${activeMonthsCount}):
+${monthlyBreakdownText || 'Нет данных по месяцах'}
 
-3. АНАЛИЗ ЗА ПОСЛЕДНИЕ 12 МЕСЯЦЕВ (Годовые данные):
-- Общий доход за 12 мес: +${income365.toFixed(2)} ${homeCurrency} (среднемесячный: +${avgMonthlyIncome12M.toFixed(2)} ${homeCurrency}/мес)
-- Общие расходы за 12 мес: -${expense365.toFixed(2)} ${homeCurrency} (среднемесячный: -${avgMonthlyExpense12M.toFixed(2)} ${homeCurrency}/мес)
-- Чистый годовой Cash Flow: ${(income365 - expense365).toFixed(2)} ${homeCurrency}
+3. ОБЩАЯ ИСТОРИЯ И СРЕДНИЕ ПОКАЗАТЕЛИ (Всего операций в базе: ${totalTxCount}):
+- Всего доходов за все время: +${allTimeIncome.toFixed(2)} ${homeCurrency} (реальное среднее: +${realAvgMonthlyIncome.toFixed(2)} ${homeCurrency}/мес за ${activeMonthsCount} активных мес.)
+- Всего расходов за все время: -${allTimeExpense.toFixed(2)} ${homeCurrency} (реальное среднее: -${realAvgMonthlyExpense.toFixed(2)} ${homeCurrency}/мес за ${activeMonthsCount} активных мес.)
 - **Расчитанная подушка безопасности на ${minBufferMonths} мес: ${userBufferTarget.toFixed(2)} ${homeCurrency}**
 
-4. АНАЛИЗ ЗА ПОСЛЕДНИЕ 30 ДНЕЙ (Текущий месяц):
+4. ПОСЛЕДНИЕ 30 ДНЕЙ:
 - Доход за 30 дней: +${income30.toFixed(2)} ${homeCurrency}
 - Расходы за 30 дней: -${expense30.toFixed(2)} ${homeCurrency}
 - Чистый остаток за 30 дней: ${(income30 - expense30).toFixed(2)} ${homeCurrency}
 
-5. РАСПРЕДЕЛЕНИЕ РАСХОДОВ ПО КАТЕГОРИЯМ ЗА 12 МЕСЯЦЕВ:
-${topCategoriesSummary12M || 'Нет данных по категориям'}
+5. РАСПРЕДЕЛЕНИЕ РАСХОДОВ ПО КАТЕГОРИЯМ:
+${topCategoriesSummary || 'Нет данных по категориям'}
 
 6. АКТИВНЫЕ БЮДЖЕТЫ:
 ${budgetsSummary || 'Бюджеты не настроены'}
@@ -354,16 +354,17 @@ ${scheduledSummary || 'Нет запланированных платежей'}
 8. СЦЕНАРИИ СИМУЛЯЦИИ:
 ${scenariosSummary || 'Сценарии не созданы'}
 
-9. ПОСЛЕДНИЕ ОПЕРАЦИИ ИЗ БАЗЫ DEDICATED (до 40 операций):
+9. ПОСЛЕДНИЕ ОПЕРАЦИИ ИЗ БАЗЫ (до 40 операций):
 ${recentTxList.join('\n') || 'Нет операций'}
 
 ПРАВИЛА И СТИЛЬ ОТВЕТА ИИ:
 - Отвечайте строго на русском языке в заданном тоне: "${toneText}".
 - СТРОГО И НЕУКОСНИТЕЛЬНО соблюдайте персональные правила пользователя:
 ${customInstructionsFormatted ? customInstructionsFormatted : '  (Нет дополнительных ограничений)'}
+- ВАЖНО: Не берите "слепое деление на 12 месяцев", если операции велись меньше 12 месяцев! Смотрите на конкретные помесячные цифры выше.
 - Если пользователь спрашивает про свои правила, инструкции или условия, перечислите ВСЕ СПЕЦИАЛЬНЫЕ ИНСТРУКЦИИ выше ДОСЛОВНО пунктами.
 - Базируйте свои выводы и рекомендации СТРОГО на приведенных выше реальных данных из базы данных CashFlow.
-- При вопросах о покупках или экономии всегда учитывайте ${minBufferMonths}-месячную подушку безопасности (${userBufferTarget.toFixed(0)} ${homeCurrency}) и цель "${goalText}".
+- При вопросах о покупках или экономии всегда учитывайте ${minBufferMonths}-месячную подушку безопасности (${userBufferTarget.toFixed(0)} ${homeCurrency}).
 - Ответы должны быть лаконичными, практичными и содержать конкретные цифры и шаги.
 `;
 
