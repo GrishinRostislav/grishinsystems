@@ -99,7 +99,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           } else {
             setAiModel("gpt-5.6-luna");
             setCustomModelInput("");
-                if (data.aiCustomInstructions !== undefined && data.aiCustomInstructions !== null) {
+          }
+
+          if (data.aiCustomInstructions !== undefined && data.aiCustomInstructions !== null) {
             setRules(parseRules(data.aiCustomInstructions));
           } else {
             setRules([]);
@@ -170,7 +172,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       } else {
         const errJson = await res.json().catch(() => ({}));
         alert(`Не удалось сохранить настройки: ${errJson.error || res.statusText}`);
-      }     }
+      }
     } catch (err) {
       console.error(err);
       alert("Error saving settings");
