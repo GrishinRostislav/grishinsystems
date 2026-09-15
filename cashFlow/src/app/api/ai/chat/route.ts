@@ -17,7 +17,7 @@ async function callOpenAI(apiKey: string, systemPrompt: string, history: any[], 
   }
   messages.push({ role: "user", content: message });
 
-  const defaultModels = ["gpt-4o-mini", "gpt-4o", "gpt-3.5-turbo"];
+  const defaultModels = ["gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.6-sol", "gpt-6-astra", "gpt-4o-mini", "gpt-4o"];
   const models = preferredModel && preferredModel.trim()
     ? Array.from(new Set([preferredModel.trim(), ...defaultModels]))
     : defaultModels;

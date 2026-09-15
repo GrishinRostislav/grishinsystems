@@ -69,7 +69,19 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             setGeminiApiKey("");
           }
           if (data.aiModel) {
-            const predefined = ["gpt-4o-mini", "gpt-4o", "gpt-4-turbo", "o3-mini", "gemini-2.0-flash", "gemini-1.5-pro"];
+            const predefined = [
+              "gpt-5.6-luna",
+              "gpt-5.6-sol",
+              "gpt-5.6-terra",
+              "gpt-6-astra",
+              "gpt-4o-mini",
+              "gpt-4o",
+              "gpt-4-turbo",
+              "o3-mini",
+              "gemini-2.5-flash",
+              "gemini-2.0-flash",
+              "gemini-1.5-pro"
+            ];
             if (predefined.includes(data.aiModel)) {
               setAiModel(data.aiModel);
               setCustomModelInput("");
@@ -78,7 +90,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               setCustomModelInput(data.aiModel);
             }
           } else {
-            setAiModel("gpt-4o-mini");
+            setAiModel("gpt-5.6-luna");
             setCustomModelInput("");
           }
           if (data.aiCustomInstructions !== undefined && data.aiCustomInstructions !== null) {
@@ -239,13 +251,17 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               onChange={e => setAiModel(e.target.value)}
               className={styles.select}
             >
-              <option value="gpt-4o-mini">⚡ OpenAI gpt-4o-mini (Быстрая, экономная, по умолчанию)</option>
-              <option value="gpt-4o">🧠 OpenAI gpt-4o (Флагманская высокоточная модель)</option>
-              <option value="gpt-4-turbo">🚀 OpenAI gpt-4-turbo</option>
+              <option value="gpt-5.6-luna">🌙 OpenAI gpt-5.6-luna (Быстрая, экономная, серия 2026 — по умолчанию)</option>
+              <option value="gpt-5.6-sol">☀️ OpenAI gpt-5.6-sol (Высокоточная профессиональная модель)</option>
+              <option value="gpt-5.6-terra">🌍 OpenAI gpt-5.6-terra (Баланс интеллекта и скорости)</option>
+              <option value="gpt-6-astra">🚀 OpenAI gpt-6-astra (Флагманская модель последнего поколения 2026)</option>
+              <option value="gpt-4o-mini">⚡ OpenAI gpt-4o-mini</option>
+              <option value="gpt-4o">🧠 OpenAI gpt-4o</option>
               <option value="o3-mini">💡 OpenAI o3-mini (Reasoning Model)</option>
+              <option value="gemini-2.5-flash">✨ Google gemini-2.5-flash</option>
               <option value="gemini-2.0-flash">✨ Google gemini-2.0-flash</option>
               <option value="gemini-1.5-pro">💎 Google gemini-1.5-pro</option>
-              <option value="custom">✏️ Своё название модели (Write custom model name...)</option>
+              <option value="custom">✏️ Своё название модели (Ввести название вручную...)</option>
             </select>
 
             {aiModel === "custom" && (
