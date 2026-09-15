@@ -125,11 +125,22 @@ export async function POST(request: Request) {
     const homeCurrency = settings?.homeCurrency || "CAD";
     const rates = await getExchangeRates(homeCurrency);
 
-    const rawOpenai = settings?.openaiApiKey || (settings?.geminiApiKey && !settings.geminiApiKey.startsWith("AIza") ? settings.geminiApiKey : "") || process.env.OPENAI_API_KEY || "";
-    const rawGemini = settings?.geminiApiKey || process.env.GEMINI_API_KEY || "";
+    const isGeminiFormat = (k: string) => k.startsWith("AIza") || k.startsWith("AQ.") || k.startsWith("AQ");
+    const isOpenAIFormat = (k: string) => k.startsWith("sk-");
 
-    const openaiKey = rawOpenai.trim().replace(/^['"\\]+|['"\\]+$/g, '');
-    const geminiKey = rawGemini.trim().replace(/^['"\\]+|['"\\]+$/g, '');
+    let openaiKey = (settings?.openaiApiKey || "").trim().replace(/^['"\\]+|['"\\]+$/g, '');
+    let geminiKey = (settings?.geminiApiKey || "").trim().replace(/^['"\\]+|['"\\]+$/g, '');
+
+    if (openaiKey && isGeminiFormat(openaiKey) && !geminiKey) {
+      geminiKey = openaiKey;
+      openaiKey = "";
+    } else if (geminiKey && isOpenAIFormat(geminiKey) && !openaiKey) {
+      openaiKey = geminiKey;
+      geminiKey = "";
+    }
+
+    if (!openaiKey) openaiKey = (process.env.OPENAI_API_KEY || "").trim().replace(/^['"\\]+|['"\\]+$/g, '');
+    if (!geminiKey) geminiKey = (process.env.GEMINI_API_KEY || "").trim().replace(/^['"\\]+|['"\\]+$/g, '');
     const selectedModel = settings?.aiModel || "gpt-5.6-luna";
 
     // Accounts & balances
@@ -331,7 +342,7 @@ ${recentTxList.join('\n') || 'Нет операций'}
 - Используйте форматирование Markdown (жирный текст, маркированные списки, смайлики-эмодзи).
 - Базируйте свои выводы и рекомендации СТРОГО на приведенных выше реальных данных из базы данных CashFlow.
 - При вопросах о покупках или экономии всегда учитывайте ${minBufferMonths}-месячную подушку безопасности ($${userBufferTarget.toFixed(0)}) и индивидуальную цель (${customGoal}).
-- Если пользователь задал специальные инструкции (${customInstructions}), неукоснительно придерживайтесь их.
+- Если пользователь задал специальные инструкции, неукоснительно придерживайтесь их.
 - Ответы должны быть лаконичными, практичными и содержать конкретные цифры и шаги.
 `;
 

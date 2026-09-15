@@ -261,7 +261,6 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               className={styles.select}
             />
           </div>
-          </div>
 
           <div className={styles.formGroup}>
             <label className={styles.label}>Модель ИИ (AI Model)</label>

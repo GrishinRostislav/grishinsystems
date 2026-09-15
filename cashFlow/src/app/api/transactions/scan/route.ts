@@ -129,11 +129,22 @@ export async function POST(request: Request) {
       select: { openaiApiKey: true, geminiApiKey: true, aiModel: true }
     }).catch(() => null);
 
-    const rawOpenai = settings?.openaiApiKey || (settings?.geminiApiKey && !settings.geminiApiKey.startsWith("AIza") ? settings.geminiApiKey : "") || process.env.OPENAI_API_KEY || "";
-    const rawGemini = settings?.geminiApiKey || process.env.GEMINI_API_KEY || "";
+    const isGeminiFormat = (k: string) => k.startsWith("AIza") || k.startsWith("AQ.") || k.startsWith("AQ");
+    const isOpenAIFormat = (k: string) => k.startsWith("sk-");
 
-    const openaiKey = rawOpenai.trim().replace(/^['"\\]+|['"\\]+$/g, '');
-    const geminiKey = rawGemini.trim().replace(/^['"\\]+|['"\\]+$/g, '');
+    let openaiKey = (settings?.openaiApiKey || "").trim().replace(/^['"\\]+|['"\\]+$/g, '');
+    let geminiKey = (settings?.geminiApiKey || "").trim().replace(/^['"\\]+|['"\\]+$/g, '');
+
+    if (openaiKey && isGeminiFormat(openaiKey) && !geminiKey) {
+      geminiKey = openaiKey;
+      openaiKey = "";
+    } else if (geminiKey && isOpenAIFormat(geminiKey) && !openaiKey) {
+      openaiKey = geminiKey;
+      geminiKey = "";
+    }
+
+    if (!openaiKey) openaiKey = (process.env.OPENAI_API_KEY || "").trim().replace(/^['"\\]+|['"\\]+$/g, '');
+    if (!geminiKey) geminiKey = (process.env.GEMINI_API_KEY || "").trim().replace(/^['"\\]+|['"\\]+$/g, '');
     const selectedModel = settings?.aiModel || "gpt-5.6-luna";
 
     // 1. Fetch categories
@@ -162,7 +173,7 @@ export async function POST(request: Request) {
     const categoriesList = categories.map(c => `"${c.name}" (ID: "${c.id}")`).join(', ');
 
     // Fallback: If no API key is defined, return mock parsed receipt for testing
-    if (!apiKey) {
+    if (!openaiKey && !geminiKey) {
       console.warn("No API key defined. Returning mock receipt data for testing.");
       const foodCat = categories.find(c => c.name.toLowerCase().includes("food") || c.name.toLowerCase().includes("groc") || c.name.toLowerCase().includes("eat"));
 
