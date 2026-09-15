@@ -126,11 +126,15 @@ export async function POST(request: Request) {
   try {
     const settings = await prisma.settings.findUnique({
       where: { id: "global" },
-      select: { geminiApiKey: true }
+      select: { openaiApiKey: true, geminiApiKey: true, aiModel: true }
     }).catch(() => null);
 
-    const rawKey = settings?.geminiApiKey || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY || "";
-    const apiKey = rawKey.trim().replace(/^['"\\]+|['"\\]+$/g, '');
+    const rawOpenai = settings?.openaiApiKey || (settings?.geminiApiKey && !settings.geminiApiKey.startsWith("AIza") ? settings.geminiApiKey : "") || process.env.OPENAI_API_KEY || "";
+    const rawGemini = settings?.geminiApiKey || process.env.GEMINI_API_KEY || "";
+
+    const openaiKey = rawOpenai.trim().replace(/^['"\\]+|['"\\]+$/g, '');
+    const geminiKey = rawGemini.trim().replace(/^['"\\]+|['"\\]+$/g, '');
+    const selectedModel = settings?.aiModel || "gpt-5.6-luna";
 
     // 1. Fetch categories
     let categories = await prisma.category.findMany({
@@ -237,29 +241,39 @@ export async function POST(request: Request) {
       }
     `;
 
-    const isGeminiKey = apiKey.startsWith("AIza");
+    const isGeminiModel = selectedModel.startsWith("gemini") || (geminiKey && !openaiKey);
     let textResponse = "";
 
-    if (isGeminiKey) {
+    if (isGeminiModel && geminiKey) {
       try {
-        textResponse = await callGeminiVision(apiKey, prompt, base64Image, mimeType);
+        textResponse = await callGeminiVision(geminiKey, prompt, base64Image, mimeType);
       } catch (err) {
-        try {
-          textResponse = await callOpenAIVision(apiKey, prompt, base64Image, mimeType);
-        } catch (oErr) {
+        if (openaiKey) {
+          try {
+            textResponse = await callOpenAIVision(openaiKey, prompt, base64Image, mimeType);
+          } catch (oErr) {
+            throw err;
+          }
+        } else {
           throw err;
         }
       }
-    } else {
+    } else if (openaiKey) {
       try {
-        textResponse = await callOpenAIVision(apiKey, prompt, base64Image, mimeType);
+        textResponse = await callOpenAIVision(openaiKey, prompt, base64Image, mimeType);
       } catch (err) {
-        try {
-          textResponse = await callGeminiVision(apiKey, prompt, base64Image, mimeType);
-        } catch (gErr) {
+        if (geminiKey) {
+          try {
+            textResponse = await callGeminiVision(geminiKey, prompt, base64Image, mimeType);
+          } catch (gErr) {
+            throw err;
+          }
+        } else {
           throw err;
         }
       }
+    } else if (geminiKey) {
+      textResponse = await callGeminiVision(geminiKey, prompt, base64Image, mimeType);
     }
 
     const cleanJsonText = extractJson(textResponse);

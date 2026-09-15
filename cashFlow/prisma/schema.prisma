@@ -143,8 +143,9 @@ model Settings {
   id                   String   @id @default("global")
   homeCurrency         String   @default("CAD")
   appPassword          String?
+  openaiApiKey         String?
   geminiApiKey         String?
-  aiModel              String?  @default("gpt-4o-mini")
+  aiModel              String?  @default("gpt-5.6-luna")
   aiCustomInstructions String?
   aiFinancialGoal      String?  @default("balanced")
   aiAuditTone          String?  @default("strict")

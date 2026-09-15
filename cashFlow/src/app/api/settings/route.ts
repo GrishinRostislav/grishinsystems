@@ -37,13 +37,14 @@ export async function GET() {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { homeCurrency, appPassword, geminiApiKey, aiModel, aiCustomInstructions, aiFinancialGoal, aiAuditTone, aiMinBufferMonths } = body;
+    const { homeCurrency, appPassword, openaiApiKey, geminiApiKey, aiModel, aiCustomInstructions, aiFinancialGoal, aiAuditTone, aiMinBufferMonths } = body;
 
     const updateData: any = {};
     if (homeCurrency !== undefined) updateData.homeCurrency = homeCurrency;
     if (appPassword !== undefined) updateData.appPassword = appPassword && appPassword.trim() ? appPassword.trim() : null;
+    if (openaiApiKey !== undefined) updateData.openaiApiKey = openaiApiKey && openaiApiKey.trim() ? openaiApiKey.trim() : null;
     if (geminiApiKey !== undefined) updateData.geminiApiKey = geminiApiKey && geminiApiKey.trim() ? geminiApiKey.trim() : null;
-    if (aiModel !== undefined) updateData.aiModel = aiModel && aiModel.trim() ? aiModel.trim() : "gpt-4o-mini";
+    if (aiModel !== undefined) updateData.aiModel = aiModel && aiModel.trim() ? aiModel.trim() : "gpt-5.6-luna";
     if (aiCustomInstructions !== undefined) updateData.aiCustomInstructions = aiCustomInstructions;
     if (aiFinancialGoal !== undefined) updateData.aiFinancialGoal = aiFinancialGoal;
     if (aiAuditTone !== undefined) updateData.aiAuditTone = aiAuditTone;
@@ -56,8 +57,9 @@ export async function PUT(request: Request) {
         id: "global",
         homeCurrency: homeCurrency || "CAD",
         appPassword: appPassword && appPassword.trim() ? appPassword.trim() : null,
+        openaiApiKey: openaiApiKey && openaiApiKey.trim() ? openaiApiKey.trim() : null,
         geminiApiKey: geminiApiKey && geminiApiKey.trim() ? geminiApiKey.trim() : null,
-        aiModel: aiModel && aiModel.trim() ? aiModel.trim() : "gpt-4o-mini",
+        aiModel: aiModel && aiModel.trim() ? aiModel.trim() : "gpt-5.6-luna",
         aiCustomInstructions: aiCustomInstructions || null,
         aiFinancialGoal: aiFinancialGoal || "balanced",
         aiAuditTone: aiAuditTone || "strict",

@@ -120,14 +120,17 @@ export async function POST(request: Request) {
     // 1. Gather comprehensive financial context from Prisma DB
     let settings = await prisma.settings.findUnique({
       where: { id: "global" },
-      select: { homeCurrency: true, geminiApiKey: true, aiModel: true, aiCustomInstructions: true, aiFinancialGoal: true, aiAuditTone: true, aiMinBufferMonths: true }
+      select: { homeCurrency: true, openaiApiKey: true, geminiApiKey: true, aiModel: true, aiCustomInstructions: true, aiFinancialGoal: true, aiAuditTone: true, aiMinBufferMonths: true }
     }).catch(() => null);
     const homeCurrency = settings?.homeCurrency || "CAD";
     const rates = await getExchangeRates(homeCurrency);
 
-    const rawKey = settings?.geminiApiKey || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY || "";
-    const apiKey = rawKey.trim().replace(/^['"\\]+|['"\\]+$/g, '');
-    const selectedModel = settings?.aiModel || "gpt-4o-mini";
+    const rawOpenai = settings?.openaiApiKey || (settings?.geminiApiKey && !settings.geminiApiKey.startsWith("AIza") ? settings.geminiApiKey : "") || process.env.OPENAI_API_KEY || "";
+    const rawGemini = settings?.geminiApiKey || process.env.GEMINI_API_KEY || "";
+
+    const openaiKey = rawOpenai.trim().replace(/^['"\\]+|['"\\]+$/g, '');
+    const geminiKey = rawGemini.trim().replace(/^['"\\]+|['"\\]+$/g, '');
+    const selectedModel = settings?.aiModel || "gpt-5.6-luna";
 
     // Accounts & balances
     const accounts = await prisma.account.findMany({
@@ -332,47 +335,57 @@ ${recentTxList.join('\n') || 'Нет операций'}
 - Ответы должны быть лаконичными, практичными и содержать конкретные цифры и шаги.
 `;
 
+    const isGeminiModel = selectedModel.startsWith("gemini") || (geminiKey && !openaiKey);
+    const activeKey = isGeminiModel ? (geminiKey || openaiKey) : (openaiKey || geminiKey);
+
     // Fallback response if no API key is provided
-    if (!apiKey) {
+    if (!activeKey) {
       return NextResponse.json({
-        reply: `🤖 **ИИ-Ассистент CashFlow (Демо-режим)**\n\n**Ваш текущий баланс:** ${totalBalance.toFixed(2)} ${homeCurrency}\n**Расходы за 30 дней:** -${expense30.toFixed(2)} ${homeCurrency}\n**Рекомендуемая подушка:** ${userBufferTarget.toFixed(2)} ${homeCurrency}\n\n💡 *Для активации полноценного диалогового ИИ добавьте API Key (OpenAI ChatGPT или Google Gemini) в Настройках.*`
+        reply: `🤖 **ИИ-Ассистент CashFlow (Демо-режим)**\n\n**Ваш текущий баланс:** ${totalBalance.toFixed(2)} ${homeCurrency}\n**Расходы за 30 дней:** -${expense30.toFixed(2)} ${homeCurrency}\n**Рекомендуемая подушка:** ${userBufferTarget.toFixed(2)} ${homeCurrency}\n\n💡 *Для активации полноценного диалогового ИИ добавьте OpenAI API Key или Gemini API Key в Настройках.*`
       });
     }
 
     let replyText = "";
     let lastError: any = null;
 
-    const isGeminiKey = apiKey.startsWith("AIza");
-
-    if (isGeminiKey) {
+    if (isGeminiModel && geminiKey) {
       try {
-        replyText = await callGemini(apiKey, systemPrompt, history, message, selectedModel);
+        replyText = await callGemini(geminiKey, systemPrompt, history, message, selectedModel);
       } catch (err) {
         lastError = err;
-        try {
-          replyText = await callOpenAI(apiKey, systemPrompt, history, message, selectedModel);
-        } catch (oErr) {
-          // Keep Gemini error as primary
+        if (openaiKey) {
+          try {
+            replyText = await callOpenAI(openaiKey, systemPrompt, history, message, selectedModel);
+          } catch (oErr) {
+            // Keep Gemini error as primary
+          }
         }
       }
-    } else {
-      // Treat any non-AIza key (sk-..., sk-proj-..., AQ..., etc.) as an OpenAI key
+    } else if (openaiKey) {
       try {
-        replyText = await callOpenAI(apiKey, systemPrompt, history, message, selectedModel);
+        replyText = await callOpenAI(openaiKey, systemPrompt, history, message, selectedModel);
       } catch (err) {
         lastError = err;
-        try {
-          replyText = await callGemini(apiKey, systemPrompt, history, message, selectedModel);
-        } catch (gErr) {
-          // Keep OpenAI error as primary
+        if (geminiKey) {
+          try {
+            replyText = await callGemini(geminiKey, systemPrompt, history, message, selectedModel);
+          } catch (gErr) {
+            // Keep OpenAI error as primary
+          }
         }
+      }
+    } else if (geminiKey) {
+      try {
+        replyText = await callGemini(geminiKey, systemPrompt, history, message, selectedModel);
+      } catch (err) {
+        lastError = err;
       }
     }
 
     if (!replyText) {
       const errMsg = lastError instanceof Error ? lastError.message : String(lastError);
-      if (isGeminiKey) {
-        replyText = `⚠️ **Ошибка Google Gemini API Key**\n\nКлюч Gemini API недействителен (ошибка: \`${errMsg}\`).\n\nПроверьте ваш ключ на [Google AI Studio](https://aistudio.google.com/app/apikey) или установите ключ OpenAI (\`sk-...\`) в Настройках приложения.`;
+      if (isGeminiModel) {
+        replyText = `⚠️ **Ошибка Google Gemini API Key**\n\nКлюч Gemini API недействителен (ошибка: \`${errMsg}\`).\n\nПроверьте ваш ключ на [Google AI Studio](https://aistudio.google.com/app/apikey) или используйте ключ OpenAI (\`sk-...\`) в Настройках приложения.`;
       } else {
         replyText = `⚠️ **Ошибка OpenAI (ChatGPT) API Key**\n\nПроизошла ошибка при обращении к OpenAI API:\n\`${errMsg}\`\n\nПроверьте ваш API-ключ в Настройках приложения (откройте ⚙️ Настройки -> вставьте новый ключ OpenAI) и убедитесь в наличии средств на балансе OpenAI.`;
       }
