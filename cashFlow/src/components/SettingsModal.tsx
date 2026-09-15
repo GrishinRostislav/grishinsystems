@@ -8,15 +8,47 @@ type SettingsModalProps = {
   onClose: () => void;
 };
 
+type RuleItem = {
+  id: string;
+  text: string;
+};
+
+function parseRules(stored: string | null | undefined): RuleItem[] {
+  if (!stored || !stored.trim()) return [];
+  try {
+    const parsed = JSON.parse(stored);
+    if (Array.isArray(parsed)) {
+      return parsed.map((item, idx) => {
+        if (typeof item === 'string') return { id: `rule-${idx}-${Date.now()}`, text: item };
+        if (item && typeof item === 'object' && item.text) return { id: item.id || `rule-${idx}-${Date.now()}`, text: String(item.text) };
+        return null;
+      }).filter(Boolean) as RuleItem[];
+    }
+  } catch {
+    // Fallback: split legacy newline-separated string
+  }
+
+  return stored
+    .split('\n')
+    .map(s => s.trim())
+    .filter(s => s.length > 0)
+    .map((text, idx) => ({ id: `rule-${idx}-${Date.now()}`, text }));
+}
+
 export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [homeCurrency, setHomeCurrency] = useState("CAD");
   const [appPassword, setAppPassword] = useState("");
   const [geminiApiKey, setGeminiApiKey] = useState("");
-  const [aiCustomInstructions, setAiCustomInstructions] = useState("");
   const [aiFinancialGoal, setAiFinancialGoal] = useState("balanced");
   const [aiAuditTone, setAiAuditTone] = useState("strict");
   const [aiMinBufferMonths, setAiMinBufferMonths] = useState(3);
   const [saving, setSaving] = useState(false);
+
+  // Custom AI Rules as separate cards (плашки)
+  const [rules, setRules] = useState<RuleItem[]>([]);
+  const [newRuleText, setNewRuleText] = useState("");
+  const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
+  const [editingRuleText, setEditingRuleText] = useState("");
 
   useEffect(() => {
     if (isOpen) {
@@ -35,7 +67,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             setGeminiApiKey("");
           }
           if (data.aiCustomInstructions !== undefined && data.aiCustomInstructions !== null) {
-            setAiCustomInstructions(data.aiCustomInstructions);
+            setRules(parseRules(data.aiCustomInstructions));
+          } else {
+            setRules([]);
           }
           if (data.aiFinancialGoal) setAiFinancialGoal(data.aiFinancialGoal);
           if (data.aiAuditTone) setAiAuditTone(data.aiAuditTone);
@@ -45,9 +79,43 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     }
   }, [isOpen]);
 
+  const handleAddRule = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const trimmed = newRuleText.trim();
+    if (!trimmed) return;
+    setRules(prev => [...prev, { id: `rule-${Date.now()}`, text: trimmed }]);
+    setNewRuleText("");
+  };
+
+  const handleDeleteRule = (id: string) => {
+    setRules(prev => prev.filter(r => r.id !== id));
+  };
+
+  const handleStartEdit = (rule: RuleItem) => {
+    setEditingRuleId(rule.id);
+    setEditingRuleText(rule.text);
+  };
+
+  const handleSaveEdit = (id: string) => {
+    const trimmed = editingRuleText.trim();
+    if (trimmed) {
+      setRules(prev => prev.map(r => r.id === id ? { ...r, text: trimmed } : r));
+    }
+    setEditingRuleId(null);
+    setEditingRuleText("");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingRuleId(null);
+    setEditingRuleText("");
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+
+    const formattedInstructions = JSON.stringify(rules.map(r => r.text.trim()).filter(Boolean));
+
     try {
       const res = await fetch("/cashFlow/api/settings", {
         method: "PUT",
@@ -56,7 +124,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           homeCurrency,
           appPassword,
           geminiApiKey,
-          aiCustomInstructions,
+          aiCustomInstructions: formattedInstructions,
           aiFinancialGoal,
           aiAuditTone,
           aiMinBufferMonths: Number(aiMinBufferMonths)
@@ -190,15 +258,102 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           <div className={styles.formGroup}>
             <label className={styles.label}>Персональные условия и правила для ИИ</label>
             <p className={styles.description}>
-              Опишите своими словами особые условия (например: &quot;Не учитывай расходы на путешествия в июне&quot;, &quot;Всегда предупреждай если расходы на кофе превышают 100$&quot;).
+              Каждое правило хранится в виде отдельной плашки. Вы можете добавлять, редактировать ✏️ и удалять 🗑️ правила.
             </p>
-            <textarea
-              value={aiCustomInstructions}
-              onChange={e => setAiCustomInstructions(e.target.value)}
-              placeholder="Введите особые указания для ИИ..."
-              className={styles.textarea}
-              rows={3}
-            />
+
+            <div className={styles.rulesList}>
+              {rules.length === 0 ? (
+                <div className={styles.noRulesText}>У вас пока нет сохраненных правил. Добавьте первое правило ниже!</div>
+              ) : (
+                rules.map((rule, idx) => (
+                  <div key={rule.id} className={styles.ruleCard}>
+                    {editingRuleId === rule.id ? (
+                      <div className={styles.editRuleRow}>
+                        <input
+                          type="text"
+                          value={editingRuleText}
+                          onChange={e => setEditingRuleText(e.target.value)}
+                          className={styles.ruleInput}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleSaveEdit(rule.id);
+                            }
+                            if (e.key === 'Escape') {
+                              handleCancelEdit();
+                            }
+                          }}
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleSaveEdit(rule.id)}
+                          className={styles.iconBtnCheck}
+                          title="Сохранить"
+                        >
+                          ✓
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleCancelEdit}
+                          className={styles.iconBtnCancel}
+                          title="Отмена"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <div className={styles.ruleContent}>
+                        <span className={styles.ruleBadge}>{idx + 1}</span>
+                        <span className={styles.ruleText}>{rule.text}</span>
+                        <div className={styles.ruleActions}>
+                          <button
+                            type="button"
+                            onClick={() => handleStartEdit(rule)}
+                            className={styles.ruleActionBtn}
+                            title="Изменить правило"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteRule(rule.id)}
+                            className={styles.ruleActionBtn}
+                            title="Удалить правило"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className={styles.addRuleRow}>
+              <input
+                type="text"
+                value={newRuleText}
+                onChange={e => setNewRuleText(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddRule();
+                  }
+                }}
+                placeholder="Например: Не учитывай расходы на путешествия в июне..."
+                className={styles.addRuleInput}
+              />
+              <button
+                type="button"
+                onClick={() => handleAddRule()}
+                disabled={!newRuleText.trim()}
+                className={styles.addRuleBtn}
+              >
+                + Добавить
+              </button>
+            </div>
           </div>
           
           <div className={styles.actions}>

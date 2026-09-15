@@ -159,3 +159,167 @@
   border-color: var(--unique-blue);
   box-shadow: 0 0 0 3px rgba(45, 93, 123, 0.1);
 }
+
+.rulesList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.noRulesText {
+  font-size: 0.85rem;
+  color: var(--text-muted, #64748b);
+  font-style: italic;
+  padding: 8px 0;
+}
+
+.ruleCard {
+  background: #f8fafc;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 10px;
+  padding: 10px 14px;
+  transition: all 0.2s ease;
+}
+
+.ruleCard:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.ruleContent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.ruleBadge {
+  background: var(--unique-blue, #2d5d7b);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ruleText {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--text-main, #0f172a);
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.ruleActions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.ruleActionBtn {
+  background: transparent;
+  border: none;
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.ruleActionBtn:hover {
+  background: #e2e8f0;
+}
+
+.editRuleRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ruleInput {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--unique-blue, #2d5d7b);
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.iconBtnCheck, .iconBtnCancel {
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: opacity 0.2s;
+}
+
+.iconBtnCheck {
+  background: #10b981;
+  color: white;
+}
+
+.iconBtnCancel {
+  background: #ef4444;
+  color: white;
+}
+
+.iconBtnCheck:hover, .iconBtnCancel:hover {
+  opacity: 0.85;
+}
+
+.addRuleRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.addRuleInput {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #cbd5e1);
+  background-color: #f8fafc;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  outline: none;
+}
+
+.addRuleInput:focus {
+  border-color: var(--unique-blue);
+  background-color: white;
+  box-shadow: 0 0 0 3px rgba(45, 93, 123, 0.1);
+}
+
+.addRuleBtn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  background: var(--unique-blue, #2d5d7b);
+  color: white;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+
+.addRuleBtn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.addRuleBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

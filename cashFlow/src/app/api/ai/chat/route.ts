@@ -238,7 +238,29 @@ export async function POST(request: Request) {
     const minBufferMonths = settings?.aiMinBufferMonths ?? 3;
     const customGoal = settings?.aiFinancialGoal || "balanced";
     const customTone = settings?.aiAuditTone || "strict";
-    const customInstructions = settings?.aiCustomInstructions || "";
+    const customInstructionsRaw = settings?.aiCustomInstructions || "";
+    let customInstructionsFormatted = "";
+
+    if (customInstructionsRaw.trim()) {
+      try {
+        const parsed = JSON.parse(customInstructionsRaw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          customInstructionsFormatted = parsed
+            .map((item: any, idx: number) => {
+              const str = typeof item === 'string' ? item : item?.text || String(item);
+              return `  ${idx + 1}. ${str}`;
+            })
+            .join('\n');
+        }
+      } catch {
+        customInstructionsFormatted = customInstructionsRaw
+          .split('\n')
+          .map(s => s.trim())
+          .filter(Boolean)
+          .map((line, idx) => `  ${idx + 1}. ${line}`)
+          .join('\n');
+      }
+    }
 
     const userBufferTarget = avgMonthlyExpense12M * minBufferMonths;
 
@@ -252,7 +274,7 @@ export async function POST(request: Request) {
 - Целевая подушка безопасности: **${minBufferMonths} месяцев** расходов (Цель = $${userBufferTarget.toFixed(2)} ${homeCurrency}).
 - Финансовая цель пользователя: **${customGoal}**
 - Тональность аудита/анализа: **${customTone}**
-${customInstructions ? `- СПЕЦИАЛЬНЫЕ ИНСТРУКЦИИ И ПРАВИЛА ПОЛЬЗОВАТЕЛЯ:\n  "${customInstructions}"` : ''}
+${customInstructionsFormatted ? `- СПЕЦИАЛЬНЫЕ ИНСТРУКЦИИ И ПРАВИЛА ПОЛЬЗОВАТЕЛЯ:\n${customInstructionsFormatted}` : ''}
 
 ВАЛЮТА ПО УМОЛЧАНИЮ: ${homeCurrency}
 
