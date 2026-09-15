@@ -69,11 +69,11 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
       const saved = localStorage.getItem(getStorageKey("date_interval")) || localStorage.getItem("global_date_interval");
       if (saved && saved !== "undefined" && saved !== "null") return saved;
     }
-    return "month";
+    return "this_month";
   });
 
   const [startDate, setStartDate] = useState(() => {
-    const intv = typeof window !== "undefined" ? (localStorage.getItem(getStorageKey("date_interval")) || localStorage.getItem("global_date_interval") || "month") : "month";
+    const intv = typeof window !== "undefined" ? (localStorage.getItem(getStorageKey("date_interval")) || localStorage.getItem("global_date_interval") || "this_month") : "this_month";
     if (intv === "custom" && typeof window !== "undefined") {
       const stored = localStorage.getItem(getStorageKey("start_date")) || localStorage.getItem("global_start_date");
       if (isValidDateStr(stored)) return stored as string;
@@ -82,7 +82,7 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
   });
 
   const [endDate, setEndDate] = useState(() => {
-    const intv = typeof window !== "undefined" ? (localStorage.getItem(getStorageKey("date_interval")) || localStorage.getItem("global_date_interval") || "month") : "month";
+    const intv = typeof window !== "undefined" ? (localStorage.getItem(getStorageKey("date_interval")) || localStorage.getItem("global_date_interval") || "this_month") : "this_month";
     if (intv === "custom" && typeof window !== "undefined") {
       const stored = localStorage.getItem(getStorageKey("end_date")) || localStorage.getItem("global_end_date");
       if (isValidDateStr(stored)) return stored as string;
@@ -93,8 +93,8 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
   useEffect(() => {
     if (typeof window === "undefined") return;
     
-    const savedInterval = localStorage.getItem(getStorageKey("date_interval")) || localStorage.getItem("global_date_interval") || "month";
-    const validInterval = (savedInterval && savedInterval !== "undefined" && savedInterval !== "null") ? savedInterval : "month";
+    const savedInterval = localStorage.getItem(getStorageKey("date_interval")) || localStorage.getItem("global_date_interval") || "this_month";
+    const validInterval = (savedInterval && savedInterval !== "undefined" && savedInterval !== "null") ? savedInterval : "this_month";
     setIntervalState(validInterval);
 
     let newStart = startDate;

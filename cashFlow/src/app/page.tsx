@@ -134,16 +134,17 @@ export default function Home() {
     }
   };
 
+  const fetchIdRef = useState(() => ({ current: 0 }))[0];
+
   const fetchDashboardData = async (isSilent = false) => {
     let sDate = startDate;
     let eDate = endDate;
 
     if (!sDate || !eDate || sDate === "undefined" || eDate === "undefined" || sDate === "null" || eDate === "null" || isNaN(Date.parse(sDate)) || isNaN(Date.parse(eDate))) {
-      const now = new Date();
-      eDate = now.toISOString().split('T')[0];
-      const past = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      sDate = past.toISOString().split('T')[0];
+      return;
     }
+
+    const currentFetchId = ++fetchIdRef.current;
 
     try {
       if (!isSilent) setLoading(true);
@@ -152,6 +153,8 @@ export default function Home() {
       await fetch('/cashFlow/api/scheduled/process', { method: 'POST' }).catch(() => {});
 
       const res = await fetch(`/cashFlow/api/dashboard?startDate=${sDate}&endDate=${eDate}`);
+      if (currentFetchId !== fetchIdRef.current) return;
+
       if (res.status === 401) {
         window.location.href = "/cashFlow/login";
         return;
@@ -163,6 +166,7 @@ export default function Home() {
         return;
       }
       const dashboardData = await res.json();
+      if (currentFetchId !== fetchIdRef.current) return;
       
       let budgetsData = [];
       try {
@@ -174,6 +178,7 @@ export default function Home() {
       } catch (err) {
         console.error("Failed to fetch budgets data", err);
       }
+      if (currentFetchId !== fetchIdRef.current) return;
 
       let forecastData = null;
       try {
@@ -184,18 +189,24 @@ export default function Home() {
       } catch(err) {
         console.error("Failed to fetch forecast data", err);
       }
+      if (currentFetchId !== fetchIdRef.current) return;
 
       setData({ ...dashboardData, budgets: budgetsData, forecast: forecastData });
     } catch (err: any) {
+      if (currentFetchId !== fetchIdRef.current) return;
       console.error("Failed to fetch dashboard data", err);
       setError(err?.message || "Failed to load dashboard data.");
     } finally {
-      if (!isSilent) setLoading(false);
+      if (currentFetchId === fetchIdRef.current) {
+        if (!isSilent) setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    fetchDashboardData();
+    if (startDate && endDate) {
+      fetchDashboardData();
+    }
   }, [startDate, endDate]);
 
   useAutoSync(() => fetchDashboardData(true));
