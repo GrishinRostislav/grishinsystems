@@ -17,10 +17,121 @@ function extractJson(text: string): string {
   return clean;
 }
 
+async function callOpenAIVision(apiKey: string, prompt: string, base64Image: string, mimeType: string) {
+  const models = ["gpt-4o-mini", "gpt-4o"];
+  let lastError: any = null;
+
+  for (const model of models) {
+    try {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "text", text: prompt },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: `data:${mimeType};base64,${base64Image}`
+                  }
+                }
+              ]
+            }
+          ],
+          response_format: { type: "json_object" },
+          temperature: 0.1
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error?.message || `OpenAI Vision API error (${res.status})`);
+      }
+
+      const text = data?.choices?.[0]?.message?.content;
+      if (text && text.trim().length > 0) {
+        return text;
+      }
+    } catch (err: any) {
+      console.warn(`OpenAI vision model ${model} error:`, err?.message || err);
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error("Failed to scan receipt with OpenAI Vision");
+}
+
+async function callGeminiVision(apiKey: string, prompt: string, base64Image: string, mimeType: string) {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const modelsToTry = [
+    'gemini-2.0-flash',
+    'gemini-1.5-flash',
+    'gemini-1.5-pro',
+    'gemini-2.0-flash-lite'
+  ];
+
+  const contentPayload = [
+    {
+      inlineData: {
+        data: base64Image,
+        mimeType: mimeType
+      }
+    },
+    prompt
+  ];
+
+  let result: any = null;
+  let lastError: any = null;
+
+  for (const modelName of modelsToTry) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          ...(attempt === 0 ? { generationConfig: { responseMimeType: "application/json" } } : {})
+        });
+        result = await model.generateContent(contentPayload);
+        break;
+      } catch (err: any) {
+        lastError = err;
+        const status = err?.status || err?.httpStatusCode || 0;
+        const msg = err?.message || String(err);
+        if (status === 503 || status === 429 || msg.includes('503') || msg.includes('429') || msg.includes('overloaded')) {
+          if (attempt === 0) {
+            await new Promise(r => setTimeout(r, 1200));
+          }
+          continue;
+        }
+        break;
+      }
+    }
+    if (result) break;
+  }
+
+  if (!result) {
+    throw lastError || new Error("Failed to scan receipt with Google Gemini");
+  }
+
+  return result.response.text();
+}
+
 export async function POST(request: Request) {
   try {
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-    
+    const settings = await prisma.settings.findUnique({
+      where: { id: "global" },
+      select: { geminiApiKey: true }
+    }).catch(() => null);
+
+    const rawKey = settings?.geminiApiKey || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY || "";
+    const apiKey = rawKey.trim().replace(/^['"\\]+|['"\\]+$/g, '');
+
     // 1. Fetch categories
     let categories = await prisma.category.findMany({
       select: { id: true, name: true }
@@ -39,7 +150,6 @@ export async function POST(request: Request) {
           name: "Taxes & Fees",
         }
       });
-      // Refresh categories list
       categories = await prisma.category.findMany({
         select: { id: true, name: true }
       });
@@ -47,9 +157,9 @@ export async function POST(request: Request) {
 
     const categoriesList = categories.map(c => `"${c.name}" (ID: "${c.id}")`).join(', ');
 
-    // Fallback: If GEMINI_API_KEY is not defined, return a mock parsed receipt for local testing
-    if (!GEMINI_API_KEY) {
-      console.warn("GEMINI_API_KEY is not defined. Returning mock receipt data for testing.");
+    // Fallback: If no API key is defined, return mock parsed receipt for testing
+    if (!apiKey) {
+      console.warn("No API key defined. Returning mock receipt data for testing.");
       const foodCat = categories.find(c => c.name.toLowerCase().includes("food") || c.name.toLowerCase().includes("groc") || c.name.toLowerCase().includes("eat"));
 
       return NextResponse.json({
@@ -61,7 +171,7 @@ export async function POST(request: Request) {
           { code: "987654321", rawName: "Kirkland Toilet Paper", description: "Kirkland Toilet Paper", amount: -21.99, categoryId: null }
         ],
         gst: { amount: -1.82, categoryId: taxCat?.id || null },
-        _warning: "GEMINI_API_KEY environment variable is missing. Showing mock receipt scan data. Set up your key to use actual AI scanning."
+        _warning: "No AI API key found. Please enter an OpenAI or Gemini API Key in Settings to enable live scanning."
       });
     }
 
@@ -71,11 +181,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No image file provided." }, { status: 400 });
     }
 
-    // Convert file to base64 for Gemini multimodal API
+    // Convert file to base64 for multimodal API
     const buffer = Buffer.from(await file.arrayBuffer());
     const base64Image = buffer.toString('base64');
     
-    // Normalize and infer MIME type safely
+    // Normalize MIME type
     let mimeType = file.type || '';
     if (!mimeType || mimeType === 'application/octet-stream') {
       const name = (file.name || '').toLowerCase();
@@ -86,16 +196,7 @@ export async function POST(request: Request) {
       else mimeType = 'image/jpeg';
     }
 
-    // Initialize Gemini API Client with active modern models (Gemini 1.5 was sunset/retired by Google)
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const modelsToTry = [
-      'gemini-2.0-flash',
-      'gemini-1.5-flash',
-      'gemini-1.5-pro',
-      'gemini-2.0-flash-lite'
-    ];
-
-    // 3. Fetch recent product mappings to teach the AI
+    // Fetch recent product mappings to teach the AI
     const recentMappings = await prisma.productMapping.findMany({
       take: 100,
       orderBy: { updatedAt: "desc" },
@@ -125,7 +226,7 @@ export async function POST(request: Request) {
       Here are some examples of how the user previously categorized items. Learn from these patterns for similar items:
       ${mappingExamples || "No previous examples."}
 
-      Return the data strictly in the following JSON format. Ensure "rawName" is ALWAYS included and exactly matches the receipt text. Do not return any markdown code blocks, explanation or formatting:
+      Return the data strictly in the following JSON format. Ensure "rawName" is ALWAYS included and exactly matches the receipt text:
       {
         "date": "YYYY-MM-DD",
         "merchant": "Merchant Name",
@@ -136,65 +237,31 @@ export async function POST(request: Request) {
       }
     `;
 
-    const contentPayload = [
-      {
-        inlineData: {
-          data: base64Image,
-          mimeType: mimeType
-        }
-      },
-      prompt
-    ];
+    const isGeminiKey = apiKey.startsWith("AIza");
+    let textResponse = "";
 
-    let result: any = null;
-    let lastError: any = null;
-    const modelErrors: string[] = [];
-
-    for (const modelName of modelsToTry) {
-      for (let attempt = 0; attempt < 2; attempt++) {
+    if (isGeminiKey) {
+      try {
+        textResponse = await callGeminiVision(apiKey, prompt, base64Image, mimeType);
+      } catch (err) {
         try {
-          // Attempt 0 requests structured JSON; attempt 1 falls back to default if MIME config was rejected
-          const model = genAI.getGenerativeModel({
-            model: modelName,
-            ...(attempt === 0 ? { generationConfig: { responseMimeType: "application/json" } } : {})
-          });
-          result = await model.generateContent(contentPayload);
-          break; // success
-        } catch (err: any) {
-          lastError = err;
-          const status = err?.status || err?.httpStatusCode || 0;
-          const msg = err?.message || String(err);
-          modelErrors.push(`${modelName}: ${msg}`);
-          console.warn(`Model ${modelName} attempt ${attempt + 1} failed: ${msg}`);
-
-          // Retry on 503 (overloaded) or 429 (rate limit)
-          if (status === 503 || status === 429 || msg.includes('503') || msg.includes('429') || msg.includes('overloaded') || msg.includes('high demand')) {
-            if (attempt === 0) {
-              await new Promise(r => setTimeout(r, 1200)); // brief pause before retry
-            }
-            continue;
-          }
-          // For other errors (e.g. 404 model not found, unsupported config), try next model
-          break;
+          textResponse = await callOpenAIVision(apiKey, prompt, base64Image, mimeType);
+        } catch (oErr) {
+          throw err;
         }
       }
-      if (result) break; // got a successful result, stop trying models
-    }
-
-    if (!result) {
-      const all404 = modelErrors.length > 0 && modelErrors.every(e => e.includes('404'));
-      const isKeyInvalid = modelErrors.some(e => e.includes('API_KEY_INVALID') || e.includes('API key not valid') || e.includes('403'));
-      
-      let errorMsg = lastError?.message || 'All AI models are currently unavailable.';
-      if (all404) {
-        errorMsg = 'Google Generative AI returned 404 for all models. Please ensure your GEMINI_API_KEY was created in Google AI Studio (https://aistudio.google.com) and has the Generative Language API enabled.';
-      } else if (isKeyInvalid) {
-        errorMsg = 'Invalid GEMINI_API_KEY. Please verify or re-generate your API key in Google AI Studio (https://aistudio.google.com) and update it in Vercel environment variables.';
+    } else {
+      try {
+        textResponse = await callOpenAIVision(apiKey, prompt, base64Image, mimeType);
+      } catch (err) {
+        try {
+          textResponse = await callGeminiVision(apiKey, prompt, base64Image, mimeType);
+        } catch (gErr) {
+          throw err;
+        }
       }
-      throw new Error(errorMsg);
     }
 
-    const textResponse = result.response.text();
     const cleanJsonText = extractJson(textResponse);
 
     let parsedData: any;
@@ -228,19 +295,17 @@ export async function POST(request: Request) {
       }
     }
 
-    // 3. Apply stored Product Mappings (Product translation dictionary)
+    // Apply stored Product Mappings (Product translation dictionary)
     const mappings = await prisma.productMapping.findMany();
     const processedItems = [];
 
     for (const item of parsedData.items) {
       let mapping = null;
       
-      // Look up by product code first
       if (item.code) {
         mapping = mappings.find(m => m.code === item.code);
       }
       
-      // Look up by raw receipt name if no code mapping was found
       if (!mapping && item.rawName) {
         mapping = mappings.find(m => m.rawName === item.rawName);
       }
@@ -249,9 +314,9 @@ export async function POST(request: Request) {
         processedItems.push({
           code: item.code || mapping.code || null,
           rawName: item.rawName,
-          description: mapping.friendlyName, // Use the user-defined name!
+          description: mapping.friendlyName,
           amount: item.amount,
-          categoryId: mapping.categoryId || item.categoryId // Use the user-defined category!
+          categoryId: mapping.categoryId || item.categoryId
         });
       } else {
         processedItems.push({
@@ -266,7 +331,6 @@ export async function POST(request: Request) {
 
     parsedData.items = processedItems;
 
-    // Force GST to Taxes & Fees category and ensure negative amount
     if (parsedData.gst) {
       if (typeof parsedData.gst.amount === 'number' && parsedData.gst.amount > 0) {
         parsedData.gst.amount = -parsedData.gst.amount;
