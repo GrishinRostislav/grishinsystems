@@ -63,7 +63,7 @@ export default function TransactionList({
     return acc;
   }, {});
 
-  const total = transactions.reduce((acc: number, txn: any) => acc + txn.amount, 0);
+  const total = transactions.reduce((acc: number, txn: any) => acc + (txn.isTransfer ? 0 : txn.amount), 0);
 
   const toggleGroup = (key: string) => {
     setExpandedGroups(prev => ({
@@ -134,7 +134,7 @@ export default function TransactionList({
         
         Object.entries(merchantGroups).forEach(([merchantName, txns]) => {
           if (txns.length > 1) {
-            const totalAmount = txns.reduce((sum, t) => sum + t.amount, 0);
+            const totalAmount = txns.reduce((sum, t) => sum + (t.isTransfer ? 0 : t.amount), 0);
             renderItems.push({
               isGroup: true,
               merchantName,
@@ -168,7 +168,7 @@ export default function TransactionList({
 
         // Calculate total spent (expenses) for this day
         const daySpent = dateTxns
-          .filter((t: any) => t.amount < 0)
+          .filter((t: any) => !t.isTransfer && t.amount < 0)
           .reduce((sum: number, t: any) => sum + t.amount, 0);
 
         const currency = dateTxns[0]?.account?.currency;

@@ -42,6 +42,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     const transactions = await prisma.transaction.findMany({
       where: {
         categoryId: { in: categoryIds },
+        isTransfer: false,
         date: { 
           gte: startDate,
           lte: endDate
