@@ -172,9 +172,11 @@ export default function CategoriesPage() {
         directSpent,
         totalSpent,
         subcategoriesSpent,
-        subcategories: parentCat.subcategories || []
+        subcategories: (parentCat.subcategories || []).filter(sub => getCategoryNodeSpent(sub) > 0)
       };
-    }).sort((a, b) => b.totalSpent - a.totalSpent);
+    })
+    .filter(item => item.totalSpent > 0)
+    .sort((a, b) => b.totalSpent - a.totalSpent);
   } else {
     // All categories flat
     displayItems = categories.map(cat => {
@@ -186,7 +188,9 @@ export default function CategoriesPage() {
         subcategoriesSpent: 0,
         subcategories: []
       };
-    }).sort((a, b) => b.totalSpent - a.totalSpent);
+    })
+    .filter(item => item.totalSpent > 0)
+    .sort((a, b) => b.totalSpent - a.totalSpent);
   }
 
   const maxItemSpent = Math.max(...displayItems.map(i => i.totalSpent), 1);
