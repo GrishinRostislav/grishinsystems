@@ -49,6 +49,16 @@ export default function BudgetCard({ budget, homeCurrency, showPeriodLabel = tru
               {formatDate(budget.currentPeriodStart)} - {formatDate(budget.currentPeriodEnd)}
             </span>
             <div className={styles.cardBadges}>
+              {spentPercent >= 100 && (
+                <span className={styles.globalBadge} style={{ background: '#fee2e2', color: '#b91c1c', border: '1px solid #fca5a5' }}>
+                  🚨 Over Limit
+                </span>
+              )}
+              {spentPercent >= 80 && spentPercent < 100 && (
+                <span className={styles.globalBadge} style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a' }}>
+                  ⚠️ Near Limit (&gt;80%)
+                </span>
+              )}
               {budget.isGlobal ? (
                 <span className={styles.globalBadge}>Global Budget</span>
               ) : (

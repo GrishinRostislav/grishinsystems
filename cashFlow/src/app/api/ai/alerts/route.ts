@@ -26,12 +26,12 @@ export async function GET() {
 
     for (const st of scheduledTxs) {
       const amt = st.account ? convertAmount(st.amount, st.account.currency, homeCurrency, rates) : st.amount;
-      const dateStr = new Date(st.nextRunDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+      const dateStr = new Date(st.nextRunDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
       alerts.push({
         id: `sched-${st.id}`,
         type: 'PAYMENT',
-        title: ' Предстоящий платеж',
-        message: `${st.name || 'Платеж'}: ${Math.abs(amt).toFixed(2)} ${homeCurrency} (${dateStr})`,
+        title: 'Upcoming Payment',
+        message: `${st.merchant || 'Scheduled Payment'}: ${Math.abs(amt).toFixed(2)} ${homeCurrency} (${dateStr})`,
         severity: 'info'
       });
     }
@@ -71,8 +71,8 @@ export async function GET() {
       alerts.push({
         id: 'spike-recent',
         type: 'SPIKE',
-        title: '⚡ Всплеск расходов',
-        message: `За последние 7 дней расходы выше обычного темпа на ${pctIncrease}% (${Math.round(spentLast7)} ${homeCurrency}).`,
+        title: '⚡ Spending Spike',
+        message: `Spending over the last 7 days is ${pctIncrease}% higher than average (${Math.round(spentLast7)} ${homeCurrency}).`,
         severity: 'warning'
       });
     }
@@ -116,16 +116,16 @@ export async function GET() {
           alerts.push({
             id: `budget-${budget.id}`,
             type: 'BUDGET',
-            title: ' Превышен бюджет',
-            message: `Бюджет "${budget.name}" израсходован на ${Math.round(usage)}% (${Math.round(spent)} / ${Math.round(budget.amount)} ${homeCurrency}).`,
+            title: 'Budget Exceeded',
+            message: `Budget "${budget.name}" has reached ${Math.round(usage)}% (${Math.round(spent)} / ${Math.round(budget.amount)} ${homeCurrency}).`,
             severity: 'danger'
           });
         } else if (usage >= 80) {
           alerts.push({
             id: `budget-${budget.id}`,
             type: 'BUDGET',
-            title: ' Предупреждение по бюджету',
-            message: `Бюджет "${budget.name}" израсходован на ${Math.round(usage)}% (${Math.round(spent)} / ${Math.round(budget.amount)} ${homeCurrency}).`,
+            title: 'Budget Warning',
+            message: `Budget "${budget.name}" has reached ${Math.round(usage)}% (${Math.round(spent)} / ${Math.round(budget.amount)} ${homeCurrency}).`,
             severity: 'warning'
           });
         }

@@ -16,6 +16,9 @@ function PlanningContent() {
   const [accounts, setAccounts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   
+  const [activeTab, setActiveTab] = useState<'payments' | 'calendar' | 'subscriptions'>('payments');
+  const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSched, setEditingSched] = useState<any | null>(null);
 
@@ -57,7 +60,6 @@ function PlanningContent() {
           type: params.get('type') || 'expense',
         });
         setIsModalOpen(true);
-        // Clear param so it doesn't reopen on refresh
         router.replace('/planning');
       }
     });
@@ -120,9 +122,26 @@ function PlanningContent() {
   });
 
   const active = scheduled.filter(s => {
-    // If it's pending, don't show it in the regular list unless we want to
     return s.isActive && (!(!s.autoApprove && new Date(s.nextRunDate) <= now));
   });
+
+  // Calendar Helpers
+  const year = currentCalendarDate.getFullYear();
+  const month = currentCalendarDate.getMonth();
+  const firstDayOfMonth = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  // Subscriptions filtering (recurring monthly/yearly items or auto-pay items)
+  const subscriptions = scheduled.filter(s => 
+    s.isActive && (s.frequency === 'MONTHLY' || s.frequency === 'YEARLY' || s.autoApprove)
+  );
+
+  const totalMonthlySubscriptions = subscriptions.reduce((acc, s) => {
+    const amt = Math.abs(s.amount);
+    if (s.frequency === 'YEARLY') return acc + amt / 12;
+    if (s.frequency === 'WEEKLY') return acc + amt * 4.33;
+    return acc + amt;
+  }, 0);
 
   if (loading) {
     return <div className={styles.container}>Loading planning data...</div>;
@@ -133,129 +152,292 @@ function PlanningContent() {
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}>Financial Planning</h1>
-          <p className={styles.subtitle}>Schedule and manage your recurring bills and income.</p>
+          <p className={styles.subtitle}>Schedule, calendarize, and track your recurring bills & subscriptions.</p>
         </div>
         <button className={styles.btnPrimary} onClick={() => { setEditingSched(null); setIsModalOpen(true); }}>
           + Add Scheduled Transaction
         </button>
       </div>
 
-      {pending.length > 0 && (
-        <div className={styles.pendingSection}>
-          <h2 className={styles.pendingTitle}>Action Required: Pending Approvals</h2>
-          <div className={styles.grid}>
-            {pending.map(s => (
-              <div key={s.id} className={styles.card} style={{ border: '2px solid #fcd34d' }}>
-                <div className={styles.cardHeader}>
-                  <div>
-                    <h3 className={styles.merchant}>{s.merchant || 'Scheduled'}</h3>
-                    <div className={s.amount > 0 ? styles.amountIncome : styles.amount}>
-                      {s.amount > 0 ? '+' : ''}{formatCurrency(s.amount)}
+      {/* Sub-Tabs Bar */}
+      <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+        <button
+          onClick={() => setActiveTab('payments')}
+          style={{
+            padding: '8px 16px',
+            borderRadius: '20px',
+            border: 'none',
+            background: activeTab === 'payments' ? 'var(--unique-blue)' : 'var(--bg-secondary)',
+            color: activeTab === 'payments' ? 'white' : 'var(--text-secondary)',
+            fontWeight: 600,
+            fontSize: '0.9rem',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+        >
+          💳 Payments ({scheduled.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('calendar')}
+          style={{
+            padding: '8px 16px',
+            borderRadius: '20px',
+            border: 'none',
+            background: activeTab === 'calendar' ? 'var(--unique-blue)' : 'var(--bg-secondary)',
+            color: activeTab === 'calendar' ? 'white' : 'var(--text-secondary)',
+            fontWeight: 600,
+            fontSize: '0.9rem',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+        >
+          📅 Calendar
+        </button>
+        <button
+          onClick={() => setActiveTab('subscriptions')}
+          style={{
+            padding: '8px 16px',
+            borderRadius: '20px',
+            border: 'none',
+            background: activeTab === 'subscriptions' ? 'var(--unique-blue)' : 'var(--bg-secondary)',
+            color: activeTab === 'subscriptions' ? 'white' : 'var(--text-secondary)',
+            fontWeight: 600,
+            fontSize: '0.9rem',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+        >
+          🔄 Subscriptions ({subscriptions.length})
+        </button>
+      </div>
+
+      {activeTab === 'payments' && (
+        <>
+          {pending.length > 0 && (
+            <div className={styles.pendingSection}>
+              <h2 className={styles.pendingTitle}>Action Required: Pending Approvals</h2>
+              <div className={styles.grid}>
+                {pending.map(s => (
+                  <div key={s.id} className={styles.card} style={{ border: '2px solid #fcd34d' }}>
+                    <div className={styles.cardHeader}>
+                      <div>
+                        <h3 className={styles.merchant}>{s.merchant || 'Scheduled'}</h3>
+                        <div className={s.amount > 0 ? styles.amountIncome : styles.amount}>
+                          {s.amount > 0 ? '+' : ''}{formatCurrency(s.amount)}
+                        </div>
+                      </div>
+                      <span className={styles.badge} style={{ background: '#fef3c7', color: '#b45309' }}>
+                        DUE: {formatDate(s.nextRunDate)}
+                      </span>
+                    </div>
+                    <div className={styles.meta}>
+                      From: {s.account?.name}
+                      <br/>
+                      Category: {s.category?.name || (s.type === 'transfer' ? 'Transfer' : 'Uncategorized')}
+                      <br/>
+                      Frequency: {s.frequency}
+                    </div>
+                    <div className={styles.actions}>
+                      <button className={`${styles.btn} ${styles.btnApprove}`} onClick={() => { setConfirmingSched(s); setIsConfirmModalOpen(true); }}>Pay Now</button>
+                      <button className={`${styles.btn} ${styles.btnSkip}`} onClick={() => handleSkip(s.id)}>Skip</button>
                     </div>
                   </div>
-                  <span className={styles.badge} style={{ background: '#fef3c7', color: '#b45309' }}>
-                    DUE: {formatDate(s.nextRunDate)}
-                    {(() => {
-                      const diffTime = new Date(s.nextRunDate).getTime() - now.getTime();
-                      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                      if (diffDays === 0) return ' (Today)';
-                      if (diffDays === -1) return ' (1 day ago)';
-                      if (diffDays < -1) return ` (${Math.abs(diffDays)} days ago)`;
-                      return '';
-                    })()}
-                  </span>
-                </div>
-                <div className={styles.meta}>
-                  From: {s.account?.name}
-                  {(s.account?.isArchived || s.toAccount?.isArchived) && (
-                    <span title="The linked account has been deleted. Please edit to select a new active account." style={{ cursor: 'help', marginLeft: '8px', color: '#dc2626', fontWeight: 'bold' }}>
-                      ⚠️
-                    </span>
-                  )}
-                  <br/>
-                  Category: {s.category ? (
-                    <span style={{ background: 'var(--bg-hover)', border: '1px solid var(--border-color)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.85rem', display: 'inline-block', marginTop: '4px' }}>
-                      {s.category.name}
-                    </span>
-                  ) : (
-                    <span style={{ color: 'var(--text-muted)' }}>
-                      {s.type === 'transfer' ? 'Transfer' : 'Uncategorized'}
-                    </span>
-                  )}
-                  <br/>
-                  Frequency: {s.frequency}
-                </div>
-                <div className={styles.actions}>
-                  <button className={`${styles.btn} ${styles.btnApprove}`} onClick={() => { setConfirmingSched(s); setIsConfirmModalOpen(true); }}>Pay Now</button>
-                  <button className={`${styles.btn} ${styles.btnSkip}`} onClick={() => handleSkip(s.id)}>Skip</button>
-                </div>
+                ))}
               </div>
+            </div>
+          )}
+
+          <div>
+            <h2 style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>Active Scheduled Transactions</h2>
+            {active.length === 0 ? (
+              <p style={{ color: 'var(--text-muted)' }}>No active scheduled transactions.</p>
+            ) : (
+              <div className={styles.grid}>
+                {active.map(s => (
+                  <div key={s.id} className={styles.card}>
+                    <div className={styles.cardHeader}>
+                      <div>
+                        <h3 className={styles.merchant}>{s.merchant || 'Scheduled'}</h3>
+                        <div className={s.amount > 0 ? styles.amountIncome : styles.amount}>
+                          {s.amount > 0 ? '+' : ''}{formatCurrency(s.amount)}
+                        </div>
+                      </div>
+                      <span className={styles.badge}>
+                        NEXT: {formatDate(s.nextRunDate)}
+                      </span>
+                    </div>
+                    <div className={styles.meta}>
+                      From: {s.account?.name}
+                      <br/>
+                      Category: {s.category?.name || (s.type === 'transfer' ? 'Transfer' : 'Uncategorized')}
+                      <br/>
+                      Frequency: {s.frequency} • {s.autoApprove ? 'Auto-pay' : 'Manual'}
+                    </div>
+                    <div className={styles.actions}>
+                      <button className={`${styles.btn} ${styles.btnApprove}`} onClick={() => { setConfirmingSched(s); setIsConfirmModalOpen(true); }}>Pay Now</button>
+                      <button className={`${styles.btn} ${styles.btnEdit}`} onClick={() => { setEditingSched(s); setIsModalOpen(true); }}>Edit</button>
+                      <button className={`${styles.btn} ${styles.btnDelete}`} onClick={() => handleDelete(s.id)}>Delete</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {activeTab === 'calendar' && (
+        <div style={{ background: 'var(--bg-secondary)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
+          {/* Calendar Header Controls */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <h2 style={{ margin: 0 }}>
+              {currentCalendarDate.toLocaleString('en-US', { month: 'long', year: 'numeric' })}
+            </h2>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button 
+                onClick={() => setCurrentCalendarDate(new Date(year, month - 1, 1))}
+                style={{ padding: '6px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'transparent', cursor: 'pointer', color: 'var(--text-main)' }}
+              >
+                ← Prev
+              </button>
+              <button 
+                onClick={() => setCurrentCalendarDate(new Date())}
+                style={{ padding: '6px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'transparent', cursor: 'pointer', color: 'var(--text-main)' }}
+              >
+                Today
+              </button>
+              <button 
+                onClick={() => setCurrentCalendarDate(new Date(year, month + 1, 1))}
+                style={{ padding: '6px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'transparent', cursor: 'pointer', color: 'var(--text-main)' }}
+              >
+                Next →
+              </button>
+            </div>
+          </div>
+
+          {/* Days of Week Header */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', textAlign: 'center', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '8px', fontSize: '0.85rem' }}>
+            <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
+          </div>
+
+          {/* Calendar Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
+            {Array.from({ length: firstDayOfMonth }).map((_, idx) => (
+              <div key={`empty-${idx}`} style={{ minHeight: '80px', background: 'transparent' }} />
             ))}
+            {Array.from({ length: daysInMonth }).map((_, idx) => {
+              const dayNum = idx + 1;
+              const cellDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+              
+              const dayItems = scheduled.filter(s => {
+                if (!s.nextRunDate) return false;
+                const rDate = new Date(s.nextRunDate);
+                return rDate.getFullYear() === year && rDate.getMonth() === month && rDate.getDate() === dayNum;
+              });
+
+              const isToday = now.getFullYear() === year && now.getMonth() === month && now.getDate() === dayNum;
+
+              return (
+                <div 
+                  key={dayNum} 
+                  style={{
+                    minHeight: '80px',
+                    padding: '8px',
+                    borderRadius: '8px',
+                    background: isToday ? 'rgba(37, 99, 235, 0.08)' : 'var(--bg-primary)',
+                    border: isToday ? '2px solid var(--unique-blue)' : '1px solid var(--border-color)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <span style={{ fontSize: '0.85rem', fontWeight: isToday ? 700 : 500, color: isToday ? 'var(--unique-blue)' : 'var(--text-main)' }}>
+                    {dayNum}
+                  </span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
+                    {dayItems.map(item => (
+                      <div 
+                        key={item.id} 
+                        onClick={() => { setEditingSched(item); setIsModalOpen(true); }}
+                        style={{ 
+                          fontSize: '0.72rem', 
+                          padding: '2px 4px', 
+                          borderRadius: '4px', 
+                          background: item.amount < 0 ? 'rgba(225, 29, 72, 0.15)' : 'rgba(20, 184, 166, 0.15)',
+                          color: item.amount < 0 ? '#e11d48' : 'var(--sporty-teal)',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}
+                      >
+                        {item.merchant || 'Payment'}: {formatCurrency(item.amount)}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
 
-      <div>
-        <h2 style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>Active Scheduled Transactions</h2>
-        {active.length === 0 ? (
-          <p style={{ color: 'var(--text-muted)' }}>No active scheduled transactions.</p>
-        ) : (
-          <div className={styles.grid}>
-            {active.map(s => (
-              <div key={s.id} className={styles.card}>
-                <div className={styles.cardHeader}>
-                  <div>
-                    <h3 className={styles.merchant}>{s.merchant || 'Scheduled'}</h3>
-                    <div className={s.amount > 0 ? styles.amountIncome : styles.amount}>
-                      {s.amount > 0 ? '+' : ''}{formatCurrency(s.amount)}
-                    </div>
-                  </div>
-                  <span className={styles.badge}>
-                    NEXT: {formatDate(s.nextRunDate)}
-                    {(() => {
-                      const diffTime = new Date(s.nextRunDate).getTime() - now.getTime();
-                      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                      if (diffDays === 0) return ' (Today)';
-                      if (diffDays === 1) return ' (Tomorrow)';
-                      if (diffDays > 1) return ` (in ${diffDays} days)`;
-                      return '';
-                    })()}
-                  </span>
-                </div>
-                <div className={styles.meta}>
-                  From: {s.account?.name}
-                  {(s.account?.isArchived || s.toAccount?.isArchived) && (
-                    <span title="The linked account has been deleted. Please edit to select a new active account." style={{ cursor: 'help', marginLeft: '8px', color: '#dc2626', fontWeight: 'bold' }}>
-                      ⚠️
-                    </span>
-                  )}
-                  <br/>
-                  Category: {s.category ? (
-                    <span style={{ background: 'var(--bg-hover)', border: '1px solid var(--border-color)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.85rem', display: 'inline-block', marginTop: '4px' }}>
-                      {s.category.name}
-                    </span>
-                  ) : (
-                    <span style={{ color: 'var(--text-muted)' }}>
-                      {s.type === 'transfer' ? 'Transfer' : 'Uncategorized'}
-                    </span>
-                  )}
-                  <br/>
-                  Frequency: {s.frequency}
-                  <br/>
-                  Mode: {s.autoApprove ? 'Auto' : 'Manual'}
-                </div>
-                <div className={styles.actions}>
-                  <button className={`${styles.btn} ${styles.btnApprove}`} onClick={() => { setConfirmingSched(s); setIsConfirmModalOpen(true); }}>Pay Now</button>
-                  <button className={`${styles.btn} ${styles.btnEdit}`} onClick={() => { setEditingSched(s); setIsModalOpen(true); }}>Edit</button>
-                  <button className={`${styles.btn} ${styles.btnDelete}`} onClick={() => handleDelete(s.id)}>Delete</button>
-                </div>
+      {activeTab === 'subscriptions' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Subscriptions Overhead Summary */}
+          <div style={{ padding: '20px', borderRadius: '16px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+            <div>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Total Recurring Subscriptions</span>
+              <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--unique-blue)', marginTop: '4px' }}>
+                {formatCurrency(totalMonthlySubscriptions)} / month
               </div>
-            ))}
+            </div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+              💡 {subscriptions.length} active recurring service{subscriptions.length !== 1 ? 's' : ''} tracked
+            </div>
           </div>
-        )}
-      </div>
 
+          {/* Subscriptions Grid */}
+          <div className={styles.grid}>
+            {subscriptions.map(s => {
+              const rDate = new Date(s.nextRunDate);
+              const daysLeft = Math.ceil((rDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
+              return (
+                <div key={s.id} className={styles.card}>
+                  <div className={styles.cardHeader}>
+                    <div>
+                      <h3 className={styles.merchant}>{s.merchant || 'Subscription'}</h3>
+                      <div className={styles.amount}>
+                        {formatCurrency(Math.abs(s.amount))} / {s.frequency.toLowerCase()}
+                      </div>
+                    </div>
+                    {s.autoApprove ? (
+                      <span className={styles.badge} style={{ background: 'rgba(20, 184, 166, 0.15)', color: 'var(--sporty-teal)' }}>
+                        ⚡ Auto-Pay
+                      </span>
+                    ) : (
+                      <span className={styles.badge}>
+                        Manual Approval
+                      </span>
+                    )}
+                  </div>
+                  <div className={styles.meta}>
+                    Payment Method: {s.account?.name}
+                    <br/>
+                    Renews: {formatDate(s.nextRunDate)} ({daysLeft <= 0 ? 'Today' : `in ${daysLeft} days`})
+                  </div>
+                  <div className={styles.actions}>
+                    <button className={`${styles.btn} ${styles.btnEdit}`} onClick={() => { setEditingSched(s); setIsModalOpen(true); }}>Manage</button>
+                    <button className={`${styles.btn} ${styles.btnDelete}`} onClick={() => handleDelete(s.id)}>Cancel</button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <ScheduledTransactionModal 
         isOpen={isModalOpen}
