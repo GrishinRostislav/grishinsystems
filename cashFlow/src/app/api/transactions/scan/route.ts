@@ -126,8 +126,9 @@ async function callGeminiVision(apiKey: string, prompt: string, base64Image: str
 
 export async function POST(request: Request) {
   try {
-    const settings: any = await prisma.settings.findUnique({
-      where: { id: "global" }
+    const settings = await prisma.settings.findUnique({
+      where: { id: "global" },
+      select: { openaiApiKey: true, geminiApiKey: true, aiModel: true }
     }).catch(() => null);
 
     const isGeminiFormat = (k: string) => k.startsWith("AIza") || k.startsWith("AQ.") || k.startsWith("AQ");

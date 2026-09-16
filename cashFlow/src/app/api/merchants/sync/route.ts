@@ -8,7 +8,8 @@ export async function POST(request: Request) {
     const transactions = await prisma.transaction.findMany({
       where: {
         merchant: {
-          not: null
+          not: null,
+          not: ""
         },
         payeeId: null,
         isTransfer: false

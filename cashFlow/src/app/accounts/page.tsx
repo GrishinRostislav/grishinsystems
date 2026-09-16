@@ -266,34 +266,33 @@ export default function AccountsPage() {
         <div className={styles.headerLeft}>
           <h1>Accounts</h1>
           <p>Manage your bank accounts, credit cards, and cash.</p>
-          {totalBalance !== null && (() => {
-            const totalAssets = accounts.reduce((acc, a) => {
-              if (!a.includeInTotal || a.isArchived) return acc;
-              return a.balance > 0 ? acc + a.balance : acc;
-            }, 0);
-            const totalLiabilities = accounts.reduce((acc, a) => {
-              if (!a.includeInTotal || a.isArchived) return acc;
-              return a.balance < 0 ? acc + Math.abs(a.balance) : acc;
-            }, 0);
-            const netWorth = totalAssets - totalLiabilities;
-
-            return (
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '16px' }}>
-                <div className={styles.totalBalanceCard} style={{ flex: 1, minWidth: '180px' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Net Worth</span>
-                  <span style={{ fontSize: '1.5rem', fontWeight: 800, color: netWorth >= 0 ? 'var(--unique-blue)' : '#e11d48' }}>{formatCurrency(netWorth, homeCurrency)}</span>
-                </div>
-                <div className={styles.totalBalanceCard} style={{ flex: 1, minWidth: '180px' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Total Assets</span>
-                  <span style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--sporty-teal)' }}>+{formatCurrency(totalAssets, homeCurrency)}</span>
-                </div>
-                <div className={styles.totalBalanceCard} style={{ flex: 1, minWidth: '180px' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Total Liabilities</span>
-                  <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#e11d48' }}>-{formatCurrency(totalLiabilities, homeCurrency)}</span>
-                </div>
+          {totalBalance !== null && (
+            <div className={styles.totalBalanceCard}>
+              <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Total Balance</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--unique-blue)', lineHeight: 1 }}>{formatCurrency(totalBalance, homeCurrency)}</span>
+                {balanceChange && (
+                  <span style={{ 
+                    fontSize: '0.875rem', 
+                    fontWeight: 600, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '4px',
+                    color: balanceChange.amount >= 0 ? 'var(--sporty-teal)' : '#e11d48',
+                    background: balanceChange.amount >= 0 ? 'rgba(20, 184, 166, 0.1)' : 'rgba(225, 29, 72, 0.1)',
+                    padding: '4px 10px',
+                    borderRadius: '16px',
+                    lineHeight: 1
+                  }}>
+                    {balanceChange.amount >= 0 ? '↑' : '↓'}
+                    {formatCurrency(Math.abs(balanceChange.amount), homeCurrency)} 
+                    ({balanceChange.amount >= 0 ? '+' : ''}{balanceChange.percentage.toFixed(1)}%)
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginLeft: '4px', fontWeight: 500 }}>(Period)</span>
+                  </span>
+                )}
               </div>
-            );
-          })()}
+            </div>
+          )}
         </div>
         <div className={styles.headerRight}>
           <GlobalDateFilter onDatesChange={handleDatesChange} />
