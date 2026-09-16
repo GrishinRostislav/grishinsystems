@@ -6,8 +6,10 @@ import Link from "next/link";
 import CategoryModal from "@/components/CategoryModal";
 import TransactionModal from "@/components/TransactionModal";
 import TransactionList from "@/components/TransactionList";
+import GlobalDateFilter from "@/components/GlobalDateFilter";
 import { useRouter } from "next/navigation";
-import { formatCurrency, formatDate } from "@/utils/format";
+import { formatCurrency } from "@/utils/format";
+import { useAutoSync } from "@/hooks/useAutoSync";
 
 export default function CategoryDetail({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -17,17 +19,32 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
   const [allCategories, setAllCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
 
   const [isTxnModalOpen, setIsTxnModalOpen] = useState(false);
   const [selectedTxn, setSelectedTxn] = useState<any>(null);
 
-  const fetchCategoryData = async () => {
+  const handleDatesChange = (start: string, end: string) => {
+    setStartDate(start);
+    setEndDate(end);
+  };
+
+  const fetchCategoryData = async (isSilent = false) => {
     try {
-      setLoading(true);
+      if (!isSilent) setLoading(true);
+
+      const queryParams = new URLSearchParams();
+      if (startDate && endDate) {
+        queryParams.set("startDate", startDate);
+        queryParams.set("endDate", endDate);
+      }
+
       const [resDetail, resAll] = await Promise.all([
-        fetch(`/cashFlow/api/categories/${resolvedParams.id}`),
+        fetch(`/cashFlow/api/categories/${resolvedParams.id}?${queryParams.toString()}`),
         fetch("/cashFlow/api/categories")
       ]);
       const result = await resDetail.json();
@@ -37,13 +54,21 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
     } catch (err) {
       console.error(err);
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCategoryData();
-  }, [resolvedParams.id]);
+    if (startDate && endDate && resolvedParams.id) {
+      fetchCategoryData();
+    }
+  }, [resolvedParams.id, startDate, endDate]);
+
+  useAutoSync(() => {
+    if (startDate && endDate && resolvedParams.id) {
+      fetchCategoryData(true);
+    }
+  });
 
   const handleSaveCategory = async (catData: any) => {
     try {
@@ -85,18 +110,20 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
 
   if (!loading && (!data || data.error)) return <div className={styles.container}><h1>Category Not Found</h1></div>;
 
-  const { category, transactions } = data || {};
-
-
+  const { category, transactions, totalSpending = 0 } = data || {};
 
   return (
     <div className={styles.container}>
-      <Link href="/categories" className={styles.backLink}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
-        Back to Categories
-      </Link>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+        <Link href="/categories" className={styles.backLink}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          Back to Categories
+        </Link>
+        <GlobalDateFilter onDatesChange={handleDatesChange} />
+      </div>
+
       <div className={styles.header}>
         <div>
           <h1 className={styles.title} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -115,6 +142,12 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
               Subcategory of <Link href={`/categories/${category.parentCategory.id}`} style={{ color: 'var(--unique-blue)', textDecoration: 'none' }}>{category.parentCategory.name}</Link>
             </p>
           )}
+          <div style={{ marginTop: '12px', background: 'var(--bg-secondary)', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'inline-block' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Period Total Spent</span>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: totalSpending > 0 ? '#e11d48' : 'var(--unique-blue)', marginTop: '2px' }}>
+              {formatCurrency(totalSpending)}
+            </div>
+          </div>
         </div>
         <button 
           className={styles.btnPrimary} 
@@ -150,13 +183,13 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
           )}
 
           <div>
-            <h2 style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>Recent Transactions</h2>
+            <h2 style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>Period Transactions</h2>
             <TransactionList
               transactions={transactions || []}
               onTransactionClick={(txn) => { setSelectedTxn(txn); setIsTxnModalOpen(true); }}
-              onTransactionsUpdated={fetchCategoryData}
-              emptyMessage="No transactions found for this category."
-              totalLabel="Total for Category:"
+              onTransactionsUpdated={() => fetchCategoryData()}
+              emptyMessage="No transactions found for this category in selected period."
+              totalLabel="Total for Period:"
             />
           </div>
         </>
@@ -176,7 +209,7 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
         isOpen={isTxnModalOpen} 
         onClose={() => setIsTxnModalOpen(false)} 
         transaction={selectedTxn} 
-        onSave={fetchCategoryData} 
+        onSave={() => fetchCategoryData()} 
       />
     </div>
   );
