@@ -124,24 +124,37 @@ export default function GlobalDateFilter({ onDatesChange }: GlobalDateFilterProp
 
   const handleIntervalChange = (val: string) => {
     setIntervalState(val);
-    if (typeof window !== "undefined") localStorage.setItem(getStorageKey("date_interval"), val);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(getStorageKey("date_interval"), val);
+      localStorage.setItem("global_date_interval", val);
+    }
     if (val !== "custom") {
       const { startStr, endStr } = computeDates(val);
       setEndDate(endStr);
-      if (typeof window !== "undefined") localStorage.setItem(getStorageKey("end_date"), endStr);
       setStartDate(startStr);
-      if (typeof window !== "undefined") localStorage.setItem(getStorageKey("start_date"), startStr);
+      if (typeof window !== "undefined") {
+        localStorage.setItem(getStorageKey("end_date"), endStr);
+        localStorage.setItem("global_end_date", endStr);
+        localStorage.setItem(getStorageKey("start_date"), startStr);
+        localStorage.setItem("global_start_date", startStr);
+      }
     }
   };
 
   const handleStartDateChange = (val: string) => {
     setStartDate(val);
-    if (typeof window !== "undefined") localStorage.setItem(getStorageKey("start_date"), val);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(getStorageKey("start_date"), val);
+      localStorage.setItem("global_start_date", val);
+    }
   };
 
   const handleEndDateChange = (val: string) => {
     setEndDate(val);
-    if (typeof window !== "undefined") localStorage.setItem(getStorageKey("end_date"), val);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(getStorageKey("end_date"), val);
+      localStorage.setItem("global_end_date", val);
+    }
   };
 
   return (

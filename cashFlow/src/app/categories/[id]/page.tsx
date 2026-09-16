@@ -7,20 +7,21 @@ import CategoryModal from "@/components/CategoryModal";
 import TransactionModal from "@/components/TransactionModal";
 import TransactionList from "@/components/TransactionList";
 import GlobalDateFilter from "@/components/GlobalDateFilter";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { formatCurrency } from "@/utils/format";
 import { useAutoSync } from "@/hooks/useAutoSync";
 
 export default function CategoryDetail({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const router = useRouter();
+  const searchParams = useSearchParams();
   
   const [data, setData] = useState<any>(null);
   const [allCategories, setAllCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState(() => searchParams.get("startDate") || "");
+  const [endDate, setEndDate] = useState(() => searchParams.get("endDate") || "");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
@@ -167,7 +168,7 @@ export default function CategoryDetail({ params }: { params: Promise<{ id: strin
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px' }}>
                 {category.subcategories.map((sub: any) => (
                   <div key={sub.id} className={styles.card} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px' }}>
-                    <Link href={`/categories/${sub.id}`} style={{ textDecoration: 'none', flex: 1 }}>
+                    <Link href={`/categories/${sub.id}?startDate=${startDate}&endDate=${endDate}`} style={{ textDecoration: 'none', flex: 1 }}>
                       <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.2rem', cursor: 'pointer' }}>📁 {sub.name}</h3>
                     </Link>
                     <button 

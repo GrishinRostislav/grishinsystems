@@ -300,7 +300,7 @@ export default function CategoriesPage() {
                         display: 'inline-block',
                         flexShrink: 0
                       }} />
-                      <Link href={`/categories/${category.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                      <Link href={`/categories/${category.id}?startDate=${startDate}&endDate=${endDate}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                         <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-main)', cursor: 'pointer' }}>
                           {category.name}
                         </span>
@@ -381,9 +381,11 @@ export default function CategoriesPage() {
                         return (
                           <div key={sub.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem' }}>
-                              <span style={{ color: 'var(--text-main)', fontWeight: 500 }}>
-                                ↳ {sub.name}
-                              </span>
+                              <Link href={`/categories/${sub.id}?startDate=${startDate}&endDate=${endDate}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                <span style={{ color: 'var(--text-main)', fontWeight: 500, cursor: 'pointer' }}>
+                                  ↳ {sub.name}
+                                </span>
+                              </Link>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <span style={{ fontWeight: 600, color: subSpent > 0 ? 'var(--text-main)' : 'var(--text-muted)' }}>
                                   {formatCurrency(subSpent, homeCurrency)}
