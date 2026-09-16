@@ -31,7 +31,7 @@ export async function GET() {
         id: `sched-${st.id}`,
         type: 'PAYMENT',
         title: ' Предстоящий платеж',
-        message: `${st.name || 'Платеж'}: ${Math.abs(amt).toFixed(2)} ${homeCurrency} (${dateStr})`,
+        message: `${st.merchant || 'Платеж'}: ${Math.abs(amt).toFixed(2)} ${homeCurrency} (${dateStr})`,
         severity: 'info'
       });
     }

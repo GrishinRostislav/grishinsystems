@@ -120,9 +120,8 @@ export async function POST(request: Request) {
     }
 
     // 1. Gather comprehensive financial context from Prisma DB
-    let settings = await prisma.settings.findUnique({
-      where: { id: "global" },
-      select: { homeCurrency: true, openaiApiKey: true, geminiApiKey: true, aiModel: true, aiCustomInstructions: true, aiFinancialGoal: true, aiAuditTone: true, aiMinBufferMonths: true }
+    let settings: any = await prisma.settings.findUnique({
+      where: { id: "global" }
     }).catch(() => null);
     const homeCurrency = settings?.homeCurrency || "CAD";
     const rates = await getExchangeRates(homeCurrency);
@@ -228,7 +227,7 @@ export async function POST(request: Request) {
         const dateStr = new Date(tx.date).toISOString().split('T')[0];
         const catName = tx.category ? tx.category.name : 'Без категории';
         const sign = convertedAmt > 0 ? '+' : '';
-        recentTxList.push(`${dateStr} | ${tx.merchant || tx.description || 'Операция'} | ${sign}${convertedAmt.toFixed(2)} ${homeCurrency} | Категория: ${catName}`);
+        recentTxList.push(`${dateStr} | ${tx.merchant || tx.notes || 'Операция'} | ${sign}${convertedAmt.toFixed(2)} ${homeCurrency} | Категория: ${catName}`);
       }
     }
 
@@ -262,7 +261,7 @@ export async function POST(request: Request) {
     // Scheduled Payments
     const scheduled = await prisma.scheduledTransaction.findMany({ where: { isActive: true } });
     const scheduledSummary = scheduled.map(s => 
-      `- ${s.name || 'Payment'}: ${s.amount} (${s.frequency}) | Next Run: ${new Date(s.nextRunDate).toISOString().split('T')[0]}`
+      `- ${s.merchant || 'Payment'}: ${s.amount} (${s.frequency}) | Next Run: ${new Date(s.nextRunDate).toISOString().split('T')[0]}`
     ).join('\n');
 
     // Active Scenarios
@@ -289,9 +288,9 @@ export async function POST(request: Request) {
       } catch {
         customInstructionsFormatted = customInstructionsRaw
           .split('\n')
-          .map(s => s.trim())
+          .map((s: string) => s.trim())
           .filter(Boolean)
-          .map((line, idx) => `  ${idx + 1}. ${line}`)
+          .map((line: string, idx: number) => `  ${idx + 1}. ${line}`)
           .join('\n');
       }
     }

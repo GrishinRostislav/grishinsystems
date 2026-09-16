@@ -450,71 +450,96 @@ export default function Home() {
           </div>
         </div>
         <div className={styles.chartCard} style={{ height: '100%' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? '8px' : '16px' }}>
-            <h3 style={{ margin: 0 }}>Expenses by Category</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div>
+              <h3 style={{ margin: 0 }}>Expenses by Category</h3>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Top 10 Categories</span>
+            </div>
             <Link href="/categories" style={{ textDecoration: 'none', color: 'var(--unique-blue)', fontSize: '14px', fontWeight: 600 }}>
               View All &rarr;
             </Link>
           </div>
-          <div style={{ width: '100%', height: isMobile ? 240 : 300, display: 'flex', justifyContent: 'center' }}>
-            {pieData && pieData.length > 0 ? (
-              <ResponsiveContainer>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    innerRadius={isMobile ? 30 : 40}
-                    outerRadius={isMobile ? 60 : 80}
-                    paddingAngle={5}
-                    dataKey="value"
-                    labelLine={true}
-                    onClick={(data) => {
-                      if (data.payload && data.payload.id) {
-                        router.push(`/categories/${data.payload.id}`);
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, overflowY: 'auto' }}>
+            {pieData && pieData.length > 0 ? (() => {
+              const top10 = pieData.slice(0, 10);
+              const maxVal = Math.max(...top10.map((c: any) => c.value), 1);
+              const totalCategorySpent = pieData.reduce((acc: number, c: any) => acc + c.value, 0);
+
+              return top10.map((item: any, idx: number) => {
+                const pct = totalCategorySpent > 0 ? ((item.value / totalCategorySpent) * 100).toFixed(1) : '0';
+                const barWidthPct = Math.min(100, Math.max(4, (item.value / maxVal) * 100));
+                const catColor = getCategoryColor(item.name);
+
+                return (
+                  <div 
+                    key={item.id || idx}
+                    onClick={() => {
+                      if (item.id) {
+                        router.push(`/categories/${item.id}`);
                       } else {
                         router.push(`/categories`);
                       }
                     }}
-                    style={{ cursor: 'pointer' }}
-                    label={isMobile 
-                      ? ({ percent, x, y, cx }) => (
-                          <text 
-                            x={x} 
-                            y={y} 
-                            fill="#1A2B4C" 
-                            textAnchor={x > cx ? 'start' : 'end'} 
-                            dominantBaseline="central" 
-                            fontSize={9}
-                            fontWeight={500}
-                          >
-                            {`${((percent || 0) * 100).toFixed(0)}%`}
-                          </text>
-                        )
-                      : ({ name, percent, x, y, cx }) => (
-                          <text 
-                            x={x} 
-                            y={y} 
-                            fill="#1A2B4C" 
-                            textAnchor={x > cx ? 'start' : 'end'} 
-                            dominantBaseline="central" 
-                            fontSize={11}
-                            fontWeight={500}
-                          >
-                            {`${name} (${((percent || 0) * 100).toFixed(0)}%)`}
-                          </text>
-                        )
-                    }
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '6px',
+                      cursor: 'pointer',
+                      padding: '8px 10px',
+                      borderRadius: '8px',
+                      transition: 'background-color 0.15s'
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
-                    {pieData.map((entry: any, index: number) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value: any) => formatCurrency(Number(value), homeCurrency)} />
-                  <Legend layout="horizontal" verticalAlign="bottom" align="center" iconSize={8} iconType="circle" wrapperStyle={{ fontSize: isMobile ? '10px' : '11px', marginTop: '10px' }} />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#64748b' }}>
-                No expenses this month.
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{
+                          width: '10px',
+                          height: '10px',
+                          borderRadius: '50%',
+                          background: catColor,
+                          display: 'inline-block',
+                          flexShrink: 0
+                        }} />
+                        <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                          {item.name}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                          {formatCurrency(item.value, homeCurrency)}
+                        </span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-muted)', minWidth: '40px', textAlign: 'right' }}>
+                          {pct}%
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div style={{
+                      width: '100%',
+                      height: '7px',
+                      borderRadius: '4px',
+                      background: 'rgba(100, 116, 139, 0.15)',
+                      overflow: 'hidden',
+                      position: 'relative'
+                    }}>
+                      <div style={{
+                        width: `${barWidthPct}%`,
+                        height: '100%',
+                        borderRadius: '4px',
+                        background: catColor,
+                        transition: 'width 0.3s ease-in-out'
+                      }} />
+                    </div>
+                  </div>
+                );
+              });
+            })() : (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)' }}>
+                No expenses this period.
               </div>
             )}
           </div>

@@ -8,10 +8,9 @@ export async function GET() {
     }).catch(() => null);
     
     if (!settings) {
-      settings = await prisma.settings.findUnique({
-        where: { id: "global" },
-        select: { id: true, homeCurrency: true }
-      }).catch(() => null);
+      settings = (await prisma.settings.findUnique({
+        where: { id: "global" }
+      }).catch(() => null)) as any;
     }
 
     if (!settings) {
@@ -64,7 +63,7 @@ export async function PUT(request: Request) {
         aiFinancialGoal: aiFinancialGoal || "balanced",
         aiAuditTone: aiAuditTone || "strict",
         aiMinBufferMonths: aiMinBufferMonths ? Number(aiMinBufferMonths) : 3,
-      }
+      } as any
     });
 
     return NextResponse.json(settings);
