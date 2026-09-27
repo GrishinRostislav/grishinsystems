@@ -4,7 +4,23 @@ import { prisma } from "@/lib/prisma";
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { transactionIds, data } = body;
+    const { transactionIds, data, updates } = body;
+
+    if (Array.isArray(updates)) {
+      if (updates.length === 0) return NextResponse.json({ error: "No updates provided" }, { status: 400 });
+      await prisma.$transaction(async (tx) => {
+        for (const update of updates) {
+          const old = await tx.transaction.findUnique({ where: { id: update.id } });
+          if (!old) continue;
+          const amount = Number(update.amount);
+          if (!Number.isFinite(amount) || !update.accountId || !update.date) throw new Error("Invalid transaction data");
+          await tx.account.update({ where: { id: old.accountId }, data: { balance: { decrement: old.amount } } });
+          await tx.account.update({ where: { id: update.accountId }, data: { balance: { increment: amount } } });
+          await tx.transaction.update({ where: { id: old.id }, data: { amount, date: new Date(update.date), merchant: update.merchant || null, notes: update.notes || null, accountId: update.accountId, categoryId: update.categoryId || null } });
+        }
+      });
+      return NextResponse.json({ success: true, count: updates.length });
+    }
 
     if (!Array.isArray(transactionIds) || transactionIds.length === 0) {
       return NextResponse.json({ error: "Missing or invalid transactionIds" }, { status: 400 });

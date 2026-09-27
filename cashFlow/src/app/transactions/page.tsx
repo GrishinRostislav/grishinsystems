@@ -62,6 +62,7 @@ export default function TransactionsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [accounts, setAccounts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
 
   // Scan State
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
@@ -93,15 +94,18 @@ export default function TransactionsPage() {
       
       const url = `/cashFlow/api/transactions${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
-      const [txRes, accountsRes] = await Promise.all([
+      const [txRes, accountsRes, categoriesRes] = await Promise.all([
         fetch(url),
-        fetch('/cashFlow/api/accounts?includeArchived=true')
+        fetch('/cashFlow/api/accounts?includeArchived=true'),
+        fetch('/cashFlow/api/categories')
       ]);
       const txData = await txRes.json();
       const accountsData = await accountsRes.json();
+      const categoriesData = await categoriesRes.json();
       
       setTransactions(txData);
       setAccounts(Array.isArray(accountsData) ? accountsData : []);
+      setCategories(Array.isArray(categoriesData) ? categoriesData : []);
     } catch (err) {
       console.error("Failed to fetch data", err);
     } finally {
@@ -236,6 +240,7 @@ export default function TransactionsPage() {
           emptyMessage="No transactions match your search query."
           totalLabel="Total for Period:"
           accounts={accounts}
+          categories={categories}
         />
       )}
 

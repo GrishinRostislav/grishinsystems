@@ -23,6 +23,7 @@ interface TransactionListProps {
   showTotal?: boolean;
   totalLabel?: string;
   accounts?: any[];
+  categories?: any[];
 }
 
 export default function TransactionList({ 
@@ -32,18 +33,18 @@ export default function TransactionList({
   emptyMessage = "No transactions found.",
   showTotal = true,
   totalLabel = "Total:",
-  accounts = []
+  accounts = [],
+  categories = []
 }: TransactionListProps) {
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
-  const [isEditMode, setIsEditMode] = useState(false);
   const [isBulkEditOpen, setIsBulkEditOpen] = useState(false);
   const [bulkEditTransactions, setBulkEditTransactions] = useState<any[]>([]);
 
-  const handleBulkEditSave = async (transactionIds: string[], data: any) => {
+  const handleBulkEditSave = async (updates: any[]) => {
     const res = await fetch("/cashFlow/api/transactions/bulk-update", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ transactionIds, data })
+      body: JSON.stringify({ updates })
     });
     if (res.ok) {
       if (onTransactionsUpdated) onTransactionsUpdated();
@@ -76,33 +77,6 @@ export default function TransactionList({
 
   return (
     <div className={styles.listContainer}>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', paddingBottom: '12px', borderBottom: '1px solid var(--border-color)', marginBottom: '16px' }}>
-        <button
-          onClick={() => setIsEditMode(!isEditMode)}
-          style={{
-            background: isEditMode ? 'var(--sporty-teal)' : 'transparent',
-            border: '1px solid',
-            borderColor: isEditMode ? 'var(--sporty-teal)' : 'var(--border-color)',
-            color: isEditMode ? 'white' : 'var(--text-secondary)',
-            padding: '6px 12px',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '0.85rem',
-            fontWeight: 600,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            transition: 'all 0.2s'
-          }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 20h9"></path>
-            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-          </svg>
-          {isEditMode ? 'Done Editing' : 'Edit Groups'}
-        </button>
-      </div>
-
       {Object.keys(grouped).map(dateStr => {
         const dateTxns = grouped[dateStr];
         
@@ -218,8 +192,7 @@ export default function TransactionList({
                           </div>
                         </div>
                         <div className={styles.groupRight}>
-                          {isEditMode && (
-                            <button
+                          <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setBulkEditTransactions(item.transactions);
@@ -248,7 +221,6 @@ export default function TransactionList({
                               </svg>
                               Edit
                             </button>
-                          )}
                           <div className={totalIsIncome ? styles.amountIncome : styles.amountExpense}>
                             {totalIsIncome ? "+" : ""}{formatCurrency(item.totalAmount, currency)}
                           </div>
@@ -376,6 +348,7 @@ export default function TransactionList({
         onSave={handleBulkEditSave}
         transactions={bulkEditTransactions}
         accounts={accounts}
+        categories={categories}
       />
     </div>
   );
