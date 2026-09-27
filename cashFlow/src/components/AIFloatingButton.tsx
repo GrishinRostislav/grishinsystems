@@ -100,7 +100,7 @@ export default function AIFloatingButton() {
       {/* Top Center AI Pill Button */}
       <button 
         className={styles.floatingBtn}
-        onClick={() => setIsOpen(true)}
+        onClick={() => { setIsOpen(true); fetchAlerts(); }}
         title="AI Financial Advisor"
         aria-label="AI Financial Advisor"
       >
@@ -165,23 +165,6 @@ export default function AIFloatingButton() {
                 </button>
               </div>
             </div>
-
-            {/* Proactive Alerts Section */}
-            {alerts.length > 0 && (
-              <div className={styles.alertsSection}>
-                {alerts.map((alert) => {
-                  let alertClass = styles.alertInfo;
-                  if (alert.severity === 'warning') alertClass = styles.alertWarning;
-                  if (alert.severity === 'danger') alertClass = styles.alertDanger;
-
-                  return (
-                    <div key={alert.id} className={`${styles.alertItem} ${alertClass}`}>
-                      <strong>{alert.title}:</strong> {alert.message}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
 
             {/* Messages Body */}
             <div className={styles.messagesBody}>
