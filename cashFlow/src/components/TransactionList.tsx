@@ -192,10 +192,11 @@ export default function TransactionList({
                           </div>
                         </div>
                         <div className={styles.groupRight}>
-                          <button
+                          {/* Edit is intentionally placed inside the expanded purchase list. */}
+                          {false && <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setBulkEditTransactions(item.transactions);
+                                setBulkEditTransactions(item.isGroup ? item.transactions : []);
                                 setIsBulkEditOpen(true);
                               }}
                               style={{
@@ -220,7 +221,7 @@ export default function TransactionList({
                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                               </svg>
                               Edit
-                            </button>
+                            </button>}
                           <div className={totalIsIncome ? styles.amountIncome : styles.amountExpense}>
                             {totalIsIncome ? "+" : ""}{formatCurrency(item.totalAmount, currency)}
                           </div>
@@ -240,6 +241,11 @@ export default function TransactionList({
                       
                       {isExpanded && (
                         <div className={styles.nestedItemsList}>
+                          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '8px 12px 4px' }}>
+                            <button onClick={(e) => { e.stopPropagation(); setBulkEditTransactions(item.transactions); setIsBulkEditOpen(true); }} style={{ background: 'var(--sporty-teal)', border: 0, color: 'white', cursor: 'pointer', padding: '8px 14px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600 }}>
+                              Edit purchase
+                            </button>
+                          </div>
                           {item.transactions.map((txn: any) => {
                             const isIncome = txn.amount >= 0;
                             const catLetter = txn.category?.name ? txn.category.name.charAt(0).toUpperCase() : "?";

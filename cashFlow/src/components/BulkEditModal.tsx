@@ -46,7 +46,7 @@ export default function BulkEditModal({ isOpen, onClose, onSave, transactions, a
             {items.map((item, index) => (
               <div key={item.id} style={{ border: "1px solid var(--border-color)", borderRadius: 12, padding: 12, background: "var(--bg-secondary)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10, color: "var(--text-muted)", fontSize: ".8rem" }}><span>Item {index + 1}</span><label style={{ display: "flex", gap: 6, alignItems: "center" }}><input type="checkbox" checked={item.isExpense} onChange={e => updateItem(item.id, "isExpense", e.target.checked)} /> Expense</label></div>
-                <div style={{ display: "grid", gridTemplateColumns: "minmax(150px, 1.5fr) minmax(90px, .6fr) minmax(130px, 1fr)", gap: 8 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 8 }}>
                   <input aria-label="Merchant" style={inputStyle} value={item.merchant} onChange={e => updateItem(item.id, "merchant", e.target.value)} placeholder="Merchant" />
                   <input aria-label="Amount" style={inputStyle} type="number" step="0.01" value={item.amount} onChange={e => updateItem(item.id, "amount", e.target.value)} placeholder="Price" />
                   <input aria-label="Date" style={inputStyle} type="date" value={item.date} onChange={e => updateItem(item.id, "date", e.target.value)} />
