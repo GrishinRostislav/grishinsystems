@@ -151,7 +151,7 @@ export default function TransactionModal({ isOpen, onClose, transaction, onSave 
 
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', zIndex: 1000, overflowY: 'auto', padding: '40px 20px', boxSizing: 'border-box' }} onClick={onClose}>
-      <div style={{ background: 'white', padding: 'clamp(16px, 5vw, 32px)', borderRadius: '16px', width: '500px', maxWidth: '100%', margin: 'auto', boxSizing: 'border-box', minWidth: 0, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
+      <div className="modal-panel" style={{ background: 'white', padding: 'clamp(16px, 5vw, 32px)', borderRadius: '16px', maxWidth: '100%', margin: 'auto', overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <h2 style={{ margin: 0 }}>{transaction ? "Edit Transaction" : "Add Transaction"}</h2>
           <button onClick={onClose} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '20px', color: 'var(--text-muted)' }}>&times;</button>
@@ -166,17 +166,17 @@ export default function TransactionModal({ isOpen, onClose, transaction, onSave 
 
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)' }}>Amount</label>
-            <input type="number" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} required style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }} />
+            <input className="form-control" type="number" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} required />
           </div>
 
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)' }}>Date</label>
-            <input type="date" value={date} onChange={e => setDate(e.target.value)} required style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }} />
+            <input className="form-control" type="date" value={date} onChange={e => setDate(e.target.value)} required />
           </div>
 
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)' }}>Merchant / Payee</label>
-            <input type="text" list="merchants-list" value={merchant} onChange={e => setMerchant(e.target.value)} placeholder="e.g. Costco, Telus" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }} />
+            <input className="form-control" type="text" list="merchants-list" value={merchant} onChange={e => setMerchant(e.target.value)} placeholder="e.g. Costco, Telus" />
             <datalist id="merchants-list">
               {merchantsList.map(m => (
                 <option key={m.id} value={m.name} />
@@ -186,7 +186,7 @@ export default function TransactionModal({ isOpen, onClose, transaction, onSave 
 
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)' }}>{transactionType === "transfer" ? "From Account" : "Account"}</label>
-            <select value={accountId} onChange={e => setAccountId(e.target.value)} required style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+            <select className="form-control" value={accountId} onChange={e => setAccountId(e.target.value)} required>
               <option value="" disabled>Select Account</option>
               {accounts.map(acc => (
                 <option key={acc.id} value={acc.id}>{acc.name} ({formatCurrency(acc.balance)})</option>
@@ -197,7 +197,7 @@ export default function TransactionModal({ isOpen, onClose, transaction, onSave 
           {transactionType === "transfer" && (
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)' }}>To Account</label>
-              <select value={toAccountId} onChange={e => setToAccountId(e.target.value)} required style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+              <select className="form-control" value={toAccountId} onChange={e => setToAccountId(e.target.value)} required>
                 <option value="" disabled>Select Account</option>
                 {accounts.map(acc => (
                   <option key={acc.id} value={acc.id}>{acc.name} ({formatCurrency(acc.balance)})</option>
@@ -209,7 +209,7 @@ export default function TransactionModal({ isOpen, onClose, transaction, onSave 
           {transactionType !== "transfer" && (
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)' }}>Category</label>
-              <select value={categoryId} onChange={e => setCategoryId(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+              <select className="form-control" value={categoryId} onChange={e => setCategoryId(e.target.value)}>
                 <option value="">Uncategorized</option>
                 {flatCategories.map((cat: any) => (
                   <option key={cat.id} value={cat.id} style={{ fontWeight: cat.depth === 0 ? 600 : 400 }}>
@@ -222,7 +222,7 @@ export default function TransactionModal({ isOpen, onClose, transaction, onSave 
 
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)' }}>Payment Method</label>
-            <input type="text" list="payment-methods-list" value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} placeholder="e.g. Credit Card, Cash" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }} />
+            <input className="form-control" type="text" list="payment-methods-list" value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} placeholder="e.g. Credit Card, Cash" />
             <datalist id="payment-methods-list">
               {paymentMethodsList.map((pm, idx) => (
                 <option key={idx} value={pm} />
@@ -232,7 +232,7 @@ export default function TransactionModal({ isOpen, onClose, transaction, onSave 
 
           <div style={{ marginBottom: '24px' }}>
             <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)' }}>Notes</label>
-            <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Additional details..." style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', minHeight: '80px', fontFamily: 'inherit' }} />
+            <textarea className="form-control" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Additional details..." style={{ minHeight: '80px' }} />
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '24px' }}>
