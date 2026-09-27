@@ -64,6 +64,17 @@ textarea,
 button {
   min-width: 0;
   max-width: 100%;
+  min-inline-size: 0;
+}
+
+input[type="date"] {
+  width: 100%;
+  min-width: 0;
+  min-inline-size: 0;
+  max-width: 100%;
+  overflow: hidden;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 a {
@@ -114,4 +125,3 @@ div[class*="card"] {
   overscroll-behavior-x: none;
   max-width: 100%;
 }
-

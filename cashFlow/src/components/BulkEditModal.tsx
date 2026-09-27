@@ -29,7 +29,7 @@ export default function BulkEditModal({ isOpen, onClose, onSave, transactions, a
         <h2 style={{ margin: 0, color: "var(--text-main)", fontSize: "1.45rem" }}>Edit purchase</h2>
         <p style={{ margin: "8px 0 0", color: "var(--text-muted)", lineHeight: 1.4 }}>These changes will apply to all {transactions.length} items in this purchase.</p>
       </div>
-      <form onSubmit={submit} style={{ padding: 24, display: "grid", gap: 16 }}>
+      <form onSubmit={submit} style={{ padding: "20px 16px", display: "grid", gap: 16, minWidth: 0 }}>
         <label style={{ color: "var(--text-secondary)", fontWeight: 600 }}>Merchant<input style={{ ...field, marginTop: 7 }} value={form.merchant} onChange={e => set("merchant", e.target.value)} /></label>
         <label style={{ color: "var(--text-secondary)", fontWeight: 600 }}>Date<input required type="date" style={{ ...field, marginTop: 7 }} value={form.date} onChange={e => set("date", e.target.value)} /></label>
         <label style={{ color: "var(--text-secondary)", fontWeight: 600 }}>Account<select style={{ ...field, marginTop: 7 }} value={form.accountId} onChange={e => set("accountId", e.target.value)}><option value="">Keep each current account</option>{accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</select></label>
