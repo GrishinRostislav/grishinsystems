@@ -34,7 +34,8 @@ export async function PUT(request: Request) {
     const updateData: any = {};
     if (data.date !== undefined) updateData.date = new Date(data.date);
     if (data.merchant !== undefined) updateData.merchant = data.merchant;
-    if (data.categoryId !== undefined) updateData.categoryId = data.categoryId || null;
+    if (data.categoryId !== undefined && data.categoryId !== "") updateData.categoryId = data.categoryId === "__uncategorized" ? null : data.categoryId;
+    if (data.notes !== undefined && data.notes !== "") updateData.notes = data.notes;
 
     const newAccountId = data.accountId || null;
     if (newAccountId) {

@@ -40,11 +40,11 @@ export default function TransactionList({
   const [isBulkEditOpen, setIsBulkEditOpen] = useState(false);
   const [bulkEditTransactions, setBulkEditTransactions] = useState<any[]>([]);
 
-  const handleBulkEditSave = async (updates: any[]) => {
+  const handleBulkEditSave = async (transactionIds: string[], data: any) => {
     const res = await fetch("/cashFlow/api/transactions/bulk-update", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ updates })
+      body: JSON.stringify({ transactionIds, data })
     });
     if (res.ok) {
       if (onTransactionsUpdated) onTransactionsUpdated();
