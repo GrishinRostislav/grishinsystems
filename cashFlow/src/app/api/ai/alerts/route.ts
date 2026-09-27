@@ -22,7 +22,7 @@ export async function GET() {
         isActive: true,
         nextRunDate: { lte: in7Days }
       },
-      include: { account: true }
+      include: { account: true, category: true }
     });
 
     for (const st of scheduledTxs) {
@@ -39,6 +39,7 @@ export async function GET() {
 
     // 2. Check recent spending spikes (last 7 days vs past 30-day baseline)
     const past7DaysStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const past30DaysStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const past37DaysStart = new Date(now.getTime() - 37 * 24 * 60 * 60 * 1000);
 
     const recentTxs = await prisma.transaction.findMany({
@@ -46,14 +47,32 @@ export async function GET() {
         date: { gte: past37DaysStart },
         isTransfer: false
       },
-      include: { account: true }
+      include: { account: true, category: true }
     });
 
     let spentLast7 = 0;
     let spentPrior30 = 0;
+    let income30 = 0;
+    let expense30 = 0;
+    const incomeBySource: Record<string, number> = {};
+    const expenseByTarget: Record<string, number> = {};
+    let essential30 = 0;
 
     for (const tx of recentTxs) {
       const convertedAmt = convertAmount(tx.amount, tx.account.currency, homeCurrency, rates);
+      if (tx.date >= past30DaysStart && tx.date <= now) {
+        const label = tx.merchant || tx.category?.name || 'Other';
+        if (convertedAmt > 0) {
+          income30 += convertedAmt;
+          incomeBySource[label] = (incomeBySource[label] || 0) + convertedAmt;
+        } else if (convertedAmt < 0) {
+          const expense = Math.abs(convertedAmt);
+          expense30 += expense;
+          expenseByTarget[label] = (expenseByTarget[label] || 0) + expense;
+          const category = (tx.category?.name || '').toLowerCase();
+          if (/rent|mortgage|housing|utility|bill|insurance|grocery|food|health|medical|transport|gas|fuel|debt|аренд|ипотек|коммун|страх|продукт|еда|медиц|транспорт|бензин|долг/.test(category)) essential30 += expense;
+        }
+      }
       if (convertedAmt < 0) {
         const val = Math.abs(convertedAmt);
         if (tx.date >= past7DaysStart) {
@@ -141,7 +160,12 @@ export async function GET() {
       ? `Attention: ${alerts[0].message}`
       : 'Attention: no urgent issues detected.';
 
-    return NextResponse.json({ alerts, count: alerts.length, summary: `${budgetSummary}\n${attentionSummary}` });
+    const topExpenses = Object.entries(expenseByTarget).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([name, value]) => `${name} ${Math.round(value)} ${homeCurrency}`).join('; ') || 'none';
+    const topIncome = Object.entries(incomeBySource).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name, value]) => `${name} ${Math.round(value)} ${homeCurrency}`).join('; ') || 'none';
+    const spendingComment = expense30 > 0 ? `Comment: ${Math.round((essential30 / expense30) * 100)}% of spending looks essential; review the rest.` : 'Comment: no spending recorded.';
+    const summary = `Last 30 days\nReceived: ${Math.round(income30)} ${homeCurrency} — ${topIncome}\nSpent: ${Math.round(expense30)} ${homeCurrency}\nTop 5 expenses: ${topExpenses}\n${spendingComment}\n${budgetSummary}\n${attentionSummary}`;
+
+    return NextResponse.json({ alerts, count: alerts.length, summary });
   } catch (error) {
     console.error("Alerts API Error:", error);
     return NextResponse.json({ alerts: [], count: 0 });
