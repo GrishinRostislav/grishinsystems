@@ -13,6 +13,7 @@ export async function GET() {
 
     const now = new Date();
     const alerts: Array<{ id: string; type: 'PAYMENT' | 'SPIKE' | 'BUDGET'; title: string; message: string; severity: 'info' | 'warning' | 'danger' }> = [];
+    let topBudget: { name: string; usage: number; spent: number; amount: number } | null = null;
 
     // 1. Check upcoming scheduled payments in next 7 days
     const in7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -112,6 +113,7 @@ export async function GET() {
 
       if (budget.amount > 0) {
         const usage = (spent / budget.amount) * 100;
+        if (!topBudget || usage > topBudget.usage) topBudget = { name: budget.name, usage, spent, amount: budget.amount };
         if (usage >= 100) {
           alerts.push({
             id: `budget-${budget.id}`,
@@ -132,7 +134,14 @@ export async function GET() {
       }
     }
 
-    return NextResponse.json({ alerts, count: alerts.length });
+    const budgetSummary = topBudget
+      ? `Budget: ${topBudget.name} — ${Math.round(topBudget.usage)}% used (${Math.round(topBudget.spent)} / ${Math.round(topBudget.amount)} ${homeCurrency}).`
+      : 'Budget: no active budgets.';
+    const attentionSummary = alerts.length > 0
+      ? `Attention: ${alerts[0].message}`
+      : 'Attention: no urgent issues detected.';
+
+    return NextResponse.json({ alerts, count: alerts.length, summary: `${budgetSummary}\n${attentionSummary}` });
   } catch (error) {
     console.error("Alerts API Error:", error);
     return NextResponse.json({ alerts: [], count: 0 });

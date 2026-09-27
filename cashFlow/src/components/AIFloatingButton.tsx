@@ -18,16 +18,13 @@ interface Message {
   content: string;
 }
 
+const defaultAiMessage = 'Budget: loading...\nAttention: loading...';
+
 export default function AIFloatingButton() {
   const [isOpen, setIsOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'model',
-      content: '👋 Hello! I am your Personal AI Financial Advisor in CashFlow. How can I help you today?'
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([{ role: 'model', content: defaultAiMessage }]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -39,6 +36,7 @@ export default function AIFloatingButton() {
       if (res.ok) {
         const json = await res.json();
         setAlerts(json.alerts || []);
+        if (json.summary) setMessages([{ role: 'model', content: json.summary }]);
       }
     } catch (err) {
       console.error("Failed to fetch AI alerts", err);
@@ -149,10 +147,7 @@ export default function AIFloatingButton() {
                 <button 
                   className={styles.closeBtn} 
                   style={{ fontSize: '1.1rem', padding: '4px 8px' }}
-                  onClick={() => setMessages([{
-                    role: 'model',
-                    content: '👋 Hello! I am your Personal AI Financial Advisor in CashFlow. How can I help you today?'
-                  }])}
+                  onClick={() => fetchAlerts()}
                   title="Clear Chat History (New Session)"
                 >
                   🔄
