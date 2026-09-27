@@ -58,6 +58,14 @@ body {
   margin: 0;
 }
 
+input,
+select,
+textarea,
+button {
+  min-width: 0;
+  max-width: 100%;
+}
+
 a {
   color: var(--unique-blue);
   text-decoration: none;
@@ -106,5 +114,4 @@ div[class*="card"] {
   overscroll-behavior-x: none;
   max-width: 100%;
 }
-
 

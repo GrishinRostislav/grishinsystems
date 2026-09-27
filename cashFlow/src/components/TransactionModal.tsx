@@ -150,8 +150,8 @@ export default function TransactionModal({ isOpen, onClose, transaction, onSave 
   const flatCategories = flattenCategoryTree(categoryTree);
 
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', zIndex: 1000, overflowY: 'auto', padding: '40px 20px' }} onClick={onClose}>
-      <div style={{ background: 'white', padding: '32px', borderRadius: '16px', width: '500px', maxWidth: '100%', margin: 'auto' }} onClick={e => e.stopPropagation()}>
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', zIndex: 1000, overflowY: 'auto', padding: '40px 20px', boxSizing: 'border-box' }} onClick={onClose}>
+      <div style={{ background: 'white', padding: '32px', borderRadius: '16px', width: '500px', maxWidth: '100%', margin: 'auto', boxSizing: 'border-box', minWidth: 0 }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <h2 style={{ margin: 0 }}>{transaction ? "Edit Transaction" : "Add Transaction"}</h2>
           <button onClick={onClose} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '20px', color: 'var(--text-muted)' }}>&times;</button>
@@ -265,4 +265,3 @@ export default function TransactionModal({ isOpen, onClose, transaction, onSave 
     </div>
   );
 }
-

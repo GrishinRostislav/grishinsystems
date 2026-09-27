@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 
 interface Props { isOpen: boolean; onClose: () => void; onSave: (ids: string[], data: any) => Promise<void>; transactions: any[]; accounts: any[]; categories?: any[]; }
-const field: React.CSSProperties = { width: "100%", padding: "12px", borderRadius: 9, border: "1px solid var(--border-color)", background: "var(--bg-secondary)", color: "var(--text-main)", fontSize: "1rem", boxSizing: "border-box" };
+const field: React.CSSProperties = { width: "100%", minWidth: 0, maxWidth: "100%", padding: "12px", borderRadius: 9, border: "1px solid var(--border-color)", background: "var(--bg-secondary)", color: "var(--text-main)", fontSize: "1rem", boxSizing: "border-box" };
 
 export default function BulkEditModal({ isOpen, onClose, onSave, transactions, accounts, categories = [] }: Props) {
   const [form, setForm] = useState({ date: "", merchant: "", accountId: "", categoryId: "", notes: "" });
@@ -23,8 +23,8 @@ export default function BulkEditModal({ isOpen, onClose, onSave, transactions, a
     try { await onSave(transactions.map(tx => tx.id), form); onClose(); } finally { setLoading(false); }
   };
 
-  return <div style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,.58)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 16 }}>
-    <div style={{ background: "var(--bg-primary)", borderRadius: 18, width: "100%", maxWidth: 520, maxHeight: "92vh", overflowY: "auto", boxShadow: "var(--shadow-xl)" }}>
+  return <div style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,.58)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 16, boxSizing: "border-box" }}>
+    <div style={{ background: "var(--bg-primary)", borderRadius: 18, width: "100%", maxWidth: 520, maxHeight: "92vh", overflowY: "auto", boxShadow: "var(--shadow-xl)", boxSizing: "border-box" }}>
       <div style={{ padding: "24px 24px 16px", borderBottom: "1px solid var(--border-color)" }}>
         <h2 style={{ margin: 0, color: "var(--text-main)", fontSize: "1.45rem" }}>Edit purchase</h2>
         <p style={{ margin: "8px 0 0", color: "var(--text-muted)", lineHeight: 1.4 }}>These changes will apply to all {transactions.length} items in this purchase.</p>
