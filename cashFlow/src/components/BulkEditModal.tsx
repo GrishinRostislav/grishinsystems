@@ -7,14 +7,16 @@ interface BulkEditModalProps {
   onClose: () => void;
   onSave: (transactionIds: string[], data: any) => Promise<void>;
   transactions: any[];
+  accounts: any[];
 }
 
-export default function BulkEditModal({ isOpen, onClose, onSave, transactions }: BulkEditModalProps) {
+export default function BulkEditModal({ isOpen, onClose, onSave, transactions, accounts }: BulkEditModalProps) {
   const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState({
     date: '',
-    merchant: ''
+    merchant: '',
+    accountId: ''
   });
 
   useEffect(() => {
@@ -22,7 +24,8 @@ export default function BulkEditModal({ isOpen, onClose, onSave, transactions }:
       if (transactions.length > 0) {
         setFormData({
           date: transactions[0].date ? new Date(transactions[0].date).toISOString().split('T')[0] : '',
-          merchant: transactions[0].merchant || ''
+          merchant: transactions[0].merchant || '',
+          accountId: ''
         });
       }
     }
@@ -75,6 +78,20 @@ export default function BulkEditModal({ isOpen, onClose, onSave, transactions }:
         </p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: 'var(--text-secondary)' }}>Account</label>
+            <select
+              value={formData.accountId}
+              onChange={e => setFormData({ ...formData, accountId: e.target.value })}
+              style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '1rem' }}
+            >
+              <option value="">Do not change account</option>
+              {accounts.map(account => (
+                <option key={account.id} value={account.id}>{account.name}</option>
+              ))}
+            </select>
+          </div>
+
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: 'var(--text-secondary)' }}>Date</label>
             <input

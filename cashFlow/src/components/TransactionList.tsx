@@ -22,6 +22,7 @@ interface TransactionListProps {
   emptyMessage?: string;
   showTotal?: boolean;
   totalLabel?: string;
+  accounts?: any[];
 }
 
 export default function TransactionList({ 
@@ -30,7 +31,8 @@ export default function TransactionList({
   onTransactionsUpdated,
   emptyMessage = "No transactions found.",
   showTotal = true,
-  totalLabel = "Total:"
+  totalLabel = "Total:",
+  accounts = []
 }: TransactionListProps) {
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [isEditMode, setIsEditMode] = useState(false);
@@ -373,6 +375,7 @@ export default function TransactionList({
         onClose={() => setIsBulkEditOpen(false)}
         onSave={handleBulkEditSave}
         transactions={bulkEditTransactions}
+        accounts={accounts}
       />
     </div>
   );

@@ -20,7 +20,35 @@ export async function PUT(request: Request) {
     if (data.merchant !== undefined) updateData.merchant = data.merchant;
     if (data.categoryId !== undefined) updateData.categoryId = data.categoryId || null;
 
-    if (Object.keys(updateData).length === 0) {
+    const newAccountId = data.accountId || null;
+    if (newAccountId) {
+      const transactions = await prisma.transaction.findMany({
+        where: { id: { in: transactionIds } },
+        select: { id: true, accountId: true, amount: true },
+      });
+
+      await prisma.$transaction(async (tx) => {
+        for (const transaction of transactions) {
+          if (transaction.accountId === newAccountId) continue;
+
+          await tx.account.update({
+            where: { id: transaction.accountId },
+            data: { balance: { decrement: transaction.amount } },
+          });
+          await tx.account.update({
+            where: { id: newAccountId },
+            data: { balance: { increment: transaction.amount } },
+          });
+        }
+
+        await tx.transaction.updateMany({
+          where: { id: { in: transactions.map(transaction => transaction.id) } },
+          data: { accountId: newAccountId },
+        });
+      });
+    }
+
+    if (Object.keys(updateData).length === 0 && !newAccountId) {
       return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
     }
 

@@ -93,12 +93,15 @@ export default function TransactionsPage() {
       
       const url = `/cashFlow/api/transactions${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
-      const [txRes] = await Promise.all([
-        fetch(url)
+      const [txRes, accountsRes] = await Promise.all([
+        fetch(url),
+        fetch('/cashFlow/api/accounts?includeArchived=true')
       ]);
       const txData = await txRes.json();
+      const accountsData = await accountsRes.json();
       
       setTransactions(txData);
+      setAccounts(Array.isArray(accountsData) ? accountsData : []);
     } catch (err) {
       console.error("Failed to fetch data", err);
     } finally {
@@ -232,6 +235,7 @@ export default function TransactionsPage() {
           onTransactionsUpdated={fetchData}
           emptyMessage="No transactions match your search query."
           totalLabel="Total for Period:"
+          accounts={accounts}
         />
       )}
 
