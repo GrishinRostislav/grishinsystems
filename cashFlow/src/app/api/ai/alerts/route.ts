@@ -10,6 +10,8 @@ export async function GET() {
     }).catch(() => null);
     const homeCurrency = settings?.homeCurrency || "CAD";
     const rates = await getExchangeRates(homeCurrency);
+    const accounts = await prisma.account.findMany({ where: { isArchived: false, includeInTotal: true } });
+    const totalBalance = accounts.reduce((sum, account) => sum + convertAmount(account.balance, account.currency, homeCurrency, rates), 0);
 
     const now = new Date();
     const alerts: Array<{ id: string; type: 'PAYMENT' | 'SPIKE' | 'BUDGET'; title: string; message: string; severity: 'info' | 'warning' | 'danger' }> = [];
@@ -39,7 +41,7 @@ export async function GET() {
 
     // 2. Check recent spending spikes (last 7 days vs past 30-day baseline)
     const past7DaysStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const past30DaysStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const past37DaysStart = new Date(now.getTime() - 37 * 24 * 60 * 60 * 1000);
 
     const recentTxs = await prisma.transaction.findMany({
@@ -60,7 +62,7 @@ export async function GET() {
 
     for (const tx of recentTxs) {
       const convertedAmt = convertAmount(tx.amount, tx.account.currency, homeCurrency, rates);
-      if (tx.date >= past30DaysStart && tx.date <= now) {
+      if (tx.date >= monthStart && tx.date <= now) {
         const label = tx.merchant || tx.category?.name || 'Other';
         if (convertedAmt > 0) {
           income30 += convertedAmt;
@@ -153,6 +155,13 @@ export async function GET() {
       }
     }
 
+    const daysElapsed = Math.max(1, now.getDate());
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const daysRemaining = Math.max(0, daysInMonth - daysElapsed);
+    const dailyNet = (income30 - expense30) / daysElapsed;
+    const projectedBalance = totalBalance + dailyNet * daysRemaining;
+    const trend = dailyNet > 0 ? 'growing' : dailyNet < 0 ? 'declining' : 'flat';
+    const monthName = now.toLocaleDateString('en-CA', { month: 'long' });
     const budgetSummary = topBudget
       ? `Budget: ${topBudget.name} — ${Math.round(topBudget.usage)}% used (${Math.round(topBudget.spent)} / ${Math.round(topBudget.amount)} ${homeCurrency}).`
       : 'Budget: no active budgets.';
@@ -163,7 +172,7 @@ export async function GET() {
     const topExpenses = Object.entries(expenseByTarget).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([name, value]) => `${name} ${Math.round(value)} ${homeCurrency}`).join('; ') || 'none';
     const topIncome = Object.entries(incomeBySource).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name, value]) => `${name} ${Math.round(value)} ${homeCurrency}`).join('; ') || 'none';
     const spendingComment = expense30 > 0 ? `Comment: ${Math.round((essential30 / expense30) * 100)}% of spending looks essential; review the rest.` : 'Comment: no spending recorded.';
-    const summary = `Last 30 days\nReceived: ${Math.round(income30)} ${homeCurrency} — ${topIncome}\nSpent: ${Math.round(expense30)} ${homeCurrency}\nTop 5 expenses: ${topExpenses}\n${spendingComment}\n${budgetSummary}\n${attentionSummary}`;
+    const summary = `${monthName}\nReceived: ${Math.round(income30)} ${homeCurrency} — ${topIncome}\nSpent: ${Math.round(expense30)} ${homeCurrency}\nTop 5 expenses: ${topExpenses}\n${spendingComment}\nTotal balance: ${Math.round(totalBalance)} ${homeCurrency} — trend ${trend}.\nIf nothing changes: ~${Math.round(projectedBalance)} ${homeCurrency} by month end.\n${budgetSummary}\n${attentionSummary}`;
 
     return NextResponse.json({ alerts, count: alerts.length, summary });
   } catch (error) {
