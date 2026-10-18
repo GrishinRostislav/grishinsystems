@@ -277,7 +277,10 @@ export async function GET(request: Request) {
 
     const recentTransactions = await prisma.transaction.findMany({
       take: 5,
-      orderBy: { date: "desc" },
+      orderBy: [
+        { createdAt: "desc" },
+        { date: "desc" }
+      ],
       include: {
         category: true,
         account: true
