@@ -209,7 +209,7 @@ export default function BudgetsPage() {
                 </h2>
                 <div className={styles.budgetsGrid}>
                   {list.map((budget: any) => (
-                    <BudgetCard key={budget.id} budget={budget} homeCurrency={homeCurrency} />
+                    <BudgetCard key={budget.id} budget={budget} homeCurrency={homeCurrency} onEdit={() => openEditModal(budget)} />
                   ))}
                 </div>
               </div>

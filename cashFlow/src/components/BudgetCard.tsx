@@ -25,9 +25,10 @@ interface BudgetCardProps {
   };
   homeCurrency: string;
   showPeriodLabel?: boolean;
+  onEdit?: () => void;
 }
 
-export default function BudgetCard({ budget, homeCurrency, showPeriodLabel = true }: BudgetCardProps) {
+export default function BudgetCard({ budget, homeCurrency, showPeriodLabel = true, onEdit }: BudgetCardProps) {
   const spentPercent = budget.amount > 0 ? (budget.spent / budget.amount) * 100 : 0;
   const projectedPercent = budget.amount > 0 ? ((budget.projected || 0) / budget.amount) * 100 : 0;
   const remaining = budget.remaining !== undefined ? budget.remaining : (budget.amount - budget.spent);
@@ -63,6 +64,15 @@ export default function BudgetCard({ budget, homeCurrency, showPeriodLabel = tru
               )}
             </div>
           </div>
+          {onEdit && (
+            <button
+              type="button"
+              onClick={(event) => { event.preventDefault(); event.stopPropagation(); onEdit(); }}
+              className={styles.editBudgetButton}
+            >
+              Edit
+            </button>
+          )}
           <div className={styles.cardStats}>
             <span className={styles.spentAmount}>{formatCurrency(budget.spent, homeCurrency)}</span>
             <span className={styles.limitAmount}>
