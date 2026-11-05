@@ -138,6 +138,7 @@ export async function GET(request: Request) {
     }
 
     const futureMap = new Map<string, MonthFlow>();
+    const plannedDetails: Array<{ type: 'income' | 'expense'; name: string; amount: number; date: string; source: string }> = [];
     const getOrInitMonthFlow = (key: string): MonthFlow => {
       if (!futureMap.has(key)) {
         futureMap.set(key, {
@@ -195,6 +196,16 @@ export async function GET(request: Request) {
         stats.net += convertedStAmt;
         if (convertedStAmt > 0) stats.income += convertedStAmt;
         else stats.expense += Math.abs(convertedStAmt);
+
+        if (simDate < new Date(now.getFullYear(), now.getMonth() + 1, 1)) {
+          plannedDetails.push({
+            type: convertedStAmt > 0 ? 'income' : 'expense',
+            name: st.merchant || 'Scheduled transaction',
+            amount: Math.abs(convertedStAmt),
+            date: simDate.toISOString(),
+            source: st.frequency === 'ONCE' ? 'One-time' : 'Scheduled'
+          });
+        }
 
         if (st.frequency === 'ONCE') break;
         simDate = addFrequency(simDate, st.frequency, st.interval || 1, st.daysOfWeek, st.monthsOfYear);
@@ -351,6 +362,15 @@ export async function GET(request: Request) {
         else monthSpecificBudget += monthly;
       }
       const finalBudgetExpense = Math.max(monthSpecificBudget, monthGlobalBudget);
+
+      if (i === 1) {
+        for (const budget of budgets) {
+          let monthly = budget.amount;
+          if (budget.period === 'weekly') monthly *= 52 / 12;
+          if (budget.period === 'yearly') monthly /= 12;
+          plannedDetails.push({ type: 'expense', name: `Budget: ${budget.name}`, amount: monthly, date: d.toISOString(), source: 'Budget' });
+        }
+      }
       
       // Calculate projected income by blending scheduled items with historical baseline
       const totalMonthIncome = Math.max(flow.income, historicalBaselineIncome);
@@ -506,6 +526,7 @@ export async function GET(request: Request) {
       hasActiveScenarios,
       scenarioRecommendations,
       chartData
+      ,plannedDetails
     });
 
   } catch (error) {

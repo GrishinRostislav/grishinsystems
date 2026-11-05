@@ -212,6 +212,7 @@ export default function Home() {
   useAutoSync(() => fetchDashboardData(true));
 
   const [isMobile, setIsMobile] = useState(false);
+  const [showPlannedDetails, setShowPlannedDetails] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -344,7 +345,7 @@ export default function Home() {
 
         {/* Planned Cash Flow Card */}
         {forecast && (
-        <Link href="/forecast" style={{ textDecoration: 'none', color: 'inherit' }}>
+        <div onClick={() => setShowPlannedDetails(true)} style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className={styles.card} style={{ cursor: 'pointer' }}>
             <div className={styles.cardHeader}>
               <h3>Planned ({periodDays === 30 ? "30 days" : `${periodDays} days`})</h3>
@@ -368,9 +369,28 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </Link>
+        </div>
         )}
       </div>
+
+      {showPlannedDetails && forecast && (
+        <div onClick={() => setShowPlannedDetails(false)} style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(15,23,42,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 560, maxHeight: '85vh', overflowY: 'auto', background: 'var(--bg-primary)', borderRadius: 18, padding: 24, boxSizing: 'border-box' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, marginBottom: 18 }}>
+              <div><h2 style={{ margin: 0 }}>Planned cash flow</h2><p style={{ margin: '6px 0 0', color: 'var(--text-muted)' }}>What is expected and why.</p></div>
+              <button onClick={() => setShowPlannedDetails(false)} style={{ border: 0, background: 'transparent', fontSize: 24, cursor: 'pointer', color: 'var(--text-muted)' }}>×</button>
+            </div>
+            <div style={{ display: 'grid', gap: 10 }}>
+              {(forecast.plannedDetails || []).length > 0 ? forecast.plannedDetails.map((item: any, index: number) => (
+                <div key={`${item.name}-${item.date}-${index}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '12px 14px', border: '1px solid var(--border-color)', borderRadius: 10 }}>
+                  <div><div style={{ fontWeight: 650 }}>{item.name}</div><div style={{ color: 'var(--text-muted)', fontSize: '.8rem' }}>{item.source} · {new Date(item.date).toLocaleDateString()}</div></div>
+                  <div style={{ fontWeight: 700, color: item.type === 'income' ? 'var(--sporty-teal)' : '#e11d48', whiteSpace: 'nowrap' }}>{item.type === 'income' ? '+' : '-'}{formatCurrency(item.amount, homeCurrency)}</div>
+                </div>
+              )) : <p style={{ color: 'var(--text-muted)' }}>No specific planned entries for this period.</p>}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className={styles.chartCard} style={{ marginTop: '24px' }}>
         <h3 style={{ marginBottom: isMobile ? '8px' : '16px' }}>Balance Trend</h3>
