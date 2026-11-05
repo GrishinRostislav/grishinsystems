@@ -64,12 +64,11 @@ export async function GET(request: Request) {
       }
     }
 
-    // Calculate weighted historical baseline (recent months weighted more heavily)
-    // Weights: Month -1 (40%), Month -2 (30%), Month -3 (20%), Month -4..6 (10% total)
-    const pastMonthWeights = [0.40, 0.30, 0.20, 0.0333, 0.0333, 0.0334];
-    let weightedPastIncome = 0;
-    let weightedPastExpense = 0;
-    let totalWeight = 0;
+    // Use a median baseline so one-off purchases (for example, a car) do not
+    // become recurring monthly expenses. Scheduled transactions and budgets
+    // are added separately below as intentional plans.
+    const historicalIncomes: number[] = [];
+    const historicalExpenses: number[] = [];
 
     for (let i = 1; i <= Math.min(6, pastMonths); i++) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -79,17 +78,18 @@ export async function GET(request: Request) {
       
       const inc = historyIncomeMap.get(key) || 0;
       const exp = historyExpenseMap.get(key) || 0;
-      const weight = pastMonthWeights[i - 1] || 0.05;
-      
-      if (inc > 0 || exp > 0) {
-        weightedPastIncome += inc * weight;
-        weightedPastExpense += exp * weight;
-        totalWeight += weight;
-      }
+      if (inc > 0) historicalIncomes.push(inc);
+      if (exp > 0) historicalExpenses.push(exp);
     }
 
-    const historicalBaselineIncome = totalWeight > 0 ? (weightedPastIncome / totalWeight) : 0;
-    const historicalBaselineExpense = totalWeight > 0 ? (weightedPastExpense / totalWeight) : 0;
+    const median = (values: number[]) => {
+      if (values.length === 0) return 0;
+      const sorted = [...values].sort((a, b) => a - b);
+      const middle = Math.floor(sorted.length / 2);
+      return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+    };
+    const historicalBaselineIncome = median(historicalIncomes);
+    const historicalBaselineExpense = median(historicalExpenses);
 
     // Build historical balance points (backward calculation)
     let runningBalanceBackward = currentBalance;
