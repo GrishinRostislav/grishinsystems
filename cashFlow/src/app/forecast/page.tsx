@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import styles from "./page.module.css";
 import { formatCurrency } from "@/utils/format";
 import { getChartDomain } from "@/utils/chart";
@@ -343,8 +344,13 @@ export default function ForecastPage() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1>Financial Forecast</h1>
-        <p>See your projected wealth based on past trends and future plans.</p>
+        <div>
+          <h1>Financial Forecast</h1>
+          <p>See your projected wealth based on past trends and future plans.</p>
+        </div>
+        <Link href="/planning" className={styles.planningLink}>
+          View planned income & expenses
+        </Link>
       </div>
 
       <div className={styles.controls} style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>

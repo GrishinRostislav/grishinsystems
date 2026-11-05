@@ -5,6 +5,32 @@
 
 .header {
   margin-bottom: 32px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.planningLink {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  color: var(--unique-blue);
+  background: var(--bg-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.planningLink:hover {
+  border-color: var(--unique-blue);
+  background: var(--bg-hover);
+}
+
+@media (max-width: 768px) {
+  .header { flex-direction: column; }
+  .planningLink { width: 100%; text-align: center; }
 }
 
 .header h1 {
