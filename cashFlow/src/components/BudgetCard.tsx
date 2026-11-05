@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { formatCurrency, formatDate } from "@/utils/format";
+import { formatCurrency } from "@/utils/format";
 import styles from "@/app/budgets/page.module.css";
 
 interface Category {
@@ -29,6 +29,8 @@ interface BudgetCardProps {
 }
 
 export default function BudgetCard({ budget, homeCurrency, showPeriodLabel = true, onEdit }: BudgetCardProps) {
+  const formatRangeDate = (value: string) => new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new Date(value));
+  const visibleCategories = Array.from(new Map((budget.categories || []).map(category => [category.name, category])).values()).slice(0, 3);
   const spentPercent = budget.amount > 0 ? (budget.spent / budget.amount) * 100 : 0;
   const projectedPercent = budget.amount > 0 ? ((budget.projected || 0) / budget.amount) * 100 : 0;
   const remaining = budget.remaining !== undefined ? budget.remaining : (budget.amount - budget.spent);
@@ -47,37 +49,31 @@ export default function BudgetCard({ budget, homeCurrency, showPeriodLabel = tru
           <div>
             <h3 className={styles.budgetName}>{budget.name}</h3>
             <span className={styles.cardInterval}>
-              {formatDate(budget.currentPeriodStart)} - {formatDate(budget.currentPeriodEnd)}
+              {formatRangeDate(budget.currentPeriodStart)} – {formatRangeDate(budget.currentPeriodEnd)}
             </span>
             <div className={styles.cardBadges}>
               {budget.isGlobal ? (
                 <span className={styles.globalBadge}>Global Budget</span>
               ) : (
                 <>
-                  {budget.categories?.slice(0, 3).map((c) => (
+                  {visibleCategories.map((c) => (
                     <span key={c.id} className={styles.categoryBadge}>{c.name}</span>
                   ))}
-                  {budget.categories && budget.categories.length > 3 && (
-                    <span className={styles.categoryBadgeMore}>+{budget.categories.length - 3} more</span>
+                  {visibleCategories.length < (budget.categories?.length || 0) && (
+                    <span className={styles.categoryBadgeMore}>+{(budget.categories?.length || 0) - visibleCategories.length} more</span>
                   )}
                 </>
               )}
             </div>
           </div>
-          {onEdit && (
-            <button
-              type="button"
-              onClick={(event) => { event.preventDefault(); event.stopPropagation(); onEdit(); }}
-              className={styles.editBudgetButton}
-            >
-              Edit
-            </button>
-          )}
-          <div className={styles.cardStats}>
-            <span className={styles.spentAmount}>{formatCurrency(budget.spent, homeCurrency)}</span>
-            <span className={styles.limitAmount}>
-              of {formatCurrency(budget.amount, homeCurrency)} {showPeriodLabel ? budget.period : ''}
-            </span>
+          <div className={styles.cardAside}>
+            {onEdit && (
+              <button type="button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); onEdit(); }} className={styles.editBudgetButton}>Edit</button>
+            )}
+            <div className={styles.cardStats}>
+              <span className={styles.spentAmount}>{formatCurrency(budget.spent, homeCurrency)}</span>
+              <span className={styles.limitAmount}>of {formatCurrency(budget.amount, homeCurrency)} {showPeriodLabel ? budget.period : ''}</span>
+            </div>
           </div>
         </div>
 

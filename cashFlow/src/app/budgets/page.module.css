@@ -162,14 +162,14 @@
 }
 
 .cardTop {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 20px;
 }
 
 .budgetName {
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   margin: 0;
   color: var(--silent-dark-blue);
 }
@@ -185,6 +185,14 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  min-width: 112px;
+}
+
+.cardAside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
 }
 
 .spentAmount {
